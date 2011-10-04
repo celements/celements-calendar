@@ -1,0 +1,67 @@
+{pre}
+#if("$!xredirect" == '')
+  #if("$!request.get('xredirect')" != '')
+    #set($xredirect = "$!request.get('xredirect')")
+  #else
+    #set($xredirect = "/${doc.getSpace()}/${doc.getName()}")
+  #end
+#end
+#set($obj = "")
+#set($obj = $doc.getObject('Classes.CalendarConfigClass'))
+#if("$!obj" == '')
+#set($obj = $doc.getObject('Classes.CalendarConfigClass', true))
+$doc.save();
+#end
+#set($celCalendar = $xwiki.celcalendar.getCalendar(false))
+#set($contextPath = ${request.contextPath})
+<!-- start visible content -->
+<div id="con_titblock" class="titleblock">$adminMsg.get('cel_cal_edit')</div>
+<form id="edit" method="post" action="$doc.getURL('save')">
+  <input type="hidden" name="xredirect" value="$!xredirect" />
+  ## There are no translated fields in the config
+  <input type="hidden" name="language" value="$!default_language" />
+  #set( $nb = $doc.getObjectNumbers("Classes.CalendarConfigClass"))
+  <input type="hidden" name="Classes.CalendarConfigClass_nb" value="$nb" />
+#if($celementsweb.getPageType($doc.fullName).hasPageTitle())
+<div id="con_titleEdit" class="editblock">$adminMsg.get('cel_tm_title'):
+    <input id="pagetitle" name="title" class="fullwidth" value="$!tdoc.getTitle()" type="text"  onfocus="setFocus('con_titleEdit');" onblur="removeFocus('con_titleEdit');">
+</div>
+#end
+  <div class="editblock cel_cal_calendarspace">$adminMsg.get('cel_cal_calendarspace'): 
+    <input type="text" name="Classes.CalendarConfigClass_${obj.number}_calendarspace" value="$xwiki.celcalendar.getEventSpaceForCalendar($doc.getFullName())" />
+  </div>
+  <div class="editblock cel_cal_subscribe_to">$adminMsg.get('cel_cal_subscribe_to'):
+    ${obj.display('subscribe_to', 'edit').replaceAll('\{/?pre\}','')}
+  </div>
+  <div class="editblock cel_cal_overview_column_config">$adminMsg.get('cel_cal_overview_column_config'): 
+    <input type="text" name="Classes.CalendarConfigClass_${obj.number}_overview_column_config" value="$!obj.getProperty('overview_column_config').getValue()" />
+    $adminMsg.get('cel_cal_overview_column_config_concat_msg')
+    <ul class="column_config_options overview_columns">
+      #foreach($prop in $celCalendar.getCalOverviewPropertyNames())
+        <li class="column_config_option">$prop</li>
+      #end
+    </ul>
+  </div>
+  <div class="editblock cel_cal_event_column_config">$adminMsg.get('cel_cal_event_column_config'): 
+    <input type="text" name="Classes.CalendarConfigClass_${obj.number}_event_column_config" value="$!obj.getProperty('event_column_config').getValue()" />
+    <ul class="column_config_options event_columns">
+      #foreach($prop in $celCalendar.getEventPropertyNames())
+        <li class="column_config_option">$prop</li>
+      #end
+    </ul>
+  </div>
+  <div class="editblock cel_cal_event_per_page">$adminMsg.get('cel_cal_event_per_page'): 
+    <input type="text" name="Classes.CalendarConfigClass_${obj.number}_event_per_page" value="$!obj.getProperty('event_per_page').getValue()" />
+  </div>
+  <div class="editblock cel_cal_hasMoreLink">$adminMsg.get('cel_cal_hasMoreLink'): 
+    #set($hasMoreLinkStr = '')
+    #set($hasMoreLinkStr = $doc.display('hasMoreLink', 'edit', $obj))
+    ${hasMoreLinkStr.replaceAll('\{/?pre\}','')}
+  </div>
+  <div class="editblock cel_cal_is_subscribable">$adminMsg.get('cel_cal_is_subscribable'): 
+    #set($isSubscribableStr = '')
+    #set($isSubscribableStr = $doc.display('is_subscribable', 'edit', $obj))
+    ${isSubscribableStr.replaceAll('\{/?pre\}','')}
+  </div>
+</form>
+{/pre}

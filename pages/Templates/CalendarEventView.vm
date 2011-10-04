@@ -1,0 +1,18 @@
+{pre}
+#set($event = $xwiki.celcalendar.getEvent(${doc.getFullName()}))
+<div id="Event${doc.getName()}:${doc.getFullName()}" class="cel_calendar_details cel_cm_calendar_event">
+#if("$!event" != '')
+  #set($cols = [])
+  #set($cols = $event.getNonEmptyFields($event.getCalendar().getDetailviewFields()))
+  #foreach($col in $cols)
+  	#set($colName = $!{col.replaceAll('\.', '')})
+    <div class="cel_cal_$!{colName}">
+      <span class="cel_cal_key">$msg.get("cel_cal_f_$!{colName}")</span>
+      <span class="cel_cal_value">${event.displayField($!{col})}</span>
+    </div>
+  #end
+#else
+  $msg.get('cel_cal_no_event')
+#end
+</div>
+{/pre}

@@ -1,0 +1,73 @@
+{pre}
+##TODO refactoring needed: please move all business logic to the plugin
+#set($theCalDoc = $doc)
+#set($configObj = $theCalDoc.getObject('Classes.CalendarConfigClass'))
+#if(("$!configObj" == '') && ("$!renderDocument" != ''))
+#set($theCalDoc = $renderDocument)
+#set($configObj = $theCalDoc.getObject('Classes.CalendarConfigClass'))
+#end
+#set($start = 0)
+#if("$!request.get('start')" != '')
+  #set($start = $util.parseInt("$request.get('start')"))
+#end
+#set($nb = 0)
+#if("$!configObj" != '')
+  #set($nb = $util.parseInt("$configObj.get('event_per_page')"))
+#end
+#set($isArchive = ("$!request.get('archive')" == "1"))
+#set($celCalendar = $xwiki.celcalendar.getCalendar($theCalDoc.fullName, $isArchive))
+#set($newStart = $util.add($start, $nb))
+#if(("$!nb" != '') && ($nb > 0))
+  #set($backNr = $util.add($start, $util.parseInt("-$nb")))
+  #if($start != 0) <a href="?start=$!{backNr}&archive=$!{archive}">$msg.get('cel_cal_previous')</a> #end
+  #if($newStart < $celCalendar.getNrOfEvents()) <a href="?start=$!{newStart}&archive=$!{archive}">$msg.get('cel_cal_next')</a> #end
+#end
+#if(($newStart > $celCalendar.getNrOfEvents()) || ($nb == 0))
+  #set($end = $celCalendar.getNrOfEvents())
+#else
+  #set($end = $newStart)
+#end
+#set($startHumanReadable = 0)
+#if($celCalendar.getNrOfEvents() > 0)
+  #set($startHumanReadable = $util.add($start, 1))
+#end
+#if(($celementsweb.getPageType($doc.fullName).hasPageTitle()) && ("$!tdoc.getTitle()" != ''))
+<h1 class="pageTitle">$tdoc.getTitle()<!--iE6.0--></h1>
+#end
+<div class="cel_cal_overview">
+<span class="cel_cal_eventcount">$msg.get('cel_cal_count', ["${startHumanReadable}", "${end}", "${celCalendar.getNrOfEvents()}"])</span>
+#set($isarchive = ("$request.archive" == '1'))
+<table id="Cal${theCalDoc.getName()}:$isarchive:" class="cel_calendar_overview cel_cm_calendar_event">
+  <thead>
+  	<tr>
+    #foreach($col in $celCalendar.getOverviewFields())
+      #set($colName = $!{col.replaceAll('\.', '')})
+      <th class="cel_cal_$!{colName.replaceAll('-',' cel_cal_')}">$msg.get("cel_cal_f_$!colName")</th>
+    #end
+    </tr>
+  </thead>
+  <tbody>
+    #if($celCalendar.getNrOfEvents() <= 0)
+      <tr><td colspan="4" align="center">$msg.get('cel_cal_empty_calendar')</td></tr>
+    #else
+      #foreach($event in $celCalendar.getEvents($start, $nb))
+        #set($eventDoc = ${event.getEventDocument()})
+        #set($eventLink = "/${eventDoc.getSpace()}/${eventDoc.getName()}")
+        #if("$!trClass" == 'cel_cal_odd')
+          #set($trClass = 'cel_cal_even')
+        #else
+          #set($trClass = 'cel_cal_odd')
+        #end
+        <tr id="Cal${theCalDoc.getName()}:${eventDoc.getFullName()}" class="cel_cm_calendar_event $!trClass">
+          #foreach($col in $celCalendar.getOverviewFields())
+          	#set($colName = $!{col.replaceAll('\.', '').replaceAll('-',' cel_cal_')})
+            <td class="cel_cal_$!{colName}">${event.displayOverviewField($col, $eventLink)}</td>
+          #end
+        </tr>
+      #end
+    #end
+  </tbody>
+</table>
+<!--iE6.0-->
+</div><!--iE6.0-->
+{/pre}

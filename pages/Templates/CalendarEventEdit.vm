@@ -1,0 +1,86 @@
+{pre}
+#if("$!request.get('eventDoc')" != '')
+  $xwiki.celcalendar.saveEvent();
+  #set($xredirect = "$request.get('xredirect')")
+  #if("$!xredirect" == '')
+    #set($xredirect = "$doc.getURL('view')")
+  #end
+  $context.getResponse().sendRedirect($xredirect)
+#end
+##TODO move to a Event api method "getObject($language)
+#set($obj = $doc.getObject('Classes.CalendarEventClass', 'lang', "$!language", false))
+#if("$!obj" == '')
+  #set($obj = $doc.newObject('Classes.CalendarEventClass'))
+  #set($defObj = $doc.getObject('Classes.CalendarEventClass', 'lang', "$!default_language", false))
+  #if("$!defObj" != '')
+    $obj.set('lang', "$!language")
+    $obj.set('title', "$!{defObj.getProperty('title').getValue()}")
+    $obj.set('description', "$!{defObj.getProperty('description').getValue()}")
+    $obj.set('location', "$!{defObj.getProperty('location').getValue()}")
+    $obj.set('eventDate', "$!{defObj.getProperty('eventDate').getValue()}")
+    $obj.set('isSubscribable', "$!{defObj.getProperty('isSubscribable').getValue()}")
+  #else
+    $obj.set('lang', "$!default_language")
+  #end
+  $doc.save()
+  #set($l = "$xwiki.getURL($doc.getFullName(), 'edit')")
+  #set($l = "${l}?language=${language}")
+  #set($cmenu_pageLink = "${l}&xredirect=$!request.get('xredirect')")
+  $context.getResponse().sendRedirect($cmenu_pageLink)
+#end
+##TODO END
+#set($event = $xwiki.celcalendar.getEvent(${doc.getFullName()}))
+##TinyMCE configs
+#set($contextPath = ${request.contextPath})
+#set($rte_supress_cancel = true)
+#set($rte_supress_save = true)
+#set($linkPickerSpaces = "")
+$xwiki.includeForm('celements2web:Macros.includeCelementsRTE', false)
+#set($hasWysiwigEditor = 'mceEditor')
+<!-- start visible content -->
+$celementsweb.addExtJSfileOnce("${xwiki.getSkinFile('celJS/editResize.js', true)}")
+<div id="con_titblock" class="titleblock">$adminMsg.get('cel_cal_ev_edit')</div>
+
+$xwiki.includeForm('celements2web:Macros.includeRTELanguageSelect', false)
+
+<form id="edit" action="" method="post">
+  <input type="hidden" name="xredirect" value="$!request.get('xredirect')" />
+  <input type="hidden" name="eventDoc" value="$doc.getFullName()" />
+  <input type="hidden" name="lang" value="$language" />
+  <div class="editgroup language_independent_fields">
+  	$adminMsg.get("cel_cal_ev_lang_indep_fields")
+  #foreach($prop in ${event.getEditableProperties().get(0)})
+    #set($dispProp = '')
+    #set($dispProp = $doc.display("$!prop", 'edit', $obj))
+    <div class="editblock cel_cal_ev_$!prop">$adminMsg.get("cel_cal_ev_$!prop")
+      ${dispProp.replaceAll('\{/?pre\}','')}
+    </div>
+  #end
+  </div>
+  #set($cals = '')
+  #set($cals = $xwiki.celcalendar.getSubscribingCalendars("$doc.getSpace()"))
+  #if(("$!cals" != '') && ("$!cals" != '[]'))
+    <div class="editblock cel_cal_ev_subscribers">$adminMsg.get('cel_cal_ev_subscribers'):<br />
+      #foreach($cal in $cals)
+        #set($calIsSubs = '')
+        #set($calSubsObj = '')
+        #set($calSubsObj = $doc.getObject('Classes.SubscriptionClass', 'subscriber', "$!cal", false))
+        #if(("$!calSubsObj" != '') && ("$!{calSubsObj.getProperty('doSubscribe').getValue()}" == '1'))
+          #set($calIsSubs = "checked='checked'")
+        #end
+        <input type="checkbox" name="esub_$!cal" value="$!cal" $!calIsSubs /> $!cal <br />
+      #end
+    </div>
+  #end
+  <div class="editgroup language_dependent_fields">
+    $adminMsg.get("cel_cal_ev_lang_dep_fields")
+  #foreach($prop in ${event.getEditableProperties().get(1)})
+    #set($dispProp = '')
+    #set($dispProp = $doc.display("$!prop", 'edit', $obj))
+    <div class="editblock cel_cal_ev_$!prop">$adminMsg.get("cel_cal_ev_$!prop")
+      ${dispProp.replaceAll('\{/?pre\}','')}
+    </div>
+  #end
+  </div>
+</form>
+{/pre}

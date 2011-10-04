@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping schema="dbo">
+  <class entity-name="Classes.CalendarEventClass" table="cel_calendareventclass">
+  <id name="id" type="integer" unsaved-value="undefined">
+    <column name="CEC_ID" not-null="true" />
+    <generator class="assigned" />
+  </id>
+  <property name="lang" type="string">
+    <column name="CEC_LANG" length="3" />
+  </property>
+  <property name="l_title" type="string">
+    <column name="CEC_TITEL" length="255" />
+  </property>
+  <property name="l_title_rte" type="text">
+    <column name="CEC_TITEL_RTE" />
+  </property>
+  <property name="l_description" type="text">
+    <column name="CEC_DESCRIPTION" />
+  </property>
+  <property name="location" type="string">
+    <column name="CEC_LOCATION" length="255" />
+  </property>
+  <property name="location_rte" type="text">
+    <column name="CEC_LOCATION_RTE"/>
+  </property>
+  <property name="eventDate" type="timestamp">
+    <column name="CEC_DATE" />
+  </property>
+  <property name="eventDate_end" type="timestamp">
+    <column name="CEC_DATE_END" />
+  </property>
+  <property name="isSubscribable" type="integer">
+    <column name="CEC_IS_SUBSCRIBABLE" />
+  </property>
+</class>
+</hibernate-mapping>

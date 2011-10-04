@@ -35,8 +35,6 @@ import com.celements.calendar.Event;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.plugin.CelementsCalendarPlugin;
-import com.celements.common.store.CelementsDefaultStore;
-import com.celements.common.store.ICelementsStoreInterface;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -153,7 +151,7 @@ public class CalendarUtils implements ICalendarUtils {
   public ICalendar getCalendar(String calDocFullName, boolean isArchive,
       XWikiContext context) {
     try {
-      return getCalendarByCalDoc(getCelStore(context).getDocument(
+      return getCalendarByCalDoc(context.getWiki().getDocument(
           calDocFullName, context), isArchive, context);
     } catch (XWikiException e) {
       mLogger.error("connot load calender doc", e);
@@ -161,10 +159,6 @@ public class CalendarUtils implements ICalendarUtils {
     }
   }
 
-  private ICelementsStoreInterface getCelStore(XWikiContext context) {
-    return CelementsDefaultStore.getCelementsStore(context);
-  }
-  
   /* (non-Javadoc)
    * @see com.celements.calendar.util.ICalendarUtils#getCalendarByCalDoc(com.xpn.xwiki.doc.XWikiDocument, boolean, com.xpn.xwiki.XWikiContext)
    */

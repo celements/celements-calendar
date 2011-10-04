@@ -23,6 +23,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 import com.xpn.xwiki.XWikiContext;
@@ -48,9 +49,10 @@ public class CalendarUtilsTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testGetAllowedSpacesHQL_noObject() throws XWikiException {
-    XWikiDocument calDoc = new XWikiDocument();
-    calDoc.setFormat("Content.Agenda");
-    calUtils.getAllowedSpacesHQL(calDoc , context);
+    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "Content",
+        "Agenda");
+    XWikiDocument calDoc = new XWikiDocument(calDocRef);
+    assertEquals("obj.name like '.%'", calUtils.getAllowedSpacesHQL(calDoc , context));
   }
 
 }

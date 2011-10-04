@@ -36,7 +36,6 @@ import com.celements.common.test.AbstractBridgedComponentTestCase;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
-import com.xpn.xwiki.store.XWikiStoreInterface;
 
 public class CalendarTest extends AbstractBridgedComponentTestCase{
 

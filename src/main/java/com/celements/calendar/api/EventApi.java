@@ -22,6 +22,8 @@ package com.celements.calendar.api;
 import java.util.Date;
 import java.util.List;
 
+import org.xwiki.model.reference.DocumentReference;
+
 import com.celements.calendar.IEvent;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -69,9 +71,14 @@ public class EventApi extends Api {
   public Document getEventDocument() {
     return event.getEventDocument().newDocument(context);
   }
-  
+
+  @Deprecated
   public String getDocName() {
     return event.getDocName();
+  }
+
+  public DocumentReference getDocumentReference() {
+    return event.getDocumentReference();
   }
   
   public boolean isFromSubscribableCalendar(String calendarSpace) {

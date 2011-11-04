@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.plugin.CelementsCalendarPlugin;
@@ -136,7 +137,9 @@ public class Calendar implements ICalendar {
   }
 
   private BaseObject getConfigObject() {
-    return calConfigDoc.getObject(CelementsCalendarPlugin.CLASS_CALENDAR);
+    return calConfigDoc.getXObject(new DocumentReference(context.getDatabase(),
+        CelementsCalendarPlugin.CLASS_CALENDAR_SPACE,
+        CelementsCalendarPlugin.CLASS_CALENDAR_DOC));
   }
 
   public List<String> getCalOverviewPropertyNames(XWikiContext context) {
@@ -150,9 +153,10 @@ public class Calendar implements ICalendar {
   public List<String> getEventPropertyNames(XWikiContext context) {
     List<String> propNames = new ArrayList<String>();
     try {
-      XWikiDocument doc = context.getWiki().getDocument(
-          CelementsCalendarPlugin.CLASS_EVENT, context);
-      BaseClass bclass = doc.getxWikiClass();
+      XWikiDocument doc = context.getWiki().getDocument(new DocumentReference(
+          context.getDatabase(), CelementsCalendarPlugin.CLASS_EVENT_SPACE,
+          CelementsCalendarPlugin.CLASS_EVENT_DOC), context);
+      BaseClass bclass = doc.getXClass();
       Object[] props = bclass.getPropertyNames();
       for(int i = 0; i < props.length; i++) {
         String propertyName = (String) props[i];

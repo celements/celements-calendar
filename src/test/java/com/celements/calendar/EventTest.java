@@ -30,7 +30,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.*;
+import org.junit.Before;
+import org.junit.Test;
+import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 import com.xpn.xwiki.XWiki;
@@ -45,6 +47,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
   private ICalendar calendar;
   private TestMessageTool testMsgTool;
   private XWiki xwiki;
+  private DocumentReference eventDocRef;
 
   @Before
   public void setUp_EventTest() throws Exception {
@@ -55,11 +58,12 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     testMsgTool.injectMessage("cel_cal_datetime_delim", " - ");
     List<BaseObject> objList = new ArrayList<BaseObject>();
     BaseObject eventObj = new BaseObject();
-    eventObj.setName("Test.Event1");
+    eventDocRef = new DocumentReference(context.getDatabase(), "Test", "Event1");
+    eventObj.setDocumentReference(eventDocRef);
     eventObj.setStringValue("lang", "de");
     objList.add(eventObj);
     event = new Event(objList, "TestSpace", context);
-    event.internal_setEventDoc(new XWikiDocument());
+    event.internal_setEventDoc(new XWikiDocument(eventDocRef));
     event.internal_setDefaultLanguage("de");
     calendar = createMock(ICalendar.class);
     event.internal_setCalendar(calendar);
@@ -75,8 +79,8 @@ public class EventTest extends AbstractBridgedComponentTestCase {
   @Test
   public void testGetObj_NPE() {
     //getObjects may return null!!
-    XWikiDocument eventDoc = new XWikiDocument();
-    eventDoc.setFullName("MySpace.MyCal");
+    XWikiDocument eventDoc = new XWikiDocument(new DocumentReference(context.getDatabase(
+        ), "MySpace", "MyCal"));
     //getObjects may return null!!
     replay(xwiki);
     Event myEvent = new Event(eventDoc, context);
@@ -86,11 +90,32 @@ public class EventTest extends AbstractBridgedComponentTestCase {
   }
 
   @Test
+  public void testGetEventDocument() {
+    assertNotNull(event.getEventDocument());
+    assertEquals(eventDocRef, event.getEventDocument().getDocumentReference());
+    assertSame(event.getEventDocument(), event.getEventDocument());
+  }
+
+  @Test
+  public void testGetEventDocument_badInit_noObjects() {
+    Event myEvent = new Event(null, "tipps", context);
+    assertNull(myEvent.getEventDocument());
+  }
+
+  @Test
+  @Deprecated
   public void testgetDocName_NPE() {
     Event myEvent = new Event(null, "tipps", context);
     assertNotNull(myEvent.getEventObjMap());
     assertNotNull(myEvent.getDocName());
     assertEquals("", myEvent.getDocName());
+  }
+
+  @Test
+  public void testgetDocumentReference_NPE() {
+    Event myEvent = new Event(null, "tipps", context);
+    assertNotNull(myEvent.getEventObjMap());
+    assertNull(myEvent.getDocumentReference());
   }
 
   @Test
@@ -172,7 +197,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testDisplayField_two_Dates_sameDay() throws ParseException {
-    event.internal_setEventDoc(new XWikiDocument());
+    event.internal_setEventDoc(new XWikiDocument(eventDocRef));
     event.internal_setDefaultLanguage("de");
     BaseObject eventOjb = event.getObj("de");
     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
@@ -184,7 +209,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testDisplayField_two_Dates_differentDays() throws ParseException {
-    event.internal_setEventDoc(new XWikiDocument());
+    event.internal_setEventDoc(new XWikiDocument(eventDocRef));
     event.internal_setDefaultLanguage("de");
     BaseObject eventOjb = event.getObj("de");
     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
@@ -197,7 +222,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testDisplayField_startDate_only() throws ParseException {
-    event.internal_setEventDoc(new XWikiDocument());
+    event.internal_setEventDoc(new XWikiDocument(eventDocRef));
     event.internal_setDefaultLanguage("de");
     BaseObject eventOjb = event.getObj("de");
     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
@@ -210,7 +235,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
   @Test
   public void testInternalDisplayField_two_Dates_differentDays (
       ) throws ParseException {
-    event.internal_setEventDoc(new XWikiDocument());
+    event.internal_setEventDoc(new XWikiDocument(eventDocRef));
     event.internal_setDefaultLanguage("de");
     BaseObject eventOjb = event.getObj("de");
     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
@@ -242,7 +267,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
   @Test
   public void testGetNonEmptyFields_optionalDateTime (
       ) throws ParseException {
-    event.internal_setEventDoc(new XWikiDocument());
+    event.internal_setEventDoc(new XWikiDocument(eventDocRef));
     event.internal_setDefaultLanguage("de");
     BaseObject eventOjb = event.getObj("de");
     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");

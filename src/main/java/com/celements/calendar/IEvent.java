@@ -22,6 +22,8 @@ package com.celements.calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.xwiki.model.reference.DocumentReference;
+
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.api.Element;
@@ -46,7 +48,10 @@ public interface IEvent {
 
   public boolean isFromSubscribableCalendar(String calendarSpace);
 
+  @Deprecated
   public String getDocName();
+
+  public DocumentReference getDocumentReference();
 
   /**
    * Get the value of a String property (String or TextArea). If the value in

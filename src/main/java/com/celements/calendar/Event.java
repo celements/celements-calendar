@@ -25,19 +25,18 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.plugin.CelementsCalendarPlugin;
 import com.celements.calendar.util.CalendarUtils;
 import com.celements.common.collections.ListUtils;
-import com.celements.web.utils.IWebUtils;
-import com.celements.web.utils.WebUtils;
+import com.celements.web.plugin.cmd.EmptyCheckCommand;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.api.Element;
@@ -47,6 +46,11 @@ import com.xpn.xwiki.objects.BaseObject;
 
 public class Event implements IEvent {
   
+  public static final String CLASSES_SPACE = "Classes";
+  public static final String CALENDAR_EVENT_CLASS_DOC = "CalendarEventClass";
+  public static final String CALENDAR_EVENT_CLASS = CLASSES_SPACE + "."
+    + CALENDAR_EVENT_CLASS_DOC;
+
   private static Log mLogger = LogFactory.getFactory().getInstance(Event.class);
   
   private Map<String, BaseObject> eventObj;
@@ -58,13 +62,19 @@ public class Event implements IEvent {
   
   public Event(XWikiDocument eventDoc, XWikiContext context
       ) {
-    this(eventDoc.getObjects("Classes.CalendarEventClass"), eventDoc.getWeb(),
-        context);
+    this(eventDoc.getXObjects(new DocumentReference(context.getDatabase(), CLASSES_SPACE,
+        CALENDAR_EVENT_CLASS_DOC)), eventDoc.getDocumentReference().getSpaceReferences(
+            ).get(0).getName(), context);
     this.eventDoc = eventDoc;
   }
   
+  @Deprecated
   public Event(String eventDocName, XWikiContext context) throws XWikiException{
     this(context.getWiki().getDocument(eventDocName, context), context);
+  }
+    
+  public Event(DocumentReference eventDocRef, XWikiContext context) throws XWikiException{
+    this(context.getWiki().getDocument(eventDocRef, context), context);
   }
     
   public Event(List<BaseObject> objList, String space, XWikiContext context) {
@@ -144,17 +154,18 @@ public class Event implements IEvent {
    * @see com.celements.calendar.IEvent#isSubscribable()
    */
   public Boolean isSubscribable(){
-    return getBooleanProperty(getObj(), CelementsCalendarPlugin.PROPERTY_EVENT_IS_SUBSCRIBABLE);
+    return getBooleanProperty(getObj(),
+        CelementsCalendarPlugin.PROPERTY_EVENT_IS_SUBSCRIBABLE);
   }
   
   /* (non-Javadoc)
    * @see com.celements.calendar.IEvent#getEventDocument()
    */
   public XWikiDocument getEventDocument() {
-    if (eventDoc == null) {
+    if ((eventDoc == null) && (getEventObjMap().size() > 0)) {
       BaseObject artObj = getEventObjMap().values().iterator().next();
       try {
-        eventDoc = context.getWiki().getDocument(artObj.getName(), context);
+        eventDoc = context.getWiki().getDocument(artObj.getDocumentReference(), context);
       } catch (XWikiException e) {
         mLogger.fatal("no EventDocument found", e);
       }
@@ -166,10 +177,12 @@ public class Event implements IEvent {
       XWikiContext context) {
     ICalendar cal = getCalendar(context);
     boolean hasLink = cal.hasDetailLink() && needsMoreLink(context);
-    hasLink &= (!cal.getOverviewFields().contains("detaillink") || name.equals("detaillink"));
+    hasLink &= (!cal.getOverviewFields().contains("detaillink")
+        || name.equals("detaillink"));
     mLogger.debug("cal.hasDetailLink(): " + cal.hasDetailLink());
     mLogger.debug("needsMoreLink(context): " + needsMoreLink(context));
-    mLogger.debug("!cal.getOverviewFields().contains('detaillink'): " + !cal.getOverviewFields().contains("detaillink"));
+    mLogger.debug("!cal.getOverviewFields().contains('detaillink'): "
+        + !cal.getOverviewFields().contains("detaillink"));
     mLogger.debug("name.equals('detaillink'): " + name.equals("detaillink"));
     mLogger.debug("hasLink: " + hasLink);
     
@@ -305,14 +318,22 @@ public class Event implements IEvent {
   /* (non-Javadoc)
    * @see com.celements.calendar.IEvent#getDocName()
    */
+  @Deprecated
   public String getDocName(){
-    for (Iterator<String> iterator = getEventObjMap().keySet().iterator(); iterator.hasNext();) {
-      String key = iterator.next();
+    for (String key : getEventObjMap().keySet()) {
       return getEventObjMap().get(key).getName();
     }
     return "";
   }
   
+  public DocumentReference getDocumentReference() {
+    if (getEventDocument() != null) {
+      return getEventDocument().getDocumentReference();
+    } else {
+      return null;
+    }
+  }
+
   /* (non-Javadoc)
    * @see com.celements.calendar.IEvent#getStringPropertyDefaultIfEmpty(java.lang.String, java.lang.String)
    */
@@ -384,27 +405,28 @@ public class Event implements IEvent {
       obj = getEventObjMap().get(lang);
     } else{
       if(getEventObjMap().containsKey(getDefaultLang())){
-        mLogger.info("'" + getDocName() + "' - Getting object for defaultLang '" + lang + "'");
+        mLogger.info("'" + getDocName() + "' - Getting object for defaultLang '" + lang
+            + "'");
         obj = getEventObjMap().get(getDefaultLang());
       } else{
         if(getEventObjMap().containsKey("")){
           mLogger.info("'" + getDocName() + "' - Getting object failed for lang ''");
           obj = getEventObjMap().get("");
         } else{
-          mLogger.info("'" + getDocName() + "' - Getting object failed for lang '" + lang + "' and defaultLang '" + getDefaultLang() + "'");
+          mLogger.info("'" + getDocName() + "' - Getting object failed for lang '" + lang
+              + "' and defaultLang '" + getDefaultLang() + "'");
         }
       }
     }
-    mLogger.info("Object found: doc " + (obj != null ? "name='" + obj.getName() + "'"
-        : "no object found! ") + " obj='" + obj + "'");
+    mLogger.info("Object found: doc " + (obj != null ? "name='"
+        + obj.getDocumentReference() + "'" : "no object found! ") + " obj='" + obj + "'");
     return obj;
   }
 
   public Element[] getProperties(String lang, XWikiContext context) {
     BaseObject obj = getObj(lang);
     if(obj != null){
-      return new com.xpn.xwiki.api.Class(obj.getxWikiClass(context),
-          context).getProperties();
+      return new com.xpn.xwiki.api.Class(obj.getXClass(context), context).getProperties();
     } else {
       mLogger.error("getProperties failed. No object found.");
     }
@@ -415,14 +437,17 @@ public class Event implements IEvent {
     if (calendar == null) {
       try {
         XWikiDocument calDoc = CalendarUtils.getInstance(
-            ).getCalendarPageByCalendarSpace(getEventDocument().getSpace(),
-                context);
+            ).getCalendarPageByCalendarSpace(getEventPrimarySpace(), context);
         calendar = internal_getCalendarByDoc(calDoc, context);
       } catch (XWikiException e) {
         mLogger.debug("No calendar doc found.", e);
       }
     }
     return calendar;
+  }
+
+  public String getEventPrimarySpace() {
+    return getDocumentReference().getSpaceReferences().get(0).getName();
   }
 
   private ICalendar internal_getCalendarByDoc(XWikiDocument calDoc,
@@ -519,12 +544,12 @@ public class Event implements IEvent {
 
   public List<String> getNonEmptyFields(List<String> fieldList,
       XWikiContext context) {
-    IWebUtils util = WebUtils.getInstance();
+    EmptyCheckCommand emptyCheckCmd = new EmptyCheckCommand();
     List<String> result = new ArrayList<String>();
     for (String fieldName : fieldList) {
       String fieldValue = internalDisplayField(
           getDetailConfigForField(fieldName, context), false, context);
-      if((fieldValue != null) && !util.isEmptyRTEString(fieldValue)){
+      if((fieldValue != null) && !emptyCheckCmd.isEmptyRTEString(fieldValue)) {
         result.add(fieldName);
       }
     }
@@ -548,7 +573,7 @@ public class Event implements IEvent {
   private final String getDefaultLang() {
     if (defaultLang == null) {
       defaultLang = context.getWiki().getWebPreference("default_language",
-          getEventDocument().getWeb(), "", context);
+          getEventPrimarySpace(), "", context);
     }
     return defaultLang;
   }

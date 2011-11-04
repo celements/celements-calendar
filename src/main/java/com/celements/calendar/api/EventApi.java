@@ -72,6 +72,12 @@ public class EventApi extends Api {
     return event.getEventDocument().newDocument(context);
   }
 
+  /**
+   * 
+   * @return
+   * 
+   * @deprecated use getDocumentReference instead
+   */
   @Deprecated
   public String getDocName() {
     return event.getDocName();

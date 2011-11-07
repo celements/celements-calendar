@@ -39,6 +39,8 @@ public class DocumentCreatedListener extends AbstractDocumentListener
 
   public void onEvent(Event event, Object source, Object data) {
     XWikiDocument document = (XWikiDocument) source;
+    mLogger.debug("onEvent: got event for [" + event.getClass() + "] on document ["
+        + document.getDocumentReference() + "].");
     String wikiName = document.getDocumentReference().getWikiReference().getName();
     DocumentReference calClass = new DocumentReference(wikiName,
         CelementsCalendarPlugin.CLASS_CALENDAR_SPACE,
@@ -51,11 +53,17 @@ public class DocumentCreatedListener extends AbstractDocumentListener
       // Fire the user created event
       CalendarCreatedEvent newEvent = new CalendarCreatedEvent();
       getObservationManager().notify(newEvent, source, getCalDataMap(document));
+    } else {
+      mLogger.trace("onEvent: no calendar class object found. skipping for calendar. ["
+          + document.getDocumentReference() + "].");
     }
     if (document.getXObject(eventClass) != null) {
       // Fire the user created event
       EventCreatedEvent newEvent = new EventCreatedEvent();
       getObservationManager().notify(newEvent, source, getEventDataMap(document));
+    } else {
+      mLogger.trace("onEvent: no event class object found. skipping for events. ["
+          + document.getDocumentReference() + "].");
     }
   }
 

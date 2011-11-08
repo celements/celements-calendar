@@ -306,6 +306,7 @@ public class CalendarUtils implements ICalendarUtils {
   /* (non-Javadoc)
    * @see com.celements.calendar.util.ICalendarUtils#getEventSpaceForCalendar(java.lang.String, com.xpn.xwiki.XWikiContext)
    */
+  @Deprecated
   public String getEventSpaceForCalendar(String fullName,
       XWikiContext context) throws XWikiException {
     return getEventSpaceForCalendar(context.getWiki().getDocument(fullName, context), context);

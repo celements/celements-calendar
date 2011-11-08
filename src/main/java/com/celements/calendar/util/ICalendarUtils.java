@@ -27,6 +27,17 @@ public interface ICalendarUtils {
   public abstract String getEventSpaceForCalendar(XWikiDocument doc, XWikiContext context)
       throws XWikiException;
 
+  /**
+   * 
+   * @param fullName
+   * @param context
+   * @return
+   * @throws XWikiException
+   * 
+   * @Deprecated use service getEventSpaceForCalendar(DocumentReference, XWikiContext)
+   *             instead
+   */
+  @Deprecated
   public abstract String getEventSpaceForCalendar(String fullName, XWikiContext context)
       throws XWikiException;
 

@@ -2,3 +2,5 @@ com.celements.calendar.classes.CalendarClasses
 com.celements.calendar.listener.DocumentCreatedListener
 com.celements.calendar.listener.DocumentDeletedListener
 com.celements.calendar.listener.DocumentUpdatedListener
+com.celements.calendar.service.CalendarScriptService
+com.celements.calendar.service.CalendarService

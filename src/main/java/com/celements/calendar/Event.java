@@ -447,7 +447,7 @@ public class Event implements IEvent {
   }
 
   public String getEventPrimarySpace() {
-    return getDocumentReference().getSpaceReferences().get(0).getName();
+    return getDocumentReference().getLastSpaceReference().getName();
   }
 
   private ICalendar internal_getCalendarByDoc(XWikiDocument calDoc,

@@ -48,8 +48,8 @@ public class EventsManager implements IEventManager {
   @Requirement("default")
   private EntityReferenceSerializer<String> refDefaultSerializer;
 
-  @Requirement("default/reference")
-  private EntityReferenceResolver<String> relativeRefResolver;
+  @Requirement
+  private EntityReferenceResolver<String> stringRefResolver;
 
   public EventsManager() {}
 
@@ -62,11 +62,12 @@ public class EventsManager implements IEventManager {
       List<String> eventDocs = storage.search(query, nb, start, getContext());
       mLogger.debug(eventDocs.size() + " events found. " + eventDocs);
       for (String eventDocName : eventDocs) {
-        mLogger.debug(eventDocName);
         Event theEvent = new Event(getDocRefFromFullName(eventDocName), getContext());
         if(checkEventSubscription(calDoc, theEvent)){
-          eventList.add(new EventApi(theEvent, getContext())
-          );
+          mLogger.debug("getEvents: add to result " + eventDocName);
+          eventList.add(new EventApi(theEvent, getContext()));
+        } else {
+          mLogger.debug("getEvents: skipp " + eventDocName);
         }
       }
     } catch (XWikiException e) {
@@ -76,9 +77,11 @@ public class EventsManager implements IEventManager {
   }
 
   private DocumentReference getDocRefFromFullName(String eventDocName) {
-    DocumentReference eventRef = (DocumentReference) relativeRefResolver.resolve(
-        eventDocName, EntityType.DOCUMENT);
+    DocumentReference eventRef = new DocumentReference(stringRefResolver.resolve(
+        eventDocName, EntityType.DOCUMENT));
     eventRef.setWikiReference(new WikiReference(getContext().getDatabase()));
+    mLogger.debug("getDocRefFromFullName: for [" + eventDocName + "] got reference ["
+        + eventRef + "].");
     return eventRef;
   }
 

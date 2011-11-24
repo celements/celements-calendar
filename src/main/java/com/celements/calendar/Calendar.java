@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.api.EventApi;
+import com.celements.calendar.cmd.GetEventsCommand;
 import com.celements.calendar.plugin.CelementsCalendarPlugin;
 import com.celements.calendar.util.CalendarUtils;
 import com.celements.calendar.util.ICalendarUtils;
@@ -52,6 +53,8 @@ public class Calendar implements ICalendar {
   private static final List<String> _NON_EVENT_PROPERTYS;
   private XWikiContext context;
   private ICalendarUtils utils;
+
+  private GetEventsCommand getEventCmd = new GetEventsCommand();
 
   static {
     _NON_EVENT_PROPERTYS = new ArrayList<String>();
@@ -82,7 +85,7 @@ public class Calendar implements ICalendar {
     if(nb < 0) { nb = 0; }
     List<EventApi> eventList = Collections.emptyList();
     try {
-      eventList = getUtils().getEvents(calConfigDoc, start, nb, isArchive, context);
+      eventList = getEventCmd.getEvents(calConfigDoc, start, nb, isArchive, context);
     } catch (XWikiException e) {
       mLogger.error("Exception while getting events for calendar " + calConfigDoc, e);
     }
@@ -94,7 +97,7 @@ public class Calendar implements ICalendar {
    * @see com.celements.calendar.ICalendar#getNrOfEvents()
    */
   public long getNrOfEvents(){
-    return getUtils().countEvents(calConfigDoc, isArchive, context);
+    return getEventCmd.countEvents(calConfigDoc, isArchive, context);
   }
   
   /* (non-Javadoc)
@@ -112,12 +115,17 @@ public class Calendar implements ICalendar {
     String overviewConfig = _OVERVIEW_DEFAULT_CONFIG;
     BaseObject calConfigObj = getConfigObject();
     if ((calConfigObj != null)
-        && (calConfigObj.getStringValue(CelementsCalendarPlugin.PROPERTY_OVERVIEW_COLUMN_CONFIG) != null)
-        && (!"".equals(calConfigObj.getStringValue(CelementsCalendarPlugin.PROPERTY_OVERVIEW_COLUMN_CONFIG)))) {
-      overviewConfig = calConfigObj.getStringValue(CelementsCalendarPlugin.PROPERTY_OVERVIEW_COLUMN_CONFIG);
+        && (getPropertyStringValueForOverviewConfig(calConfigObj) != null)
+        && (!"".equals(getPropertyStringValueForOverviewConfig(calConfigObj)))) {
+      overviewConfig = getPropertyStringValueForOverviewConfig(calConfigObj);
     }
     mLogger.debug("overview config: '" + overviewConfig + "'");
     return overviewConfig;
+  }
+
+  private String getPropertyStringValueForOverviewConfig(BaseObject calConfigObj) {
+    return calConfigObj.getStringValue(
+        CelementsCalendarPlugin.PROPERTY_OVERVIEW_COLUMN_CONFIG);
   }
 
   public List<String> getDetailviewFields() {
@@ -199,4 +207,9 @@ public class Calendar implements ICalendar {
   public void setCalendarUtils(ICalendarUtils utils) {
     this.utils = utils;
   }
+
+  void inject_getEventCmd(GetEventsCommand getEventCmdMock) {
+    getEventCmd = getEventCmdMock;
+  }
+
 }

@@ -1,4 +1,4 @@
-package com.celements.calendar.cmd;
+package com.celements.calendar.manager;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
@@ -9,6 +9,8 @@ import java.util.List;
 import org.apache.velocity.VelocityContext;
 import org.junit.Before;
 import org.junit.Test;
+import org.xwiki.context.Execution;
+import org.xwiki.context.ExecutionContext;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.common.test.AbstractBridgedComponentTestCase;
@@ -17,17 +19,23 @@ import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.store.XWikiStoreInterface;
 
-public class GetEventsCommandTest extends AbstractBridgedComponentTestCase {
+public class EventsManagerTest extends AbstractBridgedComponentTestCase {
 
   private XWikiContext context;
-  private GetEventsCommand getEventsCmd;
+  private EventsManager eventsMgr;
   private XWiki xwiki;
   private XWikiStoreInterface mockStore;
+  private Execution executionMock;
 
   @Before
   public void setUp_GetEventsCommandTest() throws Exception {
     context = getContext();
-    getEventsCmd = new GetEventsCommand();
+    eventsMgr = new EventsManager();
+    executionMock = createMock(Execution.class);
+    eventsMgr.execution = executionMock;
+    ExecutionContext execContext = new ExecutionContext();
+    execContext.setProperty("xwikicontext", context);
+    expect(executionMock.getContext()).andReturn(execContext).anyTimes();
     xwiki = createMock(XWiki.class);
     context.setWiki(xwiki);
     mockStore = createMock(XWikiStoreInterface.class);
@@ -45,18 +53,18 @@ public class GetEventsCommandTest extends AbstractBridgedComponentTestCase {
     expect(mockStore.search(isA(String.class), eq(0), eq(0), same(context))).andReturn(
         resultList).once();
     replayAll();
-    assertNotNull(getEventsCmd.countEvents(calDoc, false, context));
+    assertNotNull(eventsMgr.countEvents(calDoc, false));
     verifyAll();
   }
 
 
   private void replayAll(Object ... mocks) {
-    replay(xwiki, mockStore);
+    replay(xwiki, mockStore, executionMock);
     replay(mocks);
   }
 
   private void verifyAll(Object ... mocks) {
-    verify(xwiki, mockStore);
+    verify(xwiki, mockStore, executionMock);
     verify(mocks);
   }
 

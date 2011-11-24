@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.api.EventApi;
-import com.celements.calendar.cmd.GetEventsCommand;
+import com.celements.calendar.manager.EventsManager;
 import com.celements.calendar.plugin.CelementsCalendarPlugin;
 import com.celements.calendar.util.CalendarUtils;
 import com.celements.calendar.util.ICalendarUtils;
@@ -54,7 +54,7 @@ public class Calendar implements ICalendar {
   private XWikiContext context;
   private ICalendarUtils utils;
 
-  private GetEventsCommand getEventCmd = new GetEventsCommand();
+  private EventsManager eventMgr = new EventsManager();
 
   static {
     _NON_EVENT_PROPERTYS = new ArrayList<String>();
@@ -85,7 +85,7 @@ public class Calendar implements ICalendar {
     if(nb < 0) { nb = 0; }
     List<EventApi> eventList = Collections.emptyList();
     try {
-      eventList = getEventCmd.getEvents(calConfigDoc, start, nb, isArchive, context);
+      eventList = eventMgr.getEvents(calConfigDoc, start, nb, isArchive);
     } catch (XWikiException e) {
       mLogger.error("Exception while getting events for calendar " + calConfigDoc, e);
     }
@@ -97,7 +97,7 @@ public class Calendar implements ICalendar {
    * @see com.celements.calendar.ICalendar#getNrOfEvents()
    */
   public long getNrOfEvents(){
-    return getEventCmd.countEvents(calConfigDoc, isArchive, context);
+    return eventMgr.countEvents(calConfigDoc, isArchive);
   }
   
   /* (non-Javadoc)
@@ -208,8 +208,8 @@ public class Calendar implements ICalendar {
     this.utils = utils;
   }
 
-  void inject_getEventCmd(GetEventsCommand getEventCmdMock) {
-    getEventCmd = getEventCmdMock;
+  void inject_getEventCmd(EventsManager getEventCmdMock) {
+    eventMgr = getEventCmdMock;
   }
 
 }

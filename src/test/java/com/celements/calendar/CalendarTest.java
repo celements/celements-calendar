@@ -30,7 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.celements.calendar.api.EventApi;
-import com.celements.calendar.manager.EventsManager;
+import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.util.CalendarUtils;
 import com.celements.calendar.util.ICalendarUtils;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
@@ -45,7 +45,7 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
   private ArrayList<EventApi> eventList;
   private XWikiContext context;
   private ICalendarUtils calUtils;
-  private EventsManager eventMgrMock;
+  private IEventManager eventMgrMock;
 
   @Before
   public void setUp_CalendarTest() throws Exception {
@@ -54,7 +54,7 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     cal = new Calendar(null, isArchiv, context);
     calUtils = createMock(CalendarUtils.class);
     cal.setCalendarUtils(calUtils);
-    eventMgrMock = createMock(EventsManager.class);
+    eventMgrMock = createMock(IEventManager.class);
     cal.inject_getEventCmd(eventMgrMock);
   }
 

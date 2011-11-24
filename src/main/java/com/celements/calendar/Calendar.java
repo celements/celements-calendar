@@ -30,6 +30,7 @@ import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.manager.EventsManager;
+import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.plugin.CelementsCalendarPlugin;
 import com.celements.calendar.util.CalendarUtils;
 import com.celements.calendar.util.ICalendarUtils;
@@ -38,6 +39,7 @@ import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.objects.classes.BaseClass;
+import com.xpn.xwiki.web.Utils;
 
 public class Calendar implements ICalendar {
   private static final String _OVERVIEW_DEFAULT_CONFIG =
@@ -54,7 +56,7 @@ public class Calendar implements ICalendar {
   private XWikiContext context;
   private ICalendarUtils utils;
 
-  private EventsManager eventMgr = new EventsManager();
+  private IEventManager eventMgr;
 
   static {
     _NON_EVENT_PROPERTYS = new ArrayList<String>();
@@ -85,7 +87,7 @@ public class Calendar implements ICalendar {
     if(nb < 0) { nb = 0; }
     List<EventApi> eventList = Collections.emptyList();
     try {
-      eventList = eventMgr.getEvents(calConfigDoc, start, nb, isArchive);
+      eventList = getEventMgr().getEvents(calConfigDoc, start, nb, isArchive);
     } catch (XWikiException e) {
       mLogger.error("Exception while getting events for calendar " + calConfigDoc, e);
     }
@@ -97,7 +99,7 @@ public class Calendar implements ICalendar {
    * @see com.celements.calendar.ICalendar#getNrOfEvents()
    */
   public long getNrOfEvents(){
-    return eventMgr.countEvents(calConfigDoc, isArchive);
+    return getEventMgr().countEvents(calConfigDoc, isArchive);
   }
   
   /* (non-Javadoc)
@@ -208,8 +210,15 @@ public class Calendar implements ICalendar {
     this.utils = utils;
   }
 
-  void inject_getEventCmd(EventsManager getEventCmdMock) {
+  void inject_getEventCmd(IEventManager getEventCmdMock) {
     eventMgr = getEventCmdMock;
+  }
+
+  private IEventManager getEventMgr() {
+    if (eventMgr == null) {
+      eventMgr = (IEventManager) Utils.getComponent(IEventManager.class, "default");
+    }
+    return eventMgr;
   }
 
 }

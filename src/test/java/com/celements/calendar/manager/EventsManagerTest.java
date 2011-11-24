@@ -13,6 +13,8 @@ import org.xwiki.context.Execution;
 import org.xwiki.context.ExecutionContext;
 import org.xwiki.model.reference.DocumentReference;
 
+import com.celements.calendar.Event;
+import com.celements.calendar.service.ICalendarService;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
@@ -26,6 +28,7 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
   private XWiki xwiki;
   private XWikiStoreInterface mockStore;
   private Execution executionMock;
+  private ICalendarService calServiceMock;
 
   @Before
   public void setUp_GetEventsCommandTest() throws Exception {
@@ -36,10 +39,29 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
     ExecutionContext execContext = new ExecutionContext();
     execContext.setProperty("xwikicontext", context);
     expect(executionMock.getContext()).andReturn(execContext).anyTimes();
+    calServiceMock = createMock(ICalendarService.class);
+    eventsMgr.calService = calServiceMock;
     xwiki = createMock(XWiki.class);
     context.setWiki(xwiki);
     mockStore = createMock(XWikiStoreInterface.class);
     expect(xwiki.getStore()).andReturn(mockStore).anyTimes();
+  }
+
+  @Test
+  public void testIsHomeCalendar() throws Exception {
+    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
+    "myCalDoc");
+    DocumentReference eventDocRef = new DocumentReference(context.getDatabase(), "inbox",
+        "Event1");
+    XWikiDocument eventDoc = new XWikiDocument(eventDocRef);
+    expect(xwiki.getDocument(eq(eventDocRef), same(context))).andReturn(eventDoc).once();
+    expect(calServiceMock.getEventSpaceForCalendar(eq(calDocRef), same(context))
+        ).andReturn("inbox").once();
+    replayAll();
+    Event theEvent = new Event(eventDocRef, context);
+    assertTrue("Expect true for Event1 in space 'inbox' if EventSpaceForCalender is"
+        + " 'inbox' too.", eventsMgr.isHomeCalendar(calDocRef, theEvent));
+    verifyAll();
   }
 
   @Test
@@ -59,12 +81,12 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
 
 
   private void replayAll(Object ... mocks) {
-    replay(xwiki, mockStore, executionMock);
+    replay(xwiki, mockStore, executionMock, calServiceMock);
     replay(mocks);
   }
 
   private void verifyAll(Object ... mocks) {
-    verify(xwiki, mockStore, executionMock);
+    verify(xwiki, mockStore, executionMock, calServiceMock);
     verify(mocks);
   }
 

@@ -39,7 +39,7 @@ public class EventsManager implements IEventManager {
       EventsManager.class);
 
   @Requirement
-  private ICalendarService calService;
+  ICalendarService calService;
 
   //TODO we must change to 'default' serializer with the wikiname included
   @Requirement("local")
@@ -63,7 +63,7 @@ public class EventsManager implements IEventManager {
       mLogger.debug(eventDocs.size() + " events found. " + eventDocs);
       for (String eventDocName : eventDocs) {
         Event theEvent = new Event(getDocRefFromFullName(eventDocName), getContext());
-        if(checkEventSubscription(calDoc, theEvent)){
+        if(checkEventSubscription(calDoc.getDocumentReference(), theEvent)){
           mLogger.debug("getEvents: add to result " + eventDocName);
           eventList.add(new EventApi(theEvent, getContext()));
         } else {
@@ -157,16 +157,22 @@ public class EventsManager implements IEventManager {
     return dateMidnight;
   }
   
-  private boolean checkEventSubscription(XWikiDocument calDoc, Event theEvent
+  private boolean checkEventSubscription(DocumentReference calDocRef, Event theEvent
       ) throws XWikiException {
-    return isHomeCalendar(calDoc.getDocumentReference(), theEvent)
-        || isEventSubscribed(calDoc.getDocumentReference(), theEvent);
+    return isHomeCalendar(calDocRef, theEvent)
+        || isEventSubscribed(calDocRef, theEvent);
   }
 
-  private boolean isHomeCalendar(DocumentReference calDocRef, Event theEvent
+  boolean isHomeCalendar(DocumentReference calDocRef, Event theEvent
       ) throws XWikiException {
-    return theEvent.getDocumentReference().getLastSpaceReference().equals(
-        calService.getEventSpaceForCalendar(calDocRef, getContext()));
+    String eventSpaceForCal = calService.getEventSpaceForCalendar(calDocRef, getContext(
+        ));
+    boolean isHomeCal = theEvent.getDocumentReference().getLastSpaceReference().getName(
+        ).equals(eventSpaceForCal);
+    mLogger.trace("isHomeCalendar: for [" + theEvent.getDocumentReference()
+        + "] check on calDocRef [" + calDocRef + "] with space [" + eventSpaceForCal
+        + "] returning " + isHomeCal);
+    return isHomeCal;
   }
   
   private boolean isEventSubscribed(DocumentReference calDocRef, Event theEvent
@@ -183,6 +189,8 @@ public class EventsManager implements IEventManager {
         && (calObj != null) && (calObj.getIntValue("is_subscribable") == 1)){
       isSubscribed = true;
     }
+    mLogger.trace("isEventSubscribed: for [" + theEvent.getDocumentReference()
+        + "] returning " + isSubscribed);
     return isSubscribed;
   }
 

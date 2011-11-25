@@ -21,7 +21,6 @@ package com.celements.calendar;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -29,7 +28,6 @@ import org.apache.commons.logging.LogFactory;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.api.EventApi;
-import com.celements.calendar.manager.EventsManager;
 import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.plugin.CelementsCalendarPlugin;
 import com.celements.calendar.util.CalendarUtils;
@@ -85,12 +83,8 @@ public class Calendar implements ICalendar {
   public List<EventApi> getEvents(int start, int nb){
     if(start < 0){ start = 0; }
     if(nb < 0) { nb = 0; }
-    List<EventApi> eventList = Collections.emptyList();
-    try {
-      eventList = getEventMgr().getEvents(calConfigDoc, start, nb, isArchive);
-    } catch (XWikiException e) {
-      mLogger.error("Exception while getting events for calendar " + calConfigDoc, e);
-    }
+    List<EventApi> eventList = getEventMgr().getEvents(calConfigDoc, start, nb,
+        isArchive);
     return eventList;
   }
   //TODO gesamtnummer und so wie behandeln?

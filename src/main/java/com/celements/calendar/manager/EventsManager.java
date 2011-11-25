@@ -16,6 +16,9 @@ import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReferenceResolver;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.model.reference.WikiReference;
+import org.xwiki.query.Query;
+import org.xwiki.query.QueryException;
+import org.xwiki.query.QueryManager;
 
 import com.celements.calendar.Event;
 import com.celements.calendar.ICalendar;
@@ -27,7 +30,6 @@ import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
-import com.xpn.xwiki.store.XWikiStoreInterface;
 
 @Component("default")
 public class EventsManager implements IEventManager {
@@ -51,15 +53,16 @@ public class EventsManager implements IEventManager {
   @Requirement
   private EntityReferenceResolver<String> stringRefResolver;
 
+  @Requirement QueryManager queryManager;
+
   public EventsManager() {}
 
   public List<EventApi> getEvents(XWikiDocument calDoc, int start, int nb,
-      boolean isArchive) throws XWikiException {
-    String query = getQuery(calDoc, isArchive, false);
+      boolean isArchive) {
     List<EventApi> eventList = new ArrayList<EventApi>();
     try {
-      XWikiStoreInterface storage = getContext().getWiki().getStore();
-      List<String> eventDocs = storage.search(query, nb, start, getContext());
+      List<String> eventDocs = queryManager.createQuery(getQuery(calDoc, isArchive,
+          false), Query.HQL).setOffset(start).setLimit(nb).execute();
       mLogger.debug(eventDocs.size() + " events found. " + eventDocs);
       for (String eventDocName : eventDocs) {
         Event theEvent = new Event(getDocRefFromFullName(eventDocName), getContext());
@@ -72,6 +75,8 @@ public class EventsManager implements IEventManager {
       }
     } catch (XWikiException e) {
       mLogger.error(e);
+    } catch (QueryException exp) {
+      mLogger.error("Failed to exequte getEvents query.", exp);
     }
     return eventList;
   }
@@ -88,11 +93,13 @@ public class EventsManager implements IEventManager {
   public long countEvents(XWikiDocument calDoc, boolean isArchive) {
     List<Object> eventCount = null;
     try {
-      eventCount = getContext().getWiki().getStore().search(getQuery(calDoc, isArchive,
-          true), 0, 0, getContext());
+      eventCount = queryManager.createQuery(getQuery(calDoc, isArchive, true), Query.HQL
+          ).execute();
     } catch (XWikiException e) {
       mLogger.error("Exception while counting number of events for calendar '" + 
           ((calDoc != null)?calDoc.getDocumentReference():calDoc) + "'", e);
+    } catch (QueryException exp) {
+      mLogger.error("Failed to exequte countEvents.", exp);
     }
     if((eventCount != null) && (eventCount.size() > 0)) {
       mLogger.debug("Count resulted in " + eventCount.get(0) + " which is of class " +

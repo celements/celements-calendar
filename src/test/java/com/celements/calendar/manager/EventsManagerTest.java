@@ -4,6 +4,7 @@ import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.velocity.VelocityContext;
@@ -81,6 +82,7 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
     expect(queryManagerMock.createQuery(isA(String.class), eq(Query.HQL))).andReturn(
         queryMock).once();
     expect(queryMock.execute()).andReturn(resultList).once();
+    expect(calServiceMock.getStartDate()).andReturn(new Date()).once();
     replayAll(queryMock);
     assertNotNull(eventsMgr.countEvents(calDoc, false));
     verifyAll(queryMock);

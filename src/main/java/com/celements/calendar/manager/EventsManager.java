@@ -56,9 +56,10 @@ public class EventsManager implements IEventManager {
   @Requirement QueryManager queryManager;
 
   public EventsManager() {}
-
+  
   public List<EventApi> getEvents(XWikiDocument calDoc, int start, int nb,
       boolean isArchive) {
+    mLogger.info("Called getEvents on: " + System.identityHashCode(this));
     List<EventApi> eventList = new ArrayList<EventApi>();
     try {
       List<String> eventDocs = queryManager.createQuery(getQuery(calDoc, isArchive,
@@ -108,9 +109,9 @@ public class EventsManager implements IEventManager {
     }
     return 0;
   }
-  
-  private String getQuery(XWikiDocument calDoc, boolean isArchive, boolean count
-      ) throws XWikiException {
+
+    private String getQuery(XWikiDocument calDoc, boolean isArchive, boolean count
+        ) throws XWikiException {
     SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     
     String timeComp = ">=";
@@ -141,10 +142,6 @@ public class EventsManager implements IEventManager {
     
     return hql;
   }
-  
-  private Date getMidnightDate() {
-    return getMidnightDate(new Date());
-  }
 
   /**
    * getMidnightDate
@@ -152,9 +149,9 @@ public class EventsManager implements IEventManager {
    * @param startDate may not be null
    * @return
    */
-  private Date getMidnightDate(Date startDate) {
+  private Date getMidnightDate() {
     java.util.Calendar cal = java.util.Calendar.getInstance();
-    cal.setTime(startDate);
+    cal.setTime(calService.getStartDate());
     cal.set(java.util.Calendar.HOUR, 0);
     cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
     cal.set(java.util.Calendar.MINUTE, 0);
@@ -163,7 +160,7 @@ public class EventsManager implements IEventManager {
     mLogger.debug("date is: " + dateMidnight);
     return dateMidnight;
   }
-  
+
   private boolean checkEventSubscription(DocumentReference calDocRef, Event theEvent
       ) throws XWikiException {
     return isHomeCalendar(calDocRef, theEvent)

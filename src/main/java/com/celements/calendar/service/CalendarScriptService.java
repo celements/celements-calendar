@@ -1,5 +1,7 @@
 package com.celements.calendar.service;
 
+import java.util.Date;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xwiki.component.annotation.Component;
@@ -32,6 +34,13 @@ public class CalendarScriptService implements ScriptService {
     return null;
   }
 
+  public void setStartDate(Date newStartDate) {
+    calService.setStartDate(newStartDate);
+  }
+
+  public Date getStartDate() {
+    return calService.getStartDate();
+  }
 
   private XWikiContext getContext() {
     return (XWikiContext)execution.getContext().getProperty("xwikicontext");

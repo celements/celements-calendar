@@ -61,8 +61,8 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
         "Event1");
     XWikiDocument eventDoc = new XWikiDocument(eventDocRef);
     expect(xwiki.getDocument(eq(eventDocRef), same(context))).andReturn(eventDoc).once();
-    expect(calServiceMock.getEventSpaceForCalendar(eq(calDocRef), same(context))
-        ).andReturn("inbox").once();
+    expect(calServiceMock.getEventSpaceForCalendar(eq(calDocRef))).andReturn("inbox"
+        ).once();
     replayAll();
     Event theEvent = new Event(eventDocRef, context);
     assertTrue("Expect true for Event1 in space 'inbox' if EventSpaceForCalender is"
@@ -83,6 +83,7 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
         queryMock).once();
     expect(queryMock.execute()).andReturn(resultList).once();
     expect(calServiceMock.getStartDate()).andReturn(new Date()).once();
+    expect(calServiceMock.getAllowedSpacesHQL(same(calDoc))).andReturn("").once();
     replayAll(queryMock);
     assertNotNull(eventsMgr.countEvents(calDoc, false));
     verifyAll(queryMock);

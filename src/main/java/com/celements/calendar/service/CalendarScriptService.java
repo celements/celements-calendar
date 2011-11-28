@@ -10,7 +10,6 @@ import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.script.service.ScriptService;
 
-import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 
 @Component("celcalendar")
@@ -27,7 +26,7 @@ public class CalendarScriptService implements ScriptService {
 
   public String getEventSpaceForCalendar(DocumentReference calDocRef) {
     try {
-      return calService.getEventSpaceForCalendar(calDocRef, getContext());
+      return calService.getEventSpaceForCalendar(calDocRef);
     } catch (XWikiException exp) {
       mLogger.error("failed to getEventSpaceForCalendar [" + calDocRef + "].", exp);
     }
@@ -42,8 +41,4 @@ public class CalendarScriptService implements ScriptService {
     return calService.getStartDate();
   }
 
-  private XWikiContext getContext() {
-    return (XWikiContext)execution.getContext().getProperty("xwikicontext");
-  }
-  
 }

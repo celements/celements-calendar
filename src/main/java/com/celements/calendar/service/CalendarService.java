@@ -11,6 +11,7 @@ import org.xwiki.model.reference.DocumentReference;
 import com.celements.calendar.util.CalendarUtils;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
+import com.xpn.xwiki.doc.XWikiDocument;
 
 @Component
 public class CalendarService implements ICalendarService {
@@ -21,10 +22,14 @@ public class CalendarService implements ICalendarService {
   @Requirement
   Execution execution;
 
-  public String getEventSpaceForCalendar(DocumentReference calDocRef, XWikiContext context
+  public String getEventSpaceForCalendar(DocumentReference calDocRef
       ) throws XWikiException {
     return CalendarUtils.getInstance().getEventSpaceForCalendar(
-        context.getWiki().getDocument(calDocRef, context), context);
+        getContext().getWiki().getDocument(calDocRef, getContext()), getContext());
+  }
+
+  public String getAllowedSpacesHQL(XWikiDocument calDoc) throws XWikiException {
+    return CalendarUtils.getInstance().getAllowedSpacesHQL(calDoc, getContext());
   }
 
   public void setStartDate(Date newStartDate) {
@@ -41,4 +46,8 @@ public class CalendarService implements ICalendarService {
     return startDate;
   }
   
+  private XWikiContext getContext() {
+    return (XWikiContext)execution.getContext().getProperty("xwikicontext");
+  }
+
 }

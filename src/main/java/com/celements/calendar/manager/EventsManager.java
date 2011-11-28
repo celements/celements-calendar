@@ -25,7 +25,6 @@ import com.celements.calendar.ICalendar;
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.plugin.CelementsCalendarPlugin;
 import com.celements.calendar.service.ICalendarService;
-import com.celements.calendar.util.CalendarUtils;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -136,7 +135,7 @@ public class EventsManager implements IEventManager {
     hql += "and ec.lang='" + defaultLanguage + "' ";
     hql += "and (ec.eventDate " + timeComp + " '"
       + format.format(getMidnightDate()) + "' " + selectEmptyDates + ") and ";
-    hql += CalendarUtils.getInstance().getAllowedSpacesHQL(calDoc, getContext());
+    hql += calService.getAllowedSpacesHQL(calDoc);
     hql += " order by ec.eventDate " + sortOrder + ", ec.eventDate_end " + sortOrder;
     mLogger.debug(hql);
     
@@ -169,8 +168,7 @@ public class EventsManager implements IEventManager {
 
   boolean isHomeCalendar(DocumentReference calDocRef, Event theEvent
       ) throws XWikiException {
-    String eventSpaceForCal = calService.getEventSpaceForCalendar(calDocRef, getContext(
-        ));
+    String eventSpaceForCal = calService.getEventSpaceForCalendar(calDocRef);
     boolean isHomeCal = theEvent.getDocumentReference().getLastSpaceReference().getName(
         ).equals(eventSpaceForCal);
     mLogger.trace("isHomeCalendar: for [" + theEvent.getDocumentReference()

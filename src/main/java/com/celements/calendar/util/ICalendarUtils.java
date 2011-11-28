@@ -10,16 +10,16 @@ import com.xpn.xwiki.doc.XWikiDocument;
 
 public interface ICalendarUtils {
 
-  public abstract XWikiDocument getCalendarPageByCalendarSpace(String calSpace,
+  public XWikiDocument getCalendarPageByCalendarSpace(String calSpace,
       XWikiContext context) throws XWikiException;
 
-  public abstract List<String> getSubscribingCalendars(String calSpace,
-      XWikiContext context) throws XWikiException;
-
-  public abstract String getAllowedSpacesHQL(XWikiDocument calDoc, XWikiContext context
+  public List<String> getSubscribingCalendars(String calSpace, XWikiContext context
       ) throws XWikiException;
 
-  public abstract String getEventSpaceForCalendar(XWikiDocument doc, XWikiContext context
+  public String getAllowedSpacesHQL(XWikiDocument calDoc, XWikiContext context
+      ) throws XWikiException;
+
+  public String getEventSpaceForCalendar(XWikiDocument doc, XWikiContext context
       ) throws XWikiException;
 
   /**
@@ -33,10 +33,10 @@ public interface ICalendarUtils {
    *             instead
    */
   @Deprecated
-  public abstract String getEventSpaceForCalendar(String fullName, XWikiContext context
+  public String getEventSpaceForCalendar(String fullName, XWikiContext context
       ) throws XWikiException;
 
-  public abstract String getEventSpaceForCalendar(DocumentReference calDocRef,
-      XWikiContext context) throws XWikiException;
+  public String getEventSpaceForCalendar(DocumentReference calDocRef, XWikiContext context
+      ) throws XWikiException;
 
 }

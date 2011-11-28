@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.celements.calendar.api.EventApi;
+import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.util.CalendarUtils;
 import com.celements.calendar.util.ICalendarUtils;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
@@ -44,6 +45,7 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
   private ArrayList<EventApi> eventList;
   private XWikiContext context;
   private ICalendarUtils calUtils;
+  private IEventManager eventMgrMock;
 
   @Before
   public void setUp_CalendarTest() throws Exception {
@@ -52,16 +54,18 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     cal = new Calendar(null, isArchiv, context);
     calUtils = createMock(CalendarUtils.class);
     cal.setCalendarUtils(calUtils);
+    eventMgrMock = createMock(IEventManager.class);
+    cal.inject_getEventCmd(eventMgrMock);
   }
 
   @Test
   public void testGetAllEvents_informationHidingScurity() throws XWikiException {
     List<EventApi> list = Collections.emptyList();
-    expect(calUtils.getEvents((XWikiDocument)eq(null), eq(0), eq(0), eq(false),
-        same(context))).andReturn(list);
-    replay(calUtils);
+    expect(eventMgrMock.getEvents((XWikiDocument)eq(null), eq(0), eq(0), eq(false))
+        ).andReturn(list);
+    replayAll();
     List<EventApi> events = cal.getAllEvents();
-    verify(calUtils);
+    verifyAll();
     assertNotSame("getAllEvents may not leak internal data references.",
         eventList, events);
   }
@@ -79,11 +83,12 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     eventList.add(new EventApi(event4, null));
     Calendar cal2 = new Calendar(null, isArchiv, context);
     cal2.setCalendarUtils(calUtils);
-    expect(calUtils.getEvents((XWikiDocument)eq(null), eq(0), eq(0), eq(false),
-        same(context))).andReturn(eventList);
-    replay(event, event2, event3, event4, calUtils);
+    cal2.inject_getEventCmd(eventMgrMock);
+    expect(eventMgrMock.getEvents((XWikiDocument)eq(null), eq(0), eq(0), eq(false))
+        ).andReturn(eventList);
+    replayAll(event, event2, event3, event4);
     List<EventApi> events = cal2.getAllEvents();
-    verify(event, event2, event3, event4, calUtils);
+    verifyAll(event, event2, event3, event4);
     assertEquals("expecting complete eventList", eventList, events);
   }
 
@@ -94,13 +99,14 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     eventList.add(new EventApi(event, null));
     Calendar cal2 = new Calendar(null, isArchiv, context);
     cal2.setCalendarUtils(calUtils);
-    expect(calUtils.getEvents((XWikiDocument)eq(null), eq(0), eq(10), eq(false),
-        same(context))).andReturn(eventList);
-    replay(event, calUtils);
+    cal2.inject_getEventCmd(eventMgrMock);
+    expect(eventMgrMock.getEvents((XWikiDocument)eq(null), eq(0), eq(10), eq(false))
+        ).andReturn(eventList);
+    replayAll(event);
     int start = 0;
     int nb = 10;
     List<EventApi> events = cal2.getEvents(start, nb);
-    verify(event, calUtils);
+    verifyAll(event);
     assertEquals("Expecting to get the full eventlist", eventList, events);
   }
 
@@ -111,13 +117,14 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     eventList.add(new EventApi(event, null));
     Calendar cal2 = new Calendar(null, isArchiv, context);
     cal2.setCalendarUtils(calUtils);
-    expect(calUtils.getEvents((XWikiDocument)eq(null), eq(5), eq(1), eq(false),
-        same(context))).andReturn(eventList);
-    replay(event, calUtils);
+    cal2.inject_getEventCmd(eventMgrMock);
+    expect(eventMgrMock.getEvents((XWikiDocument)eq(null), eq(5), eq(1), eq(false))
+        ).andReturn(eventList);
+    replayAll(event);
     int start = 5;
     int nb = 1;
     List<EventApi> events = cal2.getEvents(start, nb);
-    verify(event, calUtils);
+    verifyAll(event);
     assertEquals("Expecting to get the full eventlist", eventList, events);
   }
 
@@ -127,13 +134,14 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     eventList.add(new EventApi(event, null));
     Calendar cal2 = new Calendar(null, isArchiv, context);
     cal2.setCalendarUtils(calUtils);
-    expect(calUtils.getEvents((XWikiDocument)eq(null), eq(0), eq(1), eq(false),
-        same(context))).andReturn(eventList);
-    replay(event, calUtils);
+    cal2.inject_getEventCmd(eventMgrMock);
+    expect(eventMgrMock.getEvents((XWikiDocument)eq(null), eq(0), eq(1), eq(false))
+        ).andReturn(eventList);
+    replayAll(event);
     int start = -1;
     int nb = 1;
     List<EventApi> events = cal2.getEvents(start, nb);
-    verify(event, calUtils);
+    verifyAll(event);
     assertEquals("Expecting to get the full eventlist", eventList, events);
   }
 
@@ -148,11 +156,12 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     eventList.add(123l);
     Calendar cal2 = new Calendar(null, isArchiv, context);
     cal2.setCalendarUtils(calUtils);
-    expect(calUtils.countEvents((XWikiDocument)eq(null), eq(isArchiv), same(context))
+    cal2.inject_getEventCmd(eventMgrMock);
+    expect(eventMgrMock.countEvents((XWikiDocument)eq(null), eq(isArchiv))
         ).andReturn(123l);
-    replay(calUtils);
+    replayAll();
     long numEvents = cal2.getNrOfEvents();
-    verify(calUtils);
+    verifyAll();
     assertEquals("Expecting size of eventList.", 123l, numEvents);
   }
 
@@ -160,6 +169,17 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
   public void testIsArchive() {
     assertEquals("isArchive must return the isArchive value given in "
         + "the constructor call", isArchiv, cal.isArchive());
+  }
+
+
+  private void replayAll(Object ... mocks) {
+    replay(calUtils, eventMgrMock);
+    replay(mocks);
+  }
+
+  private void verifyAll(Object ... mocks) {
+    verify(calUtils, eventMgrMock);
+    verify(mocks);
   }
 
 }

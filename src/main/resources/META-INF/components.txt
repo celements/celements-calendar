@@ -4,3 +4,4 @@ com.celements.calendar.listener.DocumentDeletedListener
 com.celements.calendar.listener.DocumentUpdatedListener
 com.celements.calendar.service.CalendarScriptService
 com.celements.calendar.service.CalendarService
+com.celements.calendar.manager.EventsManager

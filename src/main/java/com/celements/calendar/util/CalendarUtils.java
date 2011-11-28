@@ -19,27 +19,20 @@
  */
 package com.celements.calendar.util;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.velocity.VelocityContext;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.Calendar;
-import com.celements.calendar.Event;
 import com.celements.calendar.ICalendar;
-import com.celements.calendar.api.EventApi;
 import com.celements.calendar.plugin.CelementsCalendarPlugin;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
-import com.xpn.xwiki.store.XWikiStoreInterface;
 
 public class CalendarUtils implements ICalendarUtils {
   private static final Log mLogger = LogFactory.getFactory(
@@ -168,129 +161,6 @@ public class CalendarUtils implements ICalendarUtils {
   }
   
   /* (non-Javadoc)
-   * @see com.celements.calendar.util.ICalendarUtils#getEvents(com.xpn.xwiki.doc.XWikiDocument, int, int, boolean, com.xpn.xwiki.XWikiContext)
-   */
-  public List<EventApi> getEvents(XWikiDocument calDoc, int start, int nb,
-      boolean isArchive, XWikiContext context) throws XWikiException {
-    String query = getQuery(calDoc, isArchive, false, context);
-    List<EventApi> eventList = new ArrayList<EventApi>();
-    try {
-      XWikiStoreInterface storage = context.getWiki().getStore();
-      List<String> eventDocs = storage.search(query, nb, start, context);
-      mLogger.debug(eventDocs.size() + " events found. " + eventDocs);
-      for (String eventDocName : eventDocs) {
-        mLogger.debug(eventDocName);
-        if(checkEventSubscription(calDoc, eventDocName, context)){
-          eventList.add(new EventApi(new Event(eventDocName, context), context));
-        }
-      }
-    } catch (XWikiException e) {
-      mLogger.error(e);
-    }
-    return eventList;
-  }
-  
-  /* (non-Javadoc)
-   * @see com.celements.calendar.util.ICalendarUtils#countEvents(com.xpn.xwiki.doc.XWikiDocument, boolean, com.xpn.xwiki.XWikiContext)
-   */
-  public long countEvents(XWikiDocument calDoc, boolean isArchive, XWikiContext context) {
-    List<Object> eventCount = null;
-    try {
-      eventCount = context.getWiki().getStore().search(getQuery(calDoc, isArchive, true,
-          context), 0, 0, context);
-    } catch (XWikiException e) {
-      mLogger.error("Exception while counting number of events for calendar '" + 
-          ((calDoc != null)?calDoc.getDocumentReference():calDoc) + "'", e);
-    }
-    if((eventCount != null) && (eventCount.size() > 0)) {
-      mLogger.debug("Count resulted in " + eventCount.get(0) + " which is of class " +
-          eventCount.get(0).getClass());
-      return (Long)eventCount.get(0);
-    }
-    return 0;
-  }
-  
-  private boolean checkEventSubscription(XWikiDocument calDoc,
-      String eventDocName, XWikiContext context) throws XWikiException {
-    boolean isSubscribed = false;
-    if(eventDocName.startsWith(getEventSpaceForCalendar(calDoc, context)
-        + ".")) {
-      isSubscribed = true;
-    } else {
-      isSubscribed = isEventSubscribed(calDoc, eventDocName, context);
-    }
-    return isSubscribed;
-  }
-  
-  private boolean isEventSubscribed(XWikiDocument calDoc, String eventDocName,
-      XWikiContext context) throws XWikiException {
-    XWikiDocument doc = context.getWiki().getDocument(eventDocName, context);
-    BaseObject obj = doc.getObject(CelementsCalendarPlugin.SUBSCRIPTION_CLASS,
-        "subscriber", calDoc.getFullName(), false);
-    
-    XWikiDocument calendarDoc = getCalendarForEvent(doc, context);
-    BaseObject calObj = null;
-    if(calendarDoc != null){
-      calObj = calendarDoc.getObject("Classes.CalendarConfigClass");
-    }
-    boolean isSubscribed = false;
-    if((obj != null) && (obj.getIntValue("doSubscribe") == 1)
-        && (calObj != null) && (calObj.getIntValue("is_subscribable") == 1)){
-      isSubscribed = true;
-    }
-    return isSubscribed;
-  }
-  
-  private XWikiDocument getCalendarForEvent(XWikiDocument eventDoc,
-      XWikiContext context) throws XWikiException {
-    return getCalendarPageByCalendarSpace(eventDoc.getSpace(), context);
-  }
-
-  private String getQuery(XWikiDocument calDoc, boolean isArchive, boolean count,
-      XWikiContext context) throws XWikiException {
-    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    
-    String timeComp = ">=";
-    String sortOrder = "asc";
-    String selectEmptyDates = "or ec.eventDate is null";
-    if(isArchive){
-      timeComp = "<";
-      sortOrder = "desc";
-      selectEmptyDates = "";
-    }
-    String hql = "select ";
-    if(count){
-      hql += "count(obj.name)";
-    } else {
-      hql += "obj.name";
-    }
-    hql += " from XWikiDocument doc, BaseObject as obj, ";
-    hql += CelementsCalendarPlugin.CLASS_EVENT + " as ec ";
-    hql += "where doc.fullName = obj.name and doc.translation = 0 and ec.id.id=obj.id ";
-    VelocityContext vcontext = ((VelocityContext) context.get("vcontext"));
-    String defaultLanguage = (String)vcontext.get("default_language");
-    hql += "and ec.lang='" + defaultLanguage + "' ";
-    hql += "and (ec.eventDate " + timeComp + " '"
-      + format.format(getMidnightDate()) + "' " + selectEmptyDates + ") and ";
-    hql += getAllowedSpacesHQL(calDoc, context);
-    hql += " order by ec.eventDate " + sortOrder + ", ec.eventDate_end " + sortOrder;
-    mLogger.debug(hql);
-    
-    return hql;
-  }
-  
-  private Date getMidnightDate() {
-    java.util.Calendar cal = java.util.Calendar.getInstance();
-    cal.set(java.util.Calendar.HOUR, 0);
-    cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
-    cal.set(java.util.Calendar.MINUTE, 0);
-    cal.set(java.util.Calendar.SECOND, 0);
-    Date dateMidnight = cal.getTime();
-    mLogger.debug("date is: " + dateMidnight);
-    return dateMidnight;
-  }
-  
-  /* (non-Javadoc)
    * @see com.celements.calendar.util.ICalendarUtils#getEventSpaceForCalendar(com.xpn.xwiki.doc.XWikiDocument, com.xpn.xwiki.XWikiContext)
    */
   public String getEventSpaceForCalendar(XWikiDocument doc,
@@ -309,7 +179,14 @@ public class CalendarUtils implements ICalendarUtils {
   @Deprecated
   public String getEventSpaceForCalendar(String fullName,
       XWikiContext context) throws XWikiException {
-    return getEventSpaceForCalendar(context.getWiki().getDocument(fullName, context), context);
+    return getEventSpaceForCalendar(context.getWiki().getDocument(fullName, context),
+        context);
+  }
+
+  public String getEventSpaceForCalendar(DocumentReference calDocRef,
+      XWikiContext context) throws XWikiException {
+    return getEventSpaceForCalendar(context.getWiki().getDocument(calDocRef, context),
+        context);
   }
 
 }

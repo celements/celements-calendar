@@ -21,6 +21,10 @@ package com.celements.calendar.plugin;
 
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.xwiki.model.reference.DocumentReference;
+
 import com.celements.calendar.Event;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.api.CalendarApi;
@@ -33,6 +37,10 @@ import com.xpn.xwiki.api.Document;
 import com.xpn.xwiki.doc.XWikiDocument;
 
 public class CelementsCalendarPluginAPI extends Api {
+
+  private static final Log mLogger = LogFactory.getFactory().getInstance(
+      CelementsCalendarPluginAPI.class);
+
   private CelementsCalendarPlugin calPlugin;
   
   public CelementsCalendarPluginAPI(CelementsCalendarPlugin plugin, XWikiContext context) {
@@ -67,8 +75,16 @@ public class CelementsCalendarPluginAPI extends Api {
         context), context);
   }
   
+  /**
+   * @deprecated instead use getEvent(DocumentReference)
+   */
+  @Deprecated
   public EventApi getEvent(String docName) throws XWikiException {
     return new EventApi(new Event(docName, context), context);
+  }
+  
+  public EventApi getEvent(DocumentReference eventDocRef) throws XWikiException {
+    return new EventApi(new Event(eventDocRef, context), context);
   }
   
   public void saveEvent() throws XWikiException{
@@ -83,9 +99,19 @@ public class CelementsCalendarPluginAPI extends Api {
     }
     return calDoc;
   }
-  
+
+  /**
+   * @Deprecated use service getEventSpaceForCalendar(DocumentReference) instead
+   */
+  @Deprecated
   public String getEventSpaceForCalendar(String fullName) throws XWikiException{
+    mLogger.warn("Deprecated method getEventSpaceForCalendar used: "
+        + context.getDoc().getFullName() + " for calendar [" + fullName + "].");
     return CalendarUtils.getInstance().getEventSpaceForCalendar(fullName, context);
+  }
+  
+  public String getEventSpaceForCalendar(DocumentReference calDocRef) throws XWikiException{
+    return CalendarUtils.getInstance().getEventSpaceForCalendar(calDocRef, context);
   }
   
   public List<String> getSubscribingCalendars(String calEventSpace) throws XWikiException{

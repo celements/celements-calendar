@@ -21,7 +21,6 @@ package com.celements.calendar;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -29,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.api.EventApi;
+import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.plugin.CelementsCalendarPlugin;
 import com.celements.calendar.util.CalendarUtils;
 import com.celements.calendar.util.ICalendarUtils;
@@ -37,6 +37,7 @@ import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.objects.classes.BaseClass;
+import com.xpn.xwiki.web.Utils;
 
 public class Calendar implements ICalendar {
   private static final String _OVERVIEW_DEFAULT_CONFIG =
@@ -52,6 +53,8 @@ public class Calendar implements ICalendar {
   private static final List<String> _NON_EVENT_PROPERTYS;
   private XWikiContext context;
   private ICalendarUtils utils;
+
+  private IEventManager eventMgr;
 
   static {
     _NON_EVENT_PROPERTYS = new ArrayList<String>();
@@ -80,12 +83,8 @@ public class Calendar implements ICalendar {
   public List<EventApi> getEvents(int start, int nb){
     if(start < 0){ start = 0; }
     if(nb < 0) { nb = 0; }
-    List<EventApi> eventList = Collections.emptyList();
-    try {
-      eventList = getUtils().getEvents(calConfigDoc, start, nb, isArchive, context);
-    } catch (XWikiException e) {
-      mLogger.error("Exception while getting events for calendar " + calConfigDoc, e);
-    }
+    List<EventApi> eventList = getEventMgr().getEvents(calConfigDoc, start, nb,
+        isArchive);
     return eventList;
   }
   //TODO gesamtnummer und so wie behandeln?
@@ -94,7 +93,7 @@ public class Calendar implements ICalendar {
    * @see com.celements.calendar.ICalendar#getNrOfEvents()
    */
   public long getNrOfEvents(){
-    return getUtils().countEvents(calConfigDoc, isArchive, context);
+    return getEventMgr().countEvents(calConfigDoc, isArchive);
   }
   
   /* (non-Javadoc)
@@ -112,12 +111,17 @@ public class Calendar implements ICalendar {
     String overviewConfig = _OVERVIEW_DEFAULT_CONFIG;
     BaseObject calConfigObj = getConfigObject();
     if ((calConfigObj != null)
-        && (calConfigObj.getStringValue(CelementsCalendarPlugin.PROPERTY_OVERVIEW_COLUMN_CONFIG) != null)
-        && (!"".equals(calConfigObj.getStringValue(CelementsCalendarPlugin.PROPERTY_OVERVIEW_COLUMN_CONFIG)))) {
-      overviewConfig = calConfigObj.getStringValue(CelementsCalendarPlugin.PROPERTY_OVERVIEW_COLUMN_CONFIG);
+        && (getPropertyStringValueForOverviewConfig(calConfigObj) != null)
+        && (!"".equals(getPropertyStringValueForOverviewConfig(calConfigObj)))) {
+      overviewConfig = getPropertyStringValueForOverviewConfig(calConfigObj);
     }
     mLogger.debug("overview config: '" + overviewConfig + "'");
     return overviewConfig;
+  }
+
+  private String getPropertyStringValueForOverviewConfig(BaseObject calConfigObj) {
+    return calConfigObj.getStringValue(
+        CelementsCalendarPlugin.PROPERTY_OVERVIEW_COLUMN_CONFIG);
   }
 
   public List<String> getDetailviewFields() {
@@ -199,4 +203,16 @@ public class Calendar implements ICalendar {
   public void setCalendarUtils(ICalendarUtils utils) {
     this.utils = utils;
   }
+
+  void inject_getEventCmd(IEventManager getEventCmdMock) {
+    eventMgr = getEventCmdMock;
+  }
+
+  private IEventManager getEventMgr() {
+    if (eventMgr == null) {
+      eventMgr = (IEventManager) Utils.getComponent(IEventManager.class, "default");
+    }
+    return eventMgr;
+  }
+
 }

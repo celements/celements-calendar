@@ -21,6 +21,7 @@ package com.celements.calendar;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -56,6 +57,8 @@ public class Calendar implements ICalendar {
 
   private IEventManager eventMgr;
 
+  private Date startDate = new Date();
+
   static {
     _NON_EVENT_PROPERTYS = new ArrayList<String>();
     _NON_EVENT_PROPERTYS.add("lang");
@@ -68,6 +71,11 @@ public class Calendar implements ICalendar {
     this.context = context;
     this.isArchive = isArchive;
     this.calConfigDoc = calConfigDoc;
+  }
+  
+  public Calendar(DocumentReference calConfigDocRef, boolean isArchive,
+      XWikiContext context) throws XWikiException {
+    this(context.getWiki().getDocument(calConfigDocRef, context), isArchive, context);
   }
   
   /* (non-Javadoc)
@@ -83,8 +91,8 @@ public class Calendar implements ICalendar {
   public List<EventApi> getEvents(int start, int nb){
     if(start < 0){ start = 0; }
     if(nb < 0) { nb = 0; }
-    List<EventApi> eventList = getEventMgr().getEvents(calConfigDoc, start, nb,
-        isArchive);
+    List<EventApi> eventList = getEventMgr().getEvents(calConfigDoc, start, nb, isArchive,
+        getStartDate());
     return eventList;
   }
   //TODO gesamtnummer und so wie behandeln?
@@ -93,7 +101,7 @@ public class Calendar implements ICalendar {
    * @see com.celements.calendar.ICalendar#getNrOfEvents()
    */
   public long getNrOfEvents(){
-    return getEventMgr().countEvents(calConfigDoc, isArchive);
+    return getEventMgr().countEvents(calConfigDoc, isArchive, getStartDate());
   }
   
   /* (non-Javadoc)
@@ -215,4 +223,18 @@ public class Calendar implements ICalendar {
     return eventMgr;
   }
 
+  public void setStartDate(Date newStartDate) {
+    if (this.startDate != null) {
+      this.startDate = newStartDate;
+    }
+  }
+
+  public Date getStartDate() {
+    return this.startDate;
+  }
+
+  public DocumentReference getDocumentReference() {
+    return getCalDoc().getDocumentReference();
+  }
+  
 }

@@ -113,14 +113,16 @@ public class Event implements IEvent {
    * @see com.celements.calendar.IEvent#getTitle(java.lang.String)
    */
   public String getTitle(XWikiContext context){
-    return getStringPropertyDefaultIfEmpty(CelementsCalendarPlugin.PROPERTY_TITLE, context.getLanguage());
+    return getStringPropertyDefaultIfEmpty(CelementsCalendarPlugin.PROPERTY_TITLE,
+        context.getLanguage());
   }
 
   /* (non-Javadoc)
    * @see com.celements.calendar.IEvent#getDescription(java.lang.String)
    */
   public String getDescription(XWikiContext context){
-    return getStringPropertyDefaultIfEmpty(CelementsCalendarPlugin.PROPERTY_DESCRIPTION, context.getLanguage());
+    return getStringPropertyDefaultIfEmpty(CelementsCalendarPlugin.PROPERTY_DESCRIPTION,
+        context.getLanguage());
   }
 
   /* (non-Javadoc)
@@ -601,4 +603,19 @@ public class Event implements IEvent {
   void internal_setCalendar(ICalendar testCalendar) {
     calendar = testCalendar;
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof Event)) {
+      return false;
+    }
+    Event theEvent = (Event) obj;
+    return theEvent.getDocumentReference().equals(this.getDocumentReference());
+  }
+
+  @Override
+  public int hashCode() {
+    return this.getDocumentReference().hashCode();
+  }
+
 }

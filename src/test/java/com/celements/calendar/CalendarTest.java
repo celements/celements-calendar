@@ -24,6 +24,7 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.junit.Before;
@@ -61,8 +62,8 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
   @Test
   public void testGetAllEvents_informationHidingScurity() throws XWikiException {
     List<EventApi> list = Collections.emptyList();
-    expect(eventMgrMock.getEvents((XWikiDocument)eq(null), eq(0), eq(0), eq(false))
-        ).andReturn(list);
+    expect(eventMgrMock.getEvents((XWikiDocument)eq(null), eq(0), eq(0), eq(false),
+        eq(cal.getStartDate()))).andReturn(list).once();
     replayAll();
     List<EventApi> events = cal.getAllEvents();
     verifyAll();
@@ -84,8 +85,8 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     Calendar cal2 = new Calendar(null, isArchiv, context);
     cal2.setCalendarUtils(calUtils);
     cal2.inject_getEventCmd(eventMgrMock);
-    expect(eventMgrMock.getEvents((XWikiDocument)eq(null), eq(0), eq(0), eq(false))
-        ).andReturn(eventList);
+    expect(eventMgrMock.getEvents((XWikiDocument)eq(null), eq(0), eq(0), eq(false),
+        eq(cal2.getStartDate()))).andReturn(eventList);
     replayAll(event, event2, event3, event4);
     List<EventApi> events = cal2.getAllEvents();
     verifyAll(event, event2, event3, event4);
@@ -100,8 +101,8 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     Calendar cal2 = new Calendar(null, isArchiv, context);
     cal2.setCalendarUtils(calUtils);
     cal2.inject_getEventCmd(eventMgrMock);
-    expect(eventMgrMock.getEvents((XWikiDocument)eq(null), eq(0), eq(10), eq(false))
-        ).andReturn(eventList);
+    expect(eventMgrMock.getEvents((XWikiDocument)eq(null), eq(0), eq(10), eq(false),
+        eq(cal2.getStartDate()))).andReturn(eventList);
     replayAll(event);
     int start = 0;
     int nb = 10;
@@ -118,8 +119,8 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     Calendar cal2 = new Calendar(null, isArchiv, context);
     cal2.setCalendarUtils(calUtils);
     cal2.inject_getEventCmd(eventMgrMock);
-    expect(eventMgrMock.getEvents((XWikiDocument)eq(null), eq(5), eq(1), eq(false))
-        ).andReturn(eventList);
+    expect(eventMgrMock.getEvents((XWikiDocument)eq(null), eq(5), eq(1), eq(false),
+        eq(cal.getStartDate()))).andReturn(eventList);
     replayAll(event);
     int start = 5;
     int nb = 1;
@@ -135,8 +136,8 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     Calendar cal2 = new Calendar(null, isArchiv, context);
     cal2.setCalendarUtils(calUtils);
     cal2.inject_getEventCmd(eventMgrMock);
-    expect(eventMgrMock.getEvents((XWikiDocument)eq(null), eq(0), eq(1), eq(false))
-        ).andReturn(eventList);
+    expect(eventMgrMock.getEvents((XWikiDocument)eq(null), eq(0), eq(1), eq(false),
+        eq(cal.getStartDate()))).andReturn(eventList);
     replayAll(event);
     int start = -1;
     int nb = 1;
@@ -157,8 +158,8 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     Calendar cal2 = new Calendar(null, isArchiv, context);
     cal2.setCalendarUtils(calUtils);
     cal2.inject_getEventCmd(eventMgrMock);
-    expect(eventMgrMock.countEvents((XWikiDocument)eq(null), eq(isArchiv))
-        ).andReturn(123l);
+    expect(eventMgrMock.countEvents((XWikiDocument)eq(null), eq(isArchiv),
+        eq(cal2.getStartDate()))).andReturn(123l);
     replayAll();
     long numEvents = cal2.getNrOfEvents();
     verifyAll();

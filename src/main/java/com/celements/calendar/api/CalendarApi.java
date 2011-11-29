@@ -19,7 +19,10 @@
  */
 package com.celements.calendar.api;
 
+import java.util.Date;
 import java.util.List;
+
+import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.ICalendar;
 import com.xpn.xwiki.XWikiContext;
@@ -74,4 +77,15 @@ public class CalendarApi extends Api {
     return calendar.isSubscribable();
   }
 
+  public DocumentReference getDocumentReference() {
+    return calendar.getDocumentReference();
+  }
+
+  public void setStartDate(Date newStartDate) {
+    calendar.setStartDate(newStartDate);
+  }
+
+  public Date getStartDate() {
+    return calendar.getStartDate();
+  }
 }

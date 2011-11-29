@@ -86,56 +86,6 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     verifyAll();
   }
 
-  @Test
-  public void testSetStartDate() {
-    Date testNow = new Date();
-    replayAll();
-    calService.setStartDate(testNow);
-    assertSame("Expecting new object for Now.", testNow, calService.execution.getContext(
-        ).getProperty(CalendarService.CALENDAR_SERVICE_START_DATE));
-    verifyAll();
-  }
-
-  @Test
-  public void testGetStartDate_default_now() {
-    Date testNow = new Date();
-    replayAll();
-    Date startDate = calService.getStartDate();
-    assertNotNull(startDate);
-    assertNotSame("Expecting new object for Now.", startDate, calService.getStartDate());
-    assertTrue(startDate.compareTo(testNow) >= 0);
-    assertTrue(new Date().compareTo(startDate) >= 0);
-    verifyAll();
-  }
-
-  @Test
-  public void testGetStartDate_null() throws Exception {
-    Date testNow = new Date();
-    replayAll();
-    calService.execution.getContext().setProperty(
-        CalendarService.CALENDAR_SERVICE_START_DATE, null);
-    Date startDate = calService.getStartDate();
-    assertNotNull(startDate);
-    assertNotSame("Expecting new object for Now.", startDate, calService.getStartDate());
-    assertTrue(startDate.compareTo(testNow) >= 0);
-    assertTrue(new Date().compareTo(startDate) >= 0);
-    verifyAll();
-  }
-
-  @Test
-  public void testGetStartDate_set_date() throws Exception {
-    SimpleDateFormat dateFormater = new SimpleDateFormat("yyyy-mm-dd");
-    Date testDate = dateFormater.parse("2000-12-24");
-    replayAll();
-    calService.execution.getContext().setProperty(
-        CalendarService.CALENDAR_SERVICE_START_DATE, testDate);
-    Date startDate = calService.getStartDate();
-    assertNotNull(startDate);
-    assertSame("Expecting new object for Now.", startDate, calService.getStartDate());
-    assertTrue(startDate.compareTo(testDate) == 0);
-    verifyAll();
-  }
-
 
   private void replayAll(Object ... mocks) {
     replay(xwiki, mockStore, executionMock);

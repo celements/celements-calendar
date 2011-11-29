@@ -25,6 +25,7 @@ import static org.junit.Assert.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -484,4 +485,50 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     assertFalse(event.isIncludingFieldAsOptional("time", "date-date_end"));
   }
 
+  @Test
+  public void testEquals() throws Exception {
+    DocumentReference eventDocRef = new DocumentReference(context.getDatabase(),
+        "myEventSpace", "Event1");
+    DocumentReference eventDoc2Ref = new DocumentReference(context.getDatabase(),
+        "myEventSpace", "Event1");
+    XWikiDocument eventDoc = new XWikiDocument(eventDocRef);
+    expect(xwiki.getDocument(same(eventDocRef), same(context))).andReturn(eventDoc
+        ).once();
+    XWikiDocument eventDoc2 = new XWikiDocument(eventDoc2Ref);
+    expect(xwiki.getDocument(same(eventDoc2Ref), same(context))).andReturn(eventDoc2
+        ).once();
+    replayAll();
+    Event theEvent = new Event(eventDocRef, context);
+    assertTrue(theEvent.equals(new Event(eventDoc2Ref, context)));
+    verifyAll();
+  }
+
+  @Test
+  public void testEquals_listIndexOf() throws Exception {
+    DocumentReference eventDocRef = new DocumentReference(context.getDatabase(),
+        "myEventSpace", "Event1");
+    DocumentReference eventDoc2Ref = new DocumentReference(context.getDatabase(),
+        "myEventSpace", "Event1");
+    XWikiDocument eventDoc = new XWikiDocument(eventDocRef);
+    expect(xwiki.getDocument(same(eventDocRef), same(context))).andReturn(eventDoc
+        ).once();
+    XWikiDocument eventDoc2 = new XWikiDocument(eventDoc2Ref);
+    expect(xwiki.getDocument(same(eventDoc2Ref), same(context))).andReturn(eventDoc2
+        ).once();
+    replayAll();
+    Event theEvent = new Event(eventDocRef, context);
+    assertEquals(0, Arrays.asList(theEvent).indexOf(new Event(eventDoc2Ref, context)));
+    verifyAll();
+  }
+
+
+  private void replayAll(Object ... mocks) {
+    replay(xwiki);
+    replay(mocks);
+  }
+
+  private void verifyAll(Object ... mocks) {
+    verify(xwiki);
+    verify(mocks);
+  }
 }

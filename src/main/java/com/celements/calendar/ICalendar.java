@@ -19,7 +19,10 @@
  */
 package com.celements.calendar;
 
+import java.util.Date;
 import java.util.List;
+
+import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.api.EventApi;
 import com.xpn.xwiki.XWikiContext;
@@ -48,5 +51,11 @@ public interface ICalendar {
   public boolean isSubscribable();
 
   public XWikiDocument getCalDoc();
+
+  public void setStartDate(Date newStartDate);
+
+  public Date getStartDate();
+
+  public DocumentReference getDocumentReference();
 
 }

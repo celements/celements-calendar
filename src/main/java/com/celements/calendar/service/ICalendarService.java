@@ -1,7 +1,5 @@
 package com.celements.calendar.service;
 
-import java.util.Date;
-
 import org.xwiki.component.annotation.ComponentRole;
 import org.xwiki.model.reference.DocumentReference;
 
@@ -15,9 +13,5 @@ public interface ICalendarService {
       ) throws XWikiException;
 
   public String getAllowedSpacesHQL(XWikiDocument calDoc) throws XWikiException;
-
-  public void setStartDate(Date newStartDate);
-
-  public Date getStartDate();
 
 }

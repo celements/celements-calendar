@@ -8,7 +8,9 @@ public class NavigationDetails {
   
   private Date startDate;
 
-  NavigationDetails(Date startDate, Integer offset) {
+  NavigationDetails() {}
+
+  NavigationDetails(Date startDate, int offset) {
     this.offset = offset;
     this.startDate = startDate;
   }
@@ -59,7 +61,7 @@ public class NavigationDetails {
 
   @Override
   public String toString() {
-    return "[ date : " + startDate + ", offset : " + offset + "]";
+    return "[ date : " + startDate + ", offset : " + offset + " ]";
   }
   
 }

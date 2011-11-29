@@ -29,6 +29,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.manager.IEventManager;
@@ -52,7 +53,7 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
   public void setUp_CalendarTest() throws Exception {
     eventList = new ArrayList<EventApi>();
     context = getContext();
-    cal = new Calendar(null, isArchiv, context);
+    cal = new Calendar((XWikiDocument)null, isArchiv, context);
     calUtils = createMock(CalendarUtils.class);
     cal.setCalendarUtils(calUtils);
     eventMgrMock = createMock(IEventManager.class);
@@ -82,7 +83,7 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     eventList.add(new EventApi(event3, null));
     IEvent event4 = createMock(IEvent.class);
     eventList.add(new EventApi(event4, null));
-    Calendar cal2 = new Calendar(null, isArchiv, context);
+    Calendar cal2 = new Calendar((XWikiDocument)null, isArchiv, context);
     cal2.setCalendarUtils(calUtils);
     cal2.inject_getEventCmd(eventMgrMock);
     expect(eventMgrMock.getEvents((XWikiDocument)eq(null), eq(0), eq(0), eq(false),
@@ -98,7 +99,7 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     ArrayList<EventApi> eventList = new ArrayList<EventApi>();
     IEvent event = createMock(IEvent.class);
     eventList.add(new EventApi(event, null));
-    Calendar cal2 = new Calendar(null, isArchiv, context);
+    Calendar cal2 = new Calendar((XWikiDocument)null, isArchiv, context);
     cal2.setCalendarUtils(calUtils);
     cal2.inject_getEventCmd(eventMgrMock);
     expect(eventMgrMock.getEvents((XWikiDocument)eq(null), eq(0), eq(10), eq(false),
@@ -116,11 +117,11 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     ArrayList<EventApi> eventList = new ArrayList<EventApi>();
     IEvent event = createMock(IEvent.class);
     eventList.add(new EventApi(event, null));
-    Calendar cal2 = new Calendar(null, isArchiv, context);
+    Calendar cal2 = new Calendar((XWikiDocument)null, isArchiv, context);
     cal2.setCalendarUtils(calUtils);
     cal2.inject_getEventCmd(eventMgrMock);
     expect(eventMgrMock.getEvents((XWikiDocument)eq(null), eq(5), eq(1), eq(false),
-        eq(cal.getStartDate()))).andReturn(eventList);
+        eq(cal2.getStartDate()))).andReturn(eventList);
     replayAll(event);
     int start = 5;
     int nb = 1;
@@ -133,11 +134,11 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     ArrayList<EventApi> eventList = new ArrayList<EventApi>();
     IEvent event = createMock(IEvent.class);
     eventList.add(new EventApi(event, null));
-    Calendar cal2 = new Calendar(null, isArchiv, context);
+    Calendar cal2 = new Calendar((XWikiDocument)null, isArchiv, context);
     cal2.setCalendarUtils(calUtils);
     cal2.inject_getEventCmd(eventMgrMock);
     expect(eventMgrMock.getEvents((XWikiDocument)eq(null), eq(0), eq(1), eq(false),
-        eq(cal.getStartDate()))).andReturn(eventList);
+        eq(cal2.getStartDate()))).andReturn(eventList);
     replayAll(event);
     int start = -1;
     int nb = 1;
@@ -155,7 +156,7 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
   public void testGetNrOfEvents_nonEmptyList() throws XWikiException {
     ArrayList<Long> eventList = new ArrayList<Long>();
     eventList.add(123l);
-    Calendar cal2 = new Calendar(null, isArchiv, context);
+    Calendar cal2 = new Calendar((XWikiDocument)null, isArchiv, context);
     cal2.setCalendarUtils(calUtils);
     cal2.inject_getEventCmd(eventMgrMock);
     expect(eventMgrMock.countEvents((XWikiDocument)eq(null), eq(isArchiv),
@@ -172,6 +173,41 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
         + "the constructor call", isArchiv, cal.isArchive());
   }
 
+  @Test
+  public void testGetDocumentReference() {
+    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
+        "myCalDoc");
+    XWikiDocument calDoc = new XWikiDocument(calDocRef );
+    cal = new Calendar(calDoc, isArchiv, context);
+    assertEquals(calDocRef, cal.getDocumentReference());
+  }
+
+  @Test
+  public void testGetStartDate() {
+    Date startDateBefore = new Date();
+    cal = new Calendar((XWikiDocument)null, isArchiv, context);
+    Date startDateAfter = new Date();
+    assertTrue(startDateBefore.compareTo(cal.getStartDate()) <= 0);
+    assertTrue(startDateAfter.compareTo(cal.getStartDate()) >= 0);
+  }
+
+  @Test
+  public void testSetStartDate() {
+    Date startDate = cal.getStartDate();
+    Date newStartDate = new Date();
+    cal.setStartDate(newStartDate);
+    assertNotNull(cal.getStartDate());
+    assertNotSame(startDate, cal.getStartDate());
+    assertSame(newStartDate, cal.getStartDate());
+  }
+
+  @Test
+  public void testSetStartDate_null() {
+    Date startDate = cal.getStartDate();
+    cal.setStartDate(null);
+    assertNotNull(cal.getStartDate());
+    assertSame(startDate, cal.getStartDate());
+  }
 
   private void replayAll(Object ... mocks) {
     replay(calUtils, eventMgrMock);

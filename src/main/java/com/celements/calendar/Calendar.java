@@ -224,7 +224,7 @@ public class Calendar implements ICalendar {
   }
 
   public void setStartDate(Date newStartDate) {
-    if (this.startDate != null) {
+    if (newStartDate != null) {
       this.startDate = newStartDate;
     }
   }

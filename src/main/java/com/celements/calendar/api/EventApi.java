@@ -36,8 +36,13 @@ public class EventApi extends Api {
   private IEvent event;
   
   public EventApi(IEvent event, XWikiContext context) {
+    this(event, context.getLanguage(), context);
+  }
+
+  public EventApi(IEvent event, String language, XWikiContext context) {
     super(context);
     this.event = event;
+    this.event.setLanguage(language);
   }
   
   public CalendarApi getCalendar() {
@@ -45,11 +50,11 @@ public class EventApi extends Api {
   }
 
   public String getTitle() {
-    return event.getTitle(context);
+    return event.getTitle();
   }
   
   public String getDescription() {
-    return event.getDescription(context);
+    return event.getDescription();
   }
   
   public String getLocation() {
@@ -147,4 +152,13 @@ public class EventApi extends Api {
   public boolean needsMoreLink(){
     return event.needsMoreLink(context);
   }
+
+  public String getLanguage() {
+    return event.getLanguage();
+  }
+
+  public void setLanguage(String language) {
+    event.setLanguage(language);
+  }
+
 }

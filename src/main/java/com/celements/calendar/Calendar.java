@@ -31,6 +31,7 @@ import org.xwiki.model.reference.DocumentReference;
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.plugin.CelementsCalendarPlugin;
+import com.celements.calendar.service.ICalendarService;
 import com.celements.calendar.util.CalendarUtils;
 import com.celements.calendar.util.ICalendarUtils;
 import com.xpn.xwiki.XWikiContext;
@@ -56,8 +57,12 @@ public class Calendar implements ICalendar {
   private ICalendarUtils utils;
 
   private IEventManager eventMgr;
+  private ICalendarService calService;
 
   private Date startDate = new Date();
+
+  private String defaultLang;
+  private String language;
 
   static {
     _NON_EVENT_PROPERTYS = new ArrayList<String>();
@@ -91,8 +96,7 @@ public class Calendar implements ICalendar {
   public List<EventApi> getEvents(int start, int nb){
     if(start < 0){ start = 0; }
     if(nb < 0) { nb = 0; }
-    List<EventApi> eventList = getEventMgr().getEvents(calConfigDoc, start, nb, isArchive,
-        getStartDate());
+    List<EventApi> eventList = getEventMgr().getEvents(this, start, nb);
     return eventList;
   }
   //TODO gesamtnummer und so wie behandeln?
@@ -223,6 +227,13 @@ public class Calendar implements ICalendar {
     return eventMgr;
   }
 
+  private ICalendarService getCalService() {
+    if (calService == null) {
+      calService = (ICalendarService) Utils.getComponent(ICalendarService.class);
+    }
+    return calService;
+  }
+
   public void setStartDate(Date newStartDate) {
     if (newStartDate != null) {
       this.startDate = newStartDate;
@@ -236,5 +247,29 @@ public class Calendar implements ICalendar {
   public DocumentReference getDocumentReference() {
     return getCalDoc().getDocumentReference();
   }
+
+  public String getLanguage() {
+    if (this.language != null) {
+      return this.language;
+    }
+    return getDefaultLang();
+  }
+
+  public void setLanguage(String language) {
+    this.language = language;
+  }
   
+  private final String getDefaultLang() {
+    if (defaultLang == null) {
+      try {
+        defaultLang = context.getWiki().getWebPreference("default_language",
+            getCalService().getEventSpaceForCalendar(getDocumentReference()), "",
+            context);
+      } catch (XWikiException exp) {
+        mLogger.error("getDefaultLang: failed to get WebPreferences.", exp);
+      }
+    }
+    return defaultLang;
+  }
+
 }

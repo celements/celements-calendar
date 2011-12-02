@@ -57,17 +57,12 @@ public class EventsManager implements IEventManager {
 
   public EventsManager() {}
 
-  public List<EventApi> getEvents(XWikiDocument calDoc, int start, int nb,
-      boolean isArchive) {
-    return getEvents(calDoc, start, nb, isArchive, new Date());
-  }
-
-  public List<EventApi> getEvents(XWikiDocument calDoc, int start, int nb,
-      boolean isArchive, Date startDate) {
+  public List<EventApi> getEvents(ICalendar cal, int start, int nb) {
     List<EventApi> eventApiList = new ArrayList<EventApi>();
     try {
-      for (Event theEvent : getEvents_internal(calDoc, start, nb, isArchive, startDate)) {
-        eventApiList.add(new EventApi(theEvent, getContext()));
+      for (Event theEvent : getEvents_internal(cal.getCalDoc(), start, nb,
+          cal.isArchive(), cal.getStartDate())) {
+        eventApiList.add(new EventApi(theEvent, cal.getLanguage(), getContext()));
       }
     } catch (XWikiException e) {
       mLogger.error(e);

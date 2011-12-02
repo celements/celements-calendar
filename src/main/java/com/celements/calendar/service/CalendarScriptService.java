@@ -10,6 +10,7 @@ import org.xwiki.script.service.ScriptService;
 
 import com.celements.calendar.Calendar;
 import com.celements.calendar.Event;
+import com.celements.calendar.ICalendar;
 import com.celements.calendar.api.CalendarApi;
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.manager.IEventManager;
@@ -48,6 +49,29 @@ public class CalendarScriptService implements ScriptService {
               getContext()));
     } catch (XWikiException e) {
       mLogger.error("Failed to getNavigationDetails.", e);
+    }
+    return null;
+  }
+
+  public CalendarApi getCalendarByCalRef(DocumentReference calDocRef, boolean isArchive) {
+    ICalendar cal = calService.getCalendarByCalRef(calDocRef, isArchive);
+    if (cal != null) {
+      return new CalendarApi(cal, getContext());
+    } else {
+      mLogger.warn("getCalendarByCalRef: failed to get calendar for [" + calDocRef
+          + "], [" + isArchive + "].");
+    }
+    return null;
+  }
+
+  public CalendarApi getCalendarByCalRef(DocumentReference calDocRef, boolean isArchive,
+      String language) {
+    ICalendar cal = calService.getCalendarByCalRef(calDocRef, isArchive);
+    if (cal != null) {
+      return new CalendarApi(cal, language, getContext());
+    } else {
+      mLogger.warn("getCalendarByCalRef: failed to get calendar for [" + calDocRef
+          + "], [" + isArchive + "], [" + language + "].");
     }
     return null;
   }

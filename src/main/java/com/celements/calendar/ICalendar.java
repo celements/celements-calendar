@@ -58,4 +58,8 @@ public interface ICalendar {
 
   public DocumentReference getDocumentReference();
 
+  public String getLanguage();
+
+  public void setLanguage(String language);
+
 }

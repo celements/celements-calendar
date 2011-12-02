@@ -1,10 +1,14 @@
 package com.celements.calendar.service;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
 
+import com.celements.calendar.Calendar;
+import com.celements.calendar.ICalendar;
 import com.celements.calendar.util.CalendarUtils;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -19,6 +23,8 @@ public class CalendarService implements ICalendarService {
   @Requirement
   Execution execution;
 
+  private static Log mLogger = LogFactory.getFactory().getInstance(CalendarService.class);
+
   public String getEventSpaceForCalendar(DocumentReference calDocRef
       ) throws XWikiException {
     return CalendarUtils.getInstance().getEventSpaceForCalendar(
@@ -31,6 +37,15 @@ public class CalendarService implements ICalendarService {
 
   private XWikiContext getContext() {
     return (XWikiContext)execution.getContext().getProperty("xwikicontext");
+  }
+
+  public ICalendar getCalendarByCalRef(DocumentReference calDocRef, boolean isArchive) {
+    try {
+      return new Calendar(calDocRef, isArchive, getContext());
+    } catch (XWikiException exp) {
+      mLogger.error("getCalendarByCalRef: Failed to create Calendar object.", exp);
+    }
+    return null;
   }
 
 }

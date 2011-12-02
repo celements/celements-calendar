@@ -33,8 +33,13 @@ public class CalendarApi extends Api {
   private ICalendar calendar;
 
   public CalendarApi(ICalendar calendar, XWikiContext context) {
+    this(calendar, context.getLanguage(), context);
+  }
+
+  public CalendarApi(ICalendar calendar, String language, XWikiContext context) {
     super(context);
     this.calendar = calendar;
+    this.calendar.setLanguage(language);
   }
 
   public List<EventApi> getAllEvents() {

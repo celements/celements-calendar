@@ -32,9 +32,9 @@ import com.xpn.xwiki.objects.BaseObject;
 
 public interface IEvent {
 
-  public String getTitle(XWikiContext context);
+  public String getTitle();
 
-  public String getDescription(XWikiContext context);
+  public String getDescription();
 
   public String getLocation();
 
@@ -86,5 +86,9 @@ public interface IEvent {
   public List<String> getNonEmptyFields(List<String> fieldList, XWikiContext context);
 
   public boolean needsMoreLink(XWikiContext context);
+
+  public void setLanguage(String language);
+
+  public String getLanguage();
 
 }

@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,6 +57,7 @@ public class Event implements IEvent {
   private Map<String, BaseObject> eventObj;
   private XWikiDocument eventDoc;
   private String defaultLang;
+  private String language;
   private XWikiContext context;
 
   private ICalendar calendar;
@@ -112,17 +114,17 @@ public class Event implements IEvent {
   /* (non-Javadoc)
    * @see com.celements.calendar.IEvent#getTitle(java.lang.String)
    */
-  public String getTitle(XWikiContext context){
+  public String getTitle(){
     return getStringPropertyDefaultIfEmpty(CelementsCalendarPlugin.PROPERTY_TITLE,
-        context.getLanguage());
+        getLanguage());
   }
 
   /* (non-Javadoc)
    * @see com.celements.calendar.IEvent#getDescription(java.lang.String)
    */
-  public String getDescription(XWikiContext context){
+  public String getDescription(){
     return getStringPropertyDefaultIfEmpty(CelementsCalendarPlugin.PROPERTY_DESCRIPTION,
-        context.getLanguage());
+        getLanguage());
   }
 
   /* (non-Javadoc)
@@ -135,8 +137,8 @@ public class Event implements IEvent {
   /* (non-Javadoc)
    * @see com.celements.calendar.IEvent#getDateString(java.lang.String)
    */
-  public String getDateString(String dateField, String format){
-    SimpleDateFormat sdf = new SimpleDateFormat(format);
+  public String getDateString(String dateField, String format) {
+    SimpleDateFormat sdf = new SimpleDateFormat(format, new Locale(getLanguage()));
     Date date = getDateProperty(getObj(), dateField);
     String dateString = "";
     if(date != null){
@@ -144,7 +146,7 @@ public class Event implements IEvent {
     }
     return dateString;
   }
-  
+
   /* (non-Javadoc)
    * @see com.celements.calendar.IEvent#getEventDate()
    */
@@ -264,7 +266,7 @@ public class Event implements IEvent {
       value = getTimeString(CelementsCalendarPlugin.PROPERTY_EVENT_DATE_END,
           notDisplayIfSame);
     } else if(name.equals("title")) {
-      value = getTitle(context);
+      value = getTitle();
     } else if(name.equals("location")) {
       value = getLocation();
     } else if(name.equals("detaillink")) {
@@ -272,7 +274,7 @@ public class Event implements IEvent {
         value = context.getMessageTool().get("cel_cal_more_detaillink");
       }
     } else {
-      value = getStringProperty(name, context.getLanguage());
+      value = getStringProperty(name, getLanguage());
     }
     mLogger.debug("display part: '" + name + "'" + " = " + value);
     return value;
@@ -578,6 +580,17 @@ public class Event implements IEvent {
           getEventPrimarySpace(), "", context);
     }
     return defaultLang;
+  }
+
+  public String getLanguage() {
+    if (language != null) {
+      return language;
+    }
+    return getDefaultLang();
+  }
+
+  public void setLanguage(String language) {
+    this.language = language;
   }
 
   /**

@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.xwiki.model.reference.DocumentReference;
 
+import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -46,7 +47,11 @@ public class EventApi extends Api {
   }
   
   public CalendarApi getCalendar() {
-    return new CalendarApi(event.getCalendar(context), context);
+    ICalendar calendar = event.getCalendar(context);
+    if (calendar != null) {
+      return new CalendarApi(calendar, context);
+    }
+    return null;
   }
 
   public String getTitle() {

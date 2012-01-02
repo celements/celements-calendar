@@ -394,7 +394,9 @@ public class Event implements IEvent {
     }
     return result;
   }
-  
+
+  //FIXME public should return an API Object and not base Object -> refactore to use 
+  //      BaseObject only internally.
   public BaseObject getObj(){
     return getObj(getDefaultLang());
   }
@@ -402,6 +404,8 @@ public class Event implements IEvent {
   /* (non-Javadoc)
    * @see com.celements.calendar.IEvent#getObj(java.lang.String)
    */
+  //FIXME public should return an API Object and not base Object -> refactore to use 
+  //      BaseObject only internally.
   public BaseObject getObj(String lang){
     BaseObject obj = null;
     if(getEventObjMap().containsKey(lang)){

@@ -53,4 +53,9 @@
     <scope>test</scope>
     </dependency>
   </dependencies>  
+  <scm>
+    <connection>scm:git:git@github.com:celements/celements-calendar.git</connection>
+    <developerConnection>scm:git:git@github.com:celements/celements-calendar.git</developerConnection>
+    <url>https://github.com/celements/celements-calendar</url>
+  </scm>
 </project>

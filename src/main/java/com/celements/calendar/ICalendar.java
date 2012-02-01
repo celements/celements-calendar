@@ -42,8 +42,20 @@ public interface ICalendar {
 
   public List<String> getDetailviewFields();
   
+  public List<String> getCalOverviewPropertyNames();
+  
+  /**
+   * @deprecated use getCalOverviewPropertyNames() instead
+   */
+  @Deprecated
   public List<String> getCalOverviewPropertyNames(XWikiContext context);
 
+  public List<String> getEventPropertyNames();
+
+  /**
+   * @deprecated use getEventPropertyNames() instead
+   */
+  @Deprecated
   public List<String> getEventPropertyNames(XWikiContext context);
 
   public boolean hasDetailLink();

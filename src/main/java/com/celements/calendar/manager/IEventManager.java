@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.xwiki.component.annotation.ComponentRole;
+import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.Calendar;
 import com.celements.calendar.Event;
@@ -17,8 +18,31 @@ public interface IEventManager {
 
   public List<EventApi> getEvents(ICalendar cal, int start, int nb);
 
+  public long countEvents(DocumentReference calDocRef, boolean isArchive);
+
+  /**
+   * 
+   * @param calDoc
+   * @param isArchive
+   * @return
+   * 
+   * @deprecated instead use countEvents(DocumentReference, boolean)
+   */
+  @Deprecated
   public long countEvents(XWikiDocument calDoc, boolean isArchive);
 
+  public long countEvents(DocumentReference calDocRef, boolean isArchive, Date startDate);
+
+  /**
+   * 
+   * @param calDoc
+   * @param isArchive
+   * @param startDate
+   * @return
+   * 
+   * @deprecated instead use countEvents(DocumentReference, boolean, Date)
+   */
+  @Deprecated
   public long countEvents(XWikiDocument calDoc, boolean isArchive, Date startDate);
 
   public NavigationDetails getNavigationDetails(Event event, Calendar cal

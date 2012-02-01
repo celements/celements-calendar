@@ -99,18 +99,47 @@ public class EventsManager implements IEventManager {
     return eventRef;
   }
 
+  /**
+   * 
+   * @param calDoc
+   * @param isArchive
+   * @return
+   * 
+   * @deprecated instead use countEvents(DocumentReference, boolean)
+   */
+  @Deprecated
   public long countEvents(XWikiDocument calDoc, boolean isArchive) {
     return countEvents(calDoc, isArchive, new Date());
   }
 
+  public long countEvents(DocumentReference calDocRef, boolean isArchive) {
+    return countEvents(calDocRef, isArchive, new Date());
+  }
+
+  /**
+   * 
+   * @param calDoc
+   * @param isArchive
+   * @param startDate
+   * @return
+   * 
+   * @deprecated instead use countEvents(DocumentReference, boolean, Date)
+   */
+  @Deprecated
   public long countEvents(XWikiDocument calDoc, boolean isArchive, Date startDate) {
+    return countEvents(calDoc.getDocumentReference(), isArchive, startDate);
+  }
+
+  public long countEvents(DocumentReference calDocRef, boolean isArchive, Date startDate
+      ) {
     List<Object> eventCount = null;
     try {
+      XWikiDocument calDoc = getContext().getWiki().getDocument(calDocRef, getContext());
       eventCount = queryManager.createQuery(getQuery(calDoc, isArchive, startDate, true),
           Query.HQL).execute();
     } catch (XWikiException e) {
-      mLogger.error("Exception while counting number of events for calendar '" + 
-          ((calDoc != null)?calDoc.getDocumentReference():calDoc) + "'", e);
+      mLogger.error("Exception while counting number of events for calendar '" + calDocRef
+          + "'", e);
     } catch (QueryException exp) {
       mLogger.error("Failed to exequte countEvents.", exp);
     }

@@ -96,6 +96,8 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
         queryMock).once();
     expect(queryMock.execute()).andReturn(resultList).once();
     expect(calServiceMock.getAllowedSpacesHQL(same(calDoc))).andReturn("").once();
+    expect(xwiki.getDocument(eq(calDocRef), same(context))).andReturn(calDoc
+        ).atLeastOnce();
     replayAll(queryMock);
     assertNotNull(eventsMgr.countEvents(calDoc, false, new Date()));
     verifyAll(queryMock);
@@ -147,6 +149,8 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
     List<Object> result2List = new ArrayList<Object>(result2);
     addToResolver(result2);
     expect(mockQuery.execute()).andReturn(result2List).once();
+    expect(xwiki.getDocument(eq(cal1Ref), same(context))).andReturn(cal1Doc
+      ).atLeastOnce();
     replayAll(mockQuery);
     Event theEvent = new Event(Arrays.asList(eventObj), "myEventSpace", context);
     assertEquals(new NavigationDetails(theEvent.getEventDate(), 25),

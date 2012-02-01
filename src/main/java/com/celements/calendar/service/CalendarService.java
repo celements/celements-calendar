@@ -40,12 +40,9 @@ public class CalendarService implements ICalendarService {
   }
 
   public ICalendar getCalendarByCalRef(DocumentReference calDocRef, boolean isArchive) {
-    try {
-      return new Calendar(calDocRef, isArchive, getContext());
-    } catch (XWikiException exp) {
-      mLogger.error("getCalendarByCalRef: Failed to create Calendar object.", exp);
-    }
-    return null;
+    mLogger.trace("getCalendarByCalRef: create Calendar reference for [" + calDocRef
+        + "], isArchive [" + isArchive + "].");
+    return new Calendar(calDocRef, isArchive);
   }
 
 }

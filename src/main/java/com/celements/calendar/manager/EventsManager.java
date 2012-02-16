@@ -23,6 +23,7 @@ import org.xwiki.query.QueryManager;
 import com.celements.calendar.Calendar;
 import com.celements.calendar.Event;
 import com.celements.calendar.ICalendar;
+import com.celements.calendar.IEvent;
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.plugin.CelementsCalendarPlugin;
 import com.celements.calendar.service.ICalendarService;
@@ -54,6 +55,10 @@ public class EventsManager implements IEventManager {
   EntityReferenceResolver<String> stringRefResolver;
 
   @Requirement QueryManager queryManager;
+
+  private XWikiContext getContext() {
+    return (XWikiContext)execution.getContext().getProperty("xwikicontext");
+  }
 
   public EventsManager() {}
 
@@ -294,8 +299,8 @@ public class EventsManager implements IEventManager {
     return null;
   }
 
-  private XWikiContext getContext() {
-    return (XWikiContext)execution.getContext().getProperty("xwikicontext");
+  public IEvent getEvent(DocumentReference eventDocRef) {
+    return new Event(eventDocRef);
   }
 
 }

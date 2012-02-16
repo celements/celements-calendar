@@ -9,6 +9,7 @@ import org.xwiki.model.reference.DocumentReference;
 import com.celements.calendar.Calendar;
 import com.celements.calendar.Event;
 import com.celements.calendar.ICalendar;
+import com.celements.calendar.IEvent;
 import com.celements.calendar.api.EventApi;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -47,5 +48,7 @@ public interface IEventManager {
 
   public NavigationDetails getNavigationDetails(Event event, Calendar cal
     ) throws XWikiException;
+
+  public IEvent getEvent(DocumentReference eventDocRef);
 
 }

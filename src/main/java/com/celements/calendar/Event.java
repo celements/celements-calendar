@@ -76,7 +76,8 @@ public class Event implements IEvent {
   }
 
   @Deprecated
-  public Event(DocumentReference eventDocRef, XWikiContext context) {
+  public Event(DocumentReference eventDocRef, XWikiContext context
+      ) throws XWikiException {
     this(eventDocRef);
   }
 

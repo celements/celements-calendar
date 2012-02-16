@@ -18,4 +18,5 @@ public interface ICalendarService {
   public ICalendar getCalendarByCalRef(DocumentReference calDocRef, boolean isArchive);
 
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace);
+
 }

@@ -51,6 +51,8 @@ public interface IEvent {
   @Deprecated
   public String getDocName();
 
+  public String getDocumentName();
+
   public DocumentReference getDocumentReference();
 
   /**
@@ -72,20 +74,98 @@ public interface IEvent {
   public Boolean getBooleanProperty(String name, String lang);
 
   public BaseObject getObj(String lang);
-  
+
+  /**
+   * 
+   * @param name
+   * @param link
+   * @param context
+   * @return
+   * 
+   * @deprecated use instead String displayOverviewField(String, String)
+   */
+  @Deprecated
   public String displayOverviewField(String name, String link, XWikiContext context);
-  
+
+  public String displayOverviewField(String name, String link);
+
+  /**
+   * 
+   * @param name
+   * @param context
+   * @return
+   * 
+   * @deprecated use instead String displayField(String)
+   */
+  @Deprecated
   public String displayField(String name, XWikiContext context);
 
+  public String displayField(String name);
+
+  /**
+   * 
+   * @param lang
+   * @param context
+   * @return
+   * 
+   * @deprecated use instead Element[] getProperties(String)
+   */
+  @Deprecated
   public Element[] getProperties(String lang, XWikiContext context);
   
-  public List<List<String>> getEditableProperties(String lang, XWikiContext context) throws XWikiException;
+  public Element[] getProperties(String lang);
 
+  /**
+   * 
+   * @param lang
+   * @param context
+   * @return
+   * @throws XWikiException
+   * 
+   * @deprecated use instead List<List<String>> getEditableProperties(String)
+   */
+  @Deprecated
+  public List<List<String>> getEditableProperties(String lang, XWikiContext context
+    ) throws XWikiException;
+
+  public List<List<String>> getEditableProperties(String lang) throws XWikiException;
+
+  /**
+   * 
+   * @param context
+   * @return
+   * 
+   * @deprecated use instead ICalendar getCalendar()
+   */
+  @Deprecated
   public ICalendar getCalendar(XWikiContext context);
 
+  public ICalendar getCalendar();
+
+  /**
+   * 
+   * @param fieldList
+   * @param context
+   * @return
+   * 
+   * @deprecated use instead List<String> getNonEmptyFields(List<String>)
+   */
+  @Deprecated
   public List<String> getNonEmptyFields(List<String> fieldList, XWikiContext context);
 
+  public List<String> getNonEmptyFields(List<String> fieldList);
+
+  /**
+   * 
+   * @param context
+   * @return
+   * 
+   * @deprecated use instead boolean needsMoreLink()
+   */
+  @Deprecated
   public boolean needsMoreLink(XWikiContext context);
+
+  public boolean needsMoreLink();
 
   public void setLanguage(String language);
 

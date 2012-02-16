@@ -32,6 +32,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.plugin.CelementsCalendarPlugin;
@@ -44,6 +45,7 @@ import com.xpn.xwiki.api.Element;
 import com.xpn.xwiki.api.Property;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
+import com.xpn.xwiki.web.Utils;
 
 public class Event implements IEvent {
   
@@ -52,43 +54,83 @@ public class Event implements IEvent {
   public static final String CALENDAR_EVENT_CLASS = CLASSES_SPACE + "."
     + CALENDAR_EVENT_CLASS_DOC;
 
-  private static Log mLogger = LogFactory.getFactory().getInstance(Event.class);
+  private static Log LOGGER = LogFactory.getFactory().getInstance(Event.class);
   
   private Map<String, BaseObject> eventObj;
-  private XWikiDocument eventDoc;
+  private DocumentReference eventDocRef;
   private String defaultLang;
   private String language;
-  private XWikiContext context;
-
   private ICalendar calendar;
   
-  public Event(XWikiDocument eventDoc, XWikiContext context
-      ) {
+  @Deprecated
+  public Event(XWikiDocument eventDoc, XWikiContext context) {
     this(eventDoc.getXObjects(new DocumentReference(context.getDatabase(), CLASSES_SPACE,
         CALENDAR_EVENT_CLASS_DOC)), eventDoc.getDocumentReference().getSpaceReferences(
             ).get(0).getName(), context);
-    this.eventDoc = eventDoc;
+    this.eventDocRef = eventDoc.getDocumentReference();
   }
   
   @Deprecated
   public Event(String eventDocName, XWikiContext context) throws XWikiException{
     this(context.getWiki().getDocument(eventDocName, context), context);
   }
-    
-  public Event(DocumentReference eventDocRef, XWikiContext context) throws XWikiException{
-    this(context.getWiki().getDocument(eventDocRef, context), context);
+
+  @Deprecated
+  public Event(DocumentReference eventDocRef, XWikiContext context) {
+    this(eventDocRef);
+  }
+
+  public Event(DocumentReference eventDocRef) {
+    this.eventDocRef = eventDocRef;
   }
     
+  public Event(List<BaseObject> objList, String space) {
+    initObjectMap(objList, space);
+    if (getEventObjMap().size() > 0) {
+      BaseObject artObj = getEventObjMap().values().iterator().next();
+      this.eventDocRef = artObj.getDocumentReference();
+    }
+  }
+
+  /**
+   * 
+   * @param objList
+   * @param space
+   * @param context
+   * 
+   * @deprecated instead use Event(List<BaseObject>, String)
+   */
+  @Deprecated
   public Event(List<BaseObject> objList, String space, XWikiContext context) {
-    this.context = context;
+    this(objList, space);
+  }
+
+  private void initObjectMap(List<BaseObject> objList, String space) {
     if (objList != null) {
       for (BaseObject artObj : objList) {
-        init(artObj, space, context);
+        init(artObj, space);
       }
     }
   }
 
   Map<String, BaseObject> getEventObjMap() {
+    Map<String, BaseObject> eventObjMap = getEventObjMap_internal();
+    if (eventObjMap.isEmpty() && (eventDocRef != null)) {
+      try {
+        XWikiDocument eventDoc = getContext().getWiki().getDocument(eventDocRef,
+            getContext());
+        initObjectMap(eventDoc.getXObjects(new DocumentReference(getContext(
+            ).getDatabase(), CLASSES_SPACE, CALENDAR_EVENT_CLASS_DOC)),
+            eventDocRef.getLastSpaceReference().getName());
+      } catch (XWikiException exp) {
+        LOGGER.error("getEventObjMap failed to get event document [" + eventDocRef + "].",
+            exp);
+      }
+    }
+    return eventObjMap;
+  }
+
+  private Map<String, BaseObject> getEventObjMap_internal() {
     if (eventObj == null) {
       eventObj = new HashMap<String, BaseObject>();
     }
@@ -96,17 +138,15 @@ public class Event implements IEvent {
   }
 
   /* (non-Javadoc)
-   * @see com.celements.calendar.IEvent#init(BaseObject, java.lang.String, com.xpn.xwiki.XWikiContext)
+   * @see com.celements.calendar.IEvent#init(BaseObject, java.lang.String)
    */
-  final private void init(BaseObject artObj, String space,
-      XWikiContext context) {
+  final private void init(BaseObject artObj, String space) {
     if (artObj != null) {
-      String langValue = artObj.getStringValue(
-          CelementsCalendarPlugin.PROPERTY_LANG);
+      String langValue = artObj.getStringValue(CelementsCalendarPlugin.PROPERTY_LANG);
       if (langValue != null) {
-        getEventObjMap().put(langValue, artObj);
+        getEventObjMap_internal().put(langValue, artObj);
       } else {
-        getEventObjMap().put("", artObj);
+        getEventObjMap_internal().put("", artObj);
       }
     }
   }
@@ -166,52 +206,57 @@ public class Event implements IEvent {
    * @see com.celements.calendar.IEvent#getEventDocument()
    */
   public XWikiDocument getEventDocument() {
-    if ((eventDoc == null) && (getEventObjMap().size() > 0)) {
-      BaseObject artObj = getEventObjMap().values().iterator().next();
-      try {
-        eventDoc = context.getWiki().getDocument(artObj.getDocumentReference(), context);
-      } catch (XWikiException e) {
-        mLogger.fatal("no EventDocument found", e);
-      }
+    try {
+      return getContext().getWiki().getDocument(this.eventDocRef, getContext());
+    } catch (XWikiException exp) {
+      LOGGER.error("Failed to get cal doc for [" + this.eventDocRef + "].", exp);
     }
-    return eventDoc;
+    return null;
   }
-  
-  public String displayOverviewField(String name, String link,
-      XWikiContext context) {
-    ICalendar cal = getCalendar(context);
-    boolean hasLink = cal.hasDetailLink() && needsMoreLink(context);
+
+  @Deprecated
+  public String displayOverviewField(String name, String link, XWikiContext context) {
+    return displayOverviewField(name, link);
+  }
+
+  public String displayOverviewField(String name, String link) {
+    ICalendar cal = getCalendar(getContext());
+    boolean hasLink = cal.hasDetailLink() && needsMoreLink(getContext());
     hasLink &= (!cal.getOverviewFields().contains("detaillink")
         || name.equals("detaillink"));
-    mLogger.debug("cal.hasDetailLink(): " + cal.hasDetailLink());
-    mLogger.debug("needsMoreLink(context): " + needsMoreLink(context));
-    mLogger.debug("!cal.getOverviewFields().contains('detaillink'): "
+    LOGGER.debug("cal.hasDetailLink(): " + cal.hasDetailLink());
+    LOGGER.debug("needsMoreLink(context): " + needsMoreLink(getContext()));
+    LOGGER.debug("!cal.getOverviewFields().contains('detaillink'): "
         + !cal.getOverviewFields().contains("detaillink"));
-    mLogger.debug("name.equals('detaillink'): " + name.equals("detaillink"));
-    mLogger.debug("hasLink: " + hasLink);
+    LOGGER.debug("name.equals('detaillink'): " + name.equals("detaillink"));
+    LOGGER.debug("hasLink: " + hasLink);
     
     String value = "";
     if(hasLink) { value += "<a href='" + link + "'>"; }
-    value += displayField(name, context);
+    value += displayField(name, getContext());
     if(hasLink) { value += "</a>"; }
     
     return value;
   }
-  
+
+  @Deprecated
   public String displayField(String name, XWikiContext context) {
-    return internalDisplayField(name, true, context);
+    return displayField(name);
   }
 
-  String internalDisplayField(String name, boolean addSpans,
-      XWikiContext context) {
-    mLogger.debug("display: '" + name + "'");
+  public String displayField(String name) {
+    return internalDisplayField(name, true);
+  }
+
+  String internalDisplayField(String name, boolean addSpans) {
+    LOGGER.debug("display: '" + name + "'");
     String value = "";
     String[] parts = name.split("-");
     String prevPartName = null;
     for(String partName : parts) {
       boolean notDisplayIfSame = partName.endsWith(".");
       partName = partName.replaceAll("\\.", "");
-      String displayPart = getDisplayPart(partName, notDisplayIfSame, context);
+      String displayPart = getDisplayPart(partName, notDisplayIfSame);
       if ((parts.length > 1) && !"".equals(displayPart)) {
         displayPart = addDateTimeDelimiter(prevPartName, partName, displayPart);
         if (addSpans) {
@@ -237,16 +282,15 @@ public class Event implements IEvent {
 
   private String getFromDictionary(String dictKey) {
     String dictValue;
-    if (context.get("msg") != null) {
-      dictValue = context.getMessageTool().get(dictKey);
+    if (getContext().get("msg") != null) {
+      dictValue = getContext().getMessageTool().get(dictKey);
     } else {
       dictValue = dictKey;
     }
     return dictValue;
   }
 
-  String getDisplayPart(String name, boolean notDisplayIfSame,
-      XWikiContext context) {
+  String getDisplayPart(String name, boolean notDisplayIfSame) {
     String value = "";
     if(name.equals("date")) {
       value = getDateString(CelementsCalendarPlugin.PROPERTY_EVENT_DATE,
@@ -270,13 +314,13 @@ public class Event implements IEvent {
     } else if(name.equals("location")) {
       value = getLocation();
     } else if(name.equals("detaillink")) {
-      if(needsMoreLink(context)) {
-        value = context.getMessageTool().get("cel_cal_more_detaillink");
+      if(needsMoreLink(getContext())) {
+        value = getContext().getMessageTool().get("cel_cal_more_detaillink");
       }
     } else {
       value = getStringProperty(name, getLanguage());
     }
-    mLogger.debug("display part: '" + name + "'" + " = " + value);
+    LOGGER.debug("display part: '" + name + "'" + " = " + value);
     return value;
   }
 
@@ -289,22 +333,26 @@ public class Event implements IEvent {
     return value;
   }
   
+  @Deprecated
   public boolean needsMoreLink(XWikiContext context) {
+    return needsMoreLink();
+  }
+
+  public boolean needsMoreLink() {
     boolean needsLink = false;
-    List<String> additionalFields = getAdditionalPropertyNames(context);
+    List<String> additionalFields = getAdditionalPropertyNames();
     if(additionalFields != null) {
-      needsLink = (getNonEmptyFields(additionalFields, context).size() > 0);
+      needsLink = (getNonEmptyFields(additionalFields).size() > 0);
     }
     return needsLink;
   }
 
-  private List<String> getAdditionalPropertyNames(XWikiContext context) {
+  private List<String> getAdditionalPropertyNames() {
     Set<String> detailFieldsSet = new HashSet<String>();
-    detailFieldsSet.addAll(splitIntoPropertyNames(
-        getCalendar(context).getDetailviewFields()));
+    detailFieldsSet.addAll(splitIntoPropertyNames(getCalendar().getDetailviewFields()));
     List<String> additionalFields = ListUtils.subtract(
         Arrays.asList(detailFieldsSet.toArray(new String[0])),
-        splitIntoPropertyNames(getCalendar(context).getOverviewFields()));
+        splitIntoPropertyNames(getCalendar().getOverviewFields()));
     return additionalFields;
   }
 
@@ -329,13 +377,13 @@ public class Event implements IEvent {
     }
     return "";
   }
-  
+
+  public String getDocumentName() {
+    return getDocumentReference().getName();
+  }
+
   public DocumentReference getDocumentReference() {
-    if (getEventDocument() != null) {
-      return getEventDocument().getDocumentReference();
-    } else {
-      return null;
-    }
+    return this.eventDocRef;
   }
 
   /* (non-Javadoc)
@@ -409,46 +457,57 @@ public class Event implements IEvent {
   public BaseObject getObj(String lang){
     BaseObject obj = null;
     if(getEventObjMap().containsKey(lang)){
-      mLogger.info("'" + getDocName() + "' - Getting object for lang '" + lang + "'");
+      LOGGER.info("'" + getDocName() + "' - Getting object for lang '" + lang + "'");
       obj = getEventObjMap().get(lang);
     } else{
       if(getEventObjMap().containsKey(getDefaultLang())){
-        mLogger.info("'" + getDocName() + "' - Getting object for defaultLang '" + lang
+        LOGGER.info("'" + getDocName() + "' - Getting object for defaultLang '" + lang
             + "'");
         obj = getEventObjMap().get(getDefaultLang());
       } else{
         if(getEventObjMap().containsKey("")){
-          mLogger.info("'" + getDocName() + "' - Getting object failed for lang ''");
+          LOGGER.info("'" + getDocName() + "' - Getting object failed for lang ''");
           obj = getEventObjMap().get("");
         } else{
-          mLogger.info("'" + getDocName() + "' - Getting object failed for lang '" + lang
+          LOGGER.info("'" + getDocName() + "' - Getting object failed for lang '" + lang
               + "' and defaultLang '" + getDefaultLang() + "'");
         }
       }
     }
-    mLogger.info("Object found: doc " + (obj != null ? "name='"
+    LOGGER.info("Object found: doc " + (obj != null ? "name='"
         + obj.getDocumentReference() + "'" : "no object found! ") + " obj='" + obj + "'");
     return obj;
   }
 
+  @Deprecated
   public Element[] getProperties(String lang, XWikiContext context) {
+    return getProperties(lang);
+  }
+
+  public Element[] getProperties(String lang) {
     BaseObject obj = getObj(lang);
-    if(obj != null){
-      return new com.xpn.xwiki.api.Class(obj.getXClass(context), context).getProperties();
+    if(obj != null) {
+      return new com.xpn.xwiki.api.Class(obj.getXClass(getContext()), getContext()
+          ).getProperties();
     } else {
-      mLogger.error("getProperties failed. No object found.");
+      LOGGER.error("getProperties failed. No object found.");
     }
     return new Property[]{};
   }
   
+  @Deprecated
   public ICalendar getCalendar(XWikiContext context) {
+    return getCalendar();
+  }
+
+  public ICalendar getCalendar() {
     if (calendar == null) {
       try {
         XWikiDocument calDoc = CalendarUtils.getInstance(
-            ).getCalendarPageByCalendarSpace(getEventPrimarySpace(), context);
-        calendar = internal_getCalendarByDoc(calDoc, context);
+            ).getCalendarPageByCalendarSpace(getEventPrimarySpace(), getContext());
+        calendar = internal_getCalendarByDoc(calDoc);
       } catch (XWikiException e) {
-        mLogger.debug("No calendar doc found.", e);
+        LOGGER.debug("No calendar doc found.", e);
       }
     }
     return calendar;
@@ -458,39 +517,43 @@ public class Event implements IEvent {
     return getDocumentReference().getLastSpaceReference().getName();
   }
 
-  private ICalendar internal_getCalendarByDoc(XWikiDocument calDoc,
-      XWikiContext context) {
+  private ICalendar internal_getCalendarByDoc(XWikiDocument calDoc) {
     if(calDoc != null) {
       return ((CalendarUtils)CalendarUtils.getInstance()).getCalendarByCalDoc(calDoc, 
-          false, context);
+          false, getContext());
     }
     return null;
   }
   
-  public List<List<String>> getEditableProperties(String lang
-      , XWikiContext context) throws XWikiException{
+  @Deprecated
+  public List<List<String>> getEditableProperties(String lang, XWikiContext context
+      ) throws XWikiException{
+    return getEditableProperties(lang);
+  }
+
+  public List<List<String>> getEditableProperties(String lang) throws XWikiException{
     Set<String> confIndep = new HashSet<String>();
     Set<String> confDep = new HashSet<String>();
     splitLanguageDependentFields(confIndep, confDep,
-        splitIntoPropertyNames(getCalendar(context).getOverviewFields()));
+        splitIntoPropertyNames(getCalendar().getOverviewFields()));
     splitLanguageDependentFields(confIndep, confDep,
-        splitIntoPropertyNames(getCalendar(context).getDetailviewFields()));
-    if (getCalendar(context).isSubscribable()) {
+        splitIntoPropertyNames(getCalendar().getDetailviewFields()));
+    if (getCalendar().isSubscribable()) {
       confIndep.add(CelementsCalendarPlugin.PROPERTY_EVENT_IS_SUBSCRIBABLE);
     }
-    Element[] allProps = getProperties(lang, context);
-    mLogger.debug("getEditableProperties: allProps - "
+    Element[] allProps = getProperties(lang);
+    LOGGER.debug("getEditableProperties: allProps - "
         + Arrays.deepToString(allProps));
-    mLogger.debug("getEditableProperties: confIndep - "
+    LOGGER.debug("getEditableProperties: confIndep - "
         + Arrays.deepToString(confIndep.toArray()));
-    mLogger.debug("getEditableProperties: confDep - "
+    LOGGER.debug("getEditableProperties: confDep - "
         + Arrays.deepToString(confDep.toArray()));
     List<String> lIndependantProps = getProps(allProps, confIndep);
     List<String> lDependantProps= getProps(allProps, confDep);
     List<List<String>> editProp = new ArrayList<List<String>>();
     editProp.add(lIndependantProps);
     editProp.add(lDependantProps);
-    mLogger.debug("getEditableProperties: return editProp - "
+    LOGGER.debug("getEditableProperties: return editProp - "
         + Arrays.deepToString(editProp.toArray()));
     return editProp;
   }
@@ -526,7 +589,7 @@ public class Event implements IEvent {
       propNamesCleanList.remove("time_end");
       propNamesCleanList.add("eventDate_end");
     }
-    mLogger.debug("splitLanguageDepFields: " + propNamesCleanList.toString());
+    LOGGER.debug("splitLanguageDepFields: " + propNamesCleanList.toString());
     for (String propName : propNamesCleanList) {
       if(propName.startsWith("l_")) {
         confDep.add(propName);
@@ -541,22 +604,26 @@ public class Event implements IEvent {
     for (int i = 0; i < allProps.length; i++) {
       if((allProps[i] != null) && ((conf.size() == 0)
           || (conf.contains(allProps[i].getName())))){
-        mLogger.debug("addProp: " + allProps[i].getName());
+        LOGGER.debug("addProp: " + allProps[i].getName());
         props.add(allProps[i].getName());
       } else {
-        mLogger.debug("NOT addProp: " + allProps[i].getName());
+        LOGGER.debug("NOT addProp: " + allProps[i].getName());
       }
     }
     return props;
   }
 
-  public List<String> getNonEmptyFields(List<String> fieldList,
-      XWikiContext context) {
+  @Deprecated
+  public List<String> getNonEmptyFields(List<String> fieldList, XWikiContext context) {
+    return getNonEmptyFields(fieldList);
+  }
+
+  public List<String> getNonEmptyFields(List<String> fieldList) {
     EmptyCheckCommand emptyCheckCmd = new EmptyCheckCommand();
     List<String> result = new ArrayList<String>();
     for (String fieldName : fieldList) {
-      String fieldValue = internalDisplayField(
-          getDetailConfigForField(fieldName, context), false, context);
+      String fieldValue = internalDisplayField( getDetailConfigForField(fieldName),
+          false);
       if((fieldValue != null) && !emptyCheckCmd.isEmptyRTEString(fieldValue)) {
         result.add(fieldName);
       }
@@ -565,8 +632,8 @@ public class Event implements IEvent {
     return result;
   }
 
-  String getDetailConfigForField(String fieldName, XWikiContext context) {
-    for(String colFields : getCalendar(context).getDetailviewFields()) {
+  String getDetailConfigForField(String fieldName) {
+    for(String colFields : getCalendar().getDetailviewFields()) {
       if (isIncludingFieldAsOptional(fieldName, colFields)) {
         fieldName = fieldName + ".";
       }
@@ -580,8 +647,8 @@ public class Event implements IEvent {
 
   private final String getDefaultLang() {
     if (defaultLang == null) {
-      defaultLang = context.getWiki().getWebPreference("default_language",
-          getEventPrimarySpace(), "", context);
+      defaultLang = getContext().getWiki().getWebPreference("default_language",
+          getEventPrimarySpace(), "", getContext());
     }
     return defaultLang;
   }
@@ -601,8 +668,13 @@ public class Event implements IEvent {
    * for Tests only!!!
    * @param xWikiDocument
    */
+  @Deprecated
   void internal_setEventDoc(XWikiDocument testEventDoc) {
-    this.eventDoc = testEventDoc;
+    this.eventDocRef = testEventDoc.getDocumentReference();
+  }
+
+  public void internal_setDocumentReference(DocumentReference eventDocRef) {
+    this.eventDocRef = eventDocRef;
   }
 
   /**
@@ -633,6 +705,11 @@ public class Event implements IEvent {
   @Override
   public int hashCode() {
     return this.getDocumentReference().hashCode();
+  }
+
+  private XWikiContext getContext() {
+    Execution execution = Utils.getComponent(Execution.class);
+    return (XWikiContext)execution.getContext().getProperty("xwikicontext");
   }
 
 }

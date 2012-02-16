@@ -72,12 +72,10 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
     "myCalDoc");
     DocumentReference eventDocRef = new DocumentReference(context.getDatabase(), "inbox",
         "Event1");
-    XWikiDocument eventDoc = new XWikiDocument(eventDocRef);
-    expect(xwiki.getDocument(eq(eventDocRef), same(context))).andReturn(eventDoc).once();
     expect(calServiceMock.getEventSpaceForCalendar(eq(calDocRef))).andReturn("inbox"
         ).once();
     replayAll();
-    Event theEvent = new Event(eventDocRef, context);
+    Event theEvent = new Event(eventDocRef);
     assertTrue("Expect true for Event1 in space 'inbox' if EventSpaceForCalender is"
         + " 'inbox' too.", eventsMgr.isHomeCalendar(calDocRef, theEvent));
     verifyAll();
@@ -152,9 +150,9 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
     expect(xwiki.getDocument(eq(cal1Ref), same(context))).andReturn(cal1Doc
       ).atLeastOnce();
     replayAll(mockQuery);
-    Event theEvent = new Event(Arrays.asList(eventObj), "myEventSpace", context);
+    Event theEvent = new Event(Arrays.asList(eventObj), "myEventSpace");
     assertEquals(new NavigationDetails(theEvent.getEventDate(), 25),
-        eventsMgr.getNavigationDetails(theEvent , theCal));
+        eventsMgr.getNavigationDetails(theEvent, theCal));
     verifyAll(mockQuery);
   }
 
@@ -177,7 +175,6 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
     eventObj.setStringValue("", "de");
     eventObj.setDateValue(CelementsCalendarPlugin.PROPERTY_EVENT_DATE, new Date());
     eventDoc.setXObject(0, eventObj );
-    expect(xwiki.getDocument(eq(eventDocRef), same(context))).andReturn(eventDoc).once();
     return eventObj;
   }
 

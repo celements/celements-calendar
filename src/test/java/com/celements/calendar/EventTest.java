@@ -38,6 +38,7 @@ import org.xwiki.model.reference.DocumentReference;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 
@@ -63,8 +64,8 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     eventObj.setDocumentReference(eventDocRef);
     eventObj.setStringValue("lang", "de");
     objList.add(eventObj);
-    event = new Event(objList, "TestSpace", context);
-    event.internal_setEventDoc(new XWikiDocument(eventDocRef));
+    event = new Event(objList, "TestSpace");
+    event.internal_setDocumentReference(eventDocRef);
     event.internal_setDefaultLanguage("de");
     calendar = createMock(ICalendar.class);
     event.internal_setCalendar(calendar);
@@ -78,23 +79,30 @@ public class EventTest extends AbstractBridgedComponentTestCase {
   }
 
   @Test
-  public void testGetObj_NPE() {
+  public void testGetObj_NPE() throws Exception {
     //getObjects may return null!!
-    XWikiDocument eventDoc = new XWikiDocument(new DocumentReference(context.getDatabase(
-        ), "MySpace", "MyCal"));
+    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(
+        ), "MySpace", "MyCal");
+    XWikiDocument eventDoc = new XWikiDocument(myEventDocRef);
     //getObjects may return null!!
-    replay(xwiki);
-    Event myEvent = new Event(eventDoc, context);
+    expect(xwiki.getDocument(eq(myEventDocRef), same(context))).andReturn(eventDoc
+        ).atLeastOnce();
+    replayAll();
+    Event myEvent = new Event(myEventDocRef);
     myEvent.internal_setDefaultLanguage("de");
-    verify(xwiki);
     assertNull(myEvent.getObj("de"));
+    verifyAll();
   }
 
   @Test
-  public void testGetEventDocument() {
+  public void testGetEventDocument() throws Exception {
+    expect(xwiki.getDocument(eq(eventDocRef), same(context))).andReturn(new XWikiDocument(
+        eventDocRef)).atLeastOnce();
+    replayAll();
     assertNotNull(event.getEventDocument());
     assertEquals(eventDocRef, event.getEventDocument().getDocumentReference());
     assertSame(event.getEventDocument(), event.getEventDocument());
+    verifyAll();
   }
 
   @Test
@@ -242,8 +250,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
     eventOjb.setDateValue("eventDate", sdf.parse("27/04/2009 12:30:00"));
     eventOjb.setDateValue("eventDate_end", sdf.parse("28/04/2009 15:30:00"));
-    String displayPart = event.internalDisplayField("date-date_end", false,
-        context);
+    String displayPart = event.internalDisplayField("date-date_end", false);
     assertEquals("27.04.2009 - 28.04.2009", displayPart);
   }
 
@@ -421,8 +428,8 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     expect(calendar.getDetailviewFields()).andStubReturn(fieldList);
     expect(calendar.getOverviewFields()).andStubReturn(overviewFieldList);
     replay(calendar);
-    String displayTimePart = event.getDisplayPart("time", true, context);
-    String displayTimeEndPart = event.getDisplayPart("time_end", true, context);
+    String displayTimePart = event.getDisplayPart("time", true);
+    String displayTimeEndPart = event.getDisplayPart("time_end", true);
     verify(calendar);
     assertEquals("Expecting empty String for optional time (00:00)",
         "", displayTimePart);
@@ -451,10 +458,8 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     expect(calendar.getDetailviewFields()).andStubReturn(fieldList);
     expect(calendar.getOverviewFields()).andStubReturn(overviewFieldList);
     replay(calendar);
-    String displayTimePart = event.internalDisplayField("time.", false,
-        context);
-    String displayTimeEndPart = event.internalDisplayField("time_end.", false,
-        context);
+    String displayTimePart = event.internalDisplayField("time.", false);
+    String displayTimeEndPart = event.internalDisplayField("time_end.", false);
     verify(calendar);
     assertEquals("Expecting empty String for optional time (00:00)",
         "", displayTimePart);
@@ -471,8 +476,8 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     fieldList.add("location_rte");
     expect(calendar.getDetailviewFields()).andStubReturn(fieldList);
     replay(calendar);
-    assertEquals("time_end.", event.getDetailConfigForField("time_end", context));
-    assertEquals("time.", event.getDetailConfigForField("time", context));
+    assertEquals("time_end.", event.getDetailConfigForField("time_end"));
+    assertEquals("time.", event.getDetailConfigForField("time"));
     verify(calendar);
   }
   
@@ -491,15 +496,9 @@ public class EventTest extends AbstractBridgedComponentTestCase {
         "myEventSpace", "Event1");
     DocumentReference eventDoc2Ref = new DocumentReference(context.getDatabase(),
         "myEventSpace", "Event1");
-    XWikiDocument eventDoc = new XWikiDocument(eventDocRef);
-    expect(xwiki.getDocument(same(eventDocRef), same(context))).andReturn(eventDoc
-        ).once();
-    XWikiDocument eventDoc2 = new XWikiDocument(eventDoc2Ref);
-    expect(xwiki.getDocument(same(eventDoc2Ref), same(context))).andReturn(eventDoc2
-        ).once();
     replayAll();
-    Event theEvent = new Event(eventDocRef, context);
-    assertTrue(theEvent.equals(new Event(eventDoc2Ref, context)));
+    Event theEvent = new Event(eventDocRef);
+    assertTrue(theEvent.equals(new Event(eventDoc2Ref)));
     verifyAll();
   }
 
@@ -509,15 +508,9 @@ public class EventTest extends AbstractBridgedComponentTestCase {
         "myEventSpace", "Event1");
     DocumentReference eventDoc2Ref = new DocumentReference(context.getDatabase(),
         "myEventSpace", "Event1");
-    XWikiDocument eventDoc = new XWikiDocument(eventDocRef);
-    expect(xwiki.getDocument(same(eventDocRef), same(context))).andReturn(eventDoc
-        ).once();
-    XWikiDocument eventDoc2 = new XWikiDocument(eventDoc2Ref);
-    expect(xwiki.getDocument(same(eventDoc2Ref), same(context))).andReturn(eventDoc2
-        ).once();
     replayAll();
-    Event theEvent = new Event(eventDocRef, context);
-    assertEquals(0, Arrays.asList(theEvent).indexOf(new Event(eventDoc2Ref, context)));
+    Event theEvent = new Event(eventDocRef);
+    assertEquals(0, Arrays.asList(theEvent).indexOf(new Event(eventDoc2Ref)));
     verifyAll();
   }
 

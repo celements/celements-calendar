@@ -10,6 +10,17 @@ import com.xpn.xwiki.doc.XWikiDocument;
 
 public interface ICalendarUtils {
 
+  /**
+   * 
+   * @param calSpace
+   * @param context
+   * @return
+   * @throws XWikiException
+   * 
+   * @Deprecated instead use calendar service call for
+   *             DocumentReference getCalendarDocRefByCalendarSpace(String)
+   */
+  @Deprecated
   public XWikiDocument getCalendarPageByCalendarSpace(String calSpace,
       XWikiContext context) throws XWikiException;
 

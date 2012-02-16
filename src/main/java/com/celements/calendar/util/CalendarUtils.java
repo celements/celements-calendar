@@ -35,7 +35,8 @@ import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 
 public class CalendarUtils implements ICalendarUtils {
-  private static final Log mLogger = LogFactory.getFactory(
+
+  private static final Log LOGGER = LogFactory.getFactory(
       ).getInstance(CalendarUtils.class);
   
   private static ICalendarUtils utilsInstance;
@@ -52,6 +53,7 @@ public class CalendarUtils implements ICalendarUtils {
   /* (non-Javadoc)
    * @see com.celements.calendar.util.ICalendarUtils#getCalendarPageByCalendarSpace(java.lang.String, com.xpn.xwiki.XWikiContext)
    */
+  @Deprecated
   public XWikiDocument getCalendarPageByCalendarSpace(String calSpace,
       XWikiContext context) throws XWikiException{
     String hql = ", BaseObject as obj, StringProperty bspace ";
@@ -83,7 +85,7 @@ public class CalendarUtils implements ICalendarUtils {
         hql += "and obj.className='Classes.CalendarConfigClass' ";
         hql += "and obj.id = str.id.id and str.id.name = 'subscribe_to' ";
         hql += "and subto = '" + cal.getFullName() + "'";
-        mLogger.debug(hql);
+        LOGGER.debug(hql);
         subsCals = context.getWiki().getStore().searchDocumentsNames(hql, context);
       }
     }
@@ -147,7 +149,7 @@ public class CalendarUtils implements ICalendarUtils {
       return getCalendarByCalDoc(context.getWiki().getDocument(
           calDocFullName, context), isArchive, context);
     } catch (XWikiException e) {
-      mLogger.error("connot load calender doc", e);
+      LOGGER.error("connot load calender doc", e);
       return null;
     }
   }

@@ -48,8 +48,7 @@ public class EventsManager implements IEventManager {
   @Requirement("local")
   private EntityReferenceSerializer<String> refLocalSerializer;
 
-  @Requirement("default")
-  private EntityReferenceSerializer<String> refDefaultSerializer;
+  @Requirement("default") EntityReferenceSerializer<String> refDefaultSerializer;
 
   @Requirement
   EntityReferenceResolver<String> stringRefResolver;
@@ -137,6 +136,12 @@ public class EventsManager implements IEventManager {
 
   public long countEvents(DocumentReference calDocRef, boolean isArchive, Date startDate
       ) {
+    String cacheKey = "EventsManager.countEvents|" + refDefaultSerializer.serialize(
+        calDocRef) + "|" + isArchive + "|" + startDate.getTime();
+    Object cachedCount = execution.getContext().getProperty(cacheKey);
+    if (cachedCount != null) {
+      return (Long) cachedCount;
+    }
     List<Object> eventCount = null;
     try {
       XWikiDocument calDoc = getContext().getWiki().getDocument(calDocRef, getContext());
@@ -151,7 +156,9 @@ public class EventsManager implements IEventManager {
     if((eventCount != null) && (eventCount.size() > 0)) {
       mLogger.debug("Count resulted in " + eventCount.get(0) + " which is of class " +
           eventCount.get(0).getClass());
-      return (Long)eventCount.get(0);
+      Long countValue = (Long)eventCount.get(0);
+      execution.getContext().setProperty(cacheKey, countValue);
+      return countValue;
     }
     return 0;
   }

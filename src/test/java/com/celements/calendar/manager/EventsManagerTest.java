@@ -13,11 +13,11 @@ import org.apache.velocity.VelocityContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.context.Execution;
-import org.xwiki.context.ExecutionContext;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.EntityReferenceResolver;
+import org.xwiki.model.reference.EntityReferenceSerializer;
 import org.xwiki.query.Query;
 import org.xwiki.query.QueryManager;
 
@@ -32,6 +32,7 @@ import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.store.XWikiStoreInterface;
+import com.xpn.xwiki.web.Utils;
 
 public class EventsManagerTest extends AbstractBridgedComponentTestCase {
 
@@ -39,27 +40,25 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
   private EventsManager eventsMgr;
   private XWiki xwiki;
   private XWikiStoreInterface mockStore;
-  private Execution executionMock;
   private ICalendarService calServiceMock;
   private QueryManager queryManagerMock;
   private EntityReferenceResolver<String> stringRefResolverMock;
+  private EntityReferenceSerializer<String> refDefaultSerializerMock;
 
   @SuppressWarnings("unchecked")
   @Before
   public void setUp_GetEventsCommandTest() throws Exception {
     context = getContext();
     eventsMgr = new EventsManager();
-    executionMock = createMock(Execution.class);
-    eventsMgr.execution = executionMock;
-    ExecutionContext execContext = new ExecutionContext();
-    execContext.setProperty("xwikicontext", context);
-    expect(executionMock.getContext()).andReturn(execContext).anyTimes();
+    eventsMgr.execution = Utils.getComponent(Execution.class);
     calServiceMock = createMock(ICalendarService.class);
     eventsMgr.calService = calServiceMock;
     queryManagerMock = createMock(QueryManager.class);
     eventsMgr.queryManager = queryManagerMock;
     stringRefResolverMock = createMock(EntityReferenceResolver.class);
     eventsMgr.stringRefResolver = stringRefResolverMock;
+    refDefaultSerializerMock = createMock(EntityReferenceSerializer.class);
+    eventsMgr.refDefaultSerializer = refDefaultSerializerMock;
     xwiki = createMock(XWiki.class);
     context.setWiki(xwiki);
     mockStore = createMock(XWikiStoreInterface.class);
@@ -82,11 +81,13 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
   }
 
   @Test
-  public void testCountEvents() throws Exception {
+  public void testCountEvents_emptyList() throws Exception {
     VelocityContext vcontext = new VelocityContext();
     context.put("vcontext", vcontext);
     DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
         "myCalDoc");
+    expect(refDefaultSerializerMock.serialize(eq(calDocRef))).andReturn(
+        "mySpace.myCalDoc");
     XWikiDocument calDoc = new XWikiDocument(calDocRef);
     List<Object> resultList = Collections.emptyList();
     Query queryMock = createStrictMock(Query.class);
@@ -97,8 +98,27 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
     expect(xwiki.getDocument(eq(calDocRef), same(context))).andReturn(calDoc
         ).atLeastOnce();
     replayAll(queryMock);
-    assertNotNull(eventsMgr.countEvents(calDoc, false, new Date()));
+    long countEvent = eventsMgr.countEvents(calDoc, false, new Date());
+    assertNotNull(countEvent);
+    assertEquals(0L, countEvent);
     verifyAll(queryMock);
+  }
+
+  @Test
+  public void testCountEvents_checkCache() throws Exception {
+    VelocityContext vcontext = new VelocityContext();
+    context.put("vcontext", vcontext);
+    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
+        "myCalDoc");
+    expect(refDefaultSerializerMock.serialize(eq(calDocRef))).andReturn(
+        "mySpace.myCalDoc");
+    Date startDate = new Date();
+    String cacheKey = "EventsManager.countEvents|" + "mySpace.myCalDoc" + "|false|"
+      + startDate.getTime();
+    eventsMgr.execution.getContext().setProperty(cacheKey, 12345L);
+    replayAll();
+    assertEquals(12345L, eventsMgr.countEvents(calDocRef, false, startDate));
+    verifyAll();
   }
 
   @Test
@@ -179,14 +199,14 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
   }
 
   private void replayAll(Object ... mocks) {
-    replay(xwiki, mockStore, executionMock, calServiceMock, queryManagerMock,
-        stringRefResolverMock);
+    replay(xwiki, mockStore, calServiceMock, queryManagerMock,
+        stringRefResolverMock, refDefaultSerializerMock);
     replay(mocks);
   }
 
   private void verifyAll(Object ... mocks) {
-    verify(xwiki, mockStore, executionMock, calServiceMock, queryManagerMock,
-        stringRefResolverMock);
+    verify(xwiki, mockStore, calServiceMock, queryManagerMock,
+        stringRefResolverMock, refDefaultSerializerMock);
     verify(mocks);
   }
 

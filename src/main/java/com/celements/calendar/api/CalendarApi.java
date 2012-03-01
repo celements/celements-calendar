@@ -67,11 +67,11 @@ public class CalendarApi extends Api {
   }
 
   public List<String> getCalOverviewPropertyNames() {
-    return calendar.getCalOverviewPropertyNames(context);
+    return calendar.getCalOverviewPropertyNames();
   }
 
   public List<String> getEventPropertyNames() {
-    return calendar.getEventPropertyNames(context);
+    return calendar.getEventPropertyNames();
   }
 
   public boolean hasDetailLink() {

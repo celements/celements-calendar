@@ -72,6 +72,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
   }
 
   @Test
+  @Deprecated
   public void testEvent_NPE() {
     //getObjects may return null!!
     Event myEvent = new Event(null, "tipps", context);
@@ -106,6 +107,36 @@ public class EventTest extends AbstractBridgedComponentTestCase {
   }
 
   @Test
+  public void testNewEvent_docRef() throws XWikiException {
+    DocumentReference docRef = new DocumentReference(context.getDatabase(),
+        "myEventSpace", "myEvent");
+    XWikiDocument eventDoc = new XWikiDocument(docRef);
+    expect(xwiki.getDocument(eq(docRef), same(context))).andReturn(eventDoc).anyTimes();
+    replayAll();
+    Event myEvent = new Event(docRef);
+    assertNotNull(myEvent.getEventObjMap());
+    assertNotNull(myEvent.getDocumentReference());
+    assertEquals(docRef, myEvent.getDocumentReference());
+    verifyAll();
+  }
+
+  @Test
+  @Deprecated
+  public void testNewEvent_docRef_context() throws XWikiException {
+    DocumentReference docRef = new DocumentReference(context.getDatabase(),
+        "myEventSpace", "myEvent");
+    XWikiDocument eventDoc = new XWikiDocument(docRef);
+    expect(xwiki.getDocument(eq(docRef), same(context))).andReturn(eventDoc).anyTimes();
+    replayAll();
+    Event myEvent = new Event(docRef, context);
+    assertNotNull(myEvent.getEventObjMap());
+    assertNotNull(myEvent.getDocName());
+    assertEquals("", myEvent.getDocName());
+    verifyAll();
+  }
+
+  @Test
+  @Deprecated
   public void testGetEventDocument_badInit_noObjects() {
     Event myEvent = new Event(null, "tipps", context);
     assertNull(myEvent.getEventDocument());
@@ -121,6 +152,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
   }
 
   @Test
+  @Deprecated
   public void testgetDocumentReference_NPE() {
     Event myEvent = new Event(null, "tipps", context);
     assertNotNull(myEvent.getEventObjMap());

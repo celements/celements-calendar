@@ -67,6 +67,25 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
   }
 
   @Test
+  @Deprecated
+  public void testNewCalendar_deprecated_constructor() {
+    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
+        "myCalDoc");
+    XWikiDocument calDoc = new XWikiDocument(calDocRef);
+    cal = new Calendar(calDoc, isArchiv, context);
+    assertEquals(calDocRef, cal.getDocumentReference());
+  }
+
+  @Test
+  public void testNewCalendar() {
+    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
+        "myCalDoc");
+    cal = new Calendar(calDocRef, isArchiv);
+    assertEquals(calDocRef, cal.getDocumentReference());
+    assertEquals(isArchiv, cal.isArchive());
+  }
+
+  @Test
   public void testGetAllEvents_informationHidingSecurity() throws XWikiException {
     List<EventApi> list = Collections.emptyList();
     expect(eventMgrMock.getEvents(same(cal), eq(0), eq(0))).andReturn(list).once();
@@ -150,9 +169,13 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     assertEquals("Expecting to get the full eventlist", eventList, events);
   }
 
+  @Test
   public void testGetEvents_minusOneStart() throws XWikiException {
     ArrayList<EventApi> eventList = new ArrayList<EventApi>();
     IEvent event = createMock(IEvent.class);
+    event.setLanguage(eq("de"));
+    expectLastCall().once();
+    replay(event);
     eventList.add(new EventApi(event, context));
     DocumentReference cal2DocRef = new DocumentReference(context.getDatabase(),
         "MyCalDoc2Space", "MyCal2Doc");
@@ -160,7 +183,7 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     cal2.setCalendarUtils(calUtils);
     cal2.inject_getEventCmd(eventMgrMock);
     expect(eventMgrMock.getEvents(same(cal2), eq(0), eq(1))).andReturn(eventList);
-    replayAll(event);
+    replayAll();
     int start = -1;
     int nb = 1;
     List<EventApi> events = cal2.getEvents(start, nb);
@@ -204,8 +227,7 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
   public void testGetDocumentReference() {
     DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
         "myCalDoc");
-    XWikiDocument calDoc = new XWikiDocument(calDocRef);
-    cal = new Calendar(calDoc, isArchiv, context);
+    cal = new Calendar(calDocRef, isArchiv);
     assertEquals(calDocRef, cal.getDocumentReference());
   }
 

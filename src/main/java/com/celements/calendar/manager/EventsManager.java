@@ -38,7 +38,7 @@ public class EventsManager implements IEventManager {
   @Requirement
   Execution execution;
 
-  private static final Log mLogger = LogFactory.getFactory().getInstance(
+  private static final Log LOGGER = LogFactory.getFactory().getInstance(
       EventsManager.class);
 
   @Requirement
@@ -69,9 +69,9 @@ public class EventsManager implements IEventManager {
         eventApiList.add(new EventApi(theEvent, cal.getLanguage(), getContext()));
       }
     } catch (XWikiException e) {
-      mLogger.error(e);
+      LOGGER.error(e);
     } catch (QueryException exp) {
-      mLogger.error("Failed to exequte getEvents query.", exp);
+      LOGGER.error("Failed to exequte getEvents query.", exp);
     }
     return eventApiList;
   }
@@ -81,14 +81,14 @@ public class EventsManager implements IEventManager {
     List<Event> eventList = new ArrayList<Event>();
     List<String> eventDocs = queryManager.createQuery(getQuery(calDoc, isArchive,
         startDate, false), Query.HQL).setOffset(start).setLimit(nb).execute();
-    mLogger.debug(eventDocs.size() + " events found. " + eventDocs);
+    LOGGER.debug(eventDocs.size() + " events found. " + eventDocs);
     for (String eventDocName : eventDocs) {
-      Event theEvent = new Event(getDocRefFromFullName(eventDocName), getContext());
+      Event theEvent = new Event(getDocRefFromFullName(eventDocName));
       if(checkEventSubscription(calDoc.getDocumentReference(), theEvent)){
-        mLogger.debug("getEvents: add to result " + eventDocName);
+        LOGGER.debug("getEvents: add to result " + eventDocName);
         eventList.add(theEvent);
       } else {
-        mLogger.debug("getEvents: skipp " + eventDocName);
+        LOGGER.debug("getEvents: skipp " + eventDocName);
       }
     }
     return eventList;
@@ -98,7 +98,7 @@ public class EventsManager implements IEventManager {
     DocumentReference eventRef = new DocumentReference(stringRefResolver.resolve(
         eventDocName, EntityType.DOCUMENT));
     eventRef.setWikiReference(new WikiReference(getContext().getDatabase()));
-    mLogger.debug("getDocRefFromFullName: for [" + eventDocName + "] got reference ["
+    LOGGER.debug("getDocRefFromFullName: for [" + eventDocName + "] got reference ["
         + eventRef + "].");
     return eventRef;
   }
@@ -148,13 +148,13 @@ public class EventsManager implements IEventManager {
       eventCount = queryManager.createQuery(getQuery(calDoc, isArchive, startDate, true),
           Query.HQL).execute();
     } catch (XWikiException e) {
-      mLogger.error("Exception while counting number of events for calendar '" + calDocRef
+      LOGGER.error("Exception while counting number of events for calendar '" + calDocRef
           + "'", e);
     } catch (QueryException exp) {
-      mLogger.error("Failed to exequte countEvents.", exp);
+      LOGGER.error("Failed to exequte countEvents.", exp);
     }
     if((eventCount != null) && (eventCount.size() > 0)) {
-      mLogger.debug("Count resulted in " + eventCount.get(0) + " which is of class " +
+      LOGGER.debug("Count resulted in " + eventCount.get(0) + " which is of class " +
           eventCount.get(0).getClass());
       Long countValue = (Long)eventCount.get(0);
       execution.getContext().setProperty(cacheKey, countValue);
@@ -192,7 +192,7 @@ public class EventsManager implements IEventManager {
     hql += calService.getAllowedSpacesHQL(calDoc);
     hql += " order by ec.eventDate " + sortOrder + ", ec.eventDate_end " + sortOrder;
     hql += ", ec.l_title " + sortOrder;
-    mLogger.debug(hql);
+    LOGGER.debug(hql);
     
     return hql;
   }
@@ -212,7 +212,7 @@ public class EventsManager implements IEventManager {
     cal.set(java.util.Calendar.MINUTE, 0);
     cal.set(java.util.Calendar.SECOND, 0);
     Date dateMidnight = cal.getTime();
-    mLogger.debug("date is: " + dateMidnight);
+    LOGGER.debug("date is: " + dateMidnight);
     return dateMidnight;
   }
 
@@ -227,7 +227,7 @@ public class EventsManager implements IEventManager {
     String eventSpaceForCal = calService.getEventSpaceForCalendar(calDocRef);
     boolean isHomeCal = theEvent.getDocumentReference().getLastSpaceReference().getName(
         ).equals(eventSpaceForCal);
-    mLogger.trace("isHomeCalendar: for [" + theEvent.getDocumentReference()
+    LOGGER.trace("isHomeCalendar: for [" + theEvent.getDocumentReference()
         + "] check on calDocRef [" + calDocRef + "] with space [" + eventSpaceForCal
         + "] returning " + isHomeCal);
     return isHomeCal;
@@ -237,7 +237,7 @@ public class EventsManager implements IEventManager {
       ) throws XWikiException {
     BaseObject obj = getSubscriptionObject(calDocRef, theEvent);
 
-    ICalendar calendar = theEvent.getCalendar(getContext());
+    ICalendar calendar = theEvent.getCalendar();
     BaseObject calObj = null;
     if ((calendar != null) && (calendar.getCalDoc() != null)){
       calObj = calendar.getCalDoc().getXObject(getCalenderConfigClassRef());
@@ -247,7 +247,7 @@ public class EventsManager implements IEventManager {
         && (calObj != null) && (calObj.getIntValue("is_subscribable") == 1)){
       isSubscribed = true;
     }
-    mLogger.trace("isEventSubscribed: for [" + theEvent.getDocumentReference()
+    LOGGER.trace("isEventSubscribed: for [" + theEvent.getDocumentReference()
         + "] returning " + isSubscribed);
     return isSubscribed;
   }
@@ -278,8 +278,13 @@ public class EventsManager implements IEventManager {
   
   public NavigationDetails getNavigationDetails(Event theEvent, Calendar cal
       ) throws XWikiException {
-    mLogger.debug("getNavigationDetails for [" + theEvent + "] with date ["
+    LOGGER.debug("getNavigationDetails for [" + theEvent + "] with date ["
         + theEvent.getEventDate() + "]");
+    if (theEvent.getEventDate() == null) {
+      LOGGER.error("getNavigationDetails failed because eventDate is null for ["
+          + theEvent.getDocumentReference() + "].");
+      return null;
+    }
     try {
       NavigationDetails navDetail = new NavigationDetails(theEvent.getEventDate(), 0);
       int nb = 10;
@@ -297,11 +302,11 @@ public class EventsManager implements IEventManager {
         nb = nb * 2;
       } while (notFound && hasMore);
       if (!notFound) {
-        mLogger.debug("getNavigationDetails: returning " + navDetail);
+        LOGGER.debug("getNavigationDetails: returning " + navDetail);
         return navDetail;
       }
     } catch (QueryException qExp) {
-      mLogger.error("getNavigationDetails: Failed to get events.", qExp);
+      LOGGER.error("getNavigationDetails: Failed to get events.", qExp);
     }
     return null;
   }

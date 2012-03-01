@@ -81,7 +81,8 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
   }
 
   @Test
-  public void testCountEvents_emptyList() throws Exception {
+  @Deprecated
+  public void testCountEvents_emptyList_deprecatedCall() throws Exception {
     VelocityContext vcontext = new VelocityContext();
     context.put("vcontext", vcontext);
     DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
@@ -105,6 +106,30 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
   }
 
   @Test
+  public void testCountEvents_emptyList() throws Exception {
+    VelocityContext vcontext = new VelocityContext();
+    context.put("vcontext", vcontext);
+    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
+        "myCalDoc");
+    expect(refDefaultSerializerMock.serialize(eq(calDocRef))).andReturn(
+        "mySpace.myCalDoc");
+    XWikiDocument calDoc = new XWikiDocument(calDocRef);
+    List<Object> resultList = Collections.emptyList();
+    Query queryMock = createStrictMock(Query.class);
+    expect(queryManagerMock.createQuery(isA(String.class), eq(Query.HQL))).andReturn(
+        queryMock).once();
+    expect(queryMock.execute()).andReturn(resultList).once();
+    expect(calServiceMock.getAllowedSpacesHQL(same(calDoc))).andReturn("").once();
+    expect(xwiki.getDocument(eq(calDocRef), same(context))).andReturn(calDoc
+        ).atLeastOnce();
+    replayAll(queryMock);
+    long countEvent = eventsMgr.countEvents(calDocRef, false, new Date());
+    assertNotNull(countEvent);
+    assertEquals(0L, countEvent);
+    verifyAll(queryMock);
+  }
+
+  @Test
   public void testCountEvents_checkCache() throws Exception {
     VelocityContext vcontext = new VelocityContext();
     context.put("vcontext", vcontext);
@@ -122,6 +147,26 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
   }
 
   @Test
+  public void testGetNavigationDetails_Null_StartDate() throws Exception {
+    VelocityContext vcontext = new VelocityContext();
+    context.put("vcontext", vcontext);
+    DocumentReference cal1Ref = new DocumentReference(context.getDatabase(), "mySpace",
+        "cal1");
+    Calendar theCal = new Calendar(cal1Ref, false);
+    Event theEvent = createMock(Event.class);
+    expect(theEvent.getEventDate()).andReturn(null).atLeastOnce();
+    DocumentReference eventRef = new DocumentReference(context.getDatabase(),
+        "myEventSpace", "Event1");
+    expect(theEvent.getDocumentReference()).andReturn(eventRef).anyTimes();
+    XWikiDocument cal1Doc = new XWikiDocument(cal1Ref);
+    expect(xwiki.getDocument(eq(cal1Ref), same(context))).andReturn(cal1Doc
+      ).anyTimes();
+    replayAll(theEvent);
+    assertNull(eventsMgr.getNavigationDetails(theEvent, theCal));
+    verifyAll(theEvent);
+  }
+
+  @Test
   public void testGetNavigationDetails() throws Exception {
     VelocityContext vcontext = new VelocityContext();
     context.put("vcontext", vcontext);
@@ -136,7 +181,7 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
     cal1Doc.setXObject(0, cal1ConfigObj);
     cal1ConfigObj.setStringValue(CelementsCalendarPlugin.PROPERTY_CALENDAR_SPACE,
         "myEventSpace");
-    Calendar theCal = new Calendar(cal1Doc, false, context);
+    Calendar theCal = new Calendar(cal1Ref, false);
     expect(xwiki.getWebPreference(eq("default_language"), eq("myEventSpace"), eq(""),
         same(context))).andReturn("de").anyTimes();
     BaseObject eventObj = createMockEventDoc("Event1");

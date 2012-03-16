@@ -107,21 +107,39 @@ public class Calendar implements ICalendar {
   /* (non-Javadoc)
    * @see com.celements.calendar.ICalendar#getAllEvents()
    */
+  @Deprecated
   public List<EventApi> getAllEvents(){
     return new ArrayList<EventApi>(getEvents(0, 0));
   }
   
   /* (non-Javadoc)
+   * @see com.celements.calendar.ICalendar#getAllEvents()
+   */
+  public List<IEvent> getAllEventsInternal() {
+    return getEventsInternal(0, 0);
+  }
+  
+  /* (non-Javadoc)
    * @see com.celements.calendar.ICalendar#getEvents(int, int)
    */
+  @Deprecated
   public List<EventApi> getEvents(int start, int nb){
     if(start < 0){ start = 0; }
     if(nb < 0) { nb = 0; }
     List<EventApi> eventList = getEventMgr().getEvents(this, start, nb);
     return eventList;
   }
-  //TODO gesamtnummer und so wie behandeln?
   
+  /* (non-Javadoc)
+   * @see com.celements.calendar.ICalendar#getEvents(int, int)
+   */
+  public List<IEvent> getEventsInternal(int start, int nb) {
+    if(start < 0){ start = 0; }
+    if(nb < 0) { nb = 0; }
+    List<IEvent> eventList = getEventMgr().getEventsInternal(this, start, nb);
+    return eventList;
+  }
+
   /* (non-Javadoc)
    * @see com.celements.calendar.ICalendar#getNrOfEvents()
    */

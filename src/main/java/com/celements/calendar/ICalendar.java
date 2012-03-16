@@ -30,9 +30,38 @@ import com.xpn.xwiki.doc.XWikiDocument;
 
 public interface ICalendar {
 
+  /**
+   * getAllEvents
+   * 
+   * @return
+   * 
+   * @deprecated instead use getAllEvents from CalendarApi or getAllEventsInternal
+   *             getAllEvents returning EventsApi will be moved to CalendarApi class.
+   */
+  @Deprecated
   public List<EventApi> getAllEvents();
 
+  public List<IEvent> getAllEventsInternal();
+
+  /**
+   * getEvents
+   * 
+   * @return
+   * 
+   * @deprecated instead use getAllEvents from CalendarApi or getEventsInternal
+   *             getEvents returning EventsApi will be moved to CalendarApi class.
+   */
+  @Deprecated
   public List<EventApi> getEvents(int start, int nb);
+
+  /**
+   * use internal only. Do not return IEvent objects to the velocity
+   * 
+   * @param start
+   * @param nb
+   * @return
+   */
+  public List<IEvent> getEventsInternal(int start, int nb);
 
   public long getNrOfEvents();
 

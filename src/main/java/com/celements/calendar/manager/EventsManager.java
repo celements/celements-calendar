@@ -2,6 +2,7 @@ package com.celements.calendar.manager;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -64,7 +65,7 @@ public class EventsManager implements IEventManager {
   public List<EventApi> getEvents(ICalendar cal, int start, int nb) {
     List<EventApi> eventApiList = new ArrayList<EventApi>();
     try {
-      for (Event theEvent : getEvents_internal(cal.getCalDoc(), start, nb,
+      for (IEvent theEvent : getEvents_internal(cal.getCalDoc(), start, nb,
           cal.isArchive(), cal.getStartDate())) {
         eventApiList.add(new EventApi(theEvent, cal.getLanguage(), getContext()));
       }
@@ -76,9 +77,21 @@ public class EventsManager implements IEventManager {
     return eventApiList;
   }
 
-  private List<Event> getEvents_internal(XWikiDocument calDoc, int start, int nb,
+  public List<IEvent> getEventsInternal(ICalendar cal, int start, int nb) {
+    try {
+      return getEvents_internal(cal.getCalDoc(), start, nb, cal.isArchive(),
+          cal.getStartDate());
+    } catch (XWikiException e) {
+      LOGGER.error(e);
+    } catch (QueryException exp) {
+      LOGGER.error("Failed to exequte getEvents query.", exp);
+    }
+    return Collections.emptyList();
+  }
+
+  private List<IEvent> getEvents_internal(XWikiDocument calDoc, int start, int nb,
       boolean isArchive, Date startDate) throws QueryException, XWikiException {
-    List<Event> eventList = new ArrayList<Event>();
+    List<IEvent> eventList = new ArrayList<IEvent>();
     List<String> eventDocs = queryManager.createQuery(getQuery(calDoc, isArchive,
         startDate, false), Query.HQL).setOffset(start).setLimit(nb).execute();
     LOGGER.debug(eventDocs.size() + " events found. " + eventDocs);
@@ -289,7 +302,7 @@ public class EventsManager implements IEventManager {
       NavigationDetails navDetail = new NavigationDetails(theEvent.getEventDate(), 0);
       int nb = 10;
       int eventIndex, start = 0;
-      List<Event> events;
+      List<IEvent> events;
       boolean hasMore, notFound;
       do {
         events = getEvents_internal(cal.getCalDoc(), start, nb, false,

@@ -19,6 +19,8 @@ public interface IEventManager {
 
   public List<EventApi> getEvents(ICalendar cal, int start, int nb);
 
+  public List<IEvent> getEventsInternal(ICalendar cal, int start, int nb);
+
   public long countEvents(DocumentReference calDocRef, boolean isArchive);
 
   /**

@@ -197,6 +197,8 @@ public class EventsManager implements IEventManager {
     hql += " from XWikiDocument doc, BaseObject as obj, ";
     hql += CelementsCalendarPlugin.CLASS_EVENT + " as ec ";
     hql += "where doc.fullName = obj.name and doc.translation = 0 and ec.id.id=obj.id ";
+    hql += " and obj.className = '" + CelementsCalendarPlugin.CLASS_EVENT_SPACE + "."
+            + CelementsCalendarPlugin.CLASS_EVENT_DOC + "'";
     VelocityContext vcontext = ((VelocityContext) getContext().get("vcontext"));
     String defaultLanguage = (String)vcontext.get("default_language");
     hql += "and ec.lang='" + defaultLanguage + "' ";

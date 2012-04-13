@@ -52,8 +52,13 @@ $xwiki.includeForm('celements2web:Macros.includeRTELanguageSelect', false)
   #foreach($prop in ${event.getEditableProperties().get(0)})
     #set($dispProp = '')
     #set($dispProp = $doc.display("$!prop", 'edit', $obj))
+    #set($dispProp = ${dispProp.replaceAll('\{/?pre\}','')})
+    #set($isRTE = $!prop.endsWith('_rte'))
+    #if($isRTE && $dispProp.startsWith('<textarea '))
+      #set($dispProp = ${dispProp.replaceAll('<textarea ','<textarea class="mceEditor"')})
+    #end
     <div class="editblock cel_cal_ev_$!prop">$adminMsg.get("cel_cal_ev_$!prop")
-      ${dispProp.replaceAll('\{/?pre\}','')}
+      $dispProp
     </div>
   #end
   </div>

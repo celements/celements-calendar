@@ -53,8 +53,9 @@ $xwiki.includeForm('celements2web:Macros.includeRTELanguageSelect', false)
     #set($dispProp = '')
     #set($dispProp = $doc.display("$!prop", 'edit', $obj))
     #set($dispProp = ${dispProp.replaceAll('\{/?pre\}','')})
-    #set($isRTE = $!prop.endsWith('_rte'))
-    #if($isRTE && $dispProp.startsWith('<textarea '))
+    #set($isRTE = ($!prop.endsWith('_rte') || ($!prop.equals('description')) || $!prop.endsWith('_description')))
+    <!-- isRTE : $isRTE -->
+    #if($isRTE && $dispProp.trim().startsWith('<textarea '))
       #set($dispProp = ${dispProp.replaceAll('<textarea ','<textarea class="mceEditor"')})
     #end
     <div class="editblock cel_cal_ev_$!prop">$adminMsg.get("cel_cal_ev_$!prop")
@@ -82,6 +83,12 @@ $xwiki.includeForm('celements2web:Macros.includeRTELanguageSelect', false)
   #foreach($prop in ${event.getEditableProperties().get(1)})
     #set($dispProp = '')
     #set($dispProp = $doc.display("$!prop", 'edit', $obj))
+    #set($dispProp = ${dispProp.replaceAll('\{/?pre\}','')})
+    #set($isRTE = ($!prop.endsWith('_rte') || ($!prop.equals('description')) || $!prop.endsWith('_description')))
+    <!-- isRTE : $isRTE -->
+    #if($isRTE && $dispProp.trim().startsWith('<textarea '))
+      #set($dispProp = ${dispProp.replaceAll('<textarea ','<textarea class="mceEditor"')})
+    #end
     <div class="editblock cel_cal_ev_$!prop">$adminMsg.get("cel_cal_ev_$!prop")
       ${dispProp.replaceAll('\{/?pre\}','')}
     </div>

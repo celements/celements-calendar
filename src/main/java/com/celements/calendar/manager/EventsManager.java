@@ -54,7 +54,8 @@ public class EventsManager implements IEventManager {
   @Requirement
   EntityReferenceResolver<String> stringRefResolver;
 
-  @Requirement QueryManager queryManager;
+  @Requirement
+  QueryManager queryManager;
 
   private XWikiContext getContext() {
     return (XWikiContext)execution.getContext().getProperty("xwikicontext");

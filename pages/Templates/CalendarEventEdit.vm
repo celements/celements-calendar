@@ -47,6 +47,7 @@ $xwiki.includeForm('celements2web:Macros.includeRTELanguageSelect', false)
   <input type="hidden" name="xredirect" value="$!request.get('xredirect')" />
   <input type="hidden" name="eventDoc" value="$doc.getFullName()" />
   <input type="hidden" name="lang" value="$language" />
+  <input type="hidden" name="language" value="$default_language" />
   <div class="editgroup language_independent_fields">
   	$adminMsg.get("cel_cal_ev_lang_indep_fields")
   #foreach($prop in ${event.getEditableProperties().get(0)})

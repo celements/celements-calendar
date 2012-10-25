@@ -43,7 +43,7 @@ $celementsweb.addExtJSfileOnce("${xwiki.getSkinFile('celJS/editResize.js', true)
 
 $xwiki.includeForm('celements2web:Macros.includeRTELanguageSelect', false)
 
-<form id="edit" action="" method="post">
+<form id="edit" action="?" method="post">
   <input type="hidden" name="xredirect" value="$!request.get('xredirect')" />
   <input type="hidden" name="eventDoc" value="$doc.getFullName()" />
   <input type="hidden" name="lang" value="$language" />

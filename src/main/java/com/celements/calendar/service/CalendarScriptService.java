@@ -25,13 +25,17 @@ public class CalendarScriptService implements ScriptService {
       CalendarScriptService.class);
 
   @Requirement
-  Execution execution;
-
-  @Requirement
   private ICalendarService calService;
 
   @Requirement
   private IEventManager eventsMgr;
+
+  @Requirement
+  Execution execution;
+
+  private XWikiContext getContext() {
+    return (XWikiContext)execution.getContext().getProperty("xwikicontext");
+  }
 
   public String getEventSpaceForCalendar(DocumentReference calDocRef) {
     try {
@@ -76,8 +80,8 @@ public class CalendarScriptService implements ScriptService {
     return null;
   }
 
-  private XWikiContext getContext() {
-    return (XWikiContext)execution.getContext().getProperty("xwikicontext");
+  public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace) {
+    return calService.getCalendarDocRefByCalendarSpace(calSpace);
   }
 
 }

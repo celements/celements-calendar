@@ -91,6 +91,11 @@ public class CelementsCalendarPluginAPI extends Api {
     calPlugin.saveEvent(context);
   }
   
+  /**
+   * @deprecated since 2.21.0
+   *             instead use getCalendarDocRefByCalendarSpace from CalendarScriptService
+   */
+  @Deprecated
   public Document getCalendarPageByCalendarSpace(String calSpace) throws XWikiException{
     Document calDoc = null;
     XWikiDocument xCalDoc = CalendarUtils.getInstance().getCalendarPageByCalendarSpace(calSpace, context);

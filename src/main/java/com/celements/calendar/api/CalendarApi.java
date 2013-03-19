@@ -19,12 +19,14 @@
  */
 package com.celements.calendar.api;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.ICalendar;
+import com.celements.calendar.IEvent;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.api.Api;
 
@@ -43,11 +45,19 @@ public class CalendarApi extends Api {
   }
 
   public List<EventApi> getAllEvents() {
-    return calendar.getAllEvents();
+    return convertEventListToEventApiList(calendar.getAllEventsInternal());
   }
 
   public List<EventApi> getEvents(int start, int nb) {
-    return calendar.getEvents(start, nb);
+    return convertEventListToEventApiList(calendar.getEventsInternal(start, nb));
+  }
+  
+  private List<EventApi> convertEventListToEventApiList(List<IEvent> eventList) {
+    List<EventApi> eventApiList = new ArrayList<EventApi>();
+    for (IEvent event : eventList) {
+      eventApiList.add(new EventApi(event, calendar.getLanguage(), context));      
+    }
+    return eventApiList;
   }
 
   public long getNrOfEvents() {

@@ -1,5 +1,7 @@
 package com.celements.calendar.service;
 
+import java.util.Date;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xwiki.component.annotation.Component;
@@ -15,6 +17,9 @@ import com.celements.calendar.api.CalendarApi;
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.manager.NavigationDetails;
+import com.celements.calendar.search.EventSearchResult;
+import com.celements.calendar.search.IEventSearch;
+import com.celements.search.lucene.query.LuceneQueryApi;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 
@@ -32,6 +37,9 @@ public class CalendarScriptService implements ScriptService {
 
   @Requirement
   Execution execution;
+
+  @Requirement
+  IEventSearch eventSearch;
 
   private XWikiContext getContext() {
     return (XWikiContext)execution.getContext().getProperty("xwikicontext");
@@ -82,6 +90,20 @@ public class CalendarScriptService implements ScriptService {
 
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace) {
     return calService.getCalendarDocRefByCalendarSpace(calSpace);
+  }
+  
+  public EventSearchResult getEventSearchResult(LuceneQueryApi query) {
+    return eventSearch.getSearchResult(query);
+  }
+  
+  public EventSearchResult getEventSearchResultFromDate(LuceneQueryApi query, 
+      Date fromDate) {
+    return eventSearch.getSearchResultFromDate(query, fromDate);
+  }
+  
+  public EventSearchResult getEventSearchResultUpToDate(LuceneQueryApi query, 
+      Date uptoDate) {
+    return eventSearch.getSearchResultUptoDate(query, uptoDate);
   }
 
 }

@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -27,7 +28,11 @@ import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.plugin.CelementsCalendarPlugin;
+import com.celements.calendar.search.EventSearchResult;
+import com.celements.calendar.search.IEventSearch;
 import com.celements.calendar.service.ICalendarService;
+import com.celements.search.lucene.IQueryService;
+import com.celements.search.lucene.query.LuceneQueryApi;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -57,6 +62,12 @@ public class EventsManager implements IEventManager {
   @Requirement
   QueryManager queryManager;
 
+  @Requirement
+  IQueryService queryService;
+
+  @Requirement
+  IEventSearch eventSearch;
+
   private XWikiContext getContext() {
     return (XWikiContext)execution.getContext().getProperty("xwikicontext");
   }
@@ -66,7 +77,8 @@ public class EventsManager implements IEventManager {
   public List<EventApi> getEvents(ICalendar cal, int start, int nb) {
     List<EventApi> eventApiList = new ArrayList<EventApi>();
     try {
-      for (IEvent theEvent : getEvents_internal(cal.getCalDoc(), start, nb,
+      // TODO replace internalOld with internal
+      for (IEvent theEvent : getEvents_internalOld(cal.getCalDoc(), start, nb,
           cal.isArchive(), cal.getStartDate())) {
         eventApiList.add(new EventApi(theEvent, cal.getLanguage(), getContext()));
       }
@@ -80,7 +92,8 @@ public class EventsManager implements IEventManager {
 
   public List<IEvent> getEventsInternal(ICalendar cal, int start, int nb) {
     try {
-      return getEvents_internal(cal.getCalDoc(), start, nb, cal.isArchive(),
+      // TODO replace internalOld with internal
+      return getEvents_internalOld(cal.getCalDoc(), start, nb, cal.isArchive(),
           cal.getStartDate());
     } catch (XWikiException e) {
       LOGGER.error(e);
@@ -90,7 +103,37 @@ public class EventsManager implements IEventManager {
     return Collections.emptyList();
   }
 
+  // TODO should replace internalOld when working
   private List<IEvent> getEvents_internal(XWikiDocument calDoc, int start, int nb,
+      boolean isArchive, Date startDate) throws XWikiException {
+    LuceneQueryApi query = queryService.createQuery();
+    // TODO create restrictions for calcDoc and language(see getQuery())
+    EventSearchResult searchResult;
+    if (!isArchive) {
+      searchResult = eventSearch.getSearchResultFromDate(query, startDate);
+    } else {
+      searchResult = eventSearch.getSearchResultUptoDate(query, startDate);
+    }
+    List<IEvent> eventList = searchResult.getEventList(start, nb);
+    LOGGER.debug(eventList.size() + " events found.");
+    return filterEventListForSubscription(calDoc, eventList);
+  }
+  
+  private List<IEvent> filterEventListForSubscription(XWikiDocument calDoc, 
+      List<IEvent> eventList) throws XWikiException {
+    Iterator<IEvent> iter = eventList.iterator();
+    while (iter.hasNext()) {
+      IEvent event = iter.next();
+      if(!checkEventSubscription(calDoc.getDocumentReference(), event)){
+        iter.remove();
+        LOGGER.debug("filterEventListForSubscription: filtered '" + event + "'");
+      }
+    }
+    return eventList;
+  }
+
+  // TODO remove
+  private List<IEvent> getEvents_internalOld(XWikiDocument calDoc, int start, int nb,
       boolean isArchive, Date startDate) throws QueryException, XWikiException {
     List<IEvent> eventList = new ArrayList<IEvent>();
     List<String> eventDocs = queryManager.createQuery(getQuery(calDoc, isArchive,
@@ -108,6 +151,7 @@ public class EventsManager implements IEventManager {
     return eventList;
   }
 
+  // TODO remove
   private DocumentReference getDocRefFromFullName(String eventDocName) {
     DocumentReference eventRef = new DocumentReference(stringRefResolver.resolve(
         eventDocName, EntityType.DOCUMENT));
@@ -148,6 +192,7 @@ public class EventsManager implements IEventManager {
     return countEvents(calDoc.getDocumentReference(), isArchive, startDate);
   }
 
+  // TODO replace HQL with lucene search, analog to getEvents_internal()
   public long countEvents(DocumentReference calDocRef, boolean isArchive, Date startDate
       ) {
     String cacheKey = "EventsManager.countEvents|" + refDefaultSerializer.serialize(
@@ -177,7 +222,8 @@ public class EventsManager implements IEventManager {
     return 0;
   }
 
-    private String getQuery(XWikiDocument calDoc, boolean isArchive, Date startDate,
+  // TODO remove
+  private String getQuery(XWikiDocument calDoc, boolean isArchive, Date startDate,
         boolean count) throws XWikiException {
     SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     
@@ -213,6 +259,7 @@ public class EventsManager implements IEventManager {
     return hql;
   }
 
+  // TODO remove
   /**
    * getMidnightDate
    * @param startDate 
@@ -232,28 +279,28 @@ public class EventsManager implements IEventManager {
     return dateMidnight;
   }
 
-  private boolean checkEventSubscription(DocumentReference calDocRef, Event theEvent
+  private boolean checkEventSubscription(DocumentReference calDocRef, IEvent event
       ) throws XWikiException {
-    return isHomeCalendar(calDocRef, theEvent)
-        || isEventSubscribed(calDocRef, theEvent);
+    return isHomeCalendar(calDocRef, event)
+        || isEventSubscribed(calDocRef, event);
   }
 
-  boolean isHomeCalendar(DocumentReference calDocRef, Event theEvent
+  boolean isHomeCalendar(DocumentReference calDocRef, IEvent event
       ) throws XWikiException {
     String eventSpaceForCal = calService.getEventSpaceForCalendar(calDocRef);
-    boolean isHomeCal = theEvent.getDocumentReference().getLastSpaceReference().getName(
+    boolean isHomeCal = event.getDocumentReference().getLastSpaceReference().getName(
         ).equals(eventSpaceForCal);
-    LOGGER.trace("isHomeCalendar: for [" + theEvent.getDocumentReference()
+    LOGGER.trace("isHomeCalendar: for [" + event.getDocumentReference()
         + "] check on calDocRef [" + calDocRef + "] with space [" + eventSpaceForCal
         + "] returning " + isHomeCal);
     return isHomeCal;
   }
   
-  private boolean isEventSubscribed(DocumentReference calDocRef, Event theEvent
+  private boolean isEventSubscribed(DocumentReference calDocRef, IEvent event
       ) throws XWikiException {
-    BaseObject obj = getSubscriptionObject(calDocRef, theEvent);
+    BaseObject obj = getSubscriptionObject(calDocRef, event);
 
-    ICalendar calendar = theEvent.getCalendar();
+    ICalendar calendar = event.getCalendar();
     BaseObject calObj = null;
     if ((calendar != null) && (calendar.getCalDoc() != null)){
       calObj = calendar.getCalDoc().getXObject(getCalenderConfigClassRef());
@@ -263,7 +310,7 @@ public class EventsManager implements IEventManager {
         && (calObj != null) && (calObj.getIntValue("is_subscribable") == 1)){
       isSubscribed = true;
     }
-    LOGGER.trace("isEventSubscribed: for [" + theEvent.getDocumentReference()
+    LOGGER.trace("isEventSubscribed: for [" + event.getDocumentReference()
         + "] returning " + isSubscribed);
     return isSubscribed;
   }
@@ -274,7 +321,7 @@ public class EventsManager implements IEventManager {
         CelementsCalendarPlugin.CLASS_CALENDAR_DOC);
   }
 
-  private BaseObject getSubscriptionObject(DocumentReference calDocRef, Event event) {
+  private BaseObject getSubscriptionObject(DocumentReference calDocRef, IEvent event) {
     BaseObject subscriptObj = event.getEventDocument().getXObject(
         getSubscriptionClassRef(), "subscriber", refDefaultSerializer.serialize(
             calDocRef), false);
@@ -308,7 +355,8 @@ public class EventsManager implements IEventManager {
       List<IEvent> events;
       boolean hasMore, notFound;
       do {
-        events = getEvents_internal(cal.getCalDoc(), start, nb, false,
+        // TODO replace internalOld with internal
+        events = getEvents_internalOld(cal.getCalDoc(), start, nb, false,
             theEvent.getEventDate());
         hasMore = events.size() == nb;
         eventIndex = events.indexOf(theEvent);

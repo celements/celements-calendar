@@ -49,10 +49,18 @@ import com.xpn.xwiki.web.Utils;
 
 public class Event implements IEvent {
   
-  public static final String CLASSES_SPACE = "Classes";
-  public static final String CALENDAR_EVENT_CLASS_DOC = "CalendarEventClass";
-  public static final String CALENDAR_EVENT_CLASS = CLASSES_SPACE + "."
-    + CALENDAR_EVENT_CLASS_DOC;
+  public static final String SPACE = "Classes";
+  public static final String DOC = "CalendarEventClass";
+  public static final String CLASS = SPACE + "." + DOC;
+  public static final String PROPERTY_LANG = "lang";
+  public static final String PROPERTY_TITLE = "l_title";
+  public static final String PROPERTY_TITLE_RTE = "l_title_rte";
+  public static final String PROPERTY_DESCRIPTION = "l_description";
+  public static final String PROPERTY_LOCATION = "location";
+  public static final String PROPERTY_LOCATION_RTE = "location_rte";
+  public static final String PROPERTY_EVENT_DATE = "eventDate";
+  public static final String PROPERTY_EVENT_DATE_END = "eventDate_end";
+  public static final String PROPERTY_EVENT_IS_SUBSCRIBABLE = "isSubscribable";
 
   private static Log LOGGER = LogFactory.getFactory().getInstance(Event.class);
   
@@ -64,8 +72,8 @@ public class Event implements IEvent {
   
   @Deprecated
   public Event(XWikiDocument eventDoc, XWikiContext context) {
-    this(eventDoc.getXObjects(new DocumentReference(context.getDatabase(), CLASSES_SPACE,
-        CALENDAR_EVENT_CLASS_DOC)), eventDoc.getDocumentReference().getSpaceReferences(
+    this(eventDoc.getXObjects(new DocumentReference(context.getDatabase(), SPACE, DOC)), 
+    		eventDoc.getDocumentReference().getSpaceReferences(
             ).get(0).getName(), context);
     this.eventDocRef = eventDoc.getDocumentReference();
   }
@@ -121,7 +129,7 @@ public class Event implements IEvent {
         XWikiDocument eventDoc = getContext().getWiki().getDocument(eventDocRef,
             getContext());
         initObjectMap(eventDoc.getXObjects(new DocumentReference(getContext(
-            ).getDatabase(), CLASSES_SPACE, CALENDAR_EVENT_CLASS_DOC)),
+            ).getDatabase(), SPACE, DOC)),
             eventDocRef.getLastSpaceReference().getName());
       } catch (XWikiException exp) {
         LOGGER.error("getEventObjMap failed to get event document [" + eventDocRef + "].",

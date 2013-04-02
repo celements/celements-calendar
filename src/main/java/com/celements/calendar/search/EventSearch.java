@@ -9,7 +9,6 @@ import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
 
 import com.celements.calendar.Event;
-import com.celements.calendar.plugin.CelementsCalendarPlugin;
 import com.celements.search.lucene.IQueryService;
 import com.celements.search.lucene.query.LuceneQueryApi;
 import com.celements.search.lucene.query.LuceneQueryRestrictionApi;
@@ -55,11 +54,11 @@ public class EventSearch implements IEventSearch {
   }
   
   private LuceneQueryRestrictionApi createEventObjectRestriction() {
-    return queryService.createRestriction("object", Event.CALENDAR_EVENT_CLASS);
+    return queryService.createRestriction("object", Event.CLASS);
   }
   
   private String getEventDateFieldName() {
-    return Event.CALENDAR_EVENT_CLASS + "." + CelementsCalendarPlugin.PROPERTY_EVENT_DATE;
+    return Event.CLASS + "." + Event.PROPERTY_EVENT_DATE;
   }
 
 }

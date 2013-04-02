@@ -12,9 +12,7 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.model.reference.EntityReferenceResolver;
 import org.xwiki.model.reference.EntityReferenceSerializer;
-import org.xwiki.query.QueryManager;
 
 import com.celements.calendar.Calendar;
 import com.celements.calendar.Event;
@@ -48,12 +46,6 @@ public class EventsManager implements IEventManager {
   private EntityReferenceSerializer<String> refLocalSerializer;
 
   @Requirement("default") EntityReferenceSerializer<String> refDefaultSerializer;
-
-  @Requirement
-  EntityReferenceResolver<String> stringRefResolver;
-
-  @Requirement
-  QueryManager queryManager;
 
   @Requirement
   IQueryService queryService;

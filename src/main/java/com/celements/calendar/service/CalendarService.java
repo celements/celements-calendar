@@ -1,5 +1,6 @@
 package com.celements.calendar.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -17,16 +18,28 @@ import org.xwiki.query.QueryManager;
 
 import com.celements.calendar.Calendar;
 import com.celements.calendar.ICalendar;
-import com.celements.calendar.util.CalendarUtils;
+import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
+import com.xpn.xwiki.objects.BaseObject;
 
 @Component
 public class CalendarService implements ICalendarService {
 
   private static Log LOGGER = LogFactory.getFactory().getInstance(CalendarService.class);
 
+  public static final String CLASS_CALENDAR_SPACE = "Classes";
+  public static final String CLASS_CALENDAR_DOC = "CalendarConfigClass";
+  public static final String CLASS_CALENDAR = CLASS_CALENDAR_SPACE + "." + CLASS_CALENDAR_DOC;
+  public static final String PROPERTY_IS_SUBSCRIBABLE = "is_subscribable";
+  public static final String PROPERTY_EVENT_PER_PAGE = "event_per_page";
+  public static final String PROPERTY_OVERVIEW_COLUMN_CONFIG = "overview_column_config";
+  public static final String PROPERTY_EVENT_COLUMN_CONFIG = "event_column_config";
+  public static final String PROPERTY_HAS_MORE_LINK = "hasMoreLink";
+  public static final String PROPERTY_SUBSCRIBE_TO = "subscribe_to";
+  public static final String PROPERTY_CALENDAR_SPACE = "calendarspace";
+  
   public static final String CALENDAR_SERVICE_START_DATE =
     "com.celements.calendar.service.CalendarService.startDate";
 
@@ -37,6 +50,9 @@ public class CalendarService implements ICalendarService {
   EntityReferenceResolver<String> stringRefResolver;
 
   @Requirement
+  IWebUtilsService webUtils;
+
+  @Requirement
   Execution execution;
 
   private XWikiContext getContext() {
@@ -45,12 +61,73 @@ public class CalendarService implements ICalendarService {
 
   public String getEventSpaceForCalendar(DocumentReference calDocRef
       ) throws XWikiException {
-    return CalendarUtils.getInstance().getEventSpaceForCalendar(
-        getContext().getWiki().getDocument(calDocRef, getContext()), getContext());
+  	XWikiDocument doc = getContext().getWiki().getDocument(calDocRef, getContext());
+    String space = doc.getDocumentReference().getName();
+    BaseObject obj = doc.getXObject(getCalendarConfigReference());
+    if (obj != null) {
+      space = obj.getStringValue(PROPERTY_CALENDAR_SPACE).trim();
+    }
+    return space;
+  }
+  
+  public List<String> getAllowedSpaces(XWikiDocument calDoc) throws XWikiException {
+  	List<String> spaces = new ArrayList<String>();
+    BaseObject calObj = null;
+    if (calDoc != null) {
+      calObj = calDoc.getXObject(getCalendarConfigReference());
+    }
+    if (calObj != null) {
+    	addNonEmptyString(spaces, calObj.getStringValue(PROPERTY_CALENDAR_SPACE).trim());
+      spaces.addAll(getSubscribedSpaces(calObj));
+    }
+    return spaces;
+  }
+  
+  public List<String> getSubscribedSpaces(XWikiDocument calDoc) throws XWikiException {
+    return getSubscribedSpaces(calDoc.getXObject(getCalendarConfigReference()));
+  }
+  
+  private List<String> getSubscribedSpaces(BaseObject calObj) throws XWikiException {
+  	List<String> spaces = new ArrayList<String>();
+    if (calObj != null) {
+    	DocumentReference calConfRef = getCalendarConfigReference();
+	    for (Object subDocName : calObj.getListValue(PROPERTY_SUBSCRIBE_TO)) {
+	      DocumentReference subDocRef = webUtils.resolveDocumentReference(
+	      		subDocName.toString());
+	      if (getContext().getWiki().exists(subDocRef, getContext())) {
+	        BaseObject subscCalObj = getContext().getWiki().getDocument(subDocRef, 
+	        		getContext()).getXObject(calConfRef);
+	        if (subscCalObj != null) {
+	        	addNonEmptyString(spaces, subscCalObj.getStringValue(PROPERTY_CALENDAR_SPACE
+	        			).trim());
+	        }
+	      }
+	    }
+    }
+    return spaces;
+  }
+  
+  private void addNonEmptyString(List<String> list, String str) {
+  	if ((str != null) && (str.length() > 0)) {
+  		list.add(str);
+  	}
   }
 
   public String getAllowedSpacesHQL(XWikiDocument calDoc) throws XWikiException {
-    return CalendarUtils.getInstance().getAllowedSpacesHQL(calDoc, getContext());
+    String spaceHQL = "";
+  	List<String> spaces = getAllowedSpaces(calDoc);
+  	for (String space : spaces) {
+  		if (spaceHQL.length() > 0) {
+  			spaceHQL += " or ";
+  		}
+  		spaceHQL += "obj.name like '" + space + ".%'";
+  	}
+    if (spaceHQL.length() > 0) {
+      spaceHQL = "(" + spaceHQL + ")";
+    } else {
+    	spaceHQL = "obj.name like '.%'";
+    }
+    return spaceHQL;
   }
 
   public ICalendar getCalendarByCalRef(DocumentReference calDocRef, boolean isArchive) {
@@ -81,6 +158,11 @@ public class CalendarService implements ICalendarService {
           + "].", exp);
     }
     return null;
+  }
+  
+  private DocumentReference getCalendarConfigReference() {
+    return new DocumentReference(getContext().getDatabase(), CLASS_CALENDAR_SPACE, 
+    		CLASS_CALENDAR_DOC);
   }
 
 }

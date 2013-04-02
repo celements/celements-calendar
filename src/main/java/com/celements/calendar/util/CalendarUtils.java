@@ -96,6 +96,7 @@ public class CalendarUtils implements ICalendarUtils {
    * @see com.celements.calendar.util.ICalendarUtils#getAllowedSpacesHQL(com.xpn.xwiki.doc.XWikiDocument, com.xpn.xwiki.XWikiContext)
    */
   @SuppressWarnings("unchecked")
+  @Deprecated
   public String getAllowedSpacesHQL(XWikiDocument calDoc, XWikiContext context
       ) throws XWikiException {
     // If there is no config object no events should be found
@@ -165,6 +166,7 @@ public class CalendarUtils implements ICalendarUtils {
   /* (non-Javadoc)
    * @see com.celements.calendar.util.ICalendarUtils#getEventSpaceForCalendar(com.xpn.xwiki.doc.XWikiDocument, com.xpn.xwiki.XWikiContext)
    */
+  @Deprecated
   public String getEventSpaceForCalendar(XWikiDocument doc,
       XWikiContext context) throws XWikiException {
     String space = doc.getName(); // default if no config available
@@ -185,6 +187,7 @@ public class CalendarUtils implements ICalendarUtils {
         context);
   }
 
+  @Deprecated
   public String getEventSpaceForCalendar(DocumentReference calDocRef,
       XWikiContext context) throws XWikiException {
     return getEventSpaceForCalendar(context.getWiki().getDocument(calDocRef, context),

@@ -1,5 +1,7 @@
 package com.celements.calendar.service;
 
+import java.util.List;
+
 import org.xwiki.component.annotation.ComponentRole;
 import org.xwiki.model.reference.DocumentReference;
 
@@ -11,7 +13,11 @@ import com.xpn.xwiki.doc.XWikiDocument;
 public interface ICalendarService {
 
   public String getEventSpaceForCalendar(DocumentReference calDocRef
-      ) throws XWikiException;
+  		) throws XWikiException;
+  
+  public List<String> getAllowedSpaces(XWikiDocument calDoc) throws XWikiException;
+  
+  public List<String> getSubscribedSpaces(XWikiDocument calDoc) throws XWikiException;
 
   public String getAllowedSpacesHQL(XWikiDocument calDoc) throws XWikiException;
 

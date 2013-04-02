@@ -144,7 +144,7 @@ public class Calendar implements ICalendar {
    * @see com.celements.calendar.ICalendar#getNrOfEvents()
    */
   public long getNrOfEvents(){
-    return getEventMgr().countEvents(this.calConfigDocRef, isArchive, getStartDate());
+    return getEventMgr().countEvents(this);
   }
   
   /* (non-Javadoc)

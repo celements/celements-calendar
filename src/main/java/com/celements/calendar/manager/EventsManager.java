@@ -1,6 +1,5 @@
 package com.celements.calendar.manager;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -9,7 +8,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.velocity.VelocityContext;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
@@ -197,44 +195,6 @@ public class EventsManager implements IEventManager {
   			Event.CLASS + "." + Event.PROPERTY_LANG, webUtilsService.getDefaultLanguage());
   	return queryService.createQuery().addOrRestrictionList(spaceList).addRestriction(
   			langRestriction);
-  }
-
-  // TODO remove
-  private String getQuery(XWikiDocument calDoc, boolean isArchive, Date startDate,
-        boolean count) throws XWikiException {
-    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    
-    String timeComp = ">=";
-    String sortOrder = "asc";
-    String selectEmptyDates = "or ec.eventDate is null";
-    if(isArchive){
-      timeComp = "<";
-      sortOrder = "desc";
-      selectEmptyDates = "";
-    }
-    String hql = "select ";
-    if(count){
-      hql += "count(obj.name)";
-    } else {
-      hql += "obj.name";
-    }
-    hql += " from XWikiDocument doc, BaseObject as obj, ";
-    hql += Event.CLASS + " as ec ";
-    hql += "where doc.fullName = obj.name and doc.translation = 0 and ec.id.id=obj.id ";
-    hql += " and obj.className = '" + Event.SPACE + "."
-            + Event.DOC + "'";
-    VelocityContext vcontext = ((VelocityContext) getContext().get("vcontext"));
-    String defaultLanguage = (String)vcontext.get("default_language");
-    webUtilsService.getDefaultLanguage();
-    hql += "and ec.lang='" + defaultLanguage + "' ";
-    hql += "and (ec.eventDate " + timeComp + " '"
-      + format.format(startDate) + "' " + selectEmptyDates + ") and ";
-    hql += calService.getAllowedSpacesHQL(calDoc);
-    hql += " order by ec.eventDate " + sortOrder + ", ec.eventDate_end " + sortOrder;
-    hql += ", ec.l_title " + sortOrder;
-    LOGGER.debug(hql);
-    
-    return hql;
   }
 
   private boolean checkEventSubscription(DocumentReference calDocRef, IEvent event

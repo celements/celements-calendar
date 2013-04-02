@@ -16,8 +16,6 @@ public interface ICalendarService {
   		) throws XWikiException;
   
   public List<String> getAllowedSpaces(XWikiDocument calDoc) throws XWikiException;
-  
-  public List<String> getSubscribedSpaces(XWikiDocument calDoc) throws XWikiException;
 
   public String getAllowedSpacesHQL(XWikiDocument calDoc) throws XWikiException;
 

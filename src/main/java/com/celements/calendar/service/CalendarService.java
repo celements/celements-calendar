@@ -40,6 +40,10 @@ public class CalendarService implements ICalendarService {
   public static final String PROPERTY_SUBSCRIBE_TO = "subscribe_to";
   public static final String PROPERTY_CALENDAR_SPACE = "calendarspace";
   
+  public static final String SUBSCRIPTION_CLASS_SPACE = "Classes";
+  public static final String SUBSCRIPTION_CLASS_DOC = "SubscriptionClass";
+  public static final String SUBSCRIPTION_CLASS = SUBSCRIPTION_CLASS_SPACE + "." + SUBSCRIPTION_CLASS_DOC;
+  
   public static final String CALENDAR_SERVICE_START_DATE =
     "com.celements.calendar.service.CalendarService.startDate";
 
@@ -81,10 +85,6 @@ public class CalendarService implements ICalendarService {
       spaces.addAll(getSubscribedSpaces(calObj));
     }
     return spaces;
-  }
-  
-  public List<String> getSubscribedSpaces(XWikiDocument calDoc) throws XWikiException {
-    return getSubscribedSpaces(calDoc.getXObject(getCalendarConfigReference()));
   }
   
   private List<String> getSubscribedSpaces(BaseObject calObj) throws XWikiException {

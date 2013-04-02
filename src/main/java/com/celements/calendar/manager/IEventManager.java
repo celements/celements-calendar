@@ -21,8 +21,6 @@ public interface IEventManager {
 
   public List<IEvent> getEventsInternal(ICalendar cal, int start, int nb);
 
-  public long countEvents(DocumentReference calDocRef, boolean isArchive);
-
   /**
    * 
    * @param calDoc
@@ -33,8 +31,6 @@ public interface IEventManager {
    */
   @Deprecated
   public long countEvents(XWikiDocument calDoc, boolean isArchive);
-
-  public long countEvents(DocumentReference calDocRef, boolean isArchive, Date startDate);
 
   /**
    * 
@@ -47,6 +43,12 @@ public interface IEventManager {
    */
   @Deprecated
   public long countEvents(XWikiDocument calDoc, boolean isArchive, Date startDate);
+  
+  public long countEvents(ICalendar cal);
+
+  public long countEvents(DocumentReference calDocRef, boolean isArchive);
+
+  public long countEvents(DocumentReference calDocRef, boolean isArchive, Date startDate);
 
   public NavigationDetails getNavigationDetails(Event event, Calendar cal
     ) throws XWikiException;

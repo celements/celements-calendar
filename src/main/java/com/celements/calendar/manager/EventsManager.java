@@ -77,33 +77,26 @@ public class EventsManager implements IEventManager {
   public List<EventApi> getEvents(ICalendar cal, int start, int nb) {
     List<EventApi> eventApiList = new ArrayList<EventApi>();
     try {
-      // TODO replace internalOld with internal
-      for (IEvent theEvent : getEvents_internalOld(cal.getCalDoc(), start, nb,
+      for (IEvent theEvent : getEvents_internal(cal.getCalDoc(), start, nb,
           cal.isArchive(), cal.getStartDate())) {
         eventApiList.add(new EventApi(theEvent, cal.getLanguage(), getContext()));
       }
-    } catch (XWikiException e) {
-      LOGGER.error(e);
-    } catch (QueryException exp) {
-      LOGGER.error("Failed to exequte getEvents query.", exp);
+    } catch (XWikiException exc) {
+      LOGGER.error(exc);
     }
     return eventApiList;
   }
 
   public List<IEvent> getEventsInternal(ICalendar cal, int start, int nb) {
     try {
-      // TODO replace internalOld with internal
-      return getEvents_internalOld(cal.getCalDoc(), start, nb, cal.isArchive(),
+      return getEvents_internal(cal.getCalDoc(), start, nb, cal.isArchive(),
           cal.getStartDate());
-    } catch (XWikiException e) {
-      LOGGER.error(e);
-    } catch (QueryException exp) {
-      LOGGER.error("Failed to exequte getEvents query.", exp);
+    } catch (XWikiException exc) {
+      LOGGER.error(exc);
     }
     return Collections.emptyList();
   }
 
-  // TODO should replace internalOld when working
   private List<IEvent> getEvents_internal(XWikiDocument calDoc, int start, int nb,
       boolean isArchive, Date startDate) throws XWikiException {
     LuceneQueryApi query = queryService.createQuery();
@@ -130,35 +123,6 @@ public class EventsManager implements IEventManager {
       }
     }
     return eventList;
-  }
-
-  // TODO remove
-  private List<IEvent> getEvents_internalOld(XWikiDocument calDoc, int start, int nb,
-      boolean isArchive, Date startDate) throws QueryException, XWikiException {
-    List<IEvent> eventList = new ArrayList<IEvent>();
-    List<String> eventDocs = queryManager.createQuery(getQuery(calDoc, isArchive,
-        startDate, false), Query.HQL).setOffset(start).setLimit(nb).execute();
-    LOGGER.debug(eventDocs.size() + " events found. " + eventDocs);
-    for (String eventDocName : eventDocs) {
-      Event theEvent = new Event(getDocRefFromFullName(eventDocName));
-      if(checkEventSubscription(calDoc.getDocumentReference(), theEvent)){
-        LOGGER.debug("getEvents: add to result " + eventDocName);
-        eventList.add(theEvent);
-      } else {
-        LOGGER.debug("getEvents: skipp " + eventDocName);
-      }
-    }
-    return eventList;
-  }
-
-  // TODO remove
-  private DocumentReference getDocRefFromFullName(String eventDocName) {
-    DocumentReference eventRef = new DocumentReference(stringRefResolver.resolve(
-        eventDocName, EntityType.DOCUMENT));
-    eventRef.setWikiReference(new WikiReference(getContext().getDatabase()));
-    LOGGER.debug("getDocRefFromFullName: for [" + eventDocName + "] got reference ["
-        + eventRef + "].");
-    return eventRef;
   }
 
   /**
@@ -348,29 +312,24 @@ public class EventsManager implements IEventManager {
           + theEvent.getDocumentReference() + "].");
       return null;
     }
-    try {
-      NavigationDetails navDetail = new NavigationDetails(theEvent.getEventDate(), 0);
-      int nb = 10;
-      int eventIndex, start = 0;
-      List<IEvent> events;
-      boolean hasMore, notFound;
-      do {
-        // TODO replace internalOld with internal
-        events = getEvents_internalOld(cal.getCalDoc(), start, nb, false,
-            theEvent.getEventDate());
-        hasMore = events.size() == nb;
-        eventIndex = events.indexOf(theEvent);
-        notFound = eventIndex < 0;
-        navDetail.setOffset(start + eventIndex);
-        start = start + nb;
-        nb = nb * 2;
-      } while (notFound && hasMore);
-      if (!notFound) {
-        LOGGER.debug("getNavigationDetails: returning " + navDetail);
-        return navDetail;
-      }
-    } catch (QueryException qExp) {
-      LOGGER.error("getNavigationDetails: Failed to get events.", qExp);
+    NavigationDetails navDetail = new NavigationDetails(theEvent.getEventDate(), 0);
+    int nb = 10;
+    int eventIndex, start = 0;
+    List<IEvent> events;
+    boolean hasMore, notFound;
+    do {
+      events = getEvents_internal(cal.getCalDoc(), start, nb, false,
+          theEvent.getEventDate());
+      hasMore = events.size() == nb;
+      eventIndex = events.indexOf(theEvent);
+      notFound = eventIndex < 0;
+      navDetail.setOffset(start + eventIndex);
+      start = start + nb;
+      nb = nb * 2;
+    } while (notFound && hasMore);
+    if (!notFound) {
+      LOGGER.debug("getNavigationDetails: returning " + navDetail);
+      return navDetail;
     }
     return null;
   }

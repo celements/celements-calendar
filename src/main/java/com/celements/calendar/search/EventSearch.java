@@ -60,5 +60,9 @@ public class EventSearch implements IEventSearch {
   private String getEventDateFieldName() {
     return Event.CLASS + "." + Event.PROPERTY_EVENT_DATE;
   }
+  
+  void injectQueryService(IQueryService queryService) {
+    this.queryService = queryService;
+  }
 
 }

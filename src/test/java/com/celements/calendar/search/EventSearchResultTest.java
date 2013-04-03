@@ -29,10 +29,10 @@ public class EventSearchResultTest extends AbstractBridgedComponentTestCase {
   private XWiki xwiki;
   private LucenePlugin lucenePluginMock;
   private SearchResults searchResultsMock;
-  EventSearchResult searchResult;
+  private EventSearchResult searchResult;
 
   @Before
-  public void setUp_RulesFactoryTest() throws Exception {
+  public void setUp_EventSearchResultTest() throws Exception {
     context = getContext();
     xwiki = createMock(XWiki.class);
     lucenePluginMock = createMock(LucenePlugin.class);

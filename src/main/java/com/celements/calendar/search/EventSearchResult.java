@@ -37,8 +37,12 @@ public class EventSearchResult {
     this.context = context;
   }
   
-  void injectLucenePlugin(LucenePlugin lucenePlugin) {
-    this.lucenePlugin = lucenePlugin;
+  public String getLuceneQuery() {
+    return luceneQuery;
+  }
+  
+  public String[] getSortFields() {
+    return Arrays.copyOf(sortFields, sortFields.length);
   }
   
   public List<IEvent> getEventList() {
@@ -104,6 +108,10 @@ public class EventSearchResult {
   public String toString() {
     return "EventSearchResult [luceneQuery=" + luceneQuery + ", sortFields=" 
         + Arrays.toString(sortFields) + "]";
+  }
+  
+  void injectLucenePlugin(LucenePlugin lucenePlugin) {
+    this.lucenePlugin = lucenePlugin;
   }
   
 }

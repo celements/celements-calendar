@@ -1,6 +1,5 @@
 package com.celements.calendar.search;
 
-
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
@@ -72,7 +71,20 @@ public class EventSearchResultTest extends AbstractBridgedComponentTestCase {
     assertEquals(new DocumentReference("xwikidb", "TestSpace", "Event2"), 
         eventApiList.get(1).getDocumentReference());
   }
-
+  
+  @Test
+  public void testGetSize() throws Exception {    
+    expect(lucenePluginMock.getSearchResults(eq(""), eq((String[]) null), 
+        eq((String) null), eq("default,de"), same(context))).andReturn(searchResultsMock
+        ).once();
+    expect(searchResultsMock.getHitcount()).andReturn(2).once();
+    
+    replayAll();
+    int size = searchResult.getSize();
+    verifyAll();
+    
+    assertEquals(2, size);
+  }
 
   private void replayAll(Object ... mocks) {
     replay(xwiki, lucenePluginMock, searchResultsMock);

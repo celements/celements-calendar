@@ -68,7 +68,7 @@ public class EventsManager implements IEventManager {
   public List<EventApi> getEvents(ICalendar cal, int start, int nb) {
     List<EventApi> eventApiList = new ArrayList<EventApi>();
     try {
-      for (IEvent theEvent : getEvents_internal(cal.getCalDoc(), start, nb,
+      for (IEvent theEvent : getEvents_internal(cal.getDocumentReference(), start, nb,
           cal.isArchive(), cal.getStartDate())) {
         eventApiList.add(new EventApi(theEvent, cal.getLanguage(), getContext()));
       }
@@ -80,7 +80,7 @@ public class EventsManager implements IEventManager {
 
   public List<IEvent> getEventsInternal(ICalendar cal, int start, int nb) {
     try {
-      return getEvents_internal(cal.getCalDoc(), start, nb, cal.isArchive(),
+      return getEvents_internal(cal.getDocumentReference(), start, nb, cal.isArchive(),
           cal.getStartDate());
     } catch (XWikiException exc) {
       LOGGER.error(exc);
@@ -88,20 +88,20 @@ public class EventsManager implements IEventManager {
     return Collections.emptyList();
   }
 
-  private List<IEvent> getEvents_internal(XWikiDocument calDoc, int start, int nb,
+  private List<IEvent> getEvents_internal(DocumentReference calDocRef, int start, int nb,
       boolean isArchive, Date startDate) throws XWikiException {
-    List<IEvent> eventList = getEventSearchResult(calDoc, isArchive, startDate
+    List<IEvent> eventList = getEventSearchResult(calDocRef, isArchive, startDate
         ).getEventList(start, nb);
     LOGGER.debug(eventList.size() + " events found.");
-    return filterEventListForSubscription(calDoc, eventList);
+    return filterEventListForSubscription(calDocRef, eventList);
   }
 
-  private List<IEvent> filterEventListForSubscription(XWikiDocument calDoc, 
+  private List<IEvent> filterEventListForSubscription(DocumentReference calDocRef,
       List<IEvent> eventList) throws XWikiException {
     Iterator<IEvent> iter = eventList.iterator();
     while (iter.hasNext()) {
       IEvent event = iter.next();
-      if(!checkEventSubscription(calDoc.getDocumentReference(), event)){
+      if(!checkEventSubscription(calDocRef, event)){
         iter.remove();
         LOGGER.debug("filterEventListForSubscription: filtered '" + event + "'");
       }
@@ -135,7 +135,7 @@ public class EventsManager implements IEventManager {
   public long countEvents(XWikiDocument calDoc, boolean isArchive, Date startDate) {
     return countEvents(calDoc.getDocumentReference(), isArchive, startDate);
   }
-  
+
   public long countEvents(ICalendar cal) {
     return countEvents(cal.getDocumentReference(), cal.isArchive(), cal.getStartDate());
   }
@@ -143,7 +143,7 @@ public class EventsManager implements IEventManager {
   public long countEvents(DocumentReference calDocRef, boolean isArchive) {
     return countEvents(calDocRef, isArchive, new Date());
   }
-  
+
   public long countEvents(DocumentReference calDocRef, boolean isArchive, Date startDate) {
     String cacheKey = "EventsManager.countEvents|" + refDefaultSerializer.serialize(
         calDocRef) + "|" + isArchive + "|" + startDate.getTime();
@@ -153,24 +153,23 @@ public class EventsManager implements IEventManager {
       return (Long) cachedCount;
     } else {
       try {
-        long count = getEventSearchResult(getContext().getWiki().getDocument(calDocRef, 
-            getContext()), isArchive, startDate).getSize();
-        LOGGER.debug("Event count for calendar '" + calDocRef + "' with startDate + '" 
+        long count = getEventSearchResult(calDocRef, isArchive, startDate).getSize();
+        LOGGER.debug("Event count for calendar '" + calDocRef + "' with startDate + '"
             + startDate + "' and isArchive '" + isArchive + "': " + count);
         execution.getContext().setProperty(cacheKey, count);
         return count;
       } catch (XWikiException exc) {
-        LOGGER.error("Exception while counting events for calendar '" + calDocRef 
-            + "' with startDate '" + startDate + "' and isArchive '" + isArchive + "'", 
+        LOGGER.error("Exception while counting events for calendar '" + calDocRef
+            + "' with startDate '" + startDate + "' and isArchive '" + isArchive + "'",
             exc);
       }
     }
     return 0;
   }
-  
-  private EventSearchResult getEventSearchResult(XWikiDocument calDoc, boolean isArchive, 
-      Date startDate) throws XWikiException {
-    LuceneQueryApi query = getQueryForCalDoc(calDoc);
+
+  private EventSearchResult getEventSearchResult(DocumentReference calDocRef,
+      boolean isArchive, Date startDate) throws XWikiException {
+    LuceneQueryApi query = getQueryForCalDoc(calDocRef);
     if (!isArchive) {
       return eventSearch.getSearchResultFromDate(query, startDate);
     } else {
@@ -178,9 +177,10 @@ public class EventsManager implements IEventManager {
     }
   }
 
-  private LuceneQueryApi getQueryForCalDoc(XWikiDocument calDoc) throws XWikiException {
+  private LuceneQueryApi getQueryForCalDoc(DocumentReference calDocRef
+      ) throws XWikiException {
     List<LuceneQueryRestrictionApi> spaceList = new ArrayList<LuceneQueryRestrictionApi>();
-    for (String space : calService.getAllowedSpaces(calDoc)) {
+    for (String space : calService.getAllowedSpaces(calDocRef)) {
       spaceList.add(queryService.createRestriction("space", space));
     }
     LuceneQueryRestrictionApi langRestriction = queryService.createRestriction(
@@ -205,7 +205,7 @@ public class EventsManager implements IEventManager {
         + "] returning " + isHomeCal);
     return isHomeCal;
   }
-  
+
   private boolean isEventSubscribed(DocumentReference calDocRef, IEvent event
       ) throws XWikiException {
     BaseObject obj = getSubscriptionObject(calDocRef, event);
@@ -248,26 +248,26 @@ public class EventsManager implements IEventManager {
         CalendarService.SUBSCRIPTION_CLASS_SPACE,
         CalendarService.SUBSCRIPTION_CLASS_DOC);
   }
-  
-  public NavigationDetails getNavigationDetails(Event theEvent, Calendar cal
+
+  public NavigationDetails getNavigationDetails(IEvent event, Calendar cal
       ) throws XWikiException {
-    LOGGER.debug("getNavigationDetails for [" + theEvent + "] with date ["
-        + theEvent.getEventDate() + "]");
-    if (theEvent.getEventDate() == null) {
+    LOGGER.debug("getNavigationDetails for [" + event + "] with date ["
+        + event.getEventDate() + "]");
+    if (event.getEventDate() == null) {
       LOGGER.error("getNavigationDetails failed because eventDate is null for ["
-          + theEvent.getDocumentReference() + "].");
+          + event.getDocumentReference() + "].");
       return null;
     }
-    NavigationDetails navDetail = new NavigationDetails(theEvent.getEventDate(), 0);
+    NavigationDetails navDetail = new NavigationDetails(event.getEventDate(), 0);
     int nb = 10;
     int eventIndex, start = 0;
     List<IEvent> events;
     boolean hasMore, notFound;
     do {
-      events = getEvents_internal(cal.getCalDoc(), start, nb, false,
-          theEvent.getEventDate());
+      events = getEvents_internal(cal.getDocumentReference(), start, nb, false,
+          event.getEventDate());
       hasMore = events.size() == nb;
-      eventIndex = events.indexOf(theEvent);
+      eventIndex = events.indexOf(event);
       notFound = eventIndex < 0;
       navDetail.setOffset(start + eventIndex);
       start = start + nb;

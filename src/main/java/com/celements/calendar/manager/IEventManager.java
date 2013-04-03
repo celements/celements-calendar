@@ -7,7 +7,6 @@ import org.xwiki.component.annotation.ComponentRole;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.Calendar;
-import com.celements.calendar.Event;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.api.EventApi;
@@ -43,15 +42,15 @@ public interface IEventManager {
    */
   @Deprecated
   public long countEvents(XWikiDocument calDoc, boolean isArchive, Date startDate);
-  
+
   public long countEvents(ICalendar cal);
 
   public long countEvents(DocumentReference calDocRef, boolean isArchive);
 
   public long countEvents(DocumentReference calDocRef, boolean isArchive, Date startDate);
 
-  public NavigationDetails getNavigationDetails(Event event, Calendar cal
-    ) throws XWikiException;
+  public NavigationDetails getNavigationDetails(IEvent event, Calendar cal
+      ) throws XWikiException;
 
   public IEvent getEvent(DocumentReference eventDocRef);
 

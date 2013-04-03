@@ -1,11 +1,14 @@
 package com.celements.calendar.service;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.same;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import org.junit.Before;
@@ -18,9 +21,11 @@ import com.celements.calendar.plugin.CelementsCalendarPlugin;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.store.XWikiStoreInterface;
+import com.xpn.xwiki.web.Utils;
 
 public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
 
@@ -33,7 +38,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
   @Before
   public void setUp_CalendarServiceTest() throws Exception {
     context = getContext();
-    calService = new CalendarService();
+    calService = (CalendarService) Utils.getComponent(ICalendarService.class);
     executionMock = createMock(Execution.class);
     calService.execution = executionMock;
     ExecutionContext execContext = new ExecutionContext();
@@ -43,6 +48,13 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     context.setWiki(xwiki);
     mockStore = createMock(XWikiStoreInterface.class);
     expect(xwiki.getStore()).andReturn(mockStore).anyTimes();
+  }
+
+  @Test
+  public void testGetAllowedSpacesHQL_noObject() throws XWikiException {
+    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "Content",
+        "Agenda");
+    assertEquals("obj.name like '.%'", calService.getAllowedSpacesHQL(calDocRef));
   }
 
   @Test
@@ -82,7 +94,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
         "myCal2Space");
     replayAll();
     assertEquals("(obj.name like 'myCalSpace.%' or obj.name like 'myCal1Space.%'"
-        + " or obj.name like 'myCal2Space.%')", calService.getAllowedSpacesHQL(calDoc));
+        + " or obj.name like 'myCal2Space.%')", calService.getAllowedSpacesHQL(calDocRef));
     verifyAll();
   }
 

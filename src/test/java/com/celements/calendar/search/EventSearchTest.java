@@ -9,22 +9,17 @@ import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xwiki.model.reference.DocumentReference;
 
-import com.celements.calendar.IEvent;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 import com.celements.search.lucene.IQueryService;
 import com.celements.search.lucene.query.LuceneQueryApi;
 import com.celements.search.lucene.query.LuceneQueryRestrictionApi;
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
-import com.xpn.xwiki.plugin.lucene.SearchResult;
 import com.xpn.xwiki.web.Utils;
 
 public class EventSearchTest extends AbstractBridgedComponentTestCase {

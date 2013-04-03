@@ -15,9 +15,16 @@ public interface ICalendarService {
   public String getEventSpaceForCalendar(DocumentReference calDocRef
   		) throws XWikiException;
   
-  public List<String> getAllowedSpaces(XWikiDocument calDoc) throws XWikiException;
+  public List<String> getAllowedSpaces(DocumentReference calDocRef) throws XWikiException;
 
+  /**
+   * 
+   * @Deprecated use getAllowedSpacesHQL(DocumentReference) instead
+   */
+ @Deprecated
   public String getAllowedSpacesHQL(XWikiDocument calDoc) throws XWikiException;
+
+  public String getAllowedSpacesHQL(DocumentReference calDocRef) throws XWikiException;
 
   public ICalendar getCalendarByCalRef(DocumentReference calDocRef, boolean isArchive);
 

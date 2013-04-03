@@ -74,12 +74,10 @@ public class CalendarService implements ICalendarService {
     return space;
   }
   
-  public List<String> getAllowedSpaces(XWikiDocument calDoc) throws XWikiException {
+  public List<String> getAllowedSpaces(DocumentReference calDocRef) throws XWikiException {
   	List<String> spaces = new ArrayList<String>();
-    BaseObject calObj = null;
-    if (calDoc != null) {
-      calObj = calDoc.getXObject(getCalendarConfigReference());
-    }
+    BaseObject calObj = getContext().getWiki().getDocument(calDocRef, getContext()
+        ).getXObject(getCalendarConfigReference());
     if (calObj != null) {
     	addNonEmptyString(spaces, calObj.getStringValue(PROPERTY_CALENDAR_SPACE).trim());
       spaces.addAll(getSubscribedSpaces(calObj));
@@ -113,19 +111,24 @@ public class CalendarService implements ICalendarService {
   	}
   }
 
+  @Deprecated
   public String getAllowedSpacesHQL(XWikiDocument calDoc) throws XWikiException {
+    return getAllowedSpacesHQL(calDoc.getDocumentReference());
+  }
+
+  public String getAllowedSpacesHQL(DocumentReference calDocRef) throws XWikiException {
     String spaceHQL = "";
-  	List<String> spaces = getAllowedSpaces(calDoc);
-  	for (String space : spaces) {
-  		if (spaceHQL.length() > 0) {
-  			spaceHQL += " or ";
-  		}
-  		spaceHQL += "obj.name like '" + space + ".%'";
-  	}
+    List<String> spaces = getAllowedSpaces(calDocRef);
+    for (String space : spaces) {
+      if (spaceHQL.length() > 0) {
+        spaceHQL += " or ";
+      }
+      spaceHQL += "obj.name like '" + space + ".%'";
+    }
     if (spaceHQL.length() > 0) {
       spaceHQL = "(" + spaceHQL + ")";
     } else {
-    	spaceHQL = "obj.name like '.%'";
+      spaceHQL = "obj.name like '.%'";
     }
     return spaceHQL;
   }

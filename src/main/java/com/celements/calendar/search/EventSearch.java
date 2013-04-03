@@ -25,7 +25,7 @@ public class EventSearch implements IEventSearch {
   private IQueryService queryService;
   
   @Requirement
-  Execution execution;
+  private Execution execution;
 
   private XWikiContext getContext() {
     return (XWikiContext) execution.getContext().getProperty("xwikicontext");

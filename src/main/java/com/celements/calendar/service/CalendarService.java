@@ -51,16 +51,16 @@ public class CalendarService implements ICalendarService {
   private QueryManager queryManager;
 
   @Requirement
-  EntityReferenceResolver<String> stringRefResolver;
+  private EntityReferenceResolver<String> stringRefResolver;
 
   @Requirement
-  IWebUtilsService webUtils;
+  private IWebUtilsService webUtils;
 
   @Requirement
-  Execution execution;
+  private Execution execution;
 
   private XWikiContext getContext() {
-    return (XWikiContext)execution.getContext().getProperty("xwikicontext");
+    return (XWikiContext) execution.getContext().getProperty("xwikicontext");
   }
 
   public String getEventSpaceForCalendar(DocumentReference calDocRef
@@ -79,7 +79,7 @@ public class CalendarService implements ICalendarService {
     BaseObject calObj = getContext().getWiki().getDocument(calDocRef, getContext()
         ).getXObject(getCalendarConfigReference());
     if (calObj != null) {
-    	addNonEmptyString(spaces, calObj.getStringValue(PROPERTY_CALENDAR_SPACE).trim());
+    	addNonEmptyString(spaces, calObj.getStringValue(PROPERTY_CALENDAR_SPACE));
       spaces.addAll(getSubscribedSpaces(calObj));
     }
     return spaces;
@@ -92,13 +92,10 @@ public class CalendarService implements ICalendarService {
 	    for (Object subDocName : calObj.getListValue(PROPERTY_SUBSCRIBE_TO)) {
 	      DocumentReference subDocRef = webUtils.resolveDocumentReference(
 	      		subDocName.toString());
-	      if (getContext().getWiki().exists(subDocRef, getContext())) {
-	        BaseObject subscCalObj = getContext().getWiki().getDocument(subDocRef, 
-	        		getContext()).getXObject(calConfRef);
-	        if (subscCalObj != null) {
-	        	addNonEmptyString(spaces, subscCalObj.getStringValue(PROPERTY_CALENDAR_SPACE
-	        			).trim());
-	        }
+        BaseObject subscCalObj = getContext().getWiki().getDocument(subDocRef, 
+            getContext()).getXObject(calConfRef);
+	      if (subscCalObj != null) {
+	        addNonEmptyString(spaces, subscCalObj.getStringValue(PROPERTY_CALENDAR_SPACE));
 	      }
 	    }
     }
@@ -106,6 +103,7 @@ public class CalendarService implements ICalendarService {
   }
   
   private void addNonEmptyString(List<String> list, String str) {
+    str = str.trim();
   	if ((str != null) && (str.length() > 0)) {
   		list.add(str);
   	}
@@ -128,7 +126,7 @@ public class CalendarService implements ICalendarService {
     if (spaceHQL.length() > 0) {
       spaceHQL = "(" + spaceHQL + ")";
     } else {
-      spaceHQL = "obj.name like '.%'";
+      spaceHQL = "(obj.name like '.%')";
     }
     return spaceHQL;
   }

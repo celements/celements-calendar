@@ -19,40 +19,27 @@
  */
 package com.celements.calendar.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.common.test.AbstractBridgedComponentTestCase;
-import com.xpn.xwiki.XWikiContext;
-import com.xpn.xwiki.XWikiException;
-import com.xpn.xwiki.doc.XWikiDocument;
 
 public class CalendarUtilsTest extends AbstractBridgedComponentTestCase {
 
   private ICalendarUtils calUtils;
-  private XWikiContext context;
 
   @Before
   public void setUp_CalendarUtilsTest() throws Exception {
     calUtils = CalendarUtils.getInstance();
-    context = getContext();
   }
 
   @Test
   public void testGetInstance() {
     assertNotNull("getInstance should always return an instance.", calUtils);
     assertSame("Should be singleton", calUtils, CalendarUtils.getInstance());
-  }
-
-  @Test
-  public void testGetAllowedSpacesHQL_noObject() throws XWikiException {
-    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "Content",
-        "Agenda");
-    XWikiDocument calDoc = new XWikiDocument(calDocRef);
-    assertEquals("obj.name like '.%'", calUtils.getAllowedSpacesHQL(calDoc , context));
   }
 
 }

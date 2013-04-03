@@ -91,12 +91,12 @@ public class EventsManager implements IEventManager {
   private List<IEvent> getEvents_internal(XWikiDocument calDoc, int start, int nb,
       boolean isArchive, Date startDate) throws XWikiException {
     List<IEvent> eventList = getEventSearchResult(calDoc, isArchive, startDate
-    		).getEventList(start, nb);
+        ).getEventList(start, nb);
     LOGGER.debug(eventList.size() + " events found.");
     return filterEventListForSubscription(calDoc, eventList);
   }
 
-	private List<IEvent> filterEventListForSubscription(XWikiDocument calDoc, 
+  private List<IEvent> filterEventListForSubscription(XWikiDocument calDoc, 
       List<IEvent> eventList) throws XWikiException {
     Iterator<IEvent> iter = eventList.iterator();
     while (iter.hasNext()) {
@@ -137,7 +137,7 @@ public class EventsManager implements IEventManager {
   }
   
   public long countEvents(ICalendar cal) {
-  	return countEvents(cal.getDocumentReference(), cal.isArchive(), cal.getStartDate());
+    return countEvents(cal.getDocumentReference(), cal.isArchive(), cal.getStartDate());
   }
 
   public long countEvents(DocumentReference calDocRef, boolean isArchive) {
@@ -145,48 +145,48 @@ public class EventsManager implements IEventManager {
   }
   
   public long countEvents(DocumentReference calDocRef, boolean isArchive, Date startDate) {
-  	String cacheKey = "EventsManager.countEvents|" + refDefaultSerializer.serialize(
-  			calDocRef) + "|" + isArchive + "|" + startDate.getTime();
-  	Object cachedCount = execution.getContext().getProperty(cacheKey);
-  	if (cachedCount != null) {
-  		LOGGER.debug("Cached event count: " + cachedCount);
-  	  return (Long) cachedCount;
-  	} else {
-    	try {
-	      long count = getEventSearchResult(getContext().getWiki().getDocument(calDocRef, 
-	      		getContext()), isArchive, startDate).getSize();
-	      LOGGER.debug("Event count for calendar '" + calDocRef + "' with startDate + '" 
-	      		+ startDate + "' and isArchive '" + isArchive + "': " + count);
-	      execution.getContext().setProperty(cacheKey, count);
-	      return count;
+    String cacheKey = "EventsManager.countEvents|" + refDefaultSerializer.serialize(
+        calDocRef) + "|" + isArchive + "|" + startDate.getTime();
+    Object cachedCount = execution.getContext().getProperty(cacheKey);
+    if (cachedCount != null) {
+      LOGGER.debug("Cached event count: " + cachedCount);
+      return (Long) cachedCount;
+    } else {
+      try {
+        long count = getEventSearchResult(getContext().getWiki().getDocument(calDocRef, 
+            getContext()), isArchive, startDate).getSize();
+        LOGGER.debug("Event count for calendar '" + calDocRef + "' with startDate + '" 
+            + startDate + "' and isArchive '" + isArchive + "': " + count);
+        execution.getContext().setProperty(cacheKey, count);
+        return count;
       } catch (XWikiException exc) {
         LOGGER.error("Exception while counting events for calendar '" + calDocRef 
-        		+ "' with startDate '" + startDate + "' and isArchive '" + isArchive + "'", 
-        		exc);
+            + "' with startDate '" + startDate + "' and isArchive '" + isArchive + "'", 
+            exc);
       }
-  	}
+    }
     return 0;
   }
   
   private EventSearchResult getEventSearchResult(XWikiDocument calDoc, boolean isArchive, 
-  		Date startDate) throws XWikiException {
+      Date startDate) throws XWikiException {
     LuceneQueryApi query = getQueryForCalDoc(calDoc);
     if (!isArchive) {
       return eventSearch.getSearchResultFromDate(query, startDate);
     } else {
-    	return eventSearch.getSearchResultUptoDate(query, startDate);
+      return eventSearch.getSearchResultUptoDate(query, startDate);
     }
   }
 
   private LuceneQueryApi getQueryForCalDoc(XWikiDocument calDoc) throws XWikiException {
-  	List<LuceneQueryRestrictionApi> spaceList = new ArrayList<LuceneQueryRestrictionApi>();
-  	for (String space : calService.getAllowedSpaces(calDoc)) {
-  		spaceList.add(queryService.createRestriction("space", space));
-  	}
-  	LuceneQueryRestrictionApi langRestriction = queryService.createRestriction(
-  			Event.CLASS + "." + Event.PROPERTY_LANG, webUtilsService.getDefaultLanguage());
-  	return queryService.createQuery().addOrRestrictionList(spaceList).addRestriction(
-  			langRestriction);
+    List<LuceneQueryRestrictionApi> spaceList = new ArrayList<LuceneQueryRestrictionApi>();
+    for (String space : calService.getAllowedSpaces(calDoc)) {
+      spaceList.add(queryService.createRestriction("space", space));
+    }
+    LuceneQueryRestrictionApi langRestriction = queryService.createRestriction(
+        Event.CLASS + "." + Event.PROPERTY_LANG, webUtilsService.getDefaultLanguage());
+    return queryService.createQuery().addOrRestrictionList(spaceList).addRestriction(
+        langRestriction);
   }
 
   private boolean checkEventSubscription(DocumentReference calDocRef, IEvent event
@@ -227,8 +227,8 @@ public class EventsManager implements IEventManager {
 
   private DocumentReference getCalenderConfigClassRef() {
     return new DocumentReference(getContext().getDatabase(),
-    		CalendarService.CLASS_CALENDAR_SPACE,
-    		CalendarService.CLASS_CALENDAR_DOC);
+        CalendarService.CLASS_CALENDAR_SPACE,
+        CalendarService.CLASS_CALENDAR_DOC);
   }
 
   private BaseObject getSubscriptionObject(DocumentReference calDocRef, IEvent event) {
@@ -245,8 +245,8 @@ public class EventsManager implements IEventManager {
 
   private DocumentReference getSubscriptionClassRef() {
     return new DocumentReference(getContext().getDatabase(),
-    		CalendarService.SUBSCRIPTION_CLASS_SPACE,
-    		CalendarService.SUBSCRIPTION_CLASS_DOC);
+        CalendarService.SUBSCRIPTION_CLASS_SPACE,
+        CalendarService.SUBSCRIPTION_CLASS_DOC);
   }
   
   public NavigationDetails getNavigationDetails(Event theEvent, Calendar cal

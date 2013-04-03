@@ -8,6 +8,7 @@ import static org.easymock.EasyMock.same;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,6 +40,66 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
   }
   
   @Test
+  public void testGetEventSpaceForCalendar_noObject() throws XWikiException {
+    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
+        "myCalDoc");
+    XWikiDocument calDoc = new XWikiDocument(calDocRef);
+    
+    expect(xwiki.getDocument(same(calDocRef), same(context))).andReturn(calDoc);
+        
+    replayAll();
+    String space = calService.getEventSpaceForCalendar(calDocRef);
+    verifyAll();
+    
+    assertNotNull(space);
+    assertEquals("myCalDoc", space);
+  }
+  
+  @Test
+  public void testGetEventSpaceForCalendar_emptyObject() throws XWikiException {
+    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
+        "myCalDoc");
+    XWikiDocument calDoc = new XWikiDocument(calDocRef);
+    DocumentReference configClassRef = new DocumentReference(getContext().getDatabase(), 
+        "Classes", "CalendarConfigClass");
+    BaseObject calConfObj = new BaseObject();
+    calConfObj.setXClassReference(configClassRef);
+    calDoc.setXObject(0, calConfObj);
+    
+    expect(xwiki.getDocument(same(calDocRef), same(context))).andReturn(calDoc);
+        
+    replayAll();
+    String space = calService.getEventSpaceForCalendar(calDocRef);
+    verifyAll();
+    
+    assertNotNull(space);
+    assertEquals("", space);
+  }
+  
+  @Test
+  public void testGetEventSpaceForCalendar() throws XWikiException {
+    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
+        "myCalDoc");
+    XWikiDocument calDoc = new XWikiDocument(calDocRef);
+    DocumentReference configClassRef = new DocumentReference(getContext().getDatabase(), 
+        "Classes", "CalendarConfigClass");
+    BaseObject calConfObj = new BaseObject();
+    calConfObj.setXClassReference(configClassRef);
+    calDoc.setXObject(0, calConfObj);
+    calConfObj.setStringValue("calendarspace", "myCalSpace");
+    
+    expect(xwiki.getDocument(same(calDocRef), same(context))).andReturn(calDoc);
+        
+    replayAll();
+    String space = calService.getEventSpaceForCalendar(calDocRef);
+    verifyAll();
+    
+    assertNotNull(space);
+    assertEquals("myCalSpace", space);
+  }
+  
+  
+  @Test
   public void testGetAllowedSpaces_noObject() throws XWikiException {
     DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
         "myCalDoc");
@@ -63,7 +124,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
         "Classes", "CalendarConfigClass");
     BaseObject calConfObj = new BaseObject();
     calConfObj.setXClassReference(configClassRef);
-    calDoc.setXObject(0, calConfObj);    
+    calDoc.setXObject(0, calConfObj);  
     
     expect(xwiki.getDocument(same(calDocRef), same(context))).andReturn(calDoc);
         

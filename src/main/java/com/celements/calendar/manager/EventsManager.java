@@ -38,32 +38,31 @@ public class EventsManager implements IEventManager {
   private static final Log LOGGER = LogFactory.getFactory().getInstance(
       EventsManager.class);
 
-  @Requirement
-  ICalendarService calService;
-
   //TODO we must change to 'default' serializer with the wikiname included
   @Requirement("local")
   private EntityReferenceSerializer<String> refLocalSerializer;
 
-  @Requirement("default") EntityReferenceSerializer<String> refDefaultSerializer;
+  @Requirement("default")
+  private EntityReferenceSerializer<String> refDefaultSerializer;
 
   @Requirement
-  IQueryService queryService;
+  private ICalendarService calService;
 
   @Requirement
-  IEventSearch eventSearch;
+  private IQueryService queryService;
 
   @Requirement
-  IWebUtilsService webUtilsService;
+  private IEventSearch eventSearch;
 
   @Requirement
-  Execution execution;
+  private IWebUtilsService webUtilsService;
+
+  @Requirement
+  private Execution execution;
 
   private XWikiContext getContext() {
-    return (XWikiContext)execution.getContext().getProperty("xwikicontext");
+    return (XWikiContext) execution.getContext().getProperty("xwikicontext");
   }
-
-  public EventsManager() {}
 
   public List<EventApi> getEvents(ICalendar cal, int start, int nb) {
     List<EventApi> eventApiList = new ArrayList<EventApi>();
@@ -169,7 +168,9 @@ public class EventsManager implements IEventManager {
 
   private EventSearchResult getEventSearchResult(DocumentReference calDocRef,
       boolean isArchive, Date startDate) throws XWikiException {
-    LuceneQueryApi query = getQueryForCalDoc(calDocRef);
+    LuceneQueryApi query = queryService.createQuery();
+    addSpaceRestrictions(query, calDocRef);
+    addLangRestriction(query, calDocRef);
     if (!isArchive) {
       return eventSearch.getSearchResultFromDate(query, startDate);
     } else {
@@ -177,31 +178,39 @@ public class EventsManager implements IEventManager {
     }
   }
 
-  private LuceneQueryApi getQueryForCalDoc(DocumentReference calDocRef
+  private void addSpaceRestrictions(LuceneQueryApi query, DocumentReference calDocRef
       ) throws XWikiException {
-    List<LuceneQueryRestrictionApi> spaceList = new ArrayList<LuceneQueryRestrictionApi>();
-    for (String space : calService.getAllowedSpaces(calDocRef)) {
-      spaceList.add(queryService.createRestriction("space", space));
+    List<String> allowedSpaces = calService.getAllowedSpaces(calDocRef);
+    if (!allowedSpaces.isEmpty()) {
+      List<LuceneQueryRestrictionApi> spaceRestrictionList =
+          new ArrayList<LuceneQueryRestrictionApi>();
+      for (String space : allowedSpaces) {
+        spaceRestrictionList.add(queryService.createRestriction("space", space));
+      }
+      query.addOrRestrictionList(spaceRestrictionList);
     }
+  }
+
+  private void addLangRestriction(LuceneQueryApi query, DocumentReference calDocRef) {
+    String defaultLang = webUtilsService.getDefaultLanguage();
     LuceneQueryRestrictionApi langRestriction = queryService.createRestriction(
-        Event.CLASS + "." + Event.PROPERTY_LANG, webUtilsService.getDefaultLanguage());
-    return queryService.createQuery().addOrRestrictionList(spaceList).addRestriction(
-        langRestriction);
+        Event.CLASS + "." + Event.PROPERTY_LANG, defaultLang);
+    query.addRestriction(langRestriction);
   }
 
   private boolean checkEventSubscription(DocumentReference calDocRef, IEvent event
       ) throws XWikiException {
-    return isHomeCalendar(calDocRef, event)
+    return isHomeCalendar(calDocRef, event.getDocumentReference())
         || isEventSubscribed(calDocRef, event);
   }
 
-  boolean isHomeCalendar(DocumentReference calDocRef, IEvent event
+  boolean isHomeCalendar(DocumentReference calDocRef, DocumentReference eventDocRef
       ) throws XWikiException {
     String eventSpaceForCal = calService.getEventSpaceForCalendar(calDocRef);
-    boolean isHomeCal = event.getDocumentReference().getLastSpaceReference().getName(
+    boolean isHomeCal = eventDocRef.getLastSpaceReference().getName(
         ).equals(eventSpaceForCal);
-    LOGGER.trace("isHomeCalendar: for [" + event.getDocumentReference()
-        + "] check on calDocRef [" + calDocRef + "] with space [" + eventSpaceForCal
+    LOGGER.trace("isHomeCalendar: for [" + eventDocRef + "] check on calDocRef ["
+        + calDocRef + "] with space [" + eventSpaceForCal
         + "] returning " + isHomeCal);
     return isHomeCal;
   }
@@ -209,7 +218,6 @@ public class EventsManager implements IEventManager {
   private boolean isEventSubscribed(DocumentReference calDocRef, IEvent event
       ) throws XWikiException {
     BaseObject obj = getSubscriptionObject(calDocRef, event);
-
     ICalendar calendar = event.getCalendar();
     BaseObject calObj = null;
     if ((calendar != null) && (calendar.getCalDoc() != null)){
@@ -232,13 +240,13 @@ public class EventsManager implements IEventManager {
   }
 
   private BaseObject getSubscriptionObject(DocumentReference calDocRef, IEvent event) {
-    BaseObject subscriptObj = event.getEventDocument().getXObject(
-        getSubscriptionClassRef(), "subscriber", refDefaultSerializer.serialize(
-            calDocRef), false);
+    XWikiDocument eventDoc = event.getEventDocument();
+    BaseObject subscriptObj = eventDoc.getXObject(getSubscriptionClassRef(), "subscriber",
+        refDefaultSerializer.serialize(calDocRef), false);
     if (subscriptObj == null) {
       //for backwards compatibility
-      subscriptObj = event.getEventDocument().getXObject(getSubscriptionClassRef(),
-          "subscriber", refLocalSerializer.serialize(calDocRef), false);
+      subscriptObj = eventDoc.getXObject(getSubscriptionClassRef(), "subscriber",
+          refLocalSerializer.serialize(calDocRef), false);
     }
     return subscriptObj;
   }
@@ -251,21 +259,20 @@ public class EventsManager implements IEventManager {
 
   public NavigationDetails getNavigationDetails(IEvent event, Calendar cal
       ) throws XWikiException {
-    LOGGER.debug("getNavigationDetails for [" + event + "] with date ["
-        + event.getEventDate() + "]");
-    if (event.getEventDate() == null) {
+    Date eventDate = event.getEventDate();
+    LOGGER.debug("getNavigationDetails for [" + event + "] with date [" + eventDate + "]");
+    if (eventDate == null) {
       LOGGER.error("getNavigationDetails failed because eventDate is null for ["
           + event.getDocumentReference() + "].");
       return null;
     }
-    NavigationDetails navDetail = new NavigationDetails(event.getEventDate(), 0);
+    NavigationDetails navDetail = new NavigationDetails(eventDate, 0);
     int nb = 10;
     int eventIndex, start = 0;
     List<IEvent> events;
     boolean hasMore, notFound;
     do {
-      events = getEvents_internal(cal.getDocumentReference(), start, nb, false,
-          event.getEventDate());
+      events = getEvents_internal(cal.getDocumentReference(), start, nb, false, eventDate);
       hasMore = events.size() == nb;
       eventIndex = events.indexOf(event);
       notFound = eventIndex < 0;
@@ -282,6 +289,22 @@ public class EventsManager implements IEventManager {
 
   public IEvent getEvent(DocumentReference eventDocRef) {
     return new Event(eventDocRef);
+  }
+
+  void injectExecution(Execution execution) {
+    this.execution = execution;
+  }
+
+  void injectCalService(ICalendarService calService) {
+    this.calService = calService;
+  }
+
+  void injectQueryService(IQueryService queryService) {
+    this.queryService = queryService;
+  }
+
+  void injectEventSearch(IEventSearch eventSearch) {
+    this.eventSearch = eventSearch;
   }
 
 }

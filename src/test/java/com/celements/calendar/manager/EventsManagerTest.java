@@ -1,9 +1,16 @@
 package com.celements.calendar.manager;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.same;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -13,25 +20,26 @@ import org.apache.velocity.VelocityContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.context.Execution;
-import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
-import org.xwiki.model.reference.EntityReferenceResolver;
-import org.xwiki.model.reference.EntityReferenceSerializer;
-import org.xwiki.query.Query;
-import org.xwiki.query.QueryManager;
+import org.xwiki.model.reference.SpaceReference;
+import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.Calendar;
 import com.celements.calendar.Event;
-import com.celements.calendar.plugin.CelementsCalendarPlugin;
+import com.celements.calendar.ICalendar;
+import com.celements.calendar.IEvent;
+import com.celements.calendar.search.EventSearchResult;
+import com.celements.calendar.search.IEventSearch;
 import com.celements.calendar.service.ICalendarService;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
+import com.celements.search.lucene.IQueryService;
+import com.celements.search.lucene.query.LuceneQueryApi;
+import com.celements.search.lucene.query.LuceneQueryRestrictionApi;
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
-import com.xpn.xwiki.objects.BaseObject;
-import com.xpn.xwiki.store.XWikiStoreInterface;
 import com.xpn.xwiki.web.Utils;
 
 public class EventsManagerTest extends AbstractBridgedComponentTestCase {
@@ -39,219 +47,301 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
   private XWikiContext context;
   private EventsManager eventsMgr;
   private XWiki xwiki;
-  private XWikiStoreInterface mockStore;
   private ICalendarService calServiceMock;
-  private QueryManager queryManagerMock;
-  private EntityReferenceResolver<String> stringRefResolverMock;
-  private EntityReferenceSerializer<String> refDefaultSerializerMock;
+  private IQueryService queryServiceMock;
+  private IEventSearch eventSearchMock;
+  private LuceneQueryApi queryMock;
+  private EventSearchResult eventSearchResultMock;
 
-  @SuppressWarnings("unchecked")
   @Before
-  public void setUp_GetEventsCommandTest() throws Exception {
+  public void setUp_EventsManagerTest() {
     context = getContext();
-    eventsMgr = new EventsManager();
-    eventsMgr.execution = Utils.getComponent(Execution.class);
-    calServiceMock = createMock(ICalendarService.class);
-    eventsMgr.calService = calServiceMock;
-    queryManagerMock = createMock(QueryManager.class);
-    eventsMgr.queryManager = queryManagerMock;
-    stringRefResolverMock = createMock(EntityReferenceResolver.class);
-    eventsMgr.stringRefResolver = stringRefResolverMock;
-    refDefaultSerializerMock = createMock(EntityReferenceSerializer.class);
-    eventsMgr.refDefaultSerializer = refDefaultSerializerMock;
     xwiki = createMock(XWiki.class);
     context.setWiki(xwiki);
-    mockStore = createMock(XWikiStoreInterface.class);
-    expect(xwiki.getStore()).andReturn(mockStore).anyTimes();
+    eventsMgr = (EventsManager) Utils.getComponent(IEventManager.class);
+    calServiceMock = createMock(ICalendarService.class);
+    eventsMgr.injectCalService(calServiceMock);
+    queryServiceMock = createMock(IQueryService.class);
+    eventsMgr.injectQueryService(queryServiceMock);
+    eventSearchMock = createMock(IEventSearch.class);
+    eventsMgr.injectEventSearch(eventSearchMock);
+    queryMock = createMock(LuceneQueryApi.class);
+    eventSearchResultMock = createMock(EventSearchResult.class);
   }
 
   @Test
-  public void testIsHomeCalendar() throws Exception {
+  public void getEventsInternal() throws XWikiException {
+    String lang = "de";
+    String space = "myCalSpace";
+    Date startDate = new Date();
+    EntityReference calSpace = new SpaceReference(space, new WikiReference(
+        context.getDatabase()));
     DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
-    "myCalDoc");
+        "myCalDoc");
+    ICalendar cal = new Calendar(calDocRef, false);
+    cal.setStartDate(startDate);
+    LuceneQueryRestrictionApi spaceRestriction = new LuceneQueryRestrictionApi("space",
+        space);
+    LuceneQueryRestrictionApi langRestriction = new LuceneQueryRestrictionApi("lang",
+        "de");
+
+    expect(calServiceMock.getAllowedSpaces(eq(calDocRef))).andReturn(Arrays.asList(space)
+        ).once();
+    expect(queryServiceMock.createRestriction("space", space)).andReturn(
+        spaceRestriction).once();
+    expect(xwiki.getSpacePreference(eq("default_language"), same(context))
+        ).andReturn(lang);
+    expect(queryServiceMock.createRestriction("Classes.CalendarEventClass.lang", lang)
+        ).andReturn(langRestriction).once();
+    expect(queryServiceMock.createQuery()).andReturn(queryMock).once();
+    expect(queryMock.addOrRestrictionList(Arrays.asList(spaceRestriction))).andReturn(
+        queryMock).once();
+    expect(queryMock.addRestriction(eq(langRestriction))).andReturn(queryMock).once();
+    expect(eventSearchMock.getSearchResultFromDate(same(queryMock), eq(startDate))
+        ).andReturn(eventSearchResultMock).once();
+
+    DocumentReference eventDocRef = new DocumentReference(context.getDatabase(),
+        "mySpace", "myEvent");
+    eventDocRef.setParent(calSpace);
+    IEvent event = createMock(IEvent.class);
+    DocumentReference eventDocRef2 = new DocumentReference(context.getDatabase(),
+        "mySpace", "myEvent2");
+    eventDocRef2.setParent(calSpace);
+    IEvent event2 = createMock(IEvent.class);
+
+    expect(eventSearchResultMock.getEventList(2, 5)).andReturn(Arrays.asList(event,
+        event2)).once();
+    expect(calServiceMock.getEventSpaceForCalendar(eq(calDocRef))).andReturn(space
+        ).times(2);
+    expect(event.getDocumentReference()).andReturn(eventDocRef).times(1);
+    expect(event2.getDocumentReference()).andReturn(eventDocRef2).times(1);
+
+    replayAll(event, event2);
+    List<IEvent> events = eventsMgr.getEventsInternal(cal, 2, 5);
+    verifyAll(event, event2);
+
+    assertNotNull(events);
+    assertEquals(2, events.size());
+    assertEquals(event, events.get(0));
+    assertEquals(event2, events.get(1));
+  }
+
+  @Test
+  public void getEventsInternal_isArchive() throws XWikiException {
+    String lang = "de";
+    String space = "myCalSpace";
+    Date startDate = new Date();
+    EntityReference calSpace = new SpaceReference(space, new WikiReference(
+        context.getDatabase()));
+    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
+        "myCalDoc");
+    ICalendar cal = new Calendar(calDocRef, true);
+    cal.setStartDate(startDate);
+    LuceneQueryRestrictionApi spaceRestriction = new LuceneQueryRestrictionApi("space",
+        space);
+    LuceneQueryRestrictionApi langRestriction = new LuceneQueryRestrictionApi("lang",
+        "de");
+
+    expect(calServiceMock.getAllowedSpaces(eq(calDocRef))).andReturn(Arrays.asList(space)
+        ).once();
+    expect(queryServiceMock.createRestriction("space", space)).andReturn(
+        spaceRestriction).once();
+    expect(xwiki.getSpacePreference(eq("default_language"), same(context))
+        ).andReturn(lang);
+    expect(queryServiceMock.createRestriction("Classes.CalendarEventClass.lang", lang)
+        ).andReturn(langRestriction).once();
+    expect(queryServiceMock.createQuery()).andReturn(queryMock).once();
+    expect(queryMock.addOrRestrictionList(Arrays.asList(spaceRestriction))).andReturn(
+        queryMock).once();
+    expect(queryMock.addRestriction(eq(langRestriction))).andReturn(queryMock).once();
+    expect(eventSearchMock.getSearchResultUptoDate(same(queryMock), eq(startDate))
+        ).andReturn(eventSearchResultMock).once();
+
+    DocumentReference eventDocRef = new DocumentReference(context.getDatabase(),
+        "mySpace", "myEvent");
+    eventDocRef.setParent(calSpace);
+    IEvent event = createMock(IEvent.class);
+    DocumentReference eventDocRef2 = new DocumentReference(context.getDatabase(),
+        "mySpace", "myEvent2");
+    eventDocRef2.setParent(calSpace);
+    IEvent event2 = createMock(IEvent.class);
+
+    expect(eventSearchResultMock.getEventList(2, 5)).andReturn(Arrays.asList(event,
+        event2)).once();
+    expect(calServiceMock.getEventSpaceForCalendar(eq(calDocRef))).andReturn(space
+        ).times(2);
+    expect(event.getDocumentReference()).andReturn(eventDocRef).times(1);
+    expect(event2.getDocumentReference()).andReturn(eventDocRef2).times(1);
+
+    replayAll(event, event2);
+    List<IEvent> events = eventsMgr.getEventsInternal(cal, 2, 5);
+    verifyAll(event, event2);
+
+    assertNotNull(events);
+    assertEquals(2, events.size());
+    assertEquals(event, events.get(0));
+    assertEquals(event2, events.get(1));
+  }
+
+  @Test
+  public void testCountEvents() throws XWikiException {
+    String lang = "de";
+    String space = "myCalSpace";
+    Date startDate = new Date();
+    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
+        "myCalDoc");
+    ICalendar cal = new Calendar(calDocRef, false);
+    cal.setStartDate(startDate);
+    LuceneQueryRestrictionApi spaceRestriction = new LuceneQueryRestrictionApi("space",
+        space);
+    LuceneQueryRestrictionApi langRestriction = new LuceneQueryRestrictionApi("lang",
+        "de");
+
+    expect(calServiceMock.getAllowedSpaces(eq(calDocRef))).andReturn(Arrays.asList(space)
+        ).once();
+    expect(queryServiceMock.createRestriction("space", space)).andReturn(
+        spaceRestriction).once();
+    expect(xwiki.getSpacePreference(eq("default_language"), same(context))
+        ).andReturn(lang);
+    expect(queryServiceMock.createRestriction("Classes.CalendarEventClass.lang", lang)
+        ).andReturn(langRestriction).once();
+    expect(queryServiceMock.createQuery()).andReturn(queryMock).once();
+    expect(queryMock.addOrRestrictionList(Arrays.asList(spaceRestriction))).andReturn(
+        queryMock).once();
+    expect(queryMock.addRestriction(eq(langRestriction))).andReturn(queryMock).once();
+    expect(eventSearchMock.getSearchResultFromDate(same(queryMock), eq(startDate))
+        ).andReturn(eventSearchResultMock).once();
+
+    expect(eventSearchResultMock.getSize()).andReturn(2).once();
+
+    replayAll();
+    long countEvent = eventsMgr.countEvents(cal);
+    verifyAll();
+
+    assertEquals(2L, countEvent);
+  }
+
+  @Test
+  public void testCountEvents_checkCache() throws XWikiException {
+    Date startDate = new Date();
+    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
+        "myCalDoc");
+    ICalendar cal = new Calendar(calDocRef, false);
+    cal.setStartDate(startDate);
+
+    Execution execution = Utils.getComponent(Execution.class);
+    execution.getContext().setProperty("EventsManager.countEvents|xwikidb:mySpace.myCalDoc"
+        + "|false|" + startDate.getTime(), 12345L);
+    eventsMgr.injectExecution(execution);
+
+    replayAll();
+    long countEvent = eventsMgr.countEvents(cal);
+    verifyAll();
+
+    assertEquals(12345L, countEvent);
+  }
+
+  @Test
+  public void testGetNavigationDetails_noStartDate() throws XWikiException {
+    VelocityContext vcontext = new VelocityContext();
+    context.put("vcontext", vcontext);
+    DocumentReference cal1Ref = new DocumentReference(context.getDatabase(), "mySpace",
+        "cal1");
+    Calendar cal = new Calendar(cal1Ref, false);
+    Event event = createMock(Event.class);
+    DocumentReference eventRef = new DocumentReference(context.getDatabase(),
+        "myEventSpace", "Event1");
+    XWikiDocument cal1Doc = new XWikiDocument(cal1Ref);
+
+    expect(event.getEventDate()).andReturn(null).atLeastOnce();
+    expect(event.getDocumentReference()).andReturn(eventRef).anyTimes();
+    expect(xwiki.getDocument(eq(cal1Ref), same(context))).andReturn(cal1Doc
+        ).anyTimes();
+
+    replayAll(event);
+    assertNull(eventsMgr.getNavigationDetails(event, cal));
+    verifyAll(event);
+  }
+
+  @Test
+  public void testGetNavigationDetails() throws XWikiException {
+    String space = "asdf";
+    EntityReference calSpace = new SpaceReference(space, new WikiReference(
+        context.getDatabase()));
+    Date eventDate = new Date();
+    IEvent event = createMock(IEvent.class);
+    DocumentReference eventDocRef = new DocumentReference(context.getDatabase(),
+        "mySpace", "myEvent");
+    eventDocRef.setParent(calSpace);
+    IEvent event2 = createMock(IEvent.class);
+    DocumentReference eventDocRef2 = new DocumentReference(context.getDatabase(),
+        "mySpace", "myEvent2");
+    eventDocRef2.setParent(calSpace);
+    IEvent event3 = createMock(IEvent.class);
+    DocumentReference eventDocRef3 = new DocumentReference(context.getDatabase(),
+        "mySpace", "myEvent3");
+    eventDocRef3.setParent(calSpace);
+    List<IEvent> eventList = Arrays.asList(event2, event3, event);
+    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
+        "myCalDoc");
+    Calendar cal = new Calendar(calDocRef, false);
+    Date startDate = new Date(1000);
+    cal.setStartDate(startDate);
+    String lang = "de";
+    List<String> spaces = Collections.emptyList();
+    LuceneQueryRestrictionApi langRestriction = new LuceneQueryRestrictionApi("lang",
+        "de");
+
+    expect(event.getEventDate()).andReturn(eventDate).once();
+    expect(calServiceMock.getAllowedSpaces(eq(calDocRef))).andReturn(spaces).once();
+    expect(xwiki.getSpacePreference(eq("default_language"), same(context))
+        ).andReturn(lang);
+    expect(queryServiceMock.createRestriction("Classes.CalendarEventClass.lang", lang)
+        ).andReturn(langRestriction).once();
+    expect(queryServiceMock.createQuery()).andReturn(queryMock).once();
+    expect(queryMock.addRestriction(eq(langRestriction))).andReturn(queryMock).once();
+    expect(eventSearchMock.getSearchResultFromDate(same(queryMock), eq(eventDate))
+        ).andReturn(eventSearchResultMock).once();
+
+    expect(eventSearchResultMock.getEventList(0, 10)).andReturn(eventList).once();
+    expect(calServiceMock.getEventSpaceForCalendar(eq(calDocRef))).andReturn(space
+        ).times(3);
+    expect(event.getDocumentReference()).andReturn(eventDocRef).once();
+    expect(event2.getDocumentReference()).andReturn(eventDocRef2).once();
+    expect(event3.getDocumentReference()).andReturn(eventDocRef3).once();
+
+    replayAll(event, event2, event3);
+    NavigationDetails navDetails = eventsMgr.getNavigationDetails(event, cal);
+    verifyAll(event, event2, event3);
+
+    assertNotNull(navDetails);
+    assertEquals(new NavigationDetails(eventDate, 2), navDetails);
+
+  }
+
+  @Test
+  public void testIsHomeCalendar() throws XWikiException {
+    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
+        "myCalDoc");
     DocumentReference eventDocRef = new DocumentReference(context.getDatabase(), "inbox",
         "Event1");
     expect(calServiceMock.getEventSpaceForCalendar(eq(calDocRef))).andReturn("inbox"
         ).once();
     replayAll();
-    Event theEvent = new Event(eventDocRef);
     assertTrue("Expect true for Event1 in space 'inbox' if EventSpaceForCalender is"
-        + " 'inbox' too.", eventsMgr.isHomeCalendar(calDocRef, theEvent));
+        + " 'inbox' too.", eventsMgr.isHomeCalendar(calDocRef, eventDocRef));
     verifyAll();
-  }
-
-  @Test
-  @Deprecated
-  public void testCountEvents_emptyList_deprecatedCall() throws Exception {
-    VelocityContext vcontext = new VelocityContext();
-    context.put("vcontext", vcontext);
-    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
-        "myCalDoc");
-    expect(refDefaultSerializerMock.serialize(eq(calDocRef))).andReturn(
-        "mySpace.myCalDoc");
-    XWikiDocument calDoc = new XWikiDocument(calDocRef);
-    List<Object> resultList = Collections.emptyList();
-    Query queryMock = createStrictMock(Query.class);
-    expect(queryManagerMock.createQuery(isA(String.class), eq(Query.HQL))).andReturn(
-        queryMock).once();
-    expect(queryMock.execute()).andReturn(resultList).once();
-    expect(calServiceMock.getAllowedSpacesHQL(same(calDoc))).andReturn("").once();
-    expect(xwiki.getDocument(eq(calDocRef), same(context))).andReturn(calDoc
-        ).atLeastOnce();
-    replayAll(queryMock);
-    long countEvent = eventsMgr.countEvents(calDoc, false, new Date());
-    assertNotNull(countEvent);
-    assertEquals(0L, countEvent);
-    verifyAll(queryMock);
-  }
-
-  @Test
-  public void testCountEvents_emptyList() throws Exception {
-    VelocityContext vcontext = new VelocityContext();
-    context.put("vcontext", vcontext);
-    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
-        "myCalDoc");
-    expect(refDefaultSerializerMock.serialize(eq(calDocRef))).andReturn(
-        "mySpace.myCalDoc");
-    XWikiDocument calDoc = new XWikiDocument(calDocRef);
-    List<Object> resultList = Collections.emptyList();
-    Query queryMock = createStrictMock(Query.class);
-    expect(queryManagerMock.createQuery(isA(String.class), eq(Query.HQL))).andReturn(
-        queryMock).once();
-    expect(queryMock.execute()).andReturn(resultList).once();
-    expect(calServiceMock.getAllowedSpacesHQL(same(calDoc))).andReturn("").once();
-    expect(xwiki.getDocument(eq(calDocRef), same(context))).andReturn(calDoc
-        ).atLeastOnce();
-    replayAll(queryMock);
-    long countEvent = eventsMgr.countEvents(calDocRef, false, new Date());
-    assertNotNull(countEvent);
-    assertEquals(0L, countEvent);
-    verifyAll(queryMock);
-  }
-
-  @Test
-  public void testCountEvents_checkCache() throws Exception {
-    VelocityContext vcontext = new VelocityContext();
-    context.put("vcontext", vcontext);
-    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
-        "myCalDoc");
-    expect(refDefaultSerializerMock.serialize(eq(calDocRef))).andReturn(
-        "mySpace.myCalDoc");
-    Date startDate = new Date();
-    String cacheKey = "EventsManager.countEvents|" + "mySpace.myCalDoc" + "|false|"
-      + startDate.getTime();
-    eventsMgr.execution.getContext().setProperty(cacheKey, 12345L);
-    replayAll();
-    assertEquals(12345L, eventsMgr.countEvents(calDocRef, false, startDate));
-    verifyAll();
-  }
-
-  @Test
-  public void testGetNavigationDetails_Null_StartDate() throws Exception {
-    VelocityContext vcontext = new VelocityContext();
-    context.put("vcontext", vcontext);
-    DocumentReference cal1Ref = new DocumentReference(context.getDatabase(), "mySpace",
-        "cal1");
-    Calendar theCal = new Calendar(cal1Ref, false);
-    Event theEvent = createMock(Event.class);
-    expect(theEvent.getEventDate()).andReturn(null).atLeastOnce();
-    DocumentReference eventRef = new DocumentReference(context.getDatabase(),
-        "myEventSpace", "Event1");
-    expect(theEvent.getDocumentReference()).andReturn(eventRef).anyTimes();
-    XWikiDocument cal1Doc = new XWikiDocument(cal1Ref);
-    expect(xwiki.getDocument(eq(cal1Ref), same(context))).andReturn(cal1Doc
-      ).anyTimes();
-    replayAll(theEvent);
-    assertNull(eventsMgr.getNavigationDetails(theEvent, theCal));
-    verifyAll(theEvent);
-  }
-
-  @Test
-  public void testGetNavigationDetails() throws Exception {
-    VelocityContext vcontext = new VelocityContext();
-    context.put("vcontext", vcontext);
-    DocumentReference calConfObjClassRef = new DocumentReference(context.getDatabase(), 
-        CelementsCalendarPlugin.CLASS_CALENDAR_SPACE, 
-        CelementsCalendarPlugin.CLASS_CALENDAR_DOC);
-    DocumentReference cal1Ref = new DocumentReference(context.getDatabase(), "mySpace",
-      "cal1");
-    XWikiDocument cal1Doc = new XWikiDocument(cal1Ref);
-    BaseObject cal1ConfigObj = new BaseObject();
-    cal1ConfigObj.setXClassReference(calConfObjClassRef);
-    cal1Doc.setXObject(0, cal1ConfigObj);
-    cal1ConfigObj.setStringValue(CelementsCalendarPlugin.PROPERTY_CALENDAR_SPACE,
-        "myEventSpace");
-    Calendar theCal = new Calendar(cal1Ref, false);
-    expect(xwiki.getWebPreference(eq("default_language"), eq("myEventSpace"), eq(""),
-        same(context))).andReturn("de").anyTimes();
-    BaseObject eventObj = createMockEventDoc("Event1");
-    expect(calServiceMock.getAllowedSpacesHQL(same(cal1Doc))).andReturn("").atLeastOnce();
-    expect(calServiceMock.getEventSpaceForCalendar(eq(cal1Ref))).andReturn("myEventSpace"
-      ).atLeastOnce();
-    Query mockQuery = createStrictMock(Query.class);
-    expect(queryManagerMock.createQuery(isA(String.class), eq(Query.HQL))).andReturn(
-        mockQuery).atLeastOnce();
-    expect(mockQuery.setOffset(eq(0))).andReturn(mockQuery).once();
-    expect(mockQuery.setLimit(eq(10))).andReturn(mockQuery).once();
-    List<String> result1 = Arrays.asList("myEventSpace.Event2",
-        "myEventSpace.Event3", "myEventSpace.Event4", "myEventSpace.Event5",
-        "myEventSpace.Event6", "myEventSpace.Event7", "myEventSpace.Event8",
-        "myEventSpace.Event9", "myEventSpace.Event10", "myEventSpace.Event10");
-    List<Object> result1List = new ArrayList<Object>(result1);
-    addToResolver(result1);
-    expect(mockQuery.execute()).andReturn(result1List).once();
-    expect(mockQuery.setOffset(eq(10))).andReturn(mockQuery).once();
-    expect(mockQuery.setLimit(eq(20))).andReturn(mockQuery).once();
-    List<String> result2 = Arrays.asList("myEventSpace.Event11", "myEventSpace.Event12",
-        "myEventSpace.Event13", "myEventSpace.Event15", "myEventSpace.Event16",
-        "myEventSpace.Event17", "myEventSpace.Event18", "myEventSpace.Event19",
-        "myEventSpace.Event14", "myEventSpace.Event20", "myEventSpace.Event21",
-        "myEventSpace.Event22", "myEventSpace.Event23", "myEventSpace.Event25",
-        "myEventSpace.Event26", "myEventSpace.Event1", "myEventSpace.Event28",
-        "myEventSpace.Event29", "myEventSpace.Event24", "myEventSpace.Event30");
-    List<Object> result2List = new ArrayList<Object>(result2);
-    addToResolver(result2);
-    expect(mockQuery.execute()).andReturn(result2List).once();
-    expect(xwiki.getDocument(eq(cal1Ref), same(context))).andReturn(cal1Doc
-      ).atLeastOnce();
-    replayAll(mockQuery);
-    Event theEvent = new Event(Arrays.asList(eventObj), "myEventSpace");
-    assertEquals(new NavigationDetails(theEvent.getEventDate(), 25),
-        eventsMgr.getNavigationDetails(theEvent, theCal));
-    verifyAll(mockQuery);
-  }
-
-
-  private void addToResolver(List<String> fullNameList) throws XWikiException{
-    for(String fullName : fullNameList) {
-      EntityReference docRef = new DocumentReference(" ", fullName.split("\\.")[0],
-          fullName.split("\\.")[1]);
-      expect(stringRefResolverMock.resolve(eq(fullName), eq(EntityType.DOCUMENT))
-          ).andReturn(docRef).once();
-      createMockEventDoc(fullName.split("\\.")[1]);
-    }
-  }
-
-  private BaseObject createMockEventDoc(String eventDocName) throws XWikiException {
-    DocumentReference eventDocRef = new DocumentReference(context.getDatabase(),
-        "myEventSpace", eventDocName);
-    XWikiDocument eventDoc = new XWikiDocument(eventDocRef);
-    BaseObject eventObj = new BaseObject();
-    eventObj.setStringValue("", "de");
-    eventObj.setDateValue(CelementsCalendarPlugin.PROPERTY_EVENT_DATE, new Date());
-    eventDoc.setXObject(0, eventObj );
-    return eventObj;
   }
 
   private void replayAll(Object ... mocks) {
-    replay(xwiki, mockStore, calServiceMock, queryManagerMock,
-        stringRefResolverMock, refDefaultSerializerMock);
+    replay(xwiki, calServiceMock, queryServiceMock, eventSearchMock, queryMock,
+        eventSearchResultMock);
     replay(mocks);
   }
 
   private void verifyAll(Object ... mocks) {
-    verify(xwiki, mockStore, calServiceMock, queryManagerMock,
-        stringRefResolverMock, refDefaultSerializerMock);
+    verify(xwiki, calServiceMock, queryServiceMock, eventSearchMock, queryMock,
+        eventSearchResultMock);
     verify(mocks);
   }
 

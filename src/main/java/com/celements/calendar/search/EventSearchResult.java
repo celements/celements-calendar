@@ -18,15 +18,15 @@ import com.xpn.xwiki.plugin.lucene.SearchResults;
 import com.xpn.xwiki.web.Utils;
 
 public class EventSearchResult {
-  
+
   private IWebUtilsService webUtils;
 
   private static Log LOGGER = LogFactory.getFactory().getInstance(
       EventSearchResult.class);
-  
+
   private SearchResults searchResultsCache;
   private LucenePlugin lucenePlugin;
-  
+
   private final String luceneQuery;
   private final String[] sortFields;
   private final XWikiContext context;
@@ -36,33 +36,44 @@ public class EventSearchResult {
     this.sortFields = sortFields;
     this.context = context;
   }
-  
+
   public String getLuceneQuery() {
     return luceneQuery;
   }
-  
+
   public String[] getSortFields() {
     return Arrays.copyOf(sortFields, sortFields.length);
   }
-  
+
+  /**
+   * 
+   * @return all events
+   */
   public List<IEvent> getEventList() {
-    SearchResults results = luceneSearch();
-    if (results != null) {
-      return convertToEventList(results.getResults());
-    } else {
-      return null;
-    }
+    return getEventList(0, 0);
   }
-  
+
+  /**
+   * 
+   * @param offset from 0 to (size - 1)
+   * @param limit all remaining events are returned for values < 0 or >= (size - 1)
+   * @return selected events
+   */
   public List<IEvent> getEventList(int offset, int limit) {
     SearchResults results = luceneSearch();
     if (results != null) {
-      return convertToEventList(results.getResults(offset + 1, limit));
+      List<SearchResult> list;
+      if (limit > 0) {
+        list = results.getResults(offset + 1, limit);
+      } else {
+        list = results.getResults(offset + 1, results.getHitcount());
+      }
+      return convertToEventList(list);
     } else {
       return null;
     }
   }
-  
+
   private List<IEvent> convertToEventList(List<SearchResult> results) {
     List<IEvent> eventList = new ArrayList<IEvent>();
     for (SearchResult result : results) {
@@ -76,27 +87,27 @@ public class EventSearchResult {
   public int getSize() {
     return luceneSearch().getHitcount();
   }
-  
+
   private SearchResults luceneSearch() {
     if (searchResultsCache == null) {
       try {
-        searchResultsCache = getLucenePlugin().getSearchResults(luceneQuery, sortFields, 
+        searchResultsCache = getLucenePlugin().getSearchResults(luceneQuery, sortFields,
             null, "default,de", context);
       } catch (Exception exception) {
-        LOGGER.error("Unable to get lucene search results for query '" + luceneQuery 
+        LOGGER.error("Unable to get lucene search results for query '" + luceneQuery
             + "'", exception);
       }
     }
     return searchResultsCache;
   }
-  
+
   private LucenePlugin getLucenePlugin() {
     if (lucenePlugin == null) {
       lucenePlugin = (LucenePlugin) context.getWiki().getPlugin("lucene", context);
     }
     return lucenePlugin;
   }
-  
+
   private IWebUtilsService getWebUtils() {
     if(webUtils == null){
       webUtils = Utils.getComponent(IWebUtilsService.class);
@@ -106,12 +117,12 @@ public class EventSearchResult {
 
   @Override
   public String toString() {
-    return "EventSearchResult [luceneQuery=" + luceneQuery + ", sortFields=" 
+    return "EventSearchResult [luceneQuery=" + luceneQuery + ", sortFields="
         + Arrays.toString(sortFields) + "]";
   }
-  
+
   void injectLucenePlugin(LucenePlugin lucenePlugin) {
     this.lucenePlugin = lucenePlugin;
   }
-  
+
 }

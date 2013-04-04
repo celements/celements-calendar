@@ -64,17 +64,17 @@ public class EventsManager implements IEventManager {
     return (XWikiContext) execution.getContext().getProperty("xwikicontext");
   }
 
+  @Deprecated
   public List<EventApi> getEvents(ICalendar cal, int start, int nb) {
     List<EventApi> eventApiList = new ArrayList<EventApi>();
-    try {
-      for (IEvent theEvent : getEvents_internal(cal.getDocumentReference(), start, nb,
-          cal.isArchive(), cal.getStartDate())) {
-        eventApiList.add(new EventApi(theEvent, cal.getLanguage(), getContext()));
-      }
-    } catch (XWikiException exc) {
-      LOGGER.error(exc);
+    for (IEvent event : getEventsInternal(cal, start, nb)) {
+      eventApiList.add(new EventApi(event, cal.getLanguage(), getContext()));
     }
     return eventApiList;
+  }
+
+  public List<IEvent> getAllEventsInternal(ICalendar cal) {
+    return getEventsInternal(cal, 0, 0);
   }
 
   public List<IEvent> getEventsInternal(ICalendar cal, int start, int nb) {

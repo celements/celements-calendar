@@ -16,7 +16,18 @@ import com.xpn.xwiki.doc.XWikiDocument;
 @ComponentRole
 public interface IEventManager {
 
+  /**
+   * 
+   * @param calDoc
+   * @param isArchive
+   * @return
+   * 
+   * @deprecated instead use getEventsInternal(ICalendar, int, int)
+   */
+  @Deprecated
   public List<EventApi> getEvents(ICalendar cal, int start, int nb);
+
+  public List<IEvent> getAllEventsInternal(ICalendar cal);
 
   public List<IEvent> getEventsInternal(ICalendar cal, int start, int nb);
 

@@ -44,13 +44,13 @@ import com.xpn.xwiki.web.Utils;
 
 public class Calendar implements ICalendar {
   private static final String _OVERVIEW_DEFAULT_CONFIG =
-    "date,time,l_title,location";
+      "date,time,l_title,location";
 
   private static final String _DETAILVIEW_DEFAULT_CONFIG =
-    "date,time,l_title,location,l_description";
+      "date,time,l_title,location,l_description";
 
   private static Log mLogger = LogFactory.getFactory().getInstance(Calendar.class);
-  
+
   private boolean isArchive;
   private DocumentReference calConfigDocRef;
   private static final List<String> _NON_EVENT_PROPERTYS;
@@ -71,7 +71,7 @@ public class Calendar implements ICalendar {
     _NON_EVENT_PROPERTYS.add("eventDate");
     _NON_EVENT_PROPERTYS.add("eventDate_end");
   }
-  
+
   /**
    * 
    * @param calConfigDoc
@@ -84,7 +84,7 @@ public class Calendar implements ICalendar {
   public Calendar(XWikiDocument calConfigDoc, boolean isArchive, XWikiContext context){
     this(calConfigDoc.getDocumentReference(), isArchive);
   }
-  
+
   /**
    * 
    * @param calConfigDocRef
@@ -98,46 +98,40 @@ public class Calendar implements ICalendar {
       XWikiContext context) {
     this(calConfigDocRef, isArchive);
   }
-  
+
   public Calendar(DocumentReference calConfigDocRef, boolean isArchive) {
     this.isArchive = isArchive;
     this.calConfigDocRef = calConfigDocRef;
   }
-  
+
   /* (non-Javadoc)
    * @see com.celements.calendar.ICalendar#getAllEvents()
    */
   @Deprecated
   public List<EventApi> getAllEvents(){
-    return new ArrayList<EventApi>(getEvents(0, 0));
+    return getEventMgr().getEvents(this, 0, 0);
   }
-  
+
   /* (non-Javadoc)
    * @see com.celements.calendar.ICalendar#getAllEvents()
    */
   public List<IEvent> getAllEventsInternal() {
-    return getEventsInternal(0, 0);
+    return getEventMgr().getAllEventsInternal(this);
   }
-  
+
   /* (non-Javadoc)
    * @see com.celements.calendar.ICalendar#getEvents(int, int)
    */
   @Deprecated
-  public List<EventApi> getEvents(int start, int nb){
-    if(start < 0){ start = 0; }
-    if(nb < 0) { nb = 0; }
-    List<EventApi> eventList = getEventMgr().getEvents(this, start, nb);
-    return eventList;
+  public List<EventApi> getEvents(int start, int nb) {
+    return getEventMgr().getEvents(this, start < 0 ? 0 : start, nb < 0 ? 0 : nb);
   }
-  
+
   /* (non-Javadoc)
    * @see com.celements.calendar.ICalendar#getEvents(int, int)
    */
   public List<IEvent> getEventsInternal(int start, int nb) {
-    if(start < 0){ start = 0; }
-    if(nb < 0) { nb = 0; }
-    List<IEvent> eventList = getEventMgr().getEventsInternal(this, start, nb);
-    return eventList;
+    return getEventMgr().getEventsInternal(this, start < 0 ? 0 : start, nb < 0 ? 0 : nb);
   }
 
   /* (non-Javadoc)
@@ -146,7 +140,7 @@ public class Calendar implements ICalendar {
   public long getNrOfEvents(){
     return getEventMgr().countEvents(this);
   }
-  
+
   /* (non-Javadoc)
    * @see com.celements.calendar.ICalendar#isArchive()
    */
@@ -279,7 +273,7 @@ public class Calendar implements ICalendar {
     }
     return utils;
   }
-  
+
   public void setCalendarUtils(ICalendarUtils utils) {
     this.utils = utils;
   }
@@ -290,14 +284,14 @@ public class Calendar implements ICalendar {
 
   private IEventManager getEventMgr() {
     if (eventMgr == null) {
-      eventMgr = (IEventManager) Utils.getComponent(IEventManager.class, "default");
+      eventMgr = Utils.getComponent(IEventManager.class, "default");
     }
     return eventMgr;
   }
 
   private ICalendarService getCalService() {
     if (calService == null) {
-      calService = (ICalendarService) Utils.getComponent(ICalendarService.class);
+      calService = Utils.getComponent(ICalendarService.class);
     }
     return calService;
   }
@@ -326,7 +320,7 @@ public class Calendar implements ICalendar {
   public void setLanguage(String language) {
     this.language = language;
   }
-  
+
   private final String getDefaultLang() {
     if (defaultLang == null) {
       try {

@@ -213,7 +213,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     expect(xwiki.getDocument(same(calDocRef), same(context))).andReturn(calDoc);
 
     replayAll();
-    String spacesHQL = calService.getAllowedSpacesHQL(calDocRef);
+    String spacesHQL = calService.getAllowedSpacesHQL(calDoc);
     verifyAll();
 
     assertNotNull(spacesHQL);
@@ -235,7 +235,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     expect(xwiki.getDocument(same(calDocRef), same(context))).andReturn(calDoc);
 
     replayAll();
-    String spacesHQL = calService.getAllowedSpacesHQL(calDocRef);
+    String spacesHQL = calService.getAllowedSpacesHQL(calDoc);
     verifyAll();
 
     assertNotNull(spacesHQL);
@@ -278,7 +278,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     expect(xwiki.getDocument(eq(calDocRef3), same(context))).andReturn(calDoc3).once();
 
     replayAll();
-    String spacesHQL = calService.getAllowedSpacesHQL(calDocRef);
+    String spacesHQL = calService.getAllowedSpacesHQL(calDoc);
     verifyAll();
 
     assertNotNull(spacesHQL);

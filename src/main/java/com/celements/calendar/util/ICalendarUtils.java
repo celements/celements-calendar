@@ -28,14 +28,13 @@ public interface ICalendarUtils {
       ) throws XWikiException;
 
   /**
-  * @Deprecated use calendar service getEventSpaceForCalendar(DocumentReference)
-  *             instead
-  */
- @Deprecated
+   * @Deprecated use calendar service getAllowedSpaces(DocumentReference) instead
+   */
+  @Deprecated
   public String getAllowedSpacesHQL(XWikiDocument calDoc, XWikiContext context
       ) throws XWikiException;
 
-   /**
+  /**
    * @Deprecated use calendar service getEventSpaceForCalendar(DocumentReference)
    *             instead
    */
@@ -44,18 +43,18 @@ public interface ICalendarUtils {
       ) throws XWikiException;
 
   /**
-  * @Deprecated use calendar service getEventSpaceForCalendar(DocumentReference)
-  *             instead
-  */
- @Deprecated
+   * @Deprecated use calendar service getEventSpaceForCalendar(DocumentReference)
+   *             instead
+   */
+  @Deprecated
   public String getEventSpaceForCalendar(String fullName, XWikiContext context
       ) throws XWikiException;
-  
+
   /**
-  * @Deprecated use calendar service getEventSpaceForCalendar(DocumentReference)
-  *             instead
-  */
- @Deprecated
+   * @Deprecated use calendar service getEventSpaceForCalendar(DocumentReference)
+   *             instead
+   */
+  @Deprecated
   public String getEventSpaceForCalendar(DocumentReference calDocRef, XWikiContext context
       ) throws XWikiException;
 

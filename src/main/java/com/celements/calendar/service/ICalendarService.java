@@ -13,18 +13,16 @@ import com.xpn.xwiki.doc.XWikiDocument;
 public interface ICalendarService {
 
   public String getEventSpaceForCalendar(DocumentReference calDocRef
-  		) throws XWikiException;
-  
+      ) throws XWikiException;
+
   public List<String> getAllowedSpaces(DocumentReference calDocRef) throws XWikiException;
 
   /**
    * 
-   * @Deprecated use getAllowedSpacesHQL(DocumentReference) instead
+   * @Deprecated use getAllowedSpaces(DocumentReference) instead
    */
- @Deprecated
+  @Deprecated
   public String getAllowedSpacesHQL(XWikiDocument calDoc) throws XWikiException;
-
-  public String getAllowedSpacesHQL(DocumentReference calDocRef) throws XWikiException;
 
   public ICalendar getCalendarByCalRef(DocumentReference calDocRef, boolean isArchive);
 

@@ -39,20 +39,20 @@ public class CalendarUtils implements ICalendarUtils {
 
   private static final Log LOGGER = LogFactory.getFactory(
       ).getInstance(CalendarUtils.class);
-  
+
   private static ICalendarUtils utilsInstance;
-  
+
   private ICalendarService calService;
-  
+
   private CalendarUtils() {}
-  
+
   public static ICalendarUtils getInstance() {
     if (utilsInstance == null) {
       utilsInstance = new CalendarUtils();
     }
     return utilsInstance;
   }
-  
+
   /* (non-Javadoc)
    * @see com.celements.calendar.util.ICalendarUtils#getCalendarPageByCalendarSpace(java.lang.String, com.xpn.xwiki.XWikiContext)
    */
@@ -92,7 +92,7 @@ public class CalendarUtils implements ICalendarUtils {
   @Deprecated
   public String getAllowedSpacesHQL(XWikiDocument calDoc, XWikiContext context
       ) throws XWikiException {
-    return getCalService().getAllowedSpacesHQL(calDoc.getDocumentReference());
+    return getCalService().getAllowedSpacesHQL(calDoc);
   }
 
   /* (non-Javadoc)
@@ -123,7 +123,7 @@ public class CalendarUtils implements ICalendarUtils {
       boolean isArchive, XWikiContext context) {
     return new Calendar(calendarDoc, isArchive, context);
   }
-  
+
   /* (non-Javadoc)
    * @see com.celements.calendar.util.ICalendarUtils#getEventSpaceForCalendar(com.xpn.xwiki.doc.XWikiDocument, com.xpn.xwiki.XWikiContext)
    */
@@ -132,7 +132,7 @@ public class CalendarUtils implements ICalendarUtils {
       XWikiContext context) throws XWikiException {
     return getCalService().getEventSpaceForCalendar(doc.getDocumentReference());
   }
-  
+
   /* (non-Javadoc)
    * @see com.celements.calendar.util.ICalendarUtils#getEventSpaceForCalendar(java.lang.String, com.xpn.xwiki.XWikiContext)
    */
@@ -149,7 +149,7 @@ public class CalendarUtils implements ICalendarUtils {
     return getEventSpaceForCalendar(context.getWiki().getDocument(calDocRef, context),
         context);
   }
-  
+
   private ICalendarService getCalService() {
     if (calService == null) {
       calService = Utils.getComponent(ICalendarService.class);

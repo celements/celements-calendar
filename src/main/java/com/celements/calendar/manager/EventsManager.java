@@ -12,7 +12,6 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.model.reference.EntityReferenceSerializer;
 
 import com.celements.calendar.Calendar;
 import com.celements.calendar.Event;
@@ -37,13 +36,6 @@ public class EventsManager implements IEventManager {
 
   private static final Log LOGGER = LogFactory.getFactory().getInstance(
       EventsManager.class);
-
-  //TODO we must change to 'default' serializer with the wikiname included
-  @Requirement("local")
-  private EntityReferenceSerializer<String> refLocalSerializer;
-
-  @Requirement("default")
-  private EntityReferenceSerializer<String> refDefaultSerializer;
 
   @Requirement
   private ICalendarService calService;
@@ -144,8 +136,9 @@ public class EventsManager implements IEventManager {
   }
 
   public long countEvents(DocumentReference calDocRef, boolean isArchive, Date startDate) {
-    String cacheKey = "EventsManager.countEvents|" + refDefaultSerializer.serialize(
-        calDocRef) + "|" + isArchive + "|" + startDate.getTime();
+    String calFullName = webUtilsService.getRefDefaultSerializer().serialize(calDocRef);
+    String cacheKey = "EventsManager.countEvents|" + calFullName + "|" + isArchive + "|"
+        + startDate.getTime();
     Object cachedCount = execution.getContext().getProperty(cacheKey);
     if (cachedCount != null) {
       LOGGER.debug("Cached event count: " + cachedCount);
@@ -242,11 +235,11 @@ public class EventsManager implements IEventManager {
   private BaseObject getSubscriptionObject(DocumentReference calDocRef, IEvent event) {
     XWikiDocument eventDoc = event.getEventDocument();
     BaseObject subscriptObj = eventDoc.getXObject(getSubscriptionClassRef(), "subscriber",
-        refDefaultSerializer.serialize(calDocRef), false);
+        webUtilsService.getRefDefaultSerializer().serialize(calDocRef), false);
     if (subscriptObj == null) {
       //for backwards compatibility
       subscriptObj = eventDoc.getXObject(getSubscriptionClassRef(), "subscriber",
-          refLocalSerializer.serialize(calDocRef), false);
+          webUtilsService.getRefLocalSerializer().serialize(calDocRef), false);
     }
     return subscriptObj;
   }

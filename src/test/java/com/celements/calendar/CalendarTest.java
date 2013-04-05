@@ -193,8 +193,7 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
 
   @Test
   public void testGetNrOfEvents_emptyList() {
-    expect(eventMgrMock.countEvents(eq(calDocRef), eq(false), isA(Date.class))
-        ).andReturn(0L);
+    expect(eventMgrMock.countEvents(eq(cal))).andReturn(0L);
     replayAll();
     assertEquals("must be zero for empty list.", 0, cal.getNrOfEvents());
     verifyAll();
@@ -209,8 +208,7 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     Calendar cal2 = new Calendar(cal2DocRef, isArchiv);
     cal2.setCalendarUtils(calUtils);
     cal2.inject_getEventCmd(eventMgrMock);
-    expect(eventMgrMock.countEvents(eq(cal2DocRef), eq(isArchiv),
-        eq(cal2.getStartDate()))).andReturn(123l);
+    expect(eventMgrMock.countEvents(eq(cal2))).andReturn(123l);
     replayAll();
     long numEvents = cal2.getNrOfEvents();
     verifyAll();
@@ -247,7 +245,7 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     cal.setStartDate(newStartDate);
     assertNotNull(cal.getStartDate());
     assertNotSame(startDate, cal.getStartDate());
-    assertSame(newStartDate, cal.getStartDate());
+    assertEquals(cal.getMidnightDate(newStartDate), cal.getStartDate());
   }
 
   @Test

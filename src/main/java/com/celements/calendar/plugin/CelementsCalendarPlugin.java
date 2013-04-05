@@ -26,6 +26,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.celements.calendar.classes.CalendarClasses;
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -37,53 +38,82 @@ import com.xpn.xwiki.plugin.XWikiPluginInterface;
 import com.xpn.xwiki.web.XWikiRequest;
 
 public class CelementsCalendarPlugin extends XWikiDefaultPlugin {
-  public static final String SUBSCRIPTION_CLASS_SPACE = "Classes";
-  public static final String SUBSCRIPTION_CLASS_DOC = "SubscriptionClass";
-  public static final String SUBSCRIPTION_CLASS = SUBSCRIPTION_CLASS_SPACE + "." + SUBSCRIPTION_CLASS_DOC;
-  
-  public static final String CLASS_CALENDAR_SPACE = "Classes";
-  public static final String CLASS_CALENDAR_DOC = "CalendarConfigClass";
-  public static final String CLASS_CALENDAR = CLASS_CALENDAR_SPACE + "." + CLASS_CALENDAR_DOC;
-  public static final String PROPERTY_IS_SUBSCRIBABLE = "is_subscribable";
-  public static final String PROPERTY_EVENT_PER_PAGE = "event_per_page";
-  public static final String PROPERTY_OVERVIEW_COLUMN_CONFIG = "overview_column_config";
-  public static final String PROPERTY_EVENT_COLUMN_CONFIG = "event_column_config";
-  public static final String PROPERTY_HAS_MORE_LINK = "hasMoreLink";
-  public static final String PROPERTY_SUBSCRIBE_TO = "subscribe_to";
-  public static final String PROPERTY_CALENDAR_SPACE = "calendarspace";
-  
-  public static final String CLASS_EVENT_SPACE = "Classes";
-  public static final String CLASS_EVENT_DOC = "CalendarEventClass";
-  public static final String CLASS_EVENT = CLASS_EVENT_SPACE + "." + CLASS_EVENT_DOC;
-  public static final String PROPERTY_LANG = "lang";
-  public static final String PROPERTY_TITLE = "l_title";
-  public static final String PROPERTY_TITLE_RTE = "l_title_rte";
-  public static final String PROPERTY_DESCRIPTION = "l_description";
-  public static final String PROPERTY_LOCATION = "location";
-  public static final String PROPERTY_LOCATION_RTE = "location_rte";
-  public static final String PROPERTY_EVENT_DATE = "eventDate";
-  public static final String PROPERTY_EVENT_DATE_END = "eventDate_end";
-  public static final String PROPERTY_EVENT_IS_SUBSCRIBABLE = "isSubscribable";
-  
+
+  @Deprecated
+  public static final String SUBSCRIPTION_CLASS_SPACE = CalendarClasses.SUBSCRIPTION_CLASS_SPACE;
+  @Deprecated
+  public static final String SUBSCRIPTION_CLASS_DOC = CalendarClasses.SUBSCRIPTION_CLASS_DOC;
+  @Deprecated
+  public static final String SUBSCRIPTION_CLASS = CalendarClasses.SUBSCRIPTION_CLASS;
+
+  @Deprecated
+  public static final String CLASS_CALENDAR_SPACE = CalendarClasses.CALENDAR_CONFIG_CLASS_SPACE;
+  @Deprecated
+  public static final String CLASS_CALENDAR_DOC = CalendarClasses.CALENDAR_CONFIG_CLASS_DOC;
+  @Deprecated
+  public static final String CLASS_CALENDAR = CalendarClasses.CALENDAR_CONFIG_CLASS;
+  @Deprecated
+  public static final String PROPERTY_IS_SUBSCRIBABLE = CalendarClasses.PROPERTY_IS_SUBSCRIBABLE;
+  @Deprecated
+  public static final String PROPERTY_EVENT_PER_PAGE = CalendarClasses.PROPERTY_EVENT_PER_PAGE;
+  @Deprecated
+  public static final String PROPERTY_OVERVIEW_COLUMN_CONFIG = CalendarClasses.PROPERTY_OVERVIEW_COLUMN_CONFIG;
+  @Deprecated
+  public static final String PROPERTY_EVENT_COLUMN_CONFIG = CalendarClasses.PROPERTY_EVENT_COLUMN_CONFIG;
+  @Deprecated
+  public static final String PROPERTY_HAS_MORE_LINK = CalendarClasses.PROPERTY_HAS_MORE_LINK;
+  @Deprecated
+  public static final String PROPERTY_SUBSCRIBE_TO = CalendarClasses.PROPERTY_SUBSCRIBE_TO;
+  @Deprecated
+  public static final String PROPERTY_CALENDAR_SPACE = CalendarClasses.PROPERTY_CALENDAR_SPACE;
+
+  @Deprecated
+  public static final String CLASS_EVENT_SPACE = CalendarClasses.CALENDAR_EVENT_CLASS_SPACE;
+  @Deprecated
+  public static final String CLASS_EVENT_DOC = CalendarClasses.CALENDAR_EVENT_CLASS_DOC;
+  @Deprecated
+  public static final String CLASS_EVENT = CalendarClasses.CALENDAR_EVENT_CLASS;
+  @Deprecated
+  public static final String PROPERTY_LANG = CalendarClasses.PROPERTY_LANG;
+  @Deprecated
+  public static final String PROPERTY_TITLE = CalendarClasses.PROPERTY_TITLE;
+  @Deprecated
+  public static final String PROPERTY_TITLE_RTE = CalendarClasses.PROPERTY_TITLE_RTE;
+  @Deprecated
+  public static final String PROPERTY_DESCRIPTION = CalendarClasses.PROPERTY_DESCRIPTION;
+  @Deprecated
+  public static final String PROPERTY_LOCATION = CalendarClasses.PROPERTY_LOCATION;
+  @Deprecated
+  public static final String PROPERTY_LOCATION_RTE = CalendarClasses.PROPERTY_LOCATION_RTE;
+  @Deprecated
+  public static final String PROPERTY_EVENT_DATE = CalendarClasses.PROPERTY_EVENT_DATE;
+  @Deprecated
+  public static final String PROPERTY_EVENT_DATE_END = CalendarClasses.PROPERTY_EVENT_DATE_END;
+  @Deprecated
+  public static final String PROPERTY_EVENT_IS_SUBSCRIBABLE = CalendarClasses.PROPERTY_EVENT_IS_SUBSCRIBABLE;
+
   private static final Log mLogger = LogFactory.getFactory().getInstance(CelementsCalendarPlugin.class);
-  
+
   public CelementsCalendarPlugin(String name, String className, XWikiContext context) {
     super(name, className, context);
   }
-  
+
+  @Override
   public String getName() {
     return "celcalendar";
   }
-  
+
+  @Override
   public Api getPluginApi(XWikiPluginInterface plugin, XWikiContext context) {
     return new CelementsCalendarPluginAPI((CelementsCalendarPlugin) plugin, context);
   }
-  
+
+  @Override
   public void virtualInit(XWikiContext context){
   }
-  
+
   /*
-   * Form needs: 
+   * Form needs:
    * Event document name in eventDoc = Event.Document
    * Language of data in lang = de
    * Language sensitive event details in ed_l_<fieldname> (e.g. ed_l_description="Event Description")
@@ -106,11 +136,11 @@ public class CelementsCalendarPlugin extends XWikiDefaultPlugin {
     List<String> isSubscribedTo = new ArrayList<String>();
     Map<String, String[]> parameters = request.getParameterMap();
     analyseParameters(parameters, isSubscribedTo, objs, lang, context);
-    
+
     List<BaseObject> subscriptionObjs = doc.getObjects(SUBSCRIPTION_CLASS);
     changeExistingSubscriptions(subscriptionObjs, isSubscribedTo);
     addNewSubscriptions(doc, isSubscribedTo, context);
-    
+
     wiki.saveDocument(doc, context);
   }
 
@@ -166,8 +196,8 @@ public class CelementsCalendarPlugin extends XWikiDefaultPlugin {
     }
     String[] inputNameParts = inputName.split("_", 3);
     if (inputNameParts.length == 3) {
-//      String paramClass = inputNameParts[0];
-//      String objNumber = inputNameParts[1];
+      //      String paramClass = inputNameParts[0];
+      //      String objNumber = inputNameParts[1];
       String propName = inputNameParts[2];
       mLogger.debug("Save '" + value + "' to '" + propName + "'"
           + " with lang=" + lang);
@@ -184,5 +214,5 @@ public class CelementsCalendarPlugin extends XWikiDefaultPlugin {
     return ((obj != null) && (!inputName.startsWith("l_")
         || obj.getStringValue(PROPERTY_LANG).equals(lang)));
   }
-  
+
 }

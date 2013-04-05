@@ -304,7 +304,7 @@ public class Calendar implements ICalendar {
     }
   }
 
-  private Date getMidnightDate(Date startDate) {
+  Date getMidnightDate(Date startDate) {
     java.util.Calendar cal = java.util.Calendar.getInstance();
     cal.setTime(startDate);
     cal.set(java.util.Calendar.HOUR, 0);

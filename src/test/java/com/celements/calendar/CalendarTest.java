@@ -245,7 +245,7 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     cal.setStartDate(newStartDate);
     assertNotNull(cal.getStartDate());
     assertNotSame(startDate, cal.getStartDate());
-    assertSame(newStartDate, cal.getStartDate());
+    assertEquals(cal.getMidnightDate(newStartDate), cal.getStartDate());
   }
 
   @Test

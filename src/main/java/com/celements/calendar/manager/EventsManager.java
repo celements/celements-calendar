@@ -17,7 +17,6 @@ import com.celements.calendar.Event;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.api.EventApi;
-import com.celements.calendar.engine.ICalendarEngineRole;
 import com.celements.calendar.service.CalendarService;
 import com.celements.calendar.service.ICalendarService;
 import com.celements.web.service.IWebUtilsService;
@@ -61,22 +60,21 @@ public class EventsManager implements IEventManager {
 	public List<IEvent> getEventsInternal(ICalendar cal, int start, int nb) {
 		DocumentReference calDocRef = cal.getDocumentReference();
 		try {
-			return getEvents_internal(cal.getEngine(), calDocRef, cal.getStartDate(),
-					cal.isArchive(), webUtilsService.getDefaultLanguage(),
-					calService.getAllowedSpaces(calDocRef), start, nb);
+			return getEvents_internal(cal, cal.getStartDate(), cal.isArchive(),
+					webUtilsService.getDefaultLanguage(), calService.getAllowedSpaces(calDocRef),
+					start, nb);
 		} catch (XWikiException exc) {
 			LOGGER.error("Exception while getting events for calendar '" + calDocRef + "'", exc);
 		}
 		return Collections.emptyList();
 	}
 
-	private List<IEvent> getEvents_internal(ICalendarEngineRole engine,
-			DocumentReference calDocRef, Date startDate, boolean isArchive, String lang,
-			List<String> allowedSpaces, int start, int nb) throws XWikiException {
-		List<IEvent> eventList = engine.getEvents(startDate, isArchive, lang, allowedSpaces,
+	private List<IEvent> getEvents_internal(ICalendar cal, Date startDate, boolean isArchive,
+			String lang,	List<String> allowedSpaces, int start, int nb) throws XWikiException {
+		List<IEvent> eventList = cal.getEngine().getEvents(startDate, isArchive, lang, allowedSpaces,
 				start, nb);
 		LOGGER.debug(eventList.size() + " events found.");
-		return filterEventListForSubscription(calDocRef, eventList);
+		return filterEventListForSubscription(cal.getDocumentReference(), eventList);
 	}
 
 	private List<IEvent> filterEventListForSubscription(DocumentReference calDocRef,
@@ -224,8 +222,7 @@ public class EventsManager implements IEventManager {
 		List<IEvent> events;
 		boolean hasMore, notFound;
 		do {
-			events = getEvents_internal(cal.getEngine(), calDocRef, eventDate, false, lang,
-					allowedSpaces, start, nb);
+			events = getEvents_internal(cal, eventDate, false, lang, allowedSpaces, start, nb);
 			hasMore = events.size() == nb;
 			eventIndex = events.indexOf(event);
 			notFound = eventIndex < 0;

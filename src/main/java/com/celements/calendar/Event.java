@@ -35,7 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
 
-import com.celements.calendar.plugin.CelementsCalendarPlugin;
+import com.celements.calendar.classes.CalendarClasses;
 import com.celements.calendar.util.CalendarUtils;
 import com.celements.common.collections.ListUtils;
 import com.celements.web.plugin.cmd.EmptyCheckCommand;
@@ -48,36 +48,25 @@ import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.web.Utils;
 
 public class Event implements IEvent {
-  
-  public static final String SPACE = "Classes";
-  public static final String DOC = "CalendarEventClass";
-  public static final String CLASS = SPACE + "." + DOC;
-  public static final String PROPERTY_LANG = "lang";
-  public static final String PROPERTY_TITLE = "l_title";
-  public static final String PROPERTY_TITLE_RTE = "l_title_rte";
-  public static final String PROPERTY_DESCRIPTION = "l_description";
-  public static final String PROPERTY_LOCATION = "location";
-  public static final String PROPERTY_LOCATION_RTE = "location_rte";
-  public static final String PROPERTY_EVENT_DATE = "eventDate";
-  public static final String PROPERTY_EVENT_DATE_END = "eventDate_end";
-  public static final String PROPERTY_EVENT_IS_SUBSCRIBABLE = "isSubscribable";
 
   private static Log LOGGER = LogFactory.getFactory().getInstance(Event.class);
-  
+
   private Map<String, BaseObject> eventObj;
   private DocumentReference eventDocRef;
   private String defaultLang;
   private String language;
   private ICalendar calendar;
-  
+
   @Deprecated
   public Event(XWikiDocument eventDoc, XWikiContext context) {
-    this(eventDoc.getXObjects(new DocumentReference(context.getDatabase(), SPACE, DOC)), 
-    		eventDoc.getDocumentReference().getSpaceReferences(
+    this(eventDoc.getXObjects(new DocumentReference(context.getDatabase(),
+        CalendarClasses.CALENDAR_EVENT_CLASS_SPACE,
+        CalendarClasses.CALENDAR_EVENT_CLASS_DOC)),
+        eventDoc.getDocumentReference().getSpaceReferences(
             ).get(0).getName(), context);
     this.eventDocRef = eventDoc.getDocumentReference();
   }
-  
+
   @Deprecated
   public Event(String eventDocName, XWikiContext context) throws XWikiException{
     this(context.getWiki().getDocument(eventDocName, context), context);
@@ -92,7 +81,7 @@ public class Event implements IEvent {
   public Event(DocumentReference eventDocRef) {
     this.eventDocRef = eventDocRef;
   }
-    
+
   public Event(List<BaseObject> objList, String space) {
     initObjectMap(objList, space);
     if (getEventObjMap().size() > 0) {
@@ -129,7 +118,8 @@ public class Event implements IEvent {
         XWikiDocument eventDoc = getContext().getWiki().getDocument(eventDocRef,
             getContext());
         initObjectMap(eventDoc.getXObjects(new DocumentReference(getContext(
-            ).getDatabase(), SPACE, DOC)),
+            ).getDatabase(), CalendarClasses.CALENDAR_EVENT_CLASS_SPACE,
+            CalendarClasses.CALENDAR_EVENT_CLASS_DOC)),
             eventDocRef.getLastSpaceReference().getName());
       } catch (XWikiException exp) {
         LOGGER.error("getEventObjMap failed to get event document [" + eventDocRef + "].",
@@ -151,7 +141,7 @@ public class Event implements IEvent {
    */
   final private void init(BaseObject artObj, String space) {
     if (artObj != null) {
-      String langValue = artObj.getStringValue(CelementsCalendarPlugin.PROPERTY_LANG);
+      String langValue = artObj.getStringValue(CalendarClasses.PROPERTY_LANG);
       if (langValue != null) {
         getEventObjMap_internal().put(langValue, artObj);
       } else {
@@ -159,12 +149,12 @@ public class Event implements IEvent {
       }
     }
   }
-  
+
   /* (non-Javadoc)
    * @see com.celements.calendar.IEvent#getTitle(java.lang.String)
    */
   public String getTitle(){
-    return getStringPropertyDefaultIfEmpty(CelementsCalendarPlugin.PROPERTY_TITLE,
+    return getStringPropertyDefaultIfEmpty(CalendarClasses.PROPERTY_TITLE,
         getLanguage());
   }
 
@@ -172,7 +162,7 @@ public class Event implements IEvent {
    * @see com.celements.calendar.IEvent#getDescription(java.lang.String)
    */
   public String getDescription(){
-    return getStringPropertyDefaultIfEmpty(CelementsCalendarPlugin.PROPERTY_DESCRIPTION,
+    return getStringPropertyDefaultIfEmpty(CalendarClasses.PROPERTY_DESCRIPTION,
         getLanguage());
   }
 
@@ -180,9 +170,9 @@ public class Event implements IEvent {
    * @see com.celements.calendar.IEvent#getLocation()
    */
   public String getLocation(){
-    return getStringProperty(getObj(), CelementsCalendarPlugin.PROPERTY_LOCATION);
+    return getStringProperty(getObj(), CalendarClasses.PROPERTY_LOCATION);
   }
-  
+
   /* (non-Javadoc)
    * @see com.celements.calendar.IEvent#getDateString(java.lang.String)
    */
@@ -200,17 +190,17 @@ public class Event implements IEvent {
    * @see com.celements.calendar.IEvent#getEventDate()
    */
   public Date getEventDate(){
-    return getDateProperty(getObj(), CelementsCalendarPlugin.PROPERTY_EVENT_DATE);
+    return getDateProperty(getObj(), CalendarClasses.PROPERTY_EVENT_DATE);
   }
-  
+
   /* (non-Javadoc)
    * @see com.celements.calendar.IEvent#isSubscribable()
    */
   public Boolean isSubscribable(){
     return getBooleanProperty(getObj(),
-        CelementsCalendarPlugin.PROPERTY_EVENT_IS_SUBSCRIBABLE);
+        CalendarClasses.PROPERTY_EVENT_IS_SUBSCRIBABLE);
   }
-  
+
   /* (non-Javadoc)
    * @see com.celements.calendar.IEvent#getEventDocument()
    */
@@ -239,12 +229,12 @@ public class Event implements IEvent {
         + !cal.getOverviewFields().contains("detaillink"));
     LOGGER.debug("name.equals('detaillink'): " + name.equals("detaillink"));
     LOGGER.debug("hasLink: " + hasLink);
-    
+
     String value = "";
     if(hasLink) { value += "<a href='" + link + "'>"; }
     value += displayField(name, getContext());
     if(hasLink) { value += "</a>"; }
-    
+
     return value;
   }
 
@@ -302,21 +292,21 @@ public class Event implements IEvent {
   String getDisplayPart(String name, boolean notDisplayIfSame) {
     String value = "";
     if(name.equals("date")) {
-      value = getDateString(CelementsCalendarPlugin.PROPERTY_EVENT_DATE,
+      value = getDateString(CalendarClasses.PROPERTY_EVENT_DATE,
           "dd.MM.yyyy");
     } else if(name.equals("time")) {
-      value = getTimeString(CelementsCalendarPlugin.PROPERTY_EVENT_DATE,
+      value = getTimeString(CalendarClasses.PROPERTY_EVENT_DATE,
           notDisplayIfSame);
     } else if(name.equals("date_end")) {
       String startDay = getDateString(
-          CelementsCalendarPlugin.PROPERTY_EVENT_DATE, "dd.MM.yyyy");
+          CalendarClasses.PROPERTY_EVENT_DATE, "dd.MM.yyyy");
       String endDay = getDateString(
-          CelementsCalendarPlugin.PROPERTY_EVENT_DATE_END, "dd.MM.yyyy");
+          CalendarClasses.PROPERTY_EVENT_DATE_END, "dd.MM.yyyy");
       if (!notDisplayIfSame || !startDay.equals(endDay)) {
         value = endDay;
       }
     } else if(name.equals("time_end")) {
-      value = getTimeString(CelementsCalendarPlugin.PROPERTY_EVENT_DATE_END,
+      value = getTimeString(CalendarClasses.PROPERTY_EVENT_DATE_END,
           notDisplayIfSame);
     } else if(name.equals("title")) {
       value = getTitle();
@@ -341,7 +331,7 @@ public class Event implements IEvent {
     }
     return value;
   }
-  
+
   @Deprecated
   public boolean needsMoreLink(XWikiContext context) {
     return needsMoreLink();
@@ -375,7 +365,7 @@ public class Event implements IEvent {
     }
     return result;
   }
-  
+
   /* (non-Javadoc)
    * @see com.celements.calendar.IEvent#getDocName()
    */
@@ -405,7 +395,7 @@ public class Event implements IEvent {
     }
     return result;
   }
-  
+
   /* (non-Javadoc)
    * @see com.celements.calendar.IEvent#getStringProperty(java.lang.String, java.lang.String)
    */
@@ -420,14 +410,14 @@ public class Event implements IEvent {
     }
     return result;
   }
-  
+
   /* (non-Javadoc)
    * @see com.celements.calendar.IEvent#getDateProperty(java.lang.String, java.lang.String)
    */
   public Date getDateProperty(String name, String lang){
     return getDateProperty(getObj(lang), name);
   }
-  
+
   private Date getDateProperty(BaseObject obj, String name){
     Date result = null;
     if(obj != null){
@@ -435,14 +425,14 @@ public class Event implements IEvent {
     }
     return result;
   }
-  
+
   /* (non-Javadoc)
    * @see com.celements.calendar.IEvent#getBooleanProperty(java.lang.String, java.lang.String)
    */
   public Boolean getBooleanProperty(String name, String lang){
     return getBooleanProperty(getObj(lang), name);
   }
-  
+
   // not set = null, false = 0, true = 1
   private Boolean getBooleanProperty(BaseObject obj, String name){
     Boolean result = null;
@@ -452,7 +442,7 @@ public class Event implements IEvent {
     return result;
   }
 
-  //FIXME public should return an API Object and not base Object -> refactore to use 
+  //FIXME public should return an API Object and not base Object -> refactore to use
   //      BaseObject only internally.
   public BaseObject getObj(){
     return getObj(getDefaultLang());
@@ -461,7 +451,7 @@ public class Event implements IEvent {
   /* (non-Javadoc)
    * @see com.celements.calendar.IEvent#getObj(java.lang.String)
    */
-  //FIXME public should return an API Object and not base Object -> refactore to use 
+  //FIXME public should return an API Object and not base Object -> refactore to use
   //      BaseObject only internally.
   public BaseObject getObj(String lang){
     BaseObject obj = null;
@@ -503,7 +493,7 @@ public class Event implements IEvent {
     }
     return new Property[]{};
   }
-  
+
   @Deprecated
   public ICalendar getCalendar(XWikiContext context) {
     return getCalendar();
@@ -528,12 +518,12 @@ public class Event implements IEvent {
 
   private ICalendar internal_getCalendarByDoc(XWikiDocument calDoc) {
     if(calDoc != null) {
-      return ((CalendarUtils)CalendarUtils.getInstance()).getCalendarByCalDoc(calDoc, 
+      return ((CalendarUtils)CalendarUtils.getInstance()).getCalendarByCalDoc(calDoc,
           false, getContext());
     }
     return null;
   }
-  
+
   @Deprecated
   public List<List<String>> getEditableProperties(String lang, XWikiContext context
       ) throws XWikiException{
@@ -548,7 +538,7 @@ public class Event implements IEvent {
     splitLanguageDependentFields(confIndep, confDep,
         splitIntoPropertyNames(getCalendar().getDetailviewFields()));
     if (getCalendar().isSubscribable()) {
-      confIndep.add(CelementsCalendarPlugin.PROPERTY_EVENT_IS_SUBSCRIBABLE);
+      confIndep.add(CalendarClasses.PROPERTY_EVENT_IS_SUBSCRIBABLE);
     }
     Element[] allProps = getProperties(lang);
     LOGGER.debug("getEditableProperties: allProps - "
@@ -637,7 +627,7 @@ public class Event implements IEvent {
         result.add(fieldName);
       }
     }
-    
+
     return result;
   }
 

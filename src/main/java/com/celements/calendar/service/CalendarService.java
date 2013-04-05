@@ -18,6 +18,8 @@ import org.xwiki.query.QueryManager;
 
 import com.celements.calendar.Calendar;
 import com.celements.calendar.ICalendar;
+import com.celements.calendar.classes.CalendarClasses;
+import com.celements.common.classes.IClassCollectionRole;
 import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -27,22 +29,10 @@ import com.xpn.xwiki.objects.BaseObject;
 @Component
 public class CalendarService implements ICalendarService {
 
+  @Requirement("celements.CalendarClasses")
+  private IClassCollectionRole calClasses;
+
   private static Log LOGGER = LogFactory.getFactory().getInstance(CalendarService.class);
-
-  public static final String CLASS_CALENDAR_SPACE = "Classes";
-  public static final String CLASS_CALENDAR_DOC = "CalendarConfigClass";
-  public static final String CLASS_CALENDAR = CLASS_CALENDAR_SPACE + "." + CLASS_CALENDAR_DOC;
-  public static final String PROPERTY_IS_SUBSCRIBABLE = "is_subscribable";
-  public static final String PROPERTY_EVENT_PER_PAGE = "event_per_page";
-  public static final String PROPERTY_OVERVIEW_COLUMN_CONFIG = "overview_column_config";
-  public static final String PROPERTY_EVENT_COLUMN_CONFIG = "event_column_config";
-  public static final String PROPERTY_HAS_MORE_LINK = "hasMoreLink";
-  public static final String PROPERTY_SUBSCRIBE_TO = "subscribe_to";
-  public static final String PROPERTY_CALENDAR_SPACE = "calendarspace";
-
-  public static final String SUBSCRIPTION_CLASS_SPACE = "Classes";
-  public static final String SUBSCRIPTION_CLASS_DOC = "SubscriptionClass";
-  public static final String SUBSCRIPTION_CLASS = SUBSCRIPTION_CLASS_SPACE + "." + SUBSCRIPTION_CLASS_DOC;
 
   public static final String CALENDAR_SERVICE_START_DATE =
       "com.celements.calendar.service.CalendarService.startDate";
@@ -67,9 +57,10 @@ public class CalendarService implements ICalendarService {
       ) throws XWikiException {
     XWikiDocument doc = getContext().getWiki().getDocument(calDocRef, getContext());
     String space = doc.getDocumentReference().getName();
-    BaseObject obj = doc.getXObject(getCalendarConfigReference());
+    BaseObject obj = doc.getXObject(getCalClasses().getCalendarClassRef(getContext(
+        ).getDatabase()));
     if (obj != null) {
-      space = obj.getStringValue(PROPERTY_CALENDAR_SPACE).trim();
+      space = obj.getStringValue(CalendarClasses.PROPERTY_CALENDAR_SPACE).trim();
     }
     return space;
   }
@@ -77,9 +68,10 @@ public class CalendarService implements ICalendarService {
   public List<String> getAllowedSpaces(DocumentReference calDocRef) throws XWikiException {
     List<String> spaces = new ArrayList<String>();
     BaseObject calObj = getContext().getWiki().getDocument(calDocRef, getContext()
-        ).getXObject(getCalendarConfigReference());
+        ).getXObject(getCalClasses().getCalendarClassRef(getContext().getDatabase()));
     if (calObj != null) {
-      addNonEmptyString(spaces, calObj.getStringValue(PROPERTY_CALENDAR_SPACE));
+      addNonEmptyString(spaces, calObj.getStringValue(
+          CalendarClasses.PROPERTY_CALENDAR_SPACE));
       spaces.addAll(getSubscribedSpaces(calObj));
     }
     return spaces;
@@ -88,14 +80,17 @@ public class CalendarService implements ICalendarService {
   private List<String> getSubscribedSpaces(BaseObject calObj) throws XWikiException {
     List<String> spaces = new ArrayList<String>();
     if (calObj != null) {
-      DocumentReference calConfRef = getCalendarConfigReference();
-      for (Object subDocName : calObj.getListValue(PROPERTY_SUBSCRIBE_TO)) {
+      DocumentReference calConfRef = getCalClasses().getCalendarClassRef(getContext(
+          ).getDatabase());
+      for (Object subDocName : calObj.getListValue(
+          CalendarClasses.PROPERTY_SUBSCRIBE_TO)) {
         DocumentReference subDocRef = webUtils.resolveDocumentReference(
             subDocName.toString());
         BaseObject subscCalObj = getContext().getWiki().getDocument(subDocRef,
             getContext()).getXObject(calConfRef);
         if (subscCalObj != null) {
-          addNonEmptyString(spaces, subscCalObj.getStringValue(PROPERTY_CALENDAR_SPACE));
+          addNonEmptyString(spaces, subscCalObj.getStringValue(
+              CalendarClasses.PROPERTY_CALENDAR_SPACE));
         }
       }
     }
@@ -157,9 +152,8 @@ public class CalendarService implements ICalendarService {
     return null;
   }
 
-  private DocumentReference getCalendarConfigReference() {
-    return new DocumentReference(getContext().getDatabase(), CLASS_CALENDAR_SPACE,
-        CLASS_CALENDAR_DOC);
+  private CalendarClasses getCalClasses() {
+    return (CalendarClasses) calClasses;
   }
 
 }

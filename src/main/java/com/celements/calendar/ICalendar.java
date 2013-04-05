@@ -25,6 +25,7 @@ import java.util.List;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.api.EventApi;
+import com.celements.calendar.engine.ICalendarEngineRole;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.doc.XWikiDocument;
 
@@ -102,5 +103,7 @@ public interface ICalendar {
   public String getLanguage();
 
   public void setLanguage(String language);
+  
+  public ICalendarEngineRole getEngine();
 
 }

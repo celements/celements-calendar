@@ -28,45 +28,39 @@ import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.Calendar;
 import com.celements.calendar.ICalendar;
-import com.celements.calendar.plugin.CelementsCalendarPlugin;
+import com.celements.calendar.service.ICalendarService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
+import com.xpn.xwiki.web.Utils;
 
 public class CalendarUtils implements ICalendarUtils {
 
   private static final Log LOGGER = LogFactory.getFactory(
       ).getInstance(CalendarUtils.class);
-  
+
   private static ICalendarUtils utilsInstance;
-  
+
+  private ICalendarService calService;
+
   private CalendarUtils() {}
-  
+
   public static ICalendarUtils getInstance() {
     if (utilsInstance == null) {
       utilsInstance = new CalendarUtils();
     }
     return utilsInstance;
   }
-  
+
   /* (non-Javadoc)
    * @see com.celements.calendar.util.ICalendarUtils#getCalendarPageByCalendarSpace(java.lang.String, com.xpn.xwiki.XWikiContext)
    */
   @Deprecated
   public XWikiDocument getCalendarPageByCalendarSpace(String calSpace,
       XWikiContext context) throws XWikiException{
-    String hql = ", BaseObject as obj, StringProperty bspace ";
-    hql += "where obj.name=doc.fullName ";
-    hql += "and obj.className='Classes.CalendarConfigClass' ";
-    hql += "and obj.id = bspace.id.id and bspace.id.name = 'calendarspace' ";
-    hql += "and bspace.value = '" + calSpace + "'";
-    List<XWikiDocument> blogList = context.getWiki().getStore(
-        ).searchDocuments(hql, 1, 0, context);
-    if(blogList.size() > 0){
-      return blogList.get(0);
-    }
-    return null;
+    return context.getWiki().getDocument(getCalService().getCalendarDocRefByCalendarSpace(
+        calSpace), context);
   }
 
   /* (non-Javadoc)
@@ -95,42 +89,10 @@ public class CalendarUtils implements ICalendarUtils {
   /* (non-Javadoc)
    * @see com.celements.calendar.util.ICalendarUtils#getAllowedSpacesHQL(com.xpn.xwiki.doc.XWikiDocument, com.xpn.xwiki.XWikiContext)
    */
-  @SuppressWarnings("unchecked")
+  @Deprecated
   public String getAllowedSpacesHQL(XWikiDocument calDoc, XWikiContext context
       ) throws XWikiException {
-    // If there is no config object no events should be found
-    String spaceHQL = "obj.name like '.%'";
-    DocumentReference calConfObjRef = new DocumentReference(context.getDatabase(), 
-        CelementsCalendarPlugin.CLASS_CALENDAR_SPACE, 
-        CelementsCalendarPlugin.CLASS_CALENDAR_DOC);
-    BaseObject calObj = null;
-    if(calDoc != null){
-      calObj = calDoc.getXObject(calConfObjRef);
-    }
-    if(calObj != null){
-      spaceHQL = "obj.name like '" + calObj.getStringValue(
-          CelementsCalendarPlugin.PROPERTY_CALENDAR_SPACE) + ".%'";
-      
-      List subscribedDocNames = calObj.getListValue(
-          CelementsCalendarPlugin.PROPERTY_SUBSCRIBE_TO);
-      for (Object subDocName : subscribedDocNames) {
-        String subDocNameStr = subDocName.toString();
-        DocumentReference subDocRef = new DocumentReference(context.getDatabase(), 
-            subDocNameStr.split("\\.")[0], subDocNameStr.split("\\.")[1]);
-        if(context.getWiki().exists(subDocRef, context)){
-          XWikiDocument subscCalDoc = context.getWiki().getDocument(subDocRef, context);
-          BaseObject subscCalObj = subscCalDoc.getXObject(calConfObjRef);
-          if(subscCalObj != null){
-            spaceHQL += " or obj.name like '" + subscCalObj.getStringValue(
-                CelementsCalendarPlugin.PROPERTY_CALENDAR_SPACE).trim() + ".%'";
-          }
-        }
-      }
-      if(spaceHQL.length() > 0){
-        spaceHQL = "(" + spaceHQL + ")";
-      }
-    }
-    return spaceHQL;
+    return getCalService().getAllowedSpacesHQL(calDoc);
   }
 
   /* (non-Javadoc)
@@ -161,20 +123,16 @@ public class CalendarUtils implements ICalendarUtils {
       boolean isArchive, XWikiContext context) {
     return new Calendar(calendarDoc, isArchive, context);
   }
-  
+
   /* (non-Javadoc)
    * @see com.celements.calendar.util.ICalendarUtils#getEventSpaceForCalendar(com.xpn.xwiki.doc.XWikiDocument, com.xpn.xwiki.XWikiContext)
    */
+  @Deprecated
   public String getEventSpaceForCalendar(XWikiDocument doc,
       XWikiContext context) throws XWikiException {
-    String space = doc.getName(); // default if no config available
-    BaseObject obj = doc.getObject(CelementsCalendarPlugin.CLASS_CALENDAR);
-    if(obj != null){
-      space = obj.getStringValue(CelementsCalendarPlugin.PROPERTY_CALENDAR_SPACE);
-    }
-    return space;
+    return getCalService().getEventSpaceForCalendar(doc.getDocumentReference());
   }
-  
+
   /* (non-Javadoc)
    * @see com.celements.calendar.util.ICalendarUtils#getEventSpaceForCalendar(java.lang.String, com.xpn.xwiki.XWikiContext)
    */
@@ -185,10 +143,18 @@ public class CalendarUtils implements ICalendarUtils {
         context);
   }
 
+  @Deprecated
   public String getEventSpaceForCalendar(DocumentReference calDocRef,
       XWikiContext context) throws XWikiException {
     return getEventSpaceForCalendar(context.getWiki().getDocument(calDocRef, context),
         context);
+  }
+
+  private ICalendarService getCalService() {
+    if (calService == null) {
+      calService = Utils.getComponent(ICalendarService.class);
+    }
+    return calService;
   }
 
 }

@@ -56,9 +56,8 @@ public class CalendarScriptService implements ScriptService {
 
   public NavigationDetails getNavigationDetails(CalendarApi cal, EventApi event) {
     try {
-      return eventsMgr.getNavigationDetails(new Event(event.getDocumentReference(),
-          getContext()), new Calendar(cal.getDocumentReference(), cal.isArchive(),
-              getContext()));
+      return eventsMgr.getNavigationDetails(new Event(event.getDocumentReference()), 
+      		new Calendar(cal.getDocumentReference(), cal.isArchive()));
     } catch (XWikiException e) {
       mLogger.error("Failed to getNavigationDetails.", e);
     }

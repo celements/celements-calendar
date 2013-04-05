@@ -27,26 +27,34 @@ public interface ICalendarUtils {
   public List<String> getSubscribingCalendars(String calSpace, XWikiContext context
       ) throws XWikiException;
 
+  /**
+   * @Deprecated use calendar service getAllowedSpaces(DocumentReference) instead
+   */
+  @Deprecated
   public String getAllowedSpacesHQL(XWikiDocument calDoc, XWikiContext context
       ) throws XWikiException;
 
+  /**
+   * @Deprecated use calendar service getEventSpaceForCalendar(DocumentReference)
+   *             instead
+   */
+  @Deprecated
   public String getEventSpaceForCalendar(XWikiDocument doc, XWikiContext context
       ) throws XWikiException;
 
   /**
-   * 
-   * @param fullName
-   * @param context
-   * @return
-   * @throws XWikiException
-   * 
-   * @Deprecated use service getEventSpaceForCalendar(DocumentReference, XWikiContext)
+   * @Deprecated use calendar service getEventSpaceForCalendar(DocumentReference)
    *             instead
    */
   @Deprecated
   public String getEventSpaceForCalendar(String fullName, XWikiContext context
       ) throws XWikiException;
 
+  /**
+   * @Deprecated use calendar service getEventSpaceForCalendar(DocumentReference)
+   *             instead
+   */
+  @Deprecated
   public String getEventSpaceForCalendar(DocumentReference calDocRef, XWikiContext context
       ) throws XWikiException;
 

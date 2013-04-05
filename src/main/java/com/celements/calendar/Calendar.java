@@ -26,10 +26,12 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.radeox.util.logging.Logger;
 import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.api.EventApi;
+import com.celements.calendar.engine.ICalendarEngineRole;
 import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.plugin.CelementsCalendarPlugin;
 import com.celements.calendar.service.ICalendarService;
@@ -43,300 +45,312 @@ import com.xpn.xwiki.objects.classes.BaseClass;
 import com.xpn.xwiki.web.Utils;
 
 public class Calendar implements ICalendar {
-  private static final String _OVERVIEW_DEFAULT_CONFIG =
-      "date,time,l_title,location";
+	private static final String _OVERVIEW_DEFAULT_CONFIG =
+			"date,time,l_title,location";
 
-  private static final String _DETAILVIEW_DEFAULT_CONFIG =
-      "date,time,l_title,location,l_description";
+	private static final String _DETAILVIEW_DEFAULT_CONFIG =
+			"date,time,l_title,location,l_description";
 
-  private static Log mLogger = LogFactory.getFactory().getInstance(Calendar.class);
+	private static Log mLogger = LogFactory.getFactory().getInstance(Calendar.class);
 
-  private boolean isArchive;
-  private DocumentReference calConfigDocRef;
-  private static final List<String> _NON_EVENT_PROPERTYS;
-  private ICalendarUtils utils;
+	private boolean isArchive;
+	private DocumentReference calConfigDocRef;
+	private static final List<String> _NON_EVENT_PROPERTYS;
+	private ICalendarUtils utils;
 
-  private IEventManager eventMgr;
-  private ICalendarService calService;
+	private IEventManager eventMgr;
+	private ICalendarEngineRole engine;
+	private ICalendarService calService;
 
-  private Date startDate = new Date();
+	private Date startDate = new Date();
 
-  private String defaultLang;
-  private String language;
+	private String defaultLang;
+	private String language;
 
-  static {
-    _NON_EVENT_PROPERTYS = new ArrayList<String>();
-    _NON_EVENT_PROPERTYS.add("lang");
-    _NON_EVENT_PROPERTYS.add("isSubscribable");
-    _NON_EVENT_PROPERTYS.add("eventDate");
-    _NON_EVENT_PROPERTYS.add("eventDate_end");
-  }
+	static {
+		_NON_EVENT_PROPERTYS = new ArrayList<String>();
+		_NON_EVENT_PROPERTYS.add("lang");
+		_NON_EVENT_PROPERTYS.add("isSubscribable");
+		_NON_EVENT_PROPERTYS.add("eventDate");
+		_NON_EVENT_PROPERTYS.add("eventDate_end");
+	}
 
-  /**
-   * 
-   * @param calConfigDoc
-   * @param isArchive
-   * @param context
-   * 
-   * @deprecated use Calendar(DocumentReference, boolean) instead
-   */
-  @Deprecated
-  public Calendar(XWikiDocument calConfigDoc, boolean isArchive, XWikiContext context){
-    this(calConfigDoc.getDocumentReference(), isArchive);
-  }
+	/**
+	 * 
+	 * @param calConfigDoc
+	 * @param isArchive
+	 * @param context
+	 * 
+	 * @deprecated use Calendar(DocumentReference, boolean) instead
+	 */
+	@Deprecated
+	public Calendar(XWikiDocument calConfigDoc, boolean isArchive, XWikiContext context){
+		this(calConfigDoc.getDocumentReference(), isArchive);
+	}
 
-  /**
-   * 
-   * @param calConfigDocRef
-   * @param isArchive
-   * @param context
-   * 
-   * @deprecated use Calendar(DocumentReference, boolean) instead
-   */
-  @Deprecated
-  public Calendar(DocumentReference calConfigDocRef, boolean isArchive,
-      XWikiContext context) {
-    this(calConfigDocRef, isArchive);
-  }
+	/**
+	 * 
+	 * @param calConfigDocRef
+	 * @param isArchive
+	 * @param context
+	 * 
+	 * @deprecated use Calendar(DocumentReference, boolean) instead
+	 */
+	@Deprecated
+	public Calendar(DocumentReference calConfigDocRef, boolean isArchive,
+			XWikiContext context) {
+		this(calConfigDocRef, isArchive);
+	}
 
-  public Calendar(DocumentReference calConfigDocRef, boolean isArchive) {
-    this.isArchive = isArchive;
-    this.calConfigDocRef = calConfigDocRef;
-  }
+	public Calendar(DocumentReference calConfigDocRef, boolean isArchive) {
+		this.isArchive = isArchive;
+		this.calConfigDocRef = calConfigDocRef;
+	}
 
-  /* (non-Javadoc)
-   * @see com.celements.calendar.ICalendar#getAllEvents()
-   */
-  @Deprecated
-  public List<EventApi> getAllEvents(){
-    return getEventMgr().getEvents(this, 0, 0);
-  }
+	/* (non-Javadoc)
+	 * @see com.celements.calendar.ICalendar#getAllEvents()
+	 */
+	@Deprecated
+	public List<EventApi> getAllEvents(){
+		return getEventMgr().getEvents(this, 0, 0);
+	}
 
-  /* (non-Javadoc)
-   * @see com.celements.calendar.ICalendar#getAllEvents()
-   */
-  public List<IEvent> getAllEventsInternal() {
-    return getEventMgr().getAllEventsInternal(this);
-  }
+	/* (non-Javadoc)
+	 * @see com.celements.calendar.ICalendar#getAllEvents()
+	 */
+	public List<IEvent> getAllEventsInternal() {
+		return getEventMgr().getAllEventsInternal(this);
+	}
 
-  /* (non-Javadoc)
-   * @see com.celements.calendar.ICalendar#getEvents(int, int)
-   */
-  @Deprecated
-  public List<EventApi> getEvents(int start, int nb) {
-    return getEventMgr().getEvents(this, start < 0 ? 0 : start, nb < 0 ? 0 : nb);
-  }
+	/* (non-Javadoc)
+	 * @see com.celements.calendar.ICalendar#getEvents(int, int)
+	 */
+	@Deprecated
+	public List<EventApi> getEvents(int start, int nb) {
+		return getEventMgr().getEvents(this, start < 0 ? 0 : start, nb < 0 ? 0 : nb);
+	}
 
-  /* (non-Javadoc)
-   * @see com.celements.calendar.ICalendar#getEvents(int, int)
-   */
-  public List<IEvent> getEventsInternal(int start, int nb) {
-    return getEventMgr().getEventsInternal(this, start < 0 ? 0 : start, nb < 0 ? 0 : nb);
-  }
+	/* (non-Javadoc)
+	 * @see com.celements.calendar.ICalendar#getEvents(int, int)
+	 */
+	public List<IEvent> getEventsInternal(int start, int nb) {
+		return getEventMgr().getEventsInternal(this, start < 0 ? 0 : start, nb < 0 ? 0 : nb);
+	}
 
-  /* (non-Javadoc)
-   * @see com.celements.calendar.ICalendar#getNrOfEvents()
-   */
-  public long getNrOfEvents(){
-    return getEventMgr().countEvents(this);
-  }
+	/* (non-Javadoc)
+	 * @see com.celements.calendar.ICalendar#getNrOfEvents()
+	 */
+	public long getNrOfEvents(){
+		return getEventMgr().countEvents(this);
+	}
 
-  /* (non-Javadoc)
-   * @see com.celements.calendar.ICalendar#isArchive()
-   */
-  public boolean isArchive(){
-    return isArchive;
-  }
+	/* (non-Javadoc)
+	 * @see com.celements.calendar.ICalendar#isArchive()
+	 */
+	public boolean isArchive(){
+		return isArchive;
+	}
 
-  public List<String> getOverviewFields() {
-    return Arrays.asList(getOverviewConfig().split(","));
-  }
+	public List<String> getOverviewFields() {
+		return Arrays.asList(getOverviewConfig().split(","));
+	}
 
-  public String getOverviewConfig() {
-    String overviewConfig = _OVERVIEW_DEFAULT_CONFIG;
-    BaseObject calConfigObj = getConfigObject();
-    if ((calConfigObj != null)
-        && (getPropertyStringValueForOverviewConfig(calConfigObj) != null)
-        && (!"".equals(getPropertyStringValueForOverviewConfig(calConfigObj)))) {
-      overviewConfig = getPropertyStringValueForOverviewConfig(calConfigObj);
-    }
-    mLogger.debug("overview config: '" + overviewConfig + "'");
-    return overviewConfig;
-  }
+	public String getOverviewConfig() {
+		String overviewConfig = _OVERVIEW_DEFAULT_CONFIG;
+		BaseObject calConfigObj = getConfigObject();
+		if ((calConfigObj != null)
+				&& (getPropertyStringValueForOverviewConfig(calConfigObj) != null)
+				&& (!"".equals(getPropertyStringValueForOverviewConfig(calConfigObj)))) {
+			overviewConfig = getPropertyStringValueForOverviewConfig(calConfigObj);
+		}
+		mLogger.debug("overview config: '" + overviewConfig + "'");
+		return overviewConfig;
+	}
 
-  private String getPropertyStringValueForOverviewConfig(BaseObject calConfigObj) {
-    return calConfigObj.getStringValue(
-        CelementsCalendarPlugin.PROPERTY_OVERVIEW_COLUMN_CONFIG);
-  }
+	private String getPropertyStringValueForOverviewConfig(BaseObject calConfigObj) {
+		return calConfigObj.getStringValue(
+				CelementsCalendarPlugin.PROPERTY_OVERVIEW_COLUMN_CONFIG);
+	}
 
-  public List<String> getDetailviewFields() {
-    return Arrays.asList(getDetailviewConfig().split(","));
-  }
+	public List<String> getDetailviewFields() {
+		return Arrays.asList(getDetailviewConfig().split(","));
+	}
 
-  public String getDetailviewConfig() {
-    String detailviewConfig = _DETAILVIEW_DEFAULT_CONFIG;
-    BaseObject calConfigObj = getConfigObject();
-    if ((calConfigObj != null)
-        && (calConfigObj.getStringValue(CelementsCalendarPlugin.PROPERTY_EVENT_COLUMN_CONFIG) != null)
-        && (!"".equals(calConfigObj.getStringValue(CelementsCalendarPlugin.PROPERTY_EVENT_COLUMN_CONFIG)))) {
-      detailviewConfig = calConfigObj.getStringValue(CelementsCalendarPlugin.PROPERTY_EVENT_COLUMN_CONFIG);
-    }
-    mLogger.debug("detailview config: '" + detailviewConfig + "'");
-    return detailviewConfig;
-  }
+	public String getDetailviewConfig() {
+		String detailviewConfig = _DETAILVIEW_DEFAULT_CONFIG;
+		BaseObject calConfigObj = getConfigObject();
+		if ((calConfigObj != null)
+				&& (calConfigObj.getStringValue(CelementsCalendarPlugin.PROPERTY_EVENT_COLUMN_CONFIG) != null)
+				&& (!"".equals(calConfigObj.getStringValue(CelementsCalendarPlugin.PROPERTY_EVENT_COLUMN_CONFIG)))) {
+			detailviewConfig = calConfigObj.getStringValue(CelementsCalendarPlugin.PROPERTY_EVENT_COLUMN_CONFIG);
+		}
+		mLogger.debug("detailview config: '" + detailviewConfig + "'");
+		return detailviewConfig;
+	}
 
-  private BaseObject getConfigObject() {
-    return getCalDoc().getXObject(new DocumentReference(getContext().getDatabase(),
-        CelementsCalendarPlugin.CLASS_CALENDAR_SPACE,
-        CelementsCalendarPlugin.CLASS_CALENDAR_DOC));
-  }
+	private BaseObject getConfigObject() {
+		return getCalDoc().getXObject(new DocumentReference(getContext().getDatabase(),
+				CelementsCalendarPlugin.CLASS_CALENDAR_SPACE,
+				CelementsCalendarPlugin.CLASS_CALENDAR_DOC));
+	}
 
-  public List<String> getCalOverviewPropertyNames() {
-    return getCalOverviewPropertyNames_internal(getContext());
-  }
+	public List<String> getCalOverviewPropertyNames() {
+		return getCalOverviewPropertyNames_internal(getContext());
+	}
 
-  /**
-   * @deprecated use getCalOverviewPropertyNames() instead
-   */
-  @Deprecated
-  public List<String> getCalOverviewPropertyNames(XWikiContext context) {
-    return getCalOverviewPropertyNames_internal(context);
-  }
+	/**
+	 * @deprecated use getCalOverviewPropertyNames() instead
+	 */
+	@Deprecated
+	public List<String> getCalOverviewPropertyNames(XWikiContext context) {
+		return getCalOverviewPropertyNames_internal(context);
+	}
 
-  private List<String> getCalOverviewPropertyNames_internal(XWikiContext context) {
-    List<String> propNames = getEventPropertyNames(context);
-    if (hasDetailLink()) {
-      propNames.add("detaillink");
-    }
-    return propNames;
-  }
+	private List<String> getCalOverviewPropertyNames_internal(XWikiContext context) {
+		List<String> propNames = getEventPropertyNames(context);
+		if (hasDetailLink()) {
+			propNames.add("detaillink");
+		}
+		return propNames;
+	}
 
-  public List<String> getEventPropertyNames() {
-    return getEventPropertyNames_internal(getContext());
-  }
+	public List<String> getEventPropertyNames() {
+		return getEventPropertyNames_internal(getContext());
+	}
 
-  /**
-   * @deprecated use getEventPropertyNames() instead
-   */
-  @Deprecated
-  public List<String> getEventPropertyNames(XWikiContext context) {
-    return getEventPropertyNames_internal(context);
-  }
+	/**
+	 * @deprecated use getEventPropertyNames() instead
+	 */
+	@Deprecated
+	public List<String> getEventPropertyNames(XWikiContext context) {
+		return getEventPropertyNames_internal(context);
+	}
 
-  private List<String> getEventPropertyNames_internal(XWikiContext context) {
-    List<String> propNames = new ArrayList<String>();
-    try {
-      XWikiDocument doc = context.getWiki().getDocument(new DocumentReference(
-          context.getDatabase(), CelementsCalendarPlugin.CLASS_EVENT_SPACE,
-          CelementsCalendarPlugin.CLASS_EVENT_DOC), context);
-      BaseClass bclass = doc.getXClass();
-      Object[] props = bclass.getPropertyNames();
-      for(int i = 0; i < props.length; i++) {
-        String propertyName = (String) props[i];
-        if (!_NON_EVENT_PROPERTYS.contains(propertyName)) {
-          propNames.add(propertyName);
-        }
-      }
-      propNames.add("date");
-      propNames.add("time");
-      propNames.add("date_end");
-      propNames.add("time_end");
-    } catch (XWikiException e) {
-      mLogger.error("Event Class Document not available", e);
-    }
-    return propNames;
-  }
+	private List<String> getEventPropertyNames_internal(XWikiContext context) {
+		List<String> propNames = new ArrayList<String>();
+		try {
+			XWikiDocument doc = context.getWiki().getDocument(new DocumentReference(
+					context.getDatabase(), CelementsCalendarPlugin.CLASS_EVENT_SPACE,
+					CelementsCalendarPlugin.CLASS_EVENT_DOC), context);
+			BaseClass bclass = doc.getXClass();
+			Object[] props = bclass.getPropertyNames();
+			for(int i = 0; i < props.length; i++) {
+				String propertyName = (String) props[i];
+				if (!_NON_EVENT_PROPERTYS.contains(propertyName)) {
+					propNames.add(propertyName);
+				}
+			}
+			propNames.add("date");
+			propNames.add("time");
+			propNames.add("date_end");
+			propNames.add("time_end");
+		} catch (XWikiException e) {
+			mLogger.error("Event Class Document not available", e);
+		}
+		return propNames;
+	}
 
-  public boolean hasDetailLink() {
-    BaseObject configObj = getConfigObject();
-    return ((configObj != null) && (configObj.getIntValue("hasMoreLink") == 1));
-  }
+	public boolean hasDetailLink() {
+		BaseObject configObj = getConfigObject();
+		return ((configObj != null) && (configObj.getIntValue("hasMoreLink") == 1));
+	}
 
-  public boolean isSubscribable() {
-    BaseObject configObj = getConfigObject();
-    return (configObj.getIntValue(
-        CelementsCalendarPlugin.PROPERTY_IS_SUBSCRIBABLE) == 1);
-  }
+	public boolean isSubscribable() {
+		BaseObject configObj = getConfigObject();
+		return (configObj.getIntValue(
+				CelementsCalendarPlugin.PROPERTY_IS_SUBSCRIBABLE) == 1);
+	}
 
-  public XWikiDocument getCalDoc() {
-    try {
-      return getContext().getWiki().getDocument(this.calConfigDocRef, getContext());
-    } catch (XWikiException exp) {
-      mLogger.error("Failed to get cal doc for [" + this.calConfigDocRef + "].", exp);
-    }
-    return null;
-  }
+	public XWikiDocument getCalDoc() {
+		try {
+			return getContext().getWiki().getDocument(this.calConfigDocRef, getContext());
+		} catch (XWikiException exp) {
+			mLogger.error("Failed to get cal doc for [" + this.calConfigDocRef + "].", exp);
+		}
+		return null;
+	}
 
-  public ICalendarUtils getUtils() {
-    if(utils == null) {
-      utils = CalendarUtils.getInstance();
-    }
-    return utils;
-  }
+	public ICalendarUtils getUtils() {
+		if(utils == null) {
+			utils = CalendarUtils.getInstance();
+		}
+		return utils;
+	}
 
-  public void setCalendarUtils(ICalendarUtils utils) {
-    this.utils = utils;
-  }
+	public void setCalendarUtils(ICalendarUtils utils) {
+		this.utils = utils;
+	}
 
-  void inject_getEventCmd(IEventManager getEventCmdMock) {
-    eventMgr = getEventCmdMock;
-  }
+	void inject_getEventCmd(IEventManager getEventCmdMock) {
+		eventMgr = getEventCmdMock;
+	}
 
-  private IEventManager getEventMgr() {
-    if (eventMgr == null) {
-      eventMgr = Utils.getComponent(IEventManager.class, "default");
-    }
-    return eventMgr;
-  }
+	private IEventManager getEventMgr() {
+		if (eventMgr == null) {
+			eventMgr = Utils.getComponent(IEventManager.class, "default");
+		}
+		return eventMgr;
+	}
 
-  private ICalendarService getCalService() {
-    if (calService == null) {
-      calService = Utils.getComponent(ICalendarService.class);
-    }
-    return calService;
-  }
+	private ICalendarService getCalService() {
+		if (calService == null) {
+			calService = Utils.getComponent(ICalendarService.class);
+		}
+		return calService;
+	}
 
-  public void setStartDate(Date newStartDate) {
-    if (newStartDate != null) {
-      this.startDate = newStartDate;
-    }
-  }
+	public void setStartDate(Date newStartDate) {
+		if (newStartDate != null) {
+			this.startDate = newStartDate;
+		}
+	}
 
-  public Date getStartDate() {
-    return this.startDate;
-  }
+	public Date getStartDate() {
+		return this.startDate;
+	}
 
-  public DocumentReference getDocumentReference() {
-    return calConfigDocRef;
-  }
+	public DocumentReference getDocumentReference() {
+		return calConfigDocRef;
+	}
 
-  public String getLanguage() {
-    if (this.language != null) {
-      return this.language;
-    }
-    return getDefaultLang();
-  }
+	public String getLanguage() {
+		if (this.language != null) {
+			return this.language;
+		}
+		return getDefaultLang();
+	}
 
-  public void setLanguage(String language) {
-    this.language = language;
-  }
+	public void setLanguage(String language) {
+		this.language = language;
+	}
 
-  private final String getDefaultLang() {
-    if (defaultLang == null) {
-      try {
-        defaultLang = getContext().getWiki().getWebPreference("default_language",
-            getCalService().getEventSpaceForCalendar(getDocumentReference()), "",
-            getContext());
-      } catch (XWikiException exp) {
-        mLogger.error("getDefaultLang: failed to get WebPreferences.", exp);
-      }
-    }
-    return defaultLang;
-  }
+	private final String getDefaultLang() {
+		if (defaultLang == null) {
+			try {
+				defaultLang = getContext().getWiki().getWebPreference("default_language",
+						getCalService().getEventSpaceForCalendar(getDocumentReference()), "",
+						getContext());
+			} catch (XWikiException exp) {
+				mLogger.error("getDefaultLang: failed to get WebPreferences.", exp);
+			}
+		}
+		return defaultLang;
+	}
 
-  private XWikiContext getContext() {
-    Execution execution = Utils.getComponent(Execution.class);
-    return (XWikiContext)execution.getContext().getProperty("xwikicontext");
-  }
+	private XWikiContext getContext() {
+		Execution execution = Utils.getComponent(Execution.class);
+		return (XWikiContext)execution.getContext().getProperty("xwikicontext");
+	}
+
+	public ICalendarEngineRole getEngine() {
+		if (engine == null) {
+			String engineHint = getContext().getWiki().getXWikiPreference("calendar_engine",
+					"calendar.engine", "hql", getContext());
+			Logger.debug("Using engine '" + engineHint + "' for  calendar '"
+					+ getDocumentReference() + "'");
+			engine = Utils.getComponent(ICalendarEngineRole.class, engineHint);
+		}
+		return engine;
+	}
 
 }

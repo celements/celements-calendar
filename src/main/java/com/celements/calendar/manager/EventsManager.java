@@ -59,13 +59,13 @@ public class EventsManager implements IEventManager {
 	}
 
 	public List<IEvent> getEventsInternal(ICalendar cal, int start, int nb) {
+		DocumentReference calDocRef = cal.getDocumentReference();
 		try {
-			DocumentReference calDocRef = cal.getDocumentReference();
 			return getEvents_internal(cal.getEngine(), calDocRef, cal.getStartDate(),
 					cal.isArchive(), webUtilsService.getDefaultLanguage(),
 					calService.getAllowedSpaces(calDocRef), start, nb);
 		} catch (XWikiException exc) {
-			LOGGER.error(exc);
+			LOGGER.error("Exception while getting events for calendar '" + calDocRef + "'", exc);
 		}
 		return Collections.emptyList();
 	}
@@ -199,8 +199,7 @@ public class EventsManager implements IEventManager {
 				}
 				return count;
 			} catch (XWikiException exc) {
-				LOGGER.error("Exception while counting events for calendar '" + calDocRef
-						+ "' with startDate '" + startDate + "' and isArchive '" + isArchive + "'",
+				LOGGER.error("Exception while counting events for calendar '" + calDocRef + "'",
 						exc);
 			}
 		}

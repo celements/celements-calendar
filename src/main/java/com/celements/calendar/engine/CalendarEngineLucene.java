@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 
@@ -17,6 +19,9 @@ import com.celements.search.lucene.query.LuceneQueryRestrictionApi;
 
 @Component("lucene")
 public class CalendarEngineLucene implements ICalendarEngineRole {
+
+	private static final Log LOGGER = LogFactory.getFactory().getInstance(
+			CalendarEngineLucene.class);
 
 	@Requirement
 	private IQueryService queryService;
@@ -45,11 +50,14 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
 		LuceneQueryApi query = queryService.createQuery();
 		addLangRestriction(query, lang);
 		addSpaceRestrictions(query, allowedSpaces);
+		EventSearchResult searchResult;
 		if (!isArchive) {
-			return eventSearch.getSearchResultFromDate(query, startDate);
+			searchResult = eventSearch.getSearchResultFromDate(query, startDate);
 		} else {
-			return eventSearch.getSearchResultUptoDate(query, startDate);
+			searchResult = eventSearch.getSearchResultUptoDate(query, startDate);
 		}
+		LOGGER.debug("getEventSearchResult: " + searchResult);
+		return searchResult;
 	}
 
 	private void addSpaceRestrictions(LuceneQueryApi query, List<String> allowedSpaces) {

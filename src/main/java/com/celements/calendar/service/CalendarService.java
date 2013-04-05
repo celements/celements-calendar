@@ -8,10 +8,7 @@ import org.apache.commons.logging.LogFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
-import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.model.reference.EntityReferenceResolver;
-import org.xwiki.model.reference.WikiReference;
 import org.xwiki.query.Query;
 import org.xwiki.query.QueryException;
 import org.xwiki.query.QueryManager;
@@ -39,9 +36,6 @@ public class CalendarService implements ICalendarService {
 
   @Requirement
   private QueryManager queryManager;
-
-  @Requirement
-  private EntityReferenceResolver<String> stringRefResolver;
 
   @Requirement
   private IWebUtilsService webUtils;
@@ -136,11 +130,8 @@ public class CalendarService implements ICalendarService {
       query = queryManager.createQuery(xwql, Query.XWQL);
       query.bindValue("calSpace", calSpace);
       List<String> blogList = query.execute();
-      if(blogList.size() > 0){
-        DocumentReference calDocRef = new DocumentReference(stringRefResolver.resolve(
-            blogList.get(0), EntityType.DOCUMENT));
-        calDocRef.setWikiReference(new WikiReference(getContext().getDatabase()));
-        return calDocRef;
+      if (blogList.size() > 0) {
+        return webUtils.resolveDocumentReference(blogList.get(0));
       } else {
         LOGGER.error("getCalendarDocRefByCalendarSpace: no calendar found for space ["
             + calSpace + "].");

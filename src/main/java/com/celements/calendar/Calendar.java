@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.radeox.util.logging.Logger;
 import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
 
@@ -51,7 +50,7 @@ public class Calendar implements ICalendar {
 	private static final String _DETAILVIEW_DEFAULT_CONFIG =
 			"date,time,l_title,location,l_description";
 
-	private static Log mLogger = LogFactory.getFactory().getInstance(Calendar.class);
+	private static Log LOGGER = LogFactory.getFactory().getInstance(Calendar.class);
 
 	private boolean isArchive;
 	private DocumentReference calConfigDocRef;
@@ -163,7 +162,7 @@ public class Calendar implements ICalendar {
 				&& (!"".equals(getPropertyStringValueForOverviewConfig(calConfigObj)))) {
 			overviewConfig = getPropertyStringValueForOverviewConfig(calConfigObj);
 		}
-		mLogger.debug("overview config: '" + overviewConfig + "'");
+		LOGGER.debug("overview config: '" + overviewConfig + "'");
 		return overviewConfig;
 	}
 
@@ -184,7 +183,7 @@ public class Calendar implements ICalendar {
 				&& (!"".equals(calConfigObj.getStringValue(CelementsCalendarPlugin.PROPERTY_EVENT_COLUMN_CONFIG)))) {
 			detailviewConfig = calConfigObj.getStringValue(CelementsCalendarPlugin.PROPERTY_EVENT_COLUMN_CONFIG);
 		}
-		mLogger.debug("detailview config: '" + detailviewConfig + "'");
+		LOGGER.debug("detailview config: '" + detailviewConfig + "'");
 		return detailviewConfig;
 	}
 
@@ -245,7 +244,7 @@ public class Calendar implements ICalendar {
 			propNames.add("date_end");
 			propNames.add("time_end");
 		} catch (XWikiException e) {
-			mLogger.error("Event Class Document not available", e);
+			LOGGER.error("Event Class Document not available", e);
 		}
 		return propNames;
 	}
@@ -265,7 +264,7 @@ public class Calendar implements ICalendar {
 		try {
 			return getContext().getWiki().getDocument(this.calConfigDocRef, getContext());
 		} catch (XWikiException exp) {
-			mLogger.error("Failed to get cal doc for [" + this.calConfigDocRef + "].", exp);
+			LOGGER.error("Failed to get cal doc for [" + this.calConfigDocRef + "].", exp);
 		}
 		return null;
 	}
@@ -331,7 +330,7 @@ public class Calendar implements ICalendar {
 						getCalService().getEventSpaceForCalendar(getDocumentReference()), "",
 						getContext());
 			} catch (XWikiException exp) {
-				mLogger.error("getDefaultLang: failed to get WebPreferences.", exp);
+				LOGGER.error("getDefaultLang: failed to get WebPreferences.", exp);
 			}
 		}
 		return defaultLang;
@@ -346,7 +345,7 @@ public class Calendar implements ICalendar {
 		if (engine == null) {
 			String engineHint = getContext().getWiki().getXWikiPreference("calendar_engine",
 					"calendar.engine", "hql", getContext());
-			Logger.debug("Using engine '" + engineHint + "' for  calendar '"
+			LOGGER.debug("Using engine '" + engineHint + "' for  calendar '"
 					+ getDocumentReference() + "'");
 			engine = Utils.getComponent(ICalendarEngineRole.class, engineHint);
 		}

@@ -26,6 +26,7 @@ import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.engine.ICalendarEngineRole;
+import com.celements.search.lucene.query.LuceneQueryApi;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.doc.XWikiDocument;
 
@@ -43,6 +44,8 @@ public interface ICalendar {
   public List<EventApi> getAllEvents();
 
   public List<IEvent> getAllEventsInternal();
+
+  public List<IEvent> getAllEventsInternal(LuceneQueryApi query);
 
   /**
    * getEvents
@@ -64,16 +67,20 @@ public interface ICalendar {
    */
   public List<IEvent> getEventsInternal(int start, int nb);
 
+  public List<IEvent> getEventsInternal(LuceneQueryApi query, int start, int nb);
+
   public long getNrOfEvents();
 
+  public long getNrOfEvents(LuceneQueryApi query);
+
   public boolean isArchive();
-  
+
   public List<String> getOverviewFields();
 
   public List<String> getDetailviewFields();
-  
+
   public List<String> getCalOverviewPropertyNames();
-  
+
   /**
    * @deprecated use getCalOverviewPropertyNames() instead
    */
@@ -103,7 +110,7 @@ public interface ICalendar {
   public String getLanguage();
 
   public void setLanguage(String language);
-  
+
   public ICalendarEngineRole getEngine();
 
 }

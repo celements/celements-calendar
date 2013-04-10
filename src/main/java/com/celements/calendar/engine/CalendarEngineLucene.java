@@ -31,23 +31,45 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
 
   public List<IEvent> getEvents(Date startDate, boolean isArchive, String lang,
       List<String> allowedSpaces) {
-    return getEventSearchResult(isArchive, startDate, lang, allowedSpaces).getEventList();
+    return getEvents(queryService.createQuery(), startDate, isArchive, lang,
+        allowedSpaces);
+  }
+
+  public List<IEvent> getEvents(LuceneQueryApi query, Date startDate, boolean isArchive,
+      String lang, List<String> allowedSpaces) {
+    return getEventSearchResult(query, isArchive, startDate, lang, allowedSpaces
+        ).getEventList();
   }
 
   public List<IEvent> getEvents(Date startDate, boolean isArchive, String lang,
       List<String> allowedSpaces, int offset, int limit) {
-    return getEventSearchResult(isArchive, startDate, lang, allowedSpaces).getEventList(
-        offset, limit);
+    return getEvents(queryService.createQuery(), startDate, isArchive, lang,
+        allowedSpaces, offset, limit);
+  }
+
+  public List<IEvent> getEvents(LuceneQueryApi query, Date startDate, boolean isArchive,
+      String lang, List<String> allowedSpaces, int offset, int limit) {
+    return getEventSearchResult(query, isArchive, startDate, lang, allowedSpaces
+        ).getEventList(offset, limit);
   }
 
   public long countEvents(Date startDate, boolean isArchive, String lang,
       List<String> allowedSpaces) {
-    return getEventSearchResult(isArchive, startDate, lang, allowedSpaces).getSize();
+    return countEvents(queryService.createQuery(), startDate, isArchive, lang,
+        allowedSpaces);
   }
 
-  private EventSearchResult getEventSearchResult(boolean isArchive, Date startDate,
+  public long countEvents(LuceneQueryApi query, Date startDate, boolean isArchive,
       String lang, List<String> allowedSpaces) {
-    LuceneQueryApi query = queryService.createQuery();
+    return getEventSearchResult(query, isArchive, startDate, lang, allowedSpaces
+        ).getSize();
+  }
+
+  private EventSearchResult getEventSearchResult(LuceneQueryApi query, boolean isArchive,
+      Date startDate, String lang, List<String> allowedSpaces) {
+    if (query == null) {
+      query = queryService.createQuery();
+    }
     addLangRestriction(query, lang);
     addSpaceRestrictions(query, allowedSpaces);
     EventSearchResult searchResult;

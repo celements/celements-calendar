@@ -36,6 +36,7 @@ import com.celements.calendar.plugin.CelementsCalendarPlugin;
 import com.celements.calendar.service.ICalendarService;
 import com.celements.calendar.util.CalendarUtils;
 import com.celements.calendar.util.ICalendarUtils;
+import com.celements.search.lucene.query.LuceneQueryApi;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -121,6 +122,10 @@ public class Calendar implements ICalendar {
     return getEventMgr().getAllEventsInternal(this);
   }
 
+  public List<IEvent> getAllEventsInternal(LuceneQueryApi query) {
+    return getEventMgr().getAllEventsInternal(this, query);
+  }
+
   /* (non-Javadoc)
    * @see com.celements.calendar.ICalendar#getEvents(int, int)
    */
@@ -136,11 +141,20 @@ public class Calendar implements ICalendar {
     return getEventMgr().getEventsInternal(this, start < 0 ? 0 : start, nb < 0 ? 0 : nb);
   }
 
+  public List<IEvent> getEventsInternal(LuceneQueryApi query, int start, int nb) {
+    return getEventMgr().getEventsInternal(this, query, start < 0 ? 0 : start,
+        nb < 0 ? 0 : nb);
+  }
+
   /* (non-Javadoc)
    * @see com.celements.calendar.ICalendar#getNrOfEvents()
    */
   public long getNrOfEvents(){
     return getEventMgr().countEvents(this);
+  }
+
+  public long getNrOfEvents(LuceneQueryApi query) {
+    return getEventMgr().countEvents(this, query);
   }
 
   /* (non-Javadoc)

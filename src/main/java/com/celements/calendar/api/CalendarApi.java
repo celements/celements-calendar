@@ -27,6 +27,7 @@ import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
+import com.celements.search.lucene.query.LuceneQueryApi;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.api.Api;
 
@@ -48,14 +49,22 @@ public class CalendarApi extends Api {
     return convertEventListToEventApiList(calendar.getAllEventsInternal());
   }
 
+  public List<EventApi> getAllEvents(LuceneQueryApi query) {
+    return convertEventListToEventApiList(calendar.getAllEventsInternal(query));
+  }
+
   public List<EventApi> getEvents(int start, int nb) {
     return convertEventListToEventApiList(calendar.getEventsInternal(start, nb));
   }
-  
+
+  public List<EventApi> getEvents(LuceneQueryApi query, int start, int nb) {
+    return convertEventListToEventApiList(calendar.getEventsInternal(query, start, nb));
+  }
+
   private List<EventApi> convertEventListToEventApiList(List<IEvent> eventList) {
     List<EventApi> eventApiList = new ArrayList<EventApi>();
     for (IEvent event : eventList) {
-      eventApiList.add(new EventApi(event, calendar.getLanguage(), context));      
+      eventApiList.add(new EventApi(event, calendar.getLanguage(), context));
     }
     return eventApiList;
   }
@@ -64,10 +73,14 @@ public class CalendarApi extends Api {
     return calendar.getNrOfEvents();
   }
 
+  public long getNrOfEvents(LuceneQueryApi query) {
+    return calendar.getNrOfEvents(query);
+  }
+
   public boolean isArchive() {
     return calendar.isArchive();
   }
-  
+
   public List<String> getOverviewFields() {
     return calendar.getOverviewFields();
   }

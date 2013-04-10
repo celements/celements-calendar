@@ -18,8 +18,11 @@ import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.classes.CalendarClasses;
+import com.celements.calendar.engine.CalendarEngineLucene;
+import com.celements.calendar.engine.ICalendarEngineRole;
 import com.celements.calendar.service.ICalendarService;
 import com.celements.common.classes.IClassCollectionRole;
+import com.celements.search.lucene.query.LuceneQueryApi;
 import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -41,6 +44,9 @@ public class EventsManager implements IEventManager {
   @Requirement("celements.CalendarClasses")
   private IClassCollectionRole calClasses;
 
+  @Requirement("lucene")
+  private ICalendarEngineRole luceneEngine;
+
   @Requirement
   private Execution execution;
 
@@ -61,10 +67,19 @@ public class EventsManager implements IEventManager {
     return getEventsInternal(cal, 0, 0);
   }
 
+  public List<IEvent> getAllEventsInternal(ICalendar cal, LuceneQueryApi query) {
+    return getEventsInternal(cal, query, 0, 0);
+  }
+
   public List<IEvent> getEventsInternal(ICalendar cal, int start, int nb) {
+    return getEventsInternal(cal, null, start, nb);
+  }
+
+  public List<IEvent> getEventsInternal(ICalendar cal, LuceneQueryApi query, int start,
+      int nb) {
     DocumentReference calDocRef = cal.getDocumentReference();
     try {
-      return getEvents_internal(cal, cal.getStartDate(), cal.isArchive(),
+      return getEvents_internal(cal, query, cal.getStartDate(), cal.isArchive(),
           webUtilsService.getDefaultLanguage(), calService.getAllowedSpaces(calDocRef),
           start, nb);
     } catch (XWikiException exc) {
@@ -73,10 +88,18 @@ public class EventsManager implements IEventManager {
     return Collections.emptyList();
   }
 
-  private List<IEvent> getEvents_internal(ICalendar cal, Date startDate, boolean isArchive,
-      String lang,	List<String> allowedSpaces, int start, int nb) throws XWikiException {
-    List<IEvent> eventList = cal.getEngine().getEvents(startDate, isArchive, lang, allowedSpaces,
-        start, nb);
+  private List<IEvent> getEvents_internal(ICalendar cal, LuceneQueryApi query,
+      Date startDate, boolean isArchive, String lang, List<String> allowedSpaces,
+      int start, int nb) throws XWikiException {
+    List<IEvent> eventList;
+    if (query == null) {
+      eventList = cal.getEngine().getEvents(startDate, isArchive, lang, allowedSpaces,
+          start, nb);
+    } else {
+      LOGGER.debug("Using lucene calendar engine for query '" + query + "'");
+      eventList = ((CalendarEngineLucene) luceneEngine).getEvents(query, startDate,
+          isArchive, lang, allowedSpaces, start, nb);
+    }
     LOGGER.debug(eventList.size() + " events found.");
     return filterEventListForSubscription(cal.getDocumentReference(), eventList);
   }
@@ -183,22 +206,25 @@ public class EventsManager implements IEventManager {
   }
 
   public long countEvents(ICalendar cal) {
+    return countEvents_internalCached(cal, null);
+  }
+
+  public long countEvents(ICalendar cal, LuceneQueryApi query) {
+    return countEvents_internalCached(cal, query);
+  }
+
+  private long countEvents_internalCached(ICalendar cal, LuceneQueryApi query) {
     DocumentReference calDocRef = cal.getDocumentReference();
-    boolean isArchive = cal.isArchive();
-    Date startDate = cal.getStartDate();
-    String calFullName = webUtilsService.getRefDefaultSerializer().serialize(calDocRef);
-    String cacheKey = "EventsManager.countEvents|" + calFullName + "|" + isArchive + "|"
-        + startDate.getTime();
+    String cacheKey = "EventsManager.countEvents|"
+        + webUtilsService.getRefDefaultSerializer().serialize(calDocRef) + "|"
+        + cal.isArchive() + "|" + cal.getStartDate().getTime();
     Object cachedCount = execution.getContext().getProperty(cacheKey);
     if (cachedCount != null) {
       LOGGER.debug("Cached event count: " + cachedCount);
       return (Long) cachedCount;
     } else {
       try {
-        long count = cal.getEngine().countEvents(startDate, isArchive,
-            webUtilsService.getDefaultLanguage(), calService.getAllowedSpaces(calDocRef));
-        LOGGER.debug("Event count for calendar '" + calDocRef + "' with startDate + '"
-            + startDate + "' and isArchive '" + isArchive + "': " + count);
+        long count = countEvents_internal(cal, query);
         if (count > 0) {
           execution.getContext().setProperty(cacheKey, count);
         }
@@ -209,6 +235,26 @@ public class EventsManager implements IEventManager {
       }
     }
     return 0;
+  }
+
+  private long countEvents_internal(ICalendar cal, LuceneQueryApi query
+      ) throws XWikiException {
+    DocumentReference calDocRef = cal.getDocumentReference();
+    boolean isArchive = cal.isArchive();
+    Date startDate = cal.getStartDate();
+    String lang = webUtilsService.getDefaultLanguage();
+    List<String> allowedSpaces = calService.getAllowedSpaces(calDocRef);
+    long count;
+    if (query == null) {
+      count = cal.getEngine().countEvents(startDate, isArchive, lang, allowedSpaces);
+    } else {
+      LOGGER.debug("Using lucene calendar engine for query '" + query + "'");
+      count = ((CalendarEngineLucene) luceneEngine).countEvents(query, startDate,
+          isArchive, lang, allowedSpaces);
+    }
+    LOGGER.debug("Event count for calendar '" + calDocRef + "' with startDate + '"
+        + startDate + "' and isArchive '" + isArchive + "': " + count);
+    return count;
   }
 
   public NavigationDetails getNavigationDetails(IEvent event, ICalendar cal
@@ -229,7 +275,7 @@ public class EventsManager implements IEventManager {
     List<IEvent> events;
     boolean hasMore, notFound;
     do {
-      events = getEvents_internal(cal, eventDate, false, lang, allowedSpaces, start, nb);
+      events = getEvents_internal(cal, null, eventDate, false, lang, allowedSpaces, start, nb);
       hasMore = events.size() == nb;
       eventIndex = events.indexOf(event);
       notFound = eventIndex < 0;

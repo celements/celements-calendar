@@ -83,7 +83,9 @@ public class EventsManager implements IEventManager {
       Date startDate, boolean isArchive, String lang, List<String> allowedSpaces,
       int start, int nb) throws XWikiException {
     List<IEvent> eventList;
-    if (query == null) {
+    if (nb == 0) {
+      eventList = cal.getEngine().getEvents(startDate, isArchive, lang, allowedSpaces);
+    } else if (query == null) {
       eventList = cal.getEngine().getEvents(startDate, isArchive, lang, allowedSpaces,
           start, nb);
     } else {

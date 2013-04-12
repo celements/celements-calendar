@@ -98,4 +98,8 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
     this.eventSearch = eventSearch;
   }
 
+  void injectHQLEngine(ICalendarEngineRole hqlEngine) {
+    this.hqlEngine = hqlEngine;
+  }
+
 }

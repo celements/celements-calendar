@@ -143,26 +143,16 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
 				"myCalDoc");
 		ICalendar cal = new Calendar(calDocRef, false);
 		cal.setStartDate(startDate);
-		LuceneQueryRestrictionApi spaceRestriction = new LuceneQueryRestrictionApi("space",
-				spaces.get(0));
-		LuceneQueryRestrictionApi langRestriction = new LuceneQueryRestrictionApi("lang",
-				"de");
+		
+		ICalendarEngineRole hqlEngineMock = createMock(ICalendarEngineRole.class);
+		engine.injectHQLEngine(hqlEngineMock);
+		
+		expect(hqlEngineMock.countEvents(eq(startDate), eq(false), eq(lang), eq(spaces))
+		    ).andReturn(2L).once();
 
-		expect(queryServiceMock.createRestriction("space", spaces.get(0))).andReturn(
-				spaceRestriction).once();
-		expect(queryServiceMock.createRestriction("Classes.CalendarEventClass.lang", lang)
-				).andReturn(langRestriction).once();
-		expect(queryServiceMock.createQuery()).andReturn(queryMock).once();
-		expect(queryMock.addOrRestrictionList(Arrays.asList(spaceRestriction))).andReturn(
-				queryMock).once();
-		expect(queryMock.addRestriction(eq(langRestriction))).andReturn(queryMock).once();
-		expect(eventSearchMock.getSearchResultFromDate(same(queryMock), eq(startDate))
-				).andReturn(eventSearchResultMock).once();
-		expect(eventSearchResultMock.getSize()).andReturn(2).once();
-
-		replayAll();
+		replayAll(hqlEngineMock);
 		long countEvent = engine.countEvents(startDate, false, lang, spaces);
-		verifyAll();
+		verifyAll(hqlEngineMock);
 
 		assertEquals(2L, countEvent);
 	}

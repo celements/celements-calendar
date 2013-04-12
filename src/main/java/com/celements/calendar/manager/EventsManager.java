@@ -18,8 +18,6 @@ import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.classes.CalendarClasses;
-import com.celements.calendar.engine.CalendarEngineLucene;
-import com.celements.calendar.engine.ICalendarEngineRole;
 import com.celements.calendar.service.ICalendarService;
 import com.celements.common.classes.IClassCollectionRole;
 import com.celements.search.lucene.query.LuceneQueryApi;
@@ -44,9 +42,6 @@ public class EventsManager implements IEventManager {
   @Requirement("celements.CalendarClasses")
   private IClassCollectionRole calClasses;
 
-  @Requirement("lucene")
-  private ICalendarEngineRole luceneEngine;
-
   @Requirement
   private Execution execution;
 
@@ -65,10 +60,6 @@ public class EventsManager implements IEventManager {
 
   public List<IEvent> getAllEventsInternal(ICalendar cal) {
     return getEventsInternal(cal, 0, 0);
-  }
-
-  public List<IEvent> getAllEventsInternal(ICalendar cal, LuceneQueryApi query) {
-    return getEventsInternal(cal, query, 0, 0);
   }
 
   public List<IEvent> getEventsInternal(ICalendar cal, int start, int nb) {
@@ -96,9 +87,8 @@ public class EventsManager implements IEventManager {
       eventList = cal.getEngine().getEvents(startDate, isArchive, lang, allowedSpaces,
           start, nb);
     } else {
-      LOGGER.debug("Using lucene calendar engine for query '" + query + "'");
-      eventList = ((CalendarEngineLucene) luceneEngine).getEvents(query, startDate,
-          isArchive, lang, allowedSpaces, start, nb);
+      eventList = cal.getEngine().getEvents(query, startDate, isArchive, lang, 
+          allowedSpaces, start, nb);
     }
     LOGGER.debug(eventList.size() + " events found.");
     return filterEventListForSubscription(cal.getDocumentReference(), eventList);
@@ -206,14 +196,6 @@ public class EventsManager implements IEventManager {
   }
 
   public long countEvents(ICalendar cal) {
-    return countEvents_internalCached(cal, null);
-  }
-
-  public long countEvents(ICalendar cal, LuceneQueryApi query) {
-    return countEvents_internalCached(cal, query);
-  }
-
-  private long countEvents_internalCached(ICalendar cal, LuceneQueryApi query) {
     DocumentReference calDocRef = cal.getDocumentReference();
     String cacheKey = "EventsManager.countEvents|"
         + webUtilsService.getRefDefaultSerializer().serialize(calDocRef) + "|"
@@ -224,7 +206,7 @@ public class EventsManager implements IEventManager {
       return (Long) cachedCount;
     } else {
       try {
-        long count = countEvents_internal(cal, query);
+        long count = countEvents_internal(cal);
         if (count > 0) {
           execution.getContext().setProperty(cacheKey, count);
         }
@@ -237,21 +219,12 @@ public class EventsManager implements IEventManager {
     return 0;
   }
 
-  private long countEvents_internal(ICalendar cal, LuceneQueryApi query
-      ) throws XWikiException {
+  private long countEvents_internal(ICalendar cal) throws XWikiException {
     DocumentReference calDocRef = cal.getDocumentReference();
     boolean isArchive = cal.isArchive();
     Date startDate = cal.getStartDate();
-    String lang = webUtilsService.getDefaultLanguage();
-    List<String> allowedSpaces = calService.getAllowedSpaces(calDocRef);
-    long count;
-    if (query == null) {
-      count = cal.getEngine().countEvents(startDate, isArchive, lang, allowedSpaces);
-    } else {
-      LOGGER.debug("Using lucene calendar engine for query '" + query + "'");
-      count = ((CalendarEngineLucene) luceneEngine).countEvents(query, startDate,
-          isArchive, lang, allowedSpaces);
-    }
+    long count = cal.getEngine().countEvents(startDate, isArchive, 
+        webUtilsService.getDefaultLanguage(), calService.getAllowedSpaces(calDocRef));
     LOGGER.debug("Event count for calendar '" + calDocRef + "' with startDate + '"
         + startDate + "' and isArchive '" + isArchive + "': " + count);
     return count;

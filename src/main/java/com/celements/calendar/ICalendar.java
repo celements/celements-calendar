@@ -45,8 +45,6 @@ public interface ICalendar {
 
   public List<IEvent> getAllEventsInternal();
 
-  public List<IEvent> getAllEventsInternal(LuceneQueryApi query);
-
   /**
    * getEvents
    * 
@@ -70,8 +68,6 @@ public interface ICalendar {
   public List<IEvent> getEventsInternal(LuceneQueryApi query, int start, int nb);
 
   public long getNrOfEvents();
-
-  public long getNrOfEvents(LuceneQueryApi query);
 
   public boolean isArchive();
 

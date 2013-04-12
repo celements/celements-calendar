@@ -49,10 +49,6 @@ public class CalendarApi extends Api {
     return convertEventListToEventApiList(calendar.getAllEventsInternal());
   }
 
-  public List<EventApi> getAllEvents(LuceneQueryApi query) {
-    return convertEventListToEventApiList(calendar.getAllEventsInternal(query));
-  }
-
   public List<EventApi> getEvents(int start, int nb) {
     return convertEventListToEventApiList(calendar.getEventsInternal(start, nb));
   }
@@ -71,10 +67,6 @@ public class CalendarApi extends Api {
 
   public long getNrOfEvents() {
     return calendar.getNrOfEvents();
-  }
-
-  public long getNrOfEvents(LuceneQueryApi query) {
-    return calendar.getNrOfEvents(query);
   }
 
   public boolean isArchive() {

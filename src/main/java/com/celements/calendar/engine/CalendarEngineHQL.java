@@ -17,6 +17,7 @@ import org.xwiki.query.QueryManager;
 import com.celements.calendar.Event;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.classes.CalendarClasses;
+import com.celements.search.lucene.query.LuceneQueryApi;
 import com.celements.web.service.IWebUtilsService;
 
 @Component("hql")
@@ -68,6 +69,12 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
       LOGGER.error("getEvents: " + queryException);
     }
     return Collections.emptyList();
+  }
+
+  public List<IEvent> getEvents(LuceneQueryApi query, Date startDate, boolean isArchive, 
+      String lang, List<String> allowedSpaces, int offset, int limit) {
+    throw new UnsupportedOperationException("getEvents() with LuceneQueryApi not " 
+        + "supported for CalendarEngineHQL");
   }
 
   private List<IEvent> convertToEventList(List<String> eventDocs) {

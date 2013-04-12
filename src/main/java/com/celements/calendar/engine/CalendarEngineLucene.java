@@ -29,16 +29,13 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
   @Requirement
   private IEventSearch eventSearch;
 
+  @Requirement("hql")
+  private ICalendarEngineRole hqlEngine;
+
   public List<IEvent> getEvents(Date startDate, boolean isArchive, String lang,
       List<String> allowedSpaces) {
-    return getEvents(queryService.createQuery(), startDate, isArchive, lang,
-        allowedSpaces);
-  }
-
-  public List<IEvent> getEvents(LuceneQueryApi query, Date startDate, boolean isArchive,
-      String lang, List<String> allowedSpaces) {
-    return getEventSearchResult(query, isArchive, startDate, lang, allowedSpaces
-        ).getEventList();
+    LOGGER.debug("getEvents: Delegating to CalendarEngineHQL");
+    return hqlEngine.getEvents(startDate, isArchive, lang, allowedSpaces);
   }
 
   public List<IEvent> getEvents(Date startDate, boolean isArchive, String lang,
@@ -55,14 +52,8 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
 
   public long countEvents(Date startDate, boolean isArchive, String lang,
       List<String> allowedSpaces) {
-    return countEvents(queryService.createQuery(), startDate, isArchive, lang,
-        allowedSpaces);
-  }
-
-  public long countEvents(LuceneQueryApi query, Date startDate, boolean isArchive,
-      String lang, List<String> allowedSpaces) {
-    return getEventSearchResult(query, isArchive, startDate, lang, allowedSpaces
-        ).getSize();
+    LOGGER.debug("countEvents: Delegating to CalendarEngineHQL");
+    return hqlEngine.countEvents(startDate, isArchive, lang, allowedSpaces);
   }
 
   private EventSearchResult getEventSearchResult(LuceneQueryApi query, boolean isArchive,

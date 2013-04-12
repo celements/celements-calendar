@@ -29,8 +29,6 @@ public interface IEventManager {
 
   public List<IEvent> getAllEventsInternal(ICalendar cal);
 
-  public List<IEvent> getAllEventsInternal(ICalendar cal, LuceneQueryApi query);
-
   public List<IEvent> getEventsInternal(ICalendar cal, int start, int nb);
 
   public List<IEvent> getEventsInternal(ICalendar cal, LuceneQueryApi query, int start,
@@ -83,8 +81,6 @@ public interface IEventManager {
   public long countEvents(DocumentReference calDocRef, boolean isArchive, Date startDate);
 
   public long countEvents(ICalendar cal);
-
-  public long countEvents(ICalendar cal, LuceneQueryApi query);
 
   public NavigationDetails getNavigationDetails(IEvent event, ICalendar cal
       ) throws XWikiException;

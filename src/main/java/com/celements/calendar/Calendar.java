@@ -122,10 +122,6 @@ public class Calendar implements ICalendar {
     return getEventMgr().getAllEventsInternal(this);
   }
 
-  public List<IEvent> getAllEventsInternal(LuceneQueryApi query) {
-    return getEventMgr().getAllEventsInternal(this, query);
-  }
-
   /* (non-Javadoc)
    * @see com.celements.calendar.ICalendar#getEvents(int, int)
    */
@@ -151,10 +147,6 @@ public class Calendar implements ICalendar {
    */
   public long getNrOfEvents(){
     return getEventMgr().countEvents(this);
-  }
-
-  public long getNrOfEvents(LuceneQueryApi query) {
-    return getEventMgr().countEvents(this, query);
   }
 
   /* (non-Javadoc)

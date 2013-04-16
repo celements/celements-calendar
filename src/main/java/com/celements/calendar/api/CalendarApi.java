@@ -109,12 +109,12 @@ public class CalendarApi extends Api {
     return calendar.getStartDate();
   }
 
-  public Date getFirstEventDate() {
-    return calendar.getFirstEventDate();
+  public IEvent getFirstEvent() {
+    return calendar.getFirstEvent();
   }
 
-  public Date getLastEventDate() {
-    return calendar.getLastEventDate();
+  public IEvent getLastEvent() {
+    return calendar.getLastEvent();
   }
 
 }

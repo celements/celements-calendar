@@ -135,11 +135,11 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
     return spaceHQL;
   }
 
-  public Date getFirstEventDate(Date startDate, boolean isArchive, String lang,
+  public IEvent getFirstEvent(Date startDate, boolean isArchive, String lang,
       List<String> allowedSpaces) {
     List<IEvent> events = getEvents(startDate, isArchive, lang, allowedSpaces, 0, 1);
     if (events.size() > 0) {
-      return events.get(0).getEventDate();
+      return events.get(0);
     } else {
       LOGGER.debug("getFirstEventDate: Empty list returned from getEvents() for spaces '"
           + allowedSpaces + "'");
@@ -147,14 +147,14 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
     return null;
   }
 
-  public Date getLastEventDate(Date startDate, boolean isArchive, String lang,
+  public IEvent getLastEvent(Date startDate, boolean isArchive, String lang,
       List<String> allowedSpaces) {
     long count = countEvents(startDate, isArchive, lang, allowedSpaces);
     if (count > 0) {
       List<IEvent> events = getEvents(startDate, isArchive, lang, allowedSpaces,
           (int) (count - 1), 1);
       if (events.size() > 0) {
-        return events.get(0).getEventDate();
+        return events.get(0);
       } else {
         LOGGER.debug("getLastEventDate: Empty list returned from getEvents() for spaces '"
             + allowedSpaces + "'");
@@ -163,6 +163,10 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
       LOGGER.debug("getLastEventDate: no Events for spaces '" + allowedSpaces + "'");
     }
     return null;
+  }
+
+  void injectQueryManager(QueryManager queryManagerMock) {
+    this.queryManager = queryManagerMock;
   }
 
 }

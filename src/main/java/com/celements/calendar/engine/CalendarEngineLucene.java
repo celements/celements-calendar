@@ -90,6 +90,16 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
     query.addRestriction(langRestriction);
   }
 
+  public IEvent getFirstEvent(Date startDate, boolean isArchive, String lang,
+      List<String> allowedSpaces) {
+    return hqlEngine.getFirstEvent(startDate, isArchive, lang, allowedSpaces);
+  }
+
+  public IEvent getLastEvent(Date startDate, boolean isArchive, String lang,
+      List<String> allowedSpaces) {
+    return hqlEngine.getLastEvent(startDate, isArchive, lang, allowedSpaces);
+  }
+
   void injectQueryService(IQueryService queryService) {
     this.queryService = queryService;
   }
@@ -100,16 +110,6 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
 
   void injectHQLEngine(ICalendarEngineRole hqlEngine) {
     this.hqlEngine = hqlEngine;
-  }
-
-  public Date getFirstEventDate(Date startDate, boolean isArchive, String lang,
-      List<String> allowedSpaces) {
-    return hqlEngine.getFirstEventDate(startDate, isArchive, lang, allowedSpaces);
-  }
-
-  public Date getLastEventDate(Date startDate, boolean isArchive, String lang,
-      List<String> allowedSpaces) {
-    return hqlEngine.getLastEventDate(startDate, isArchive, lang, allowedSpaces);
   }
 
 }

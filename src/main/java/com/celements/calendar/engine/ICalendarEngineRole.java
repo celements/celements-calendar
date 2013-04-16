@@ -23,10 +23,10 @@ public interface ICalendarEngineRole {
   public List<IEvent> getEvents(LuceneQueryApi query, Date startDate, boolean isArchive,
       String lang, List<String> allowedSpaces, int offset, int limit);
 
-  public Date getFirstEventDate(Date startDate, boolean isArchive, String lang,
+  public IEvent getFirstEvent(Date startDate, boolean isArchive, String lang,
       List<String> allowedSpaces);
 
-  public Date getLastEventDate(Date startDate, boolean isArchive, String lang,
+  public IEvent getLastEvent(Date startDate, boolean isArchive, String lang,
       List<String> allowedSpaces);
 
 }

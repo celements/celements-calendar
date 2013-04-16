@@ -333,12 +333,12 @@ public class Calendar implements ICalendar {
     return engine;
   }
 
-  public Date getFirstEventDate() {
-    return getEventMgr().getFirstEventDate(this);
+  public IEvent getFirstEvent() {
+    return getEventMgr().getFirstEvent(this);
   }
 
-  public Date getLastEventDate() {
-    return getEventMgr().getLastEventDate(this);
+  public IEvent getLastEvent() {
+    return getEventMgr().getLastEvent(this);
   }
 
   private XWikiContext getContext() {

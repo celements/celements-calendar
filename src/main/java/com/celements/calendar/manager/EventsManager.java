@@ -269,10 +269,10 @@ public class EventsManager implements IEventManager {
     return new Event(eventDocRef);
   }
 
-  public Date getFirstEventDate(ICalendar cal) {
+  public IEvent getFirstEvent(ICalendar cal) {
     DocumentReference calDocRef = cal.getDocumentReference();
     try {
-      return cal.getEngine().getFirstEventDate(cal.getStartDate(), cal.isArchive(),
+      return cal.getEngine().getFirstEvent(cal.getStartDate(), cal.isArchive(),
           webUtilsService.getDefaultLanguage(), calService.getAllowedSpaces(calDocRef));
     } catch (XWikiException exc) {
       LOGGER.error("Exception while getting first event date for calendar '" + calDocRef
@@ -281,10 +281,10 @@ public class EventsManager implements IEventManager {
     return null;
   }
 
-  public Date getLastEventDate(ICalendar cal) {
+  public IEvent getLastEvent(ICalendar cal) {
     DocumentReference calDocRef = cal.getDocumentReference();
     try {
-      return cal.getEngine().getLastEventDate(cal.getStartDate(), cal.isArchive(),
+      return cal.getEngine().getLastEvent(cal.getStartDate(), cal.isArchive(),
           webUtilsService.getDefaultLanguage(), calService.getAllowedSpaces(calDocRef));
     } catch (XWikiException exc) {
       LOGGER.error("Exception while getting last event date for calendar '" + calDocRef

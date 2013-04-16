@@ -87,8 +87,8 @@ public interface IEventManager {
 
   public IEvent getEvent(DocumentReference eventDocRef);
 
-  public Date getFirstEventDate(ICalendar cal);
+  public IEvent getFirstEvent(ICalendar cal);
 
-  public Date getLastEventDate(ICalendar cal);
+  public IEvent getLastEvent(ICalendar cal);
 
 }

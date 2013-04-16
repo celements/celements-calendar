@@ -71,9 +71,9 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
     return Collections.emptyList();
   }
 
-  public List<IEvent> getEvents(LuceneQueryApi query, Date startDate, boolean isArchive, 
+  public List<IEvent> getEvents(LuceneQueryApi query, Date startDate, boolean isArchive,
       String lang, List<String> allowedSpaces, int offset, int limit) {
-    throw new UnsupportedOperationException("getEvents() with LuceneQueryApi not " 
+    throw new UnsupportedOperationException("getEvents() with LuceneQueryApi not "
         + "supported for CalendarEngineHQL");
   }
 
@@ -133,6 +133,34 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
       spaceHQL = "(obj.name like '.%')";
     }
     return spaceHQL;
+  }
+
+  public Date getFirstEventDate(String lang, List<String> allowedSpaces) {
+    List<IEvent> events = getEvents(new Date(0), false, lang, allowedSpaces, 0, 1);
+    if (events.size() > 0) {
+      return events.get(0).getEventDate();
+    } else {
+      LOGGER.debug("getFirstEventDate: Empty list returned from getEvents() for spaces '"
+          + allowedSpaces + "'");
+    }
+    return null;
+  }
+
+  public Date getLastEventDate(String lang, List<String> allowedSpaces) {
+    long count = countEvents(new Date(0), false, lang, allowedSpaces);
+    if (count > 0) {
+      List<IEvent> events = getEvents(new Date(0), false, lang, allowedSpaces,
+          (int) (count - 1), 1);
+      if (events.size() > 0) {
+        return events.get(0).getEventDate();
+      } else {
+        LOGGER.debug("getLastEventDate: Empty list returned from getEvents() for spaces '"
+            + allowedSpaces + "'");
+      }
+    } else {
+      LOGGER.debug("getLastEventDate: no Events for spaces '" + allowedSpaces + "'");
+    }
+    return null;
   }
 
 }

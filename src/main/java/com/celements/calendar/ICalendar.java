@@ -109,4 +109,8 @@ public interface ICalendar {
 
   public ICalendarEngineRole getEngine();
 
+  public Date getFirstEventDate();
+
+  public Date getLastEventDate();
+
 }

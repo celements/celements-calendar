@@ -19,8 +19,18 @@
  */
 package com.celements.calendar;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.same;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,8 +43,6 @@ import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.manager.IEventManager;
-import com.celements.calendar.util.CalendarUtils;
-import com.celements.calendar.util.ICalendarUtils;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
@@ -47,7 +55,6 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
   private Calendar cal;
   private ArrayList<EventApi> eventList;
   private XWikiContext context;
-  private ICalendarUtils calUtils;
   private IEventManager eventMgrMock;
   private DocumentReference calDocRef;
   private XWiki xwiki;
@@ -60,8 +67,6 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     context.setWiki(xwiki);
     calDocRef = new DocumentReference(context.getDatabase(), "MyCalSpace", "MyCalDoc");
     cal = new Calendar(calDocRef, isArchiv);
-    calUtils = createMock(CalendarUtils.class);
-    cal.setCalendarUtils(calUtils);
     eventMgrMock = createMock(IEventManager.class);
     cal.inject_getEventCmd(eventMgrMock);
   }
@@ -114,7 +119,6 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     DocumentReference cal2DocRef = new DocumentReference(context.getDatabase(),
         "MyCalDoc2Space", "MyCal2Doc");
     Calendar cal2 = new Calendar(cal2DocRef, isArchiv);
-    cal2.setCalendarUtils(calUtils);
     cal2.inject_getEventCmd(eventMgrMock);
     expect(eventMgrMock.getEvents(same(cal2), eq(0), eq(0))).andReturn(eventList);
     replayAll(event, event2, event3, event4);
@@ -136,7 +140,6 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     DocumentReference cal2DocRef = new DocumentReference(context.getDatabase(),
         "MyCalDoc2Space", "MyCal2Doc");
     Calendar cal2 = new Calendar(cal2DocRef, isArchiv);
-    cal2.setCalendarUtils(calUtils);
     cal2.inject_getEventCmd(eventMgrMock);
     expect(eventMgrMock.getEvents(same(cal2), eq(0), eq(10))).andReturn(eventList);
     replayAll(event);
@@ -157,7 +160,6 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     DocumentReference cal2DocRef = new DocumentReference(context.getDatabase(),
         "MyCalDoc2Space", "MyCal2Doc");
     Calendar cal2 = new Calendar(cal2DocRef, isArchiv);
-    cal2.setCalendarUtils(calUtils);
     cal2.inject_getEventCmd(eventMgrMock);
     expect(eventMgrMock.getEvents(same(cal2), eq(5), eq(1))).andReturn(eventList);
     replayAll(event);
@@ -180,7 +182,6 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     DocumentReference cal2DocRef = new DocumentReference(context.getDatabase(),
         "MyCalDoc2Space", "MyCal2Doc");
     Calendar cal2 = new Calendar(cal2DocRef, isArchiv);
-    cal2.setCalendarUtils(calUtils);
     cal2.inject_getEventCmd(eventMgrMock);
     expect(eventMgrMock.getEvents(same(cal2), eq(0), eq(1))).andReturn(eventList);
     replayAll();
@@ -206,7 +207,6 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     DocumentReference cal2DocRef = new DocumentReference(context.getDatabase(),
         "MyCalDoc2Space", "MyCal2Doc");
     Calendar cal2 = new Calendar(cal2DocRef, isArchiv);
-    cal2.setCalendarUtils(calUtils);
     cal2.inject_getEventCmd(eventMgrMock);
     expect(eventMgrMock.countEvents(eq(cal2))).andReturn(123l);
     replayAll();
@@ -257,12 +257,12 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
   }
 
   private void replayAll(Object ... mocks) {
-    replay(xwiki, calUtils, eventMgrMock);
+    replay(xwiki, eventMgrMock);
     replay(mocks);
   }
 
   private void verifyAll(Object ... mocks) {
-    verify(xwiki, calUtils, eventMgrMock);
+    verify(xwiki, eventMgrMock);
     verify(mocks);
   }
 

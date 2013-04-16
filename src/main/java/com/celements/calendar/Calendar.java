@@ -30,13 +30,12 @@ import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.api.EventApi;
+import com.celements.calendar.classes.CalendarClasses;
 import com.celements.calendar.engine.ICalendarEngineRole;
 import com.celements.calendar.manager.IEventManager;
-import com.celements.calendar.plugin.CelementsCalendarPlugin;
 import com.celements.calendar.service.ICalendarService;
-import com.celements.calendar.util.CalendarUtils;
-import com.celements.calendar.util.ICalendarUtils;
 import com.celements.search.lucene.query.LuceneQueryApi;
+import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -56,11 +55,11 @@ public class Calendar implements ICalendar {
   private boolean isArchive;
   private DocumentReference calConfigDocRef;
   private static final List<String> _NON_EVENT_PROPERTYS;
-  private ICalendarUtils utils;
 
   private IEventManager eventMgr;
   private ICalendarEngineRole engine;
   private ICalendarService calService;
+  private IWebUtilsService webUtilsService;
 
   private Date startDate = new Date();
 
@@ -174,7 +173,7 @@ public class Calendar implements ICalendar {
 
   private String getPropertyStringValueForOverviewConfig(BaseObject calConfigObj) {
     return calConfigObj.getStringValue(
-        CelementsCalendarPlugin.PROPERTY_OVERVIEW_COLUMN_CONFIG);
+        CalendarClasses.PROPERTY_OVERVIEW_COLUMN_CONFIG);
   }
 
   public List<String> getDetailviewFields() {
@@ -185,9 +184,9 @@ public class Calendar implements ICalendar {
     String detailviewConfig = _DETAILVIEW_DEFAULT_CONFIG;
     BaseObject calConfigObj = getConfigObject();
     if ((calConfigObj != null)
-        && (calConfigObj.getStringValue(CelementsCalendarPlugin.PROPERTY_EVENT_COLUMN_CONFIG) != null)
-        && (!"".equals(calConfigObj.getStringValue(CelementsCalendarPlugin.PROPERTY_EVENT_COLUMN_CONFIG)))) {
-      detailviewConfig = calConfigObj.getStringValue(CelementsCalendarPlugin.PROPERTY_EVENT_COLUMN_CONFIG);
+        && (calConfigObj.getStringValue(CalendarClasses.PROPERTY_EVENT_COLUMN_CONFIG) != null)
+        && (!"".equals(calConfigObj.getStringValue(CalendarClasses.PROPERTY_EVENT_COLUMN_CONFIG)))) {
+      detailviewConfig = calConfigObj.getStringValue(CalendarClasses.PROPERTY_EVENT_COLUMN_CONFIG);
     }
     LOGGER.debug("detailview config: '" + detailviewConfig + "'");
     return detailviewConfig;
@@ -195,8 +194,8 @@ public class Calendar implements ICalendar {
 
   private BaseObject getConfigObject() {
     return getCalDoc().getXObject(new DocumentReference(getContext().getDatabase(),
-        CelementsCalendarPlugin.CLASS_CALENDAR_SPACE,
-        CelementsCalendarPlugin.CLASS_CALENDAR_DOC));
+        CalendarClasses.CALENDAR_CONFIG_CLASS_SPACE,
+        CalendarClasses.CALENDAR_CONFIG_CLASS_DOC));
   }
 
   public List<String> getCalOverviewPropertyNames() {
@@ -235,8 +234,8 @@ public class Calendar implements ICalendar {
     List<String> propNames = new ArrayList<String>();
     try {
       XWikiDocument doc = context.getWiki().getDocument(new DocumentReference(
-          context.getDatabase(), CelementsCalendarPlugin.CLASS_EVENT_SPACE,
-          CelementsCalendarPlugin.CLASS_EVENT_DOC), context);
+          context.getDatabase(), CalendarClasses.CALENDAR_EVENT_CLASS_SPACE,
+          CalendarClasses.CALENDAR_EVENT_CLASS_DOC), context);
       BaseClass bclass = doc.getXClass();
       Object[] props = bclass.getPropertyNames();
       for(int i = 0; i < props.length; i++) {
@@ -263,7 +262,7 @@ public class Calendar implements ICalendar {
   public boolean isSubscribable() {
     BaseObject configObj = getConfigObject();
     return (configObj.getIntValue(
-        CelementsCalendarPlugin.PROPERTY_IS_SUBSCRIBABLE) == 1);
+        CalendarClasses.PROPERTY_IS_SUBSCRIBABLE) == 1);
   }
 
   public XWikiDocument getCalDoc() {
@@ -273,35 +272,6 @@ public class Calendar implements ICalendar {
       LOGGER.error("Failed to get cal doc for [" + this.calConfigDocRef + "].", exp);
     }
     return null;
-  }
-
-  public ICalendarUtils getUtils() {
-    if(utils == null) {
-      utils = CalendarUtils.getInstance();
-    }
-    return utils;
-  }
-
-  public void setCalendarUtils(ICalendarUtils utils) {
-    this.utils = utils;
-  }
-
-  void inject_getEventCmd(IEventManager getEventCmdMock) {
-    eventMgr = getEventCmdMock;
-  }
-
-  private IEventManager getEventMgr() {
-    if (eventMgr == null) {
-      eventMgr = Utils.getComponent(IEventManager.class, "default");
-    }
-    return eventMgr;
-  }
-
-  private ICalendarService getCalService() {
-    if (calService == null) {
-      calService = Utils.getComponent(ICalendarService.class);
-    }
-    return calService;
   }
 
   public void setStartDate(Date newStartDate) {
@@ -354,11 +324,6 @@ public class Calendar implements ICalendar {
     return defaultLang;
   }
 
-  private XWikiContext getContext() {
-    Execution execution = Utils.getComponent(Execution.class);
-    return (XWikiContext)execution.getContext().getProperty("xwikicontext");
-  }
-
   public ICalendarEngineRole getEngine() {
     if (engine == null) {
       String engineHint = getContext().getWiki().getXWikiPreference("calendar_engine",
@@ -368,6 +333,58 @@ public class Calendar implements ICalendar {
       engine = Utils.getComponent(ICalendarEngineRole.class, engineHint);
     }
     return engine;
+  }
+
+  public Date getFirstEventDate() {
+    try {
+      return getEngine().getFirstEventDate(getWebUtilsService().getDefaultLanguage(),
+          getCalService().getAllowedSpaces(getDocumentReference()));
+    } catch (XWikiException exc) {
+      LOGGER.error("Exception while getting first event date for calendar '"
+          + getDocumentReference() + "'", exc);
+    }
+    return null;
+  }
+
+  public Date getLastEventDate() {
+    try {
+      return getEngine().getLastEventDate(getWebUtilsService().getDefaultLanguage(),
+          getCalService().getAllowedSpaces(getDocumentReference()));
+    } catch (XWikiException exc) {
+      LOGGER.error("Exception while getting last event date for calendar '"
+          + getDocumentReference() + "'", exc);
+    }
+    return null;
+  }
+
+  private XWikiContext getContext() {
+    Execution execution = Utils.getComponent(Execution.class);
+    return (XWikiContext)execution.getContext().getProperty("xwikicontext");
+  }
+
+  void inject_getEventCmd(IEventManager getEventCmdMock) {
+    eventMgr = getEventCmdMock;
+  }
+
+  private IEventManager getEventMgr() {
+    if (eventMgr == null) {
+      eventMgr = Utils.getComponent(IEventManager.class, "default");
+    }
+    return eventMgr;
+  }
+
+  private ICalendarService getCalService() {
+    if (calService == null) {
+      calService = Utils.getComponent(ICalendarService.class);
+    }
+    return calService;
+  }
+
+  private IWebUtilsService getWebUtilsService() {
+    if (webUtilsService == null) {
+      webUtilsService = Utils.getComponent(IWebUtilsService.class);
+    }
+    return webUtilsService;
   }
 
 }

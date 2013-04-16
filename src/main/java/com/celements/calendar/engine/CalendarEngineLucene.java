@@ -102,12 +102,14 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
     this.hqlEngine = hqlEngine;
   }
 
-  public Date getFirstEventDate(String lang, List<String> allowedSpaces) {
-    return hqlEngine.getFirstEventDate(lang, allowedSpaces);
+  public Date getFirstEventDate(Date startDate, boolean isArchive, String lang,
+      List<String> allowedSpaces) {
+    return hqlEngine.getFirstEventDate(startDate, isArchive, lang, allowedSpaces);
   }
 
-  public Date getLastEventDate(String lang, List<String> allowedSpaces) {
-    return hqlEngine.getLastEventDate(lang, allowedSpaces);
+  public Date getLastEventDate(Date startDate, boolean isArchive, String lang,
+      List<String> allowedSpaces) {
+    return hqlEngine.getLastEventDate(startDate, isArchive, lang, allowedSpaces);
   }
 
 }

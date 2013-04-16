@@ -135,8 +135,9 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
     return spaceHQL;
   }
 
-  public Date getFirstEventDate(String lang, List<String> allowedSpaces) {
-    List<IEvent> events = getEvents(new Date(0), false, lang, allowedSpaces, 0, 1);
+  public Date getFirstEventDate(Date startDate, boolean isArchive, String lang,
+      List<String> allowedSpaces) {
+    List<IEvent> events = getEvents(startDate, isArchive, lang, allowedSpaces, 0, 1);
     if (events.size() > 0) {
       return events.get(0).getEventDate();
     } else {
@@ -146,10 +147,11 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
     return null;
   }
 
-  public Date getLastEventDate(String lang, List<String> allowedSpaces) {
-    long count = countEvents(new Date(0), false, lang, allowedSpaces);
+  public Date getLastEventDate(Date startDate, boolean isArchive, String lang,
+      List<String> allowedSpaces) {
+    long count = countEvents(startDate, isArchive, lang, allowedSpaces);
     if (count > 0) {
-      List<IEvent> events = getEvents(new Date(0), false, lang, allowedSpaces,
+      List<IEvent> events = getEvents(startDate, isArchive, lang, allowedSpaces,
           (int) (count - 1), 1);
       if (events.size() > 0) {
         return events.get(0).getEventDate();

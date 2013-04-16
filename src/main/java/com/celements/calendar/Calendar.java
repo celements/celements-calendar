@@ -35,7 +35,6 @@ import com.celements.calendar.engine.ICalendarEngineRole;
 import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.service.ICalendarService;
 import com.celements.search.lucene.query.LuceneQueryApi;
-import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -59,7 +58,6 @@ public class Calendar implements ICalendar {
   private IEventManager eventMgr;
   private ICalendarEngineRole engine;
   private ICalendarService calService;
-  private IWebUtilsService webUtilsService;
 
   private Date startDate = new Date();
 
@@ -336,25 +334,11 @@ public class Calendar implements ICalendar {
   }
 
   public Date getFirstEventDate() {
-    try {
-      return getEngine().getFirstEventDate(getWebUtilsService().getDefaultLanguage(),
-          getCalService().getAllowedSpaces(getDocumentReference()));
-    } catch (XWikiException exc) {
-      LOGGER.error("Exception while getting first event date for calendar '"
-          + getDocumentReference() + "'", exc);
-    }
-    return null;
+    return getEventMgr().getFirstEventDate(this);
   }
 
   public Date getLastEventDate() {
-    try {
-      return getEngine().getLastEventDate(getWebUtilsService().getDefaultLanguage(),
-          getCalService().getAllowedSpaces(getDocumentReference()));
-    } catch (XWikiException exc) {
-      LOGGER.error("Exception while getting last event date for calendar '"
-          + getDocumentReference() + "'", exc);
-    }
-    return null;
+    return getEventMgr().getLastEventDate(this);
   }
 
   private XWikiContext getContext() {
@@ -378,13 +362,6 @@ public class Calendar implements ICalendar {
       calService = Utils.getComponent(ICalendarService.class);
     }
     return calService;
-  }
-
-  private IWebUtilsService getWebUtilsService() {
-    if (webUtilsService == null) {
-      webUtilsService = Utils.getComponent(IWebUtilsService.class);
-    }
-    return webUtilsService;
   }
 
 }

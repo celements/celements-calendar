@@ -89,7 +89,7 @@ public class EventsManager implements IEventManager {
       eventList = cal.getEngine().getEvents(startDate, isArchive, lang, allowedSpaces,
           start, nb);
     } else {
-      eventList = cal.getEngine().getEvents(query, startDate, isArchive, lang, 
+      eventList = cal.getEngine().getEvents(query, startDate, isArchive, lang,
           allowedSpaces, start, nb);
     }
     LOGGER.debug(eventList.size() + " events found.");
@@ -225,7 +225,7 @@ public class EventsManager implements IEventManager {
     DocumentReference calDocRef = cal.getDocumentReference();
     boolean isArchive = cal.isArchive();
     Date startDate = cal.getStartDate();
-    long count = cal.getEngine().countEvents(startDate, isArchive, 
+    long count = cal.getEngine().countEvents(startDate, isArchive,
         webUtilsService.getDefaultLanguage(), calService.getAllowedSpaces(calDocRef));
     LOGGER.debug("Event count for calendar '" + calDocRef + "' with startDate + '"
         + startDate + "' and isArchive '" + isArchive + "': " + count);
@@ -267,6 +267,30 @@ public class EventsManager implements IEventManager {
 
   public IEvent getEvent(DocumentReference eventDocRef) {
     return new Event(eventDocRef);
+  }
+
+  public Date getFirstEventDate(ICalendar cal) {
+    DocumentReference calDocRef = cal.getDocumentReference();
+    try {
+      return cal.getEngine().getFirstEventDate(cal.getStartDate(), cal.isArchive(),
+          webUtilsService.getDefaultLanguage(), calService.getAllowedSpaces(calDocRef));
+    } catch (XWikiException exc) {
+      LOGGER.error("Exception while getting first event date for calendar '" + calDocRef
+          + "'", exc);
+    }
+    return null;
+  }
+
+  public Date getLastEventDate(ICalendar cal) {
+    DocumentReference calDocRef = cal.getDocumentReference();
+    try {
+      return cal.getEngine().getLastEventDate(cal.getStartDate(), cal.isArchive(),
+          webUtilsService.getDefaultLanguage(), calService.getAllowedSpaces(calDocRef));
+    } catch (XWikiException exc) {
+      LOGGER.error("Exception while getting last event date for calendar '" + calDocRef
+          + "'", exc);
+    }
+    return null;
   }
 
   private CalendarClasses getCalClasses() {

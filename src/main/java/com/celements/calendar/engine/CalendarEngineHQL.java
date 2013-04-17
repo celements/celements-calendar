@@ -137,30 +137,38 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
 
   public IEvent getFirstEvent(Date startDate, boolean isArchive, String lang,
       List<String> allowedSpaces) {
-    List<IEvent> events = getEvents(startDate, isArchive, lang, allowedSpaces, 0, 1);
-    if (events.size() > 0) {
-      return events.get(0);
-    } else {
-      LOGGER.debug("getFirstEventDate: Empty list returned from getEvents() for spaces '"
-          + allowedSpaces + "'");
+    IEvent event = getBorderEvent(true, startDate, isArchive, lang, allowedSpaces);
+    if (event == null) {
+      LOGGER.debug("getFirstEventDate: no Events for startDate '" + startDate
+          + "', isArchive '" + isArchive + "', language '" + lang
+          + "' and allowedSpaces '" + allowedSpaces + "'");
     }
-    return null;
+    return event;
   }
 
   public IEvent getLastEvent(Date startDate, boolean isArchive, String lang,
       List<String> allowedSpaces) {
-    long count = countEvents(startDate, isArchive, lang, allowedSpaces);
-    if (count > 0) {
-      List<IEvent> events = getEvents(startDate, isArchive, lang, allowedSpaces,
-          (int) (count - 1), 1);
+    IEvent event = getBorderEvent(false, startDate, isArchive, lang, allowedSpaces);
+    if (event == null) {
+      LOGGER.debug("getLastEventDate: no Events for startDate '" + startDate
+          + "', isArchive '" + isArchive + "', language '" + lang
+          + "' and allowedSpaces '" + allowedSpaces + "'");
+    }
+    return event;
+  }
+
+  public IEvent getBorderEvent(boolean first, Date startDate, boolean isArchive,
+      String lang, List<String> allowedSpaces) {
+    int start = 0;
+    if ((first && isArchive) || (!first && !isArchive)) {
+      long count = countEvents(startDate, isArchive, lang, allowedSpaces);
+      start = (int) (count - 1);
+    }
+    if (start >= 0) {
+      List<IEvent> events = getEvents(startDate, isArchive, lang, allowedSpaces, start, 1);
       if (events.size() > 0) {
         return events.get(0);
-      } else {
-        LOGGER.debug("getLastEventDate: Empty list returned from getEvents() for spaces '"
-            + allowedSpaces + "'");
       }
-    } else {
-      LOGGER.debug("getLastEventDate: no Events for spaces '" + allowedSpaces + "'");
     }
     return null;
   }

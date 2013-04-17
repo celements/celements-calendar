@@ -250,7 +250,8 @@ public class EventsManager implements IEventManager {
     List<IEvent> events;
     boolean hasMore, notFound;
     do {
-      events = getEvents_internal(cal, null, eventDate, false, lang, allowedSpaces, start, nb);
+      events = getEvents_internal(cal, null, eventDate, false, lang, allowedSpaces,
+          start, nb);
       hasMore = events.size() == nb;
       eventIndex = events.indexOf(event);
       notFound = eventIndex < 0;

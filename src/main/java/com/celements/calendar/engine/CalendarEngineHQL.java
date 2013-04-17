@@ -103,15 +103,13 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
     } else {
       hql += "obj.name";
     }
-    hql += " from XWikiDocument doc, BaseObject as obj, ";
-    hql += CalendarClasses.CALENDAR_EVENT_CLASS + " as ec ";
-    hql += "where doc.fullName = obj.name and doc.translation = 0 and ec.id.id=obj.id ";
-    hql += " and obj.className = '" + CalendarClasses.CALENDAR_EVENT_CLASS_SPACE + "."
-        + CalendarClasses.CALENDAR_EVENT_CLASS_DOC + "'";
+    hql += " from BaseObject as obj, " + CalendarClasses.CALENDAR_EVENT_CLASS + " as ec";
+    hql += " where ec.id.id=obj.id and obj.className = '"
+        + CalendarClasses.CALENDAR_EVENT_CLASS + "' ";
     hql += "and ec.lang='" + lang + "' ";
-    hql += "and (ec.eventDate " + timeComp + " '"
-        + format.format(startDate) + "' " + selectEmptyDates + ") and ";
-    hql += getAllowedSpacesHQL(allowedSpaces);
+    hql += "and (ec.eventDate " + timeComp + " '" + format.format(startDate) + "' "
+        + selectEmptyDates + ") ";
+    hql += "and " + getAllowedSpacesHQL(allowedSpaces);
     hql += " order by ec.eventDate " + sortOrder + ", ec.eventDate_end " + sortOrder;
     hql += ", ec.l_title " + sortOrder;
     LOGGER.debug(hql);

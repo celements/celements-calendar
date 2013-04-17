@@ -1,13 +1,7 @@
 package com.celements.calendar.engine;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.same;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -33,138 +27,180 @@ import com.xpn.xwiki.web.Utils;
 
 public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
 
-	private XWikiContext context;
-	private CalendarEngineLucene engine;
-	private IQueryService queryServiceMock;
-	private IEventSearch eventSearchMock;
-	private LuceneQueryApi queryMock;
-	private EventSearchResult eventSearchResultMock;
+  private XWikiContext context;
+  private CalendarEngineLucene engine;
+  private IQueryService queryServiceMock;
+  private IEventSearch eventSearchMock;
+  private LuceneQueryApi queryMock;
+  private EventSearchResult eventSearchResultMock;
 
-	@Before
-	public void setUp_EventsManagerTest() {
-		context = getContext();
-		engine = (CalendarEngineLucene) Utils.getComponent(ICalendarEngineRole.class, "lucene");
-		queryServiceMock = createMock(IQueryService.class);
-		engine.injectQueryService(queryServiceMock);
-		eventSearchMock = createMock(IEventSearch.class);
-		engine.injectEventSearch(eventSearchMock);
-		queryMock = createMock(LuceneQueryApi.class);
-		eventSearchResultMock = createMock(EventSearchResult.class);
-	}
+  @Before
+  public void setUp_EventsManagerTest() {
+    context = getContext();
+    engine = (CalendarEngineLucene) Utils.getComponent(ICalendarEngineRole.class, "lucene");
+    queryServiceMock = createMock(IQueryService.class);
+    engine.injectQueryService(queryServiceMock);
+    eventSearchMock = createMock(IEventSearch.class);
+    engine.injectEventSearch(eventSearchMock);
+    queryMock = createMock(LuceneQueryApi.class);
+    eventSearchResultMock = createMock(EventSearchResult.class);
+  }
 
-	@Test
-	public void testGetEvents() throws XWikiException {
-		String lang = "de";
-		List<String> spaces = Arrays.asList("myCalSpace");
-		Date startDate = new Date();
-		DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
-				"myCalDoc");
-		ICalendar cal = new Calendar(calDocRef, false);
-		cal.setStartDate(startDate);
-		LuceneQueryRestrictionApi spaceRestriction = new LuceneQueryRestrictionApi("space",
-				spaces.get(0));
-		LuceneQueryRestrictionApi langRestriction = new LuceneQueryRestrictionApi("lang",
-				"de");
-		IEvent event = new Event(new DocumentReference(context.getDatabase(),
-				"mySpace", "myEvent"));
-		IEvent event2 = new Event(new DocumentReference(context.getDatabase(),
-				"mySpace", "myEvent2"));
+  @Test
+  public void testGetEvents() throws XWikiException {
+    String lang = "de";
+    List<String> spaces = Arrays.asList("myCalSpace");
+    Date startDate = new Date();
+    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
+        "myCalDoc");
+    ICalendar cal = new Calendar(calDocRef, false);
+    cal.setStartDate(startDate);
+    LuceneQueryRestrictionApi spaceRestriction = new LuceneQueryRestrictionApi("space",
+        spaces.get(0));
+    LuceneQueryRestrictionApi langRestriction = new LuceneQueryRestrictionApi("lang",
+        "de");
+    IEvent event = new Event(new DocumentReference(context.getDatabase(),
+        "mySpace", "myEvent"));
+    IEvent event2 = new Event(new DocumentReference(context.getDatabase(),
+        "mySpace", "myEvent2"));
 
-		expect(queryServiceMock.createRestriction("space", spaces.get(0))).andReturn(
-				spaceRestriction).once();
-		expect(queryServiceMock.createRestriction("Classes.CalendarEventClass.lang", lang)
-				).andReturn(langRestriction).once();
-		expect(queryServiceMock.createQuery()).andReturn(queryMock).once();
-		expect(queryMock.addOrRestrictionList(Arrays.asList(spaceRestriction))).andReturn(
-				queryMock).once();
-		expect(queryMock.addRestriction(eq(langRestriction))).andReturn(queryMock).once();
-		expect(eventSearchMock.getSearchResultFromDate(same(queryMock), eq(startDate))
-				).andReturn(eventSearchResultMock).once();
-		expect(eventSearchResultMock.getEventList(2, 5)).andReturn(Arrays.asList(event,
-				event2)).once();
+    expect(queryServiceMock.createRestriction("space", spaces.get(0))).andReturn(
+        spaceRestriction).once();
+    expect(queryServiceMock.createRestriction("Classes.CalendarEventClass.lang", lang)
+        ).andReturn(langRestriction).once();
+    expect(queryServiceMock.createQuery()).andReturn(queryMock).once();
+    expect(queryMock.addOrRestrictionList(Arrays.asList(spaceRestriction))).andReturn(
+        queryMock).once();
+    expect(queryMock.addRestriction(eq(langRestriction))).andReturn(queryMock).once();
+    expect(eventSearchMock.getSearchResultFromDate(same(queryMock), eq(startDate))
+        ).andReturn(eventSearchResultMock).once();
+    expect(eventSearchResultMock.getEventList(2, 5)).andReturn(Arrays.asList(event,
+        event2)).once();
 
-		replayAll();
-		List<IEvent> events = engine.getEvents(startDate, false, lang, spaces, 2, 5);
-		verifyAll();
+    replayAll();
+    List<IEvent> events = engine.getEvents(startDate, false, lang, spaces, 2, 5);
+    verifyAll();
 
-		assertNotNull(events);
-		assertEquals(2, events.size());
-		assertEquals(event, events.get(0));
-		assertEquals(event2, events.get(1));
-	}
+    assertNotNull(events);
+    assertEquals(2, events.size());
+    assertEquals(event, events.get(0));
+    assertEquals(event2, events.get(1));
+  }
 
-	@Test
-	public void testGetEvents_isArchive() throws XWikiException {
-		String lang = "de";
-		List<String> spaces = Arrays.asList("myCalSpace");
-		Date startDate = new Date();
-		DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
-				"myCalDoc");
-		ICalendar cal = new Calendar(calDocRef, true);
-		cal.setStartDate(startDate);
-		LuceneQueryRestrictionApi spaceRestriction = new LuceneQueryRestrictionApi("space",
-				spaces.get(0));
-		LuceneQueryRestrictionApi langRestriction = new LuceneQueryRestrictionApi("lang",
-				"de");
-		IEvent event = new Event(new DocumentReference(context.getDatabase(),
-				"mySpace", "myEvent"));
-		IEvent event2 = new Event(new DocumentReference(context.getDatabase(),
-				"mySpace", "myEvent2"));
+  @Test
+  public void testGetEvents_isArchive() throws XWikiException {
+    String lang = "de";
+    List<String> spaces = Arrays.asList("myCalSpace");
+    Date startDate = new Date();
+    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
+        "myCalDoc");
+    ICalendar cal = new Calendar(calDocRef, true);
+    cal.setStartDate(startDate);
+    LuceneQueryRestrictionApi spaceRestriction = new LuceneQueryRestrictionApi("space",
+        spaces.get(0));
+    LuceneQueryRestrictionApi langRestriction = new LuceneQueryRestrictionApi("lang",
+        "de");
+    IEvent event = new Event(new DocumentReference(context.getDatabase(),
+        "mySpace", "myEvent"));
+    IEvent event2 = new Event(new DocumentReference(context.getDatabase(),
+        "mySpace", "myEvent2"));
 
-		expect(queryServiceMock.createRestriction("space", spaces.get(0))).andReturn(
-				spaceRestriction).once();
-		expect(queryServiceMock.createRestriction("Classes.CalendarEventClass.lang", lang)
-				).andReturn(langRestriction).once();
-		expect(queryServiceMock.createQuery()).andReturn(queryMock).once();
-		expect(queryMock.addOrRestrictionList(Arrays.asList(spaceRestriction))).andReturn(
-				queryMock).once();
-		expect(queryMock.addRestriction(eq(langRestriction))).andReturn(queryMock).once();
-		expect(eventSearchMock.getSearchResultUptoDate(same(queryMock), eq(startDate))
-				).andReturn(eventSearchResultMock).once();
-		expect(eventSearchResultMock.getEventList(2, 5)).andReturn(Arrays.asList(event,
-				event2)).once();
+    expect(queryServiceMock.createRestriction("space", spaces.get(0))).andReturn(
+        spaceRestriction).once();
+    expect(queryServiceMock.createRestriction("Classes.CalendarEventClass.lang", lang)
+        ).andReturn(langRestriction).once();
+    expect(queryServiceMock.createQuery()).andReturn(queryMock).once();
+    expect(queryMock.addOrRestrictionList(Arrays.asList(spaceRestriction))).andReturn(
+        queryMock).once();
+    expect(queryMock.addRestriction(eq(langRestriction))).andReturn(queryMock).once();
+    expect(eventSearchMock.getSearchResultUptoDate(same(queryMock), eq(startDate))
+        ).andReturn(eventSearchResultMock).once();
+    expect(eventSearchResultMock.getEventList(2, 5)).andReturn(Arrays.asList(event,
+        event2)).once();
 
-		replayAll();
-		List<IEvent> events = engine.getEvents(startDate, true, lang, spaces, 2, 5);
-		verifyAll();
+    replayAll();
+    List<IEvent> events = engine.getEvents(startDate, true, lang, spaces, 2, 5);
+    verifyAll();
 
-		assertNotNull(events);
-		assertEquals(2, events.size());
-		assertEquals(event, events.get(0));
-		assertEquals(event2, events.get(1));
-	}
+    assertNotNull(events);
+    assertEquals(2, events.size());
+    assertEquals(event, events.get(0));
+    assertEquals(event2, events.get(1));
+  }
 
-	@Test
-	public void testCountEvents() throws XWikiException {
-		String lang = "de";
-		List<String> spaces = Arrays.asList("myCalSpace");
-		Date startDate = new Date();
-		DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
-				"myCalDoc");
-		ICalendar cal = new Calendar(calDocRef, false);
-		cal.setStartDate(startDate);
-		
-		ICalendarEngineRole hqlEngineMock = createMock(ICalendarEngineRole.class);
-		engine.injectHQLEngine(hqlEngineMock);
-		
-		expect(hqlEngineMock.countEvents(eq(startDate), eq(false), eq(lang), eq(spaces))
-		    ).andReturn(2L).once();
+  @Test
+  public void testCountEvents() throws XWikiException {
+    String lang = "de";
+    List<String> spaces = Arrays.asList("myCalSpace");
+    Date startDate = new Date();
+    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
+        "myCalDoc");
+    ICalendar cal = new Calendar(calDocRef, false);
+    cal.setStartDate(startDate);
 
-		replayAll(hqlEngineMock);
-		long countEvent = engine.countEvents(startDate, false, lang, spaces);
-		verifyAll(hqlEngineMock);
+    ICalendarEngineRole hqlEngineMock = createMock(ICalendarEngineRole.class);
+    engine.injectHQLEngine(hqlEngineMock);
 
-		assertEquals(2L, countEvent);
-	}
+    expect(hqlEngineMock.countEvents(eq(startDate), eq(false), eq(lang), eq(spaces))
+        ).andReturn(2L).once();
 
-	private void replayAll(Object ... mocks) {
-		replay(queryServiceMock, eventSearchMock, queryMock,	eventSearchResultMock);
-		replay(mocks);
-	}
+    replayAll(hqlEngineMock);
+    long countEvent = engine.countEvents(startDate, false, lang, spaces);
+    verifyAll(hqlEngineMock);
 
-	private void verifyAll(Object ... mocks) {
-		verify(queryServiceMock, eventSearchMock, queryMock,	eventSearchResultMock);
-		verify(mocks);
-	}
+    assertEquals(2L, countEvent);
+  }
+
+  @Test
+  public void testGetFirstEventDate() {
+    String lang = "de";
+    List<String> spaces = Arrays.asList("myCalSpace");
+    Date startDate = new Date(0);
+    boolean isArchive = false;
+    IEvent event = new Event(null);
+
+    ICalendarEngineRole hqlEngineMock = createMock(ICalendarEngineRole.class);
+    engine.injectHQLEngine(hqlEngineMock);
+
+    expect(hqlEngineMock.getFirstEvent(eq(startDate), eq(isArchive), eq(lang),
+        eq(spaces))).andReturn(event).once();
+
+    replayAll(hqlEngineMock);
+    IEvent firstEvent = engine.getFirstEvent(startDate, isArchive, lang, spaces);
+    verifyAll(hqlEngineMock);
+
+    assertTrue(firstEvent == event);
+  }
+
+  @Test
+  public void testGetLastEventDate() {
+    String lang = "de";
+    List<String> spaces = Arrays.asList("myCalSpace");
+    Date startDate = new Date(0);
+    boolean isArchive = false;
+    IEvent event = new Event(null);
+
+    ICalendarEngineRole hqlEngineMock = createMock(ICalendarEngineRole.class);
+    engine.injectHQLEngine(hqlEngineMock);
+
+    expect(hqlEngineMock.getLastEvent(eq(startDate), eq(isArchive), eq(lang),
+        eq(spaces))).andReturn(event).once();
+
+    replayAll(hqlEngineMock);
+    IEvent lastEvent = engine.getLastEvent(startDate, isArchive, lang, spaces);
+    verifyAll(hqlEngineMock);
+
+    assertTrue(lastEvent == event);
+  }
+
+  private void replayAll(Object ... mocks) {
+    replay(queryServiceMock, eventSearchMock, queryMock,	eventSearchResultMock);
+    replay(mocks);
+  }
+
+  private void verifyAll(Object ... mocks) {
+    verify(queryServiceMock, eventSearchMock, queryMock,	eventSearchResultMock);
+    verify(mocks);
+  }
 
 }

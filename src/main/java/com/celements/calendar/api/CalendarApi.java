@@ -46,23 +46,15 @@ public class CalendarApi extends Api {
   }
 
   public List<EventApi> getAllEvents() {
-    return convertEventListToEventApiList(calendar.getAllEventsInternal());
+    return getEventApiList(calendar.getAllEventsInternal());
   }
 
   public List<EventApi> getEvents(int start, int nb) {
-    return convertEventListToEventApiList(calendar.getEventsInternal(start, nb));
+    return getEventApiList(calendar.getEventsInternal(start, nb));
   }
 
   public List<EventApi> getEvents(LuceneQueryApi query, int start, int nb) {
-    return convertEventListToEventApiList(calendar.getEventsInternal(query, start, nb));
-  }
-
-  private List<EventApi> convertEventListToEventApiList(List<IEvent> eventList) {
-    List<EventApi> eventApiList = new ArrayList<EventApi>();
-    for (IEvent event : eventList) {
-      eventApiList.add(new EventApi(event, calendar.getLanguage(), context));
-    }
-    return eventApiList;
+    return getEventApiList(calendar.getEventsInternal(query, start, nb));
   }
 
   public long getNrOfEvents() {
@@ -109,12 +101,24 @@ public class CalendarApi extends Api {
     return calendar.getStartDate();
   }
 
-  public IEvent getFirstEvent() {
-    return calendar.getFirstEvent();
+  public EventApi getFirstEvent() {
+    return getEventApi(calendar.getFirstEvent());
   }
 
-  public IEvent getLastEvent() {
-    return calendar.getLastEvent();
+  public EventApi getLastEvent() {
+    return getEventApi(calendar.getLastEvent());
+  }
+
+  private List<EventApi> getEventApiList(List<IEvent> eventList) {
+    List<EventApi> eventApiList = new ArrayList<EventApi>();
+    for (IEvent event : eventList) {
+      eventApiList.add(getEventApi(event));
+    }
+    return eventApiList;
+  }
+
+  private EventApi getEventApi(IEvent event) {
+    return new EventApi(event, calendar.getLanguage(), context);
   }
 
 }

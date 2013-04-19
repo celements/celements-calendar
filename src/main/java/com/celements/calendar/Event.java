@@ -694,16 +694,23 @@ public class Event implements IEvent {
 
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof Event)) {
-      return false;
+    if (this == obj) {
+      return true;
+    } else if (obj instanceof Event) {
+      return getDocumentReference().equals(((Event) obj).getDocumentReference());
     }
-    Event theEvent = (Event) obj;
-    return theEvent.getDocumentReference().equals(this.getDocumentReference());
+    return false;
   }
 
   @Override
   public int hashCode() {
-    return this.getDocumentReference().hashCode();
+    return getDocumentReference().hashCode();
+  }
+
+  @Override
+  public String toString() {
+    return "Event [eventDocRef=" + eventDocRef + ", language=" + language + ", calendar="
+        + calendar + ", eventDate=" + getEventDate() + "]";
   }
 
   private XWikiContext getContext() {

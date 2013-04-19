@@ -92,7 +92,7 @@ public class EventsManager implements IEventManager {
       eventList = cal.getEngine().getEvents(query, startDate, isArchive, lang,
           allowedSpaces, start, nb);
     }
-    LOGGER.debug(eventList.size() + " events found.");
+    LOGGER.debug("getEvents_internal: " + eventList.size() + " events found.");
     return filterEventListForSubscription(cal.getDocumentReference(), eventList);
   }
 
@@ -258,12 +258,18 @@ public class EventsManager implements IEventManager {
       navDetail.setOffset(start + eventIndex);
       start = start + nb;
       nb = nb * 2;
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("getNavigationDetails: events '" + events + "'");
+        LOGGER.debug("getNavigationDetails: index for event '" + eventIndex);
+      }
     } while (notFound && hasMore);
     if (!notFound) {
-      LOGGER.debug("getNavigationDetails: returning " + navDetail);
+      LOGGER.debug("getNavigationDetails: found '" + navDetail + "'");
       return navDetail;
+    } else {
+      LOGGER.debug("getNavigationDetails: not found");
+      return null;
     }
-    return null;
   }
 
   public IEvent getEvent(DocumentReference eventDocRef) {

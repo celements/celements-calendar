@@ -33,11 +33,13 @@ import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.manager.IEventManager;
+import com.celements.calendar.service.ICalendarService;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
+import com.xpn.xwiki.web.Utils;
 
 public class CalendarTest extends AbstractBridgedComponentTestCase{
 
@@ -229,13 +231,23 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
   }
 
   @Test
+  public void testSetTimestamp() {
+    Date startDate = cal.getStartDate();
+    Date newStartDate = new Date();
+    cal.setStartTimestamp(newStartDate);
+    assertNotNull(cal.getStartDate());
+    assertNotSame(startDate, cal.getStartDate());
+    assertEquals(newStartDate, cal.getStartDate());
+  }
+
+  @Test
   public void testSetStartDate() {
     Date startDate = cal.getStartDate();
     Date newStartDate = new Date();
     cal.setStartDate(newStartDate);
     assertNotNull(cal.getStartDate());
     assertNotSame(startDate, cal.getStartDate());
-    assertEquals(newStartDate, cal.getStartDate());
+    assertEquals(getCalService().getMidnightDate(newStartDate), cal.getStartDate());
   }
 
   @Test
@@ -244,6 +256,10 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     cal.setStartDate(null);
     assertNotNull(cal.getStartDate());
     assertSame(startDate, cal.getStartDate());
+  }
+
+  private ICalendarService getCalService() {
+    return Utils.getComponent(ICalendarService.class);
   }
 
   private void replayAll(Object ... mocks) {

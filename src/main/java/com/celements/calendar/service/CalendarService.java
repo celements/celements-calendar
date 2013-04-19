@@ -1,6 +1,7 @@
 package com.celements.calendar.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -141,6 +142,21 @@ public class CalendarService implements ICalendarService {
           + "].", exp);
     }
     return null;
+  }
+
+  public Date getMidnightDate(Date date) {
+    Date dateMidnight = null;
+    if (date != null) {
+      java.util.Calendar cal = java.util.Calendar.getInstance();
+      cal.setTime(date);
+      cal.set(java.util.Calendar.HOUR, 0);
+      cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+      cal.set(java.util.Calendar.MINUTE, 0);
+      cal.set(java.util.Calendar.SECOND, 0);
+      dateMidnight = cal.getTime();
+    }
+    LOGGER.debug("date is: " + dateMidnight);
+    return dateMidnight;
   }
 
   private CalendarClasses getCalClasses() {

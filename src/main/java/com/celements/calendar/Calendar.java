@@ -272,10 +272,14 @@ public class Calendar implements ICalendar {
     return null;
   }
 
-  public void setStartDate(Date newStartDate) {
+  public void setStartTimestamp(Date newStartDate) {
     if (newStartDate != null) {
       this.startDate = newStartDate;
     }
+  }
+
+  public void setStartDate(Date newStartDate) {
+    setStartTimestamp(getCalService().getMidnightDate(newStartDate));
   }
 
   public Date getStartDate() {

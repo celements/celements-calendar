@@ -1,5 +1,6 @@
 package com.celements.calendar.service;
 
+import java.util.Date;
 import java.util.List;
 
 import org.xwiki.component.annotation.ComponentRole;
@@ -27,5 +28,7 @@ public interface ICalendarService {
   public ICalendar getCalendarByCalRef(DocumentReference calDocRef, boolean isArchive);
 
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace);
+
+  public Date getMidnightDate(Date date);
 
 }

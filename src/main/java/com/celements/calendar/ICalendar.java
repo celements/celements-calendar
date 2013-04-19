@@ -97,6 +97,18 @@ public interface ICalendar {
 
   public XWikiDocument getCalDoc();
 
+  /**
+   * Sets date and time of Calendar
+   * 
+   * @param newStartDate
+   */
+  public void setStartTimestamp(Date newStartDate);
+
+  /**
+   * Sets only date of Calendar (time to midnight)
+   * 
+   * @param newStartDate
+   */
   public void setStartDate(Date newStartDate);
 
   public Date getStartDate();

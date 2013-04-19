@@ -93,6 +93,10 @@ public class CalendarApi extends Api {
     return calendar.getDocumentReference();
   }
 
+  public void setStartTimestamp(Date newStartDate) {
+    calendar.setStartTimestamp(newStartDate);
+  }
+
   public void setStartDate(Date newStartDate) {
     calendar.setStartDate(newStartDate);
   }

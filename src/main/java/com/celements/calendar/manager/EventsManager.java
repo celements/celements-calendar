@@ -82,7 +82,6 @@ public class EventsManager implements IEventManager {
   private List<IEvent> getEvents_internal(ICalendar cal, LuceneQueryApi query,
       Date startDate, boolean isArchive, String lang, List<String> allowedSpaces,
       int start, int nb) throws XWikiException {
-    startDate = getMidnightDate(startDate);
     List<IEvent> eventList;
     if (nb == 0) {
       eventList = cal.getEngine().getEvents(startDate, isArchive, lang, allowedSpaces);
@@ -235,7 +234,7 @@ public class EventsManager implements IEventManager {
 
   public NavigationDetails getNavigationDetails(IEvent event, ICalendar cal
       ) throws XWikiException {
-    Date eventDate = getMidnightDate(event.getEventDate());
+    Date eventDate = calService.getMidnightDate(event.getEventDate());
     LOGGER.debug("getNavigationDetails for [" + event + "] with date [" + eventDate + "]");
     if (eventDate == null) {
       LOGGER.error("getNavigationDetails failed because eventDate is null for ["
@@ -299,21 +298,6 @@ public class EventsManager implements IEventManager {
           + "'", exc);
     }
     return null;
-  }
-
-  Date getMidnightDate(Date startDate) {
-    Date dateMidnight = null;
-    if (startDate != null) {
-      java.util.Calendar cal = java.util.Calendar.getInstance();
-      cal.setTime(startDate);
-      cal.set(java.util.Calendar.HOUR, 0);
-      cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
-      cal.set(java.util.Calendar.MINUTE, 0);
-      cal.set(java.util.Calendar.SECOND, 0);
-      dateMidnight = cal.getTime();
-    }
-    LOGGER.debug("date is: " + dateMidnight);
-    return dateMidnight;
   }
 
   private CalendarClasses getCalClasses() {

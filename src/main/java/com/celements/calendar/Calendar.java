@@ -274,20 +274,8 @@ public class Calendar implements ICalendar {
 
   public void setStartDate(Date newStartDate) {
     if (newStartDate != null) {
-      this.startDate = getMidnightDate(newStartDate);
+      this.startDate = newStartDate;
     }
-  }
-
-  Date getMidnightDate(Date startDate) {
-    java.util.Calendar cal = java.util.Calendar.getInstance();
-    cal.setTime(startDate);
-    cal.set(java.util.Calendar.HOUR, 0);
-    cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
-    cal.set(java.util.Calendar.MINUTE, 0);
-    cal.set(java.util.Calendar.SECOND, 0);
-    Date dateMidnight = cal.getTime();
-    LOGGER.debug("date is: " + dateMidnight);
-    return dateMidnight;
   }
 
   public Date getStartDate() {

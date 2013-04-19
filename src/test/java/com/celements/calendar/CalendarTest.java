@@ -19,18 +19,8 @@
  */
 package com.celements.calendar;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.same;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -245,7 +235,7 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     cal.setStartDate(newStartDate);
     assertNotNull(cal.getStartDate());
     assertNotSame(startDate, cal.getStartDate());
-    assertEquals(cal.getMidnightDate(newStartDate), cal.getStartDate());
+    assertEquals(newStartDate, cal.getStartDate());
   }
 
   @Test

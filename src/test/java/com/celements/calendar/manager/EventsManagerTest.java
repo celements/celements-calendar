@@ -75,8 +75,9 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
     expect(xwiki.getSpacePreference(eq("default_language"), same(context))
         ).andReturn(lang);
     expect(calServiceMock.getAllowedSpaces(eq(calDocRef))).andReturn(spaces).once();
-    expect(engineMock.getEvents(eq(startDate), eq(false), eq(lang), eq(spaces), eq(2),
-        eq(5))).andReturn(Arrays.asList(event, event2)).once();
+    expect(engineMock.getEvents(eq(eventsMgr.getMidnightDate(startDate)), eq(false),
+        eq(lang), eq(spaces), eq(2), eq(5))).andReturn(Arrays.asList(event, event2)
+            ).once();
     expect(calServiceMock.getEventSpaceForCalendar(eq(calDocRef))).andReturn(spaces.get(0)
         ).times(2);
     expect(event.getDocumentReference()).andReturn(eventDocRef).once();
@@ -203,8 +204,8 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
     expect(xwiki.getSpacePreference(eq("default_language"), same(context))
         ).andReturn(lang);
     expect(calServiceMock.getAllowedSpaces(eq(calDocRef))).andReturn(spaces).once();
-    expect(engineMock.getEvents(eq(eventDate), eq(false), eq(lang), eq(spaces),eq(0),
-        eq(10))).andReturn(eventList).once();
+    expect(engineMock.getEvents(eq(eventsMgr.getMidnightDate(eventDate)), eq(false),
+        eq(lang), eq(spaces),eq(0), eq(10))).andReturn(eventList).once();
 
     expect(calServiceMock.getEventSpaceForCalendar(eq(calDocRef))).andReturn(spaces.get(0)
         ).times(3);
@@ -217,7 +218,8 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
     verifyAll(calMock, event, event2, event3);
 
     assertNotNull(navDetails);
-    assertEquals(new NavigationDetails(eventDate, 2), navDetails);
+    assertEquals(eventsMgr.getMidnightDate(eventDate), navDetails.getStartDate());
+    assertEquals(2, navDetails.getOffset());
 
   }
 

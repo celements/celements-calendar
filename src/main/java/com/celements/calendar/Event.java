@@ -694,17 +694,16 @@ public class Event implements IEvent {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    } else if (obj instanceof Event) {
-      return getDocumentReference().equals(((Event) obj).getDocumentReference());
+    if (!(obj instanceof Event)) {
+      return false;
     }
-    return false;
+    Event theEvent = (Event) obj;
+    return theEvent.getDocumentReference().equals(this.getDocumentReference());
   }
 
   @Override
   public int hashCode() {
-    return getDocumentReference().hashCode();
+    return this.getDocumentReference().hashCode();
   }
 
   @Override

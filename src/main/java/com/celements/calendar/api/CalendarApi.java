@@ -118,7 +118,11 @@ public class CalendarApi extends Api {
   }
 
   private EventApi getEventApi(IEvent event) {
-    return new EventApi(event, calendar.getLanguage(), context);
+    EventApi eventApi = null;
+    if (event != null) {
+      eventApi = new EventApi(event, calendar.getLanguage(), context);
+    }
+    return eventApi;
   }
 
 }

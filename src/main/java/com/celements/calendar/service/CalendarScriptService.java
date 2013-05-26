@@ -17,6 +17,7 @@ import com.celements.calendar.api.CalendarApi;
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.manager.NavigationDetails;
+import com.celements.calendar.manager.PagingNavigation;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearch;
 import com.celements.search.lucene.query.LuceneQueryApi;
@@ -60,6 +61,17 @@ public class CalendarScriptService implements ScriptService {
       		new Calendar(cal.getDocumentReference(), cal.isArchive()));
     } catch (XWikiException e) {
       mLogger.error("Failed to getNavigationDetails.", e);
+    }
+    return null;
+  }
+
+  public PagingNavigation getPagingNavigation(DocumentReference calConfigDocRef, 
+      EventApi event, int nb) {
+    try {
+      return eventsMgr.getPagingNavigation(calConfigDocRef, 
+          new Event(event.getDocumentReference()), nb);
+    } catch (XWikiException exc) {
+      mLogger.error("Failed to get PagingNavigation.", exc);
     }
     return null;
   }

@@ -84,6 +84,9 @@ public interface IEventManager {
 
   public NavigationDetails getNavigationDetails(IEvent event, ICalendar cal
       ) throws XWikiException;
+  
+  public PagingNavigation getPagingNavigation(DocumentReference calConfigDocRef, 
+      IEvent event, int nb) throws XWikiException;
 
   public IEvent getEvent(DocumentReference eventDocRef);
 

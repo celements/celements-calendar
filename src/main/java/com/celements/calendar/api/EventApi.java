@@ -165,5 +165,10 @@ public class EventApi extends Api {
   public void setLanguage(String language) {
     event.setLanguage(language);
   }
+  
+  @Override
+  public String toString() {
+    return event.toString();
+  }
 
 }

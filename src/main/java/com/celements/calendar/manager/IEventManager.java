@@ -30,7 +30,7 @@ public interface IEventManager {
   public List<IEvent> getAllEventsInternal(ICalendar cal);
 
   public List<IEvent> getEventsInternal(ICalendar cal, int start, int nb);
-  
+
   public List<IEvent> searchEvents(ICalendar cal, EventSearchQuery query, int start,
       int nb);
 
@@ -84,14 +84,17 @@ public interface IEventManager {
 
   public NavigationDetails getNavigationDetails(IEvent event, ICalendar cal
       ) throws XWikiException;
-  
-  public PagingNavigation getPagingNavigation(DocumentReference calConfigDocRef, 
-      IEvent event, int nb) throws XWikiException;
 
   public IEvent getEvent(DocumentReference eventDocRef);
 
   public IEvent getFirstEvent(ICalendar cal);
 
   public IEvent getLastEvent(ICalendar cal);
+
+  public PagingNavigation getPagingNavigation(DocumentReference calConfigDocRef,
+      Date eventDate, int offset, int nb) throws XWikiException;
+
+  public PagingNavigation getPagingNavigation(DocumentReference calConfigDocRef,
+      NavigationDetails navDetails, int nb) throws XWikiException;
 
 }

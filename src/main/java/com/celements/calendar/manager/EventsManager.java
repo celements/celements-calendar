@@ -88,7 +88,7 @@ public class EventsManager implements IEventManager {
     return Collections.emptyList();
   }
 
-  private List<IEvent> getEvents_internal(ICalendar cal, Date startDate, 
+  private List<IEvent> getEvents_internal(ICalendar cal, Date startDate,
       boolean isArchive, String lang, List<String> allowedSpaces, int start, int nb,
       EventSearchQuery query) throws XWikiException {
     List<IEvent> eventList;
@@ -98,7 +98,7 @@ public class EventsManager implements IEventManager {
       eventList = cal.getEngine().getEvents(startDate, isArchive, lang, allowedSpaces,
           start, nb);
     } else {
-      eventList = cal.getEngine().searchEvents(query, startDate, isArchive, lang, 
+      eventList = cal.getEngine().searchEvents(query, startDate, isArchive, lang,
           allowedSpaces, start, nb);
     }
     LOGGER.debug("getEvents_internal: " + eventList.size() + " events found.");
@@ -160,7 +160,7 @@ public class EventsManager implements IEventManager {
     if (subscriptObj == null) {
       // for backwards compatibility
       subscriptObj = eventDoc.getXObject(getCalClasses().getSubscriptionClassRef(
-          getContext().getDatabase()), "subscriber", 
+          getContext().getDatabase()), "subscriber",
           webUtilsService.getRefLocalSerializer().serialize(calDocRef), false);
     }
     return subscriptObj;
@@ -258,7 +258,7 @@ public class EventsManager implements IEventManager {
     List<IEvent> events;
     boolean hasMore, notFound;
     do {
-      events = getEvents_internal(cal, eventDate, false, lang, allowedSpaces, start, nb, 
+      events = getEvents_internal(cal, eventDate, false, lang, allowedSpaces, start, nb,
           null);
       hasMore = events.size() == nb;
       eventIndex = events.indexOf(event);
@@ -278,82 +278,6 @@ public class EventsManager implements IEventManager {
       LOGGER.debug("getNavigationDetails: not found");
       return null;
     }
-  }
-
-  public PagingNavigation getPagingNavigation(DocumentReference calConfigDocRef,
-      IEvent event, int nb) throws XWikiException {
-    ICalendar cal = new Calendar(calConfigDocRef, false);
-    ICalendar calArchive = new Calendar(calConfigDocRef, true);
-    cal.setStartDate(event.getEventDate());
-    calArchive.setStartDate(event.getEventDate());
-    NavigationDetails navDetails = getNavigationDetails(event, cal);    
-    PagingNavigation pagingNavigation = null;
-    if (navDetails != null) {
-      pagingNavigation = new PagingNavigation(getStartNavDetails(cal, calArchive),
-          getEndNavDetails(cal, calArchive, nb), 
-          getPrevNavDetails(cal, calArchive, navDetails, nb), 
-          getNextNavDetails(cal, navDetails, nb));
-    } else {
-      LOGGER.error("getPagingNavigation: Event '" + event 
-          + "' does not exist in calendar '" + calConfigDocRef + "'");
-    }
-    LOGGER.debug("getPagingNavigation: return '" + pagingNavigation + "'");
-    return pagingNavigation;
-  }
-
-  private NavigationDetails getStartNavDetails(ICalendar cal, ICalendar calArchive) {
-    NavigationDetails startNavDetails = null;
-    if (calArchive.getNrOfEvents() > 0) {
-      IEvent startDate = calArchive.getFirstEvent();
-      startNavDetails = new NavigationDetails(startDate.getEventDate(), 0);
-    } else if (cal.getNrOfEvents() > 0) {
-      IEvent startDate = cal.getFirstEvent();
-      startNavDetails = new NavigationDetails(startDate.getEventDate(), 0);
-    }
-    return startNavDetails;
-  }
-
-  private NavigationDetails getEndNavDetails(ICalendar cal, ICalendar calArchive, int nb)
-      throws XWikiException {
-    NavigationDetails endNavDetails = null;
-    int endOffset = (int) cal.getNrOfEvents() - nb;
-    if (endOffset >= 0) {
-      IEvent endEvent = getFirstElement(cal.getEventsInternal(endOffset, 1));
-      endNavDetails = getNavigationDetails(endEvent, cal);
-    } else if (calArchive.getNrOfEvents() > 0) {
-      IEvent endEvent = getLastElement(calArchive.getEventsInternal(0, Math.abs(nb)));
-      endNavDetails = getNavigationDetails(endEvent, calArchive);
-    }
-    return endNavDetails;
-  }
-
-  private NavigationDetails getPrevNavDetails(ICalendar cal, ICalendar calArchive,
-      NavigationDetails navDetails, int nb) throws XWikiException {
-    NavigationDetails prevNavDetails = null;
-    int prevOffset = navDetails.getOffset() - nb;
-    if (prevOffset >= 0) {
-      if (cal.getNrOfEvents() > 0) {
-        IEvent endEvent = getFirstElement(cal.getEventsInternal(prevOffset, 1));
-        prevNavDetails = getNavigationDetails(endEvent, cal);
-      }
-    } else if (calArchive.getNrOfEvents() > 0) {
-      IEvent endEvent = getLastElement(calArchive.getEventsInternal(0, Math.abs(nb)));
-      prevNavDetails = getNavigationDetails(endEvent, calArchive);
-    }
-    return prevNavDetails;
-  }
-
-  private NavigationDetails getNextNavDetails(ICalendar cal,
-      NavigationDetails navDetails, int nb) throws XWikiException {
-    NavigationDetails nextNavDetails;
-    int nextOffset = navDetails.getOffset() + nb;
-    if (cal.getNrOfEvents() > nextOffset) {
-      IEvent nextEvent = getFirstElement(cal.getEventsInternal(nextOffset, 1));
-      nextNavDetails = getNavigationDetails(nextEvent, cal);
-    } else {
-      nextNavDetails = navDetails;
-    }
-    return nextNavDetails;
   }
 
   public IEvent getEvent(DocumentReference eventDocRef) {
@@ -384,6 +308,101 @@ public class EventsManager implements IEventManager {
     return null;
   }
 
+  public PagingNavigation getPagingNavigation(DocumentReference calConfigDocRef,
+      Date eventDate, int offset, int nb) throws XWikiException {
+    return getPagingNavigation(calConfigDocRef, new NavigationDetails(eventDate, offset),
+        nb);
+  }
+
+  public PagingNavigation getPagingNavigation(DocumentReference calConfigDocRef,
+      NavigationDetails navDetails, int nb) throws XWikiException {
+    ICalendar cal = new Calendar(calConfigDocRef, false);
+    ICalendar calArchive = new Calendar(calConfigDocRef, true);
+    cal.setStartDate(navDetails.getStartDate());
+    calArchive.setStartDate(navDetails.getStartDate());
+    PagingNavigation pagingNavigation = new PagingNavigation(
+        getCountTotal(cal, calArchive),
+        getCountBefore(calArchive, navDetails.getOffset()),
+        getCountAfter(cal, navDetails.getOffset(), nb),
+        getStartNavDetails(cal, calArchive),
+        getEndNavDetails(cal, calArchive, nb),
+        getPrevNavDetails(cal, calArchive, navDetails, nb),
+        getNextNavDetails(cal, navDetails, nb));
+    LOGGER.debug("getPagingNavigation: return '" + pagingNavigation + "' for cal '"
+        + calConfigDocRef + "' and navDetails '" + navDetails + "'");
+    return pagingNavigation;
+  }
+
+  private int getCountTotal(ICalendar cal, ICalendar calArchive) {
+    return (int) (cal.getNrOfEvents() + calArchive.getNrOfEvents());
+  }
+
+  private int getCountBefore(ICalendar calArchive, int offset) {
+    return (int) calArchive.getNrOfEvents() + offset;
+  }
+
+  private int getCountAfter(ICalendar cal, int offset, int nb) {
+    int countAfter = (int) cal.getNrOfEvents() - offset - nb;
+    return countAfter > 0 ? countAfter : 0;
+  }
+
+  private NavigationDetails getStartNavDetails(ICalendar cal, ICalendar calArchive) {
+    NavigationDetails startNavDetails = null;
+    if (calArchive.getNrOfEvents() > 0) {
+      IEvent startDate = calArchive.getFirstEvent();
+      startNavDetails = new NavigationDetails(startDate.getEventDate(), 0);
+    } else if (cal.getNrOfEvents() > 0) {
+      IEvent startDate = cal.getFirstEvent();
+      startNavDetails = new NavigationDetails(startDate.getEventDate(), 0);
+    }
+    return startNavDetails;
+  }
+
+  private NavigationDetails getEndNavDetails(ICalendar cal, ICalendar calArchive, int nb)
+      throws XWikiException {
+    NavigationDetails endNavDetails = null;
+    int endOffset = (int) cal.getNrOfEvents() - nb;
+    if (endOffset >= 0) {
+      IEvent endEvent = getFirstElement(cal.getEventsInternal(endOffset, 1));
+      endNavDetails = getNavigationDetails(endEvent, cal);
+    } else if (calArchive.getNrOfEvents() > 0) {
+      IEvent endEvent = getLastElement(calArchive.getEventsInternal(0,
+          Math.abs(endOffset)));
+      endNavDetails = getNavigationDetails(endEvent, calArchive);
+    }
+    return endNavDetails;
+  }
+
+  private NavigationDetails getPrevNavDetails(ICalendar cal, ICalendar calArchive,
+      NavigationDetails navDetails, int nb) throws XWikiException {
+    NavigationDetails prevNavDetails = null;
+    int prevOffset = navDetails.getOffset() - nb;
+    if (prevOffset >= 0) {
+      if (cal.getNrOfEvents() > 0) {
+        IEvent prevEvent = getFirstElement(cal.getEventsInternal(prevOffset, 1));
+        prevNavDetails = getNavigationDetails(prevEvent, cal);
+      }
+    } else if (calArchive.getNrOfEvents() > 0) {
+      IEvent prevEvent = getLastElement(calArchive.getEventsInternal(0,
+          Math.abs(prevOffset)));
+      prevNavDetails = getNavigationDetails(prevEvent, calArchive);
+    }
+    return prevNavDetails;
+  }
+
+  private NavigationDetails getNextNavDetails(ICalendar cal,
+      NavigationDetails navDetails, int nb) throws XWikiException {
+    NavigationDetails nextNavDetails;
+    int nextOffset = navDetails.getOffset() + nb;
+    if (cal.getNrOfEvents() > nextOffset) {
+      IEvent nextEvent = getFirstElement(cal.getEventsInternal(nextOffset, 1));
+      nextNavDetails = getNavigationDetails(nextEvent, cal);
+    } else {
+      nextNavDetails = navDetails;
+    }
+    return nextNavDetails;
+  }
+
   private CalendarClasses getCalClasses() {
     return (CalendarClasses) calClasses;
   }
@@ -397,14 +416,14 @@ public class EventsManager implements IEventManager {
   }
 
   private static <T> T getFirstElement(List<T> list) {
-    if (list != null && list.size() > 0) {
+    if ((list != null) && (list.size() > 0)) {
       return list.get(0);
     }
     return null;
   }
 
   private static <T> T getLastElement(List<T> list) {
-    if (list != null && list.size() > 0) {
+    if ((list != null) && (list.size() > 0)) {
       return list.get(list.size() - 1);
     }
     return null;

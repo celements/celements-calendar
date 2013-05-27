@@ -43,6 +43,7 @@ import com.xpn.xwiki.objects.classes.BaseClass;
 import com.xpn.xwiki.web.Utils;
 
 public class Calendar implements ICalendar {
+
   private static final String _OVERVIEW_DEFAULT_CONFIG =
       "date,time,l_title,location";
 
@@ -133,7 +134,7 @@ public class Calendar implements ICalendar {
   public List<IEvent> getEventsInternal(int start, int nb) {
     return getEventMgr().getEventsInternal(this, start < 0 ? 0 : start, nb < 0 ? 0 : nb);
   }
-  
+
   public List<IEvent> searchEvents(EventSearchQuery query, int start, int nb) {
     return getEventMgr().searchEvents(this, query, start < 0 ? 0 : start,
         nb < 0 ? 0 : nb);
@@ -354,6 +355,13 @@ public class Calendar implements ICalendar {
       calService = Utils.getComponent(ICalendarService.class);
     }
     return calService;
+  }
+
+  @Override
+  public String toString() {
+    return "Calendar [calConfigDocRef=" + calConfigDocRef + ", startDate=" + startDate
+        + ", isArchive=" + isArchive + ", engine=" + getEngine() + ", language="
+        + getLanguage() + ", defaultLang=" + getDefaultLang() + "]";
   }
 
 }

@@ -58,19 +58,18 @@ public class CalendarScriptService implements ScriptService {
 
   public NavigationDetails getNavigationDetails(CalendarApi cal, EventApi event) {
     try {
-      return eventsMgr.getNavigationDetails(new Event(event.getDocumentReference()), 
-      		new Calendar(cal.getDocumentReference(), cal.isArchive()));
+      return eventsMgr.getNavigationDetails(new Event(event.getDocumentReference()),
+          new Calendar(cal.getDocumentReference(), cal.isArchive()));
     } catch (XWikiException e) {
       mLogger.error("Failed to getNavigationDetails.", e);
     }
     return null;
   }
 
-  public PagingNavigation getPagingNavigation(DocumentReference calConfigDocRef, 
-      EventApi event, int nb) {
+  public PagingNavigation getPagingNavigation(DocumentReference calConfigDocRef,
+      Date eventDate, int offset, int nb) {
     try {
-      return eventsMgr.getPagingNavigation(calConfigDocRef, 
-          new Event(event.getDocumentReference()), nb);
+      return eventsMgr.getPagingNavigation(calConfigDocRef, eventDate, offset, nb);
     } catch (XWikiException exc) {
       mLogger.error("Failed to get PagingNavigation.", exc);
     }
@@ -103,21 +102,21 @@ public class CalendarScriptService implements ScriptService {
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace) {
     return calService.getCalendarDocRefByCalendarSpace(calSpace);
   }
-  
+
   public EventSearchResult getEventSearchResult(LuceneQueryApi query) {
     return eventSearch.getSearchResult(query);
   }
-  
-  public EventSearchResult getEventSearchResultFromDate(LuceneQueryApi query, 
+
+  public EventSearchResult getEventSearchResultFromDate(LuceneQueryApi query,
       Date fromDate) {
     return eventSearch.getSearchResultFromDate(query, fromDate);
   }
-  
-  public EventSearchResult getEventSearchResultUpToDate(LuceneQueryApi query, 
+
+  public EventSearchResult getEventSearchResultUpToDate(LuceneQueryApi query,
       Date uptoDate) {
     return eventSearch.getSearchResultUptoDate(query, uptoDate);
   }
-  
+
   public EventSearchQuery getEventSearchQuery(String spaceName, String searchTerm) {
     return new EventSearchQuery(spaceName, searchTerm);
   }

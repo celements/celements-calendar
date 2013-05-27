@@ -11,10 +11,10 @@ import com.xpn.xwiki.web.Utils;
 
 public class EventSearchQuery {
   
-  private IQueryService queryService;
+  protected IQueryService queryService;
   
-  private String spaceName;
-  private String searchTerm;
+  protected String spaceName;
+  protected String searchTerm;
 
   public EventSearchQuery(String spaceName, String searchTerm) {
     this.spaceName = spaceName;
@@ -28,7 +28,7 @@ public class EventSearchQuery {
     return query;
   }
   
-  private String[] getSearchTermFields() {
+  protected String[] getSearchTermFields() {
     return new String[] {
         CalendarClasses.CALENDAR_EVENT_CLASS + "." + CalendarClasses.PROPERTY_TITLE,
         CalendarClasses.CALENDAR_EVENT_CLASS + "." + CalendarClasses.PROPERTY_DESCRIPTION
@@ -61,12 +61,12 @@ public class EventSearchQuery {
   protected final LuceneQueryRestrictionApi getRestriction(String field, String value, 
       boolean tokenize, boolean fuzzy) {
     LuceneQueryRestrictionApi restriction = getQueryService().createRestriction(field, 
-        value, tokenize);
+        value.trim(), tokenize);
     return fuzzy ? restriction.setFuzzy() : restriction;
   }
   
   protected final boolean checkString(String s) {
-    return (s != null) && (!s.isEmpty());
+    return (s != null) && (!s.trim().isEmpty());
   }
 
   protected final IQueryService getQueryService() {

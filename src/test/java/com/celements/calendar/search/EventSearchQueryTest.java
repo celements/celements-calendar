@@ -47,6 +47,7 @@ public class EventSearchQueryTest {
     		"(Classes.CalendarEventClass.l_title:(some~ search~ term~) OR " +
     		"Classes.CalendarEventClass.l_description:(some~ search~ term~)) " +
     		"AND wiki:myDB";
+ 
     assertEquals(compareQueryString, luceneQuery.getQueryString());
   }
 

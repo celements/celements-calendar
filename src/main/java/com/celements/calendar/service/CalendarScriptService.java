@@ -18,6 +18,7 @@ import com.celements.calendar.api.EventApi;
 import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.manager.NavigationDetails;
 import com.celements.calendar.manager.PagingNavigation;
+import com.celements.calendar.search.EventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearch;
 import com.celements.search.lucene.query.LuceneQueryApi;
@@ -115,6 +116,10 @@ public class CalendarScriptService implements ScriptService {
   public EventSearchResult getEventSearchResultUpToDate(LuceneQueryApi query, 
       Date uptoDate) {
     return eventSearch.getSearchResultUptoDate(query, uptoDate);
+  }
+  
+  public EventSearchQuery getEventSearchQuery(String spaceName, String searchTerm) {
+    return new EventSearchQuery(spaceName, searchTerm);
   }
 
 }

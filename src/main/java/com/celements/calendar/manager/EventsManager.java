@@ -286,14 +286,18 @@ public class EventsManager implements IEventManager {
     ICalendar calArchive = new Calendar(calConfigDocRef, true);
     cal.setStartDate(event.getEventDate());
     calArchive.setStartDate(event.getEventDate());
-    NavigationDetails navDetails = getNavigationDetails(event, cal);
-    NavigationDetails startNavDetails = getStartNavDetails(cal, calArchive);
-    NavigationDetails endNavDetails = getEndNavDetails(cal, calArchive, nb);
-    NavigationDetails prevNavDetails = getPrevNavDetails(cal, calArchive, navDetails, nb);
-    NavigationDetails nextNavDetails = getNextNavDetails(cal, navDetails, nb);
-    PagingNavigation pagingNavigation = new PagingNavigation(startNavDetails,
-        endNavDetails, prevNavDetails, nextNavDetails);
-    LOGGER.debug("getPagingNavigation returned '" + pagingNavigation + "'");
+    NavigationDetails navDetails = getNavigationDetails(event, cal);    
+    PagingNavigation pagingNavigation = null;
+    if (navDetails != null) {
+      pagingNavigation = new PagingNavigation(getStartNavDetails(cal, calArchive),
+          getEndNavDetails(cal, calArchive, nb), 
+          getPrevNavDetails(cal, calArchive, navDetails, nb), 
+          getNextNavDetails(cal, navDetails, nb));
+    } else {
+      LOGGER.error("getPagingNavigation: Event '" + event 
+          + "' does not exist in calendar '" + calConfigDocRef + "'");
+    }
+    LOGGER.debug("getPagingNavigation: return '" + pagingNavigation + "'");
     return pagingNavigation;
   }
 

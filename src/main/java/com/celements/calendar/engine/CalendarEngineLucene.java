@@ -11,6 +11,7 @@ import org.xwiki.component.annotation.Requirement;
 
 import com.celements.calendar.IEvent;
 import com.celements.calendar.classes.CalendarClasses;
+import com.celements.calendar.search.EventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearch;
 import com.celements.search.lucene.IQueryService;
@@ -40,20 +41,32 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
 
   public List<IEvent> getEvents(Date startDate, boolean isArchive, String lang,
       List<String> allowedSpaces, int offset, int limit) {
-    return getEvents(queryService.createQuery(), startDate, isArchive, lang,
-        allowedSpaces, offset, limit);
-  }
-
-  public List<IEvent> getEvents(LuceneQueryApi query, Date startDate, boolean isArchive,
-      String lang, List<String> allowedSpaces, int offset, int limit) {
-    return getEventSearchResult(query, isArchive, startDate, lang, allowedSpaces
-        ).getEventList(offset, limit);
+    return getEventSearchResult(queryService.createQuery(), isArchive, startDate, lang, 
+        allowedSpaces).getEventList(offset, limit);
   }
 
   public long countEvents(Date startDate, boolean isArchive, String lang,
       List<String> allowedSpaces) {
     LOGGER.debug("countEvents: Delegating to CalendarEngineHQL");
     return hqlEngine.countEvents(startDate, isArchive, lang, allowedSpaces);
+  }
+
+  public IEvent getFirstEvent(Date startDate, boolean isArchive, String lang,
+      List<String> allowedSpaces) {
+    LOGGER.debug("getFirstEvent: Delegating to CalendarEngineHQL");
+    return hqlEngine.getFirstEvent(startDate, isArchive, lang, allowedSpaces);
+  }
+
+  public IEvent getLastEvent(Date startDate, boolean isArchive, String lang,
+      List<String> allowedSpaces) {
+    LOGGER.debug("getLastEvent: Delegating to CalendarEngineHQL");
+    return hqlEngine.getLastEvent(startDate, isArchive, lang, allowedSpaces);
+  }
+
+  public List<IEvent> searchEvents(EventSearchQuery query, Date startDate,
+      boolean isArchive, String lang, List<String> allowedSpaces, int offset, int limit) {
+    return getEventSearchResult(query.getAsLuceneQuery(), isArchive, startDate, lang, 
+        allowedSpaces).getEventList(offset, limit);
   }
 
   private EventSearchResult getEventSearchResult(LuceneQueryApi query, boolean isArchive,
@@ -88,16 +101,6 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
     LuceneQueryRestrictionApi langRestriction = queryService.createRestriction(
         CalendarClasses.CALENDAR_EVENT_CLASS + "." + CalendarClasses.PROPERTY_LANG, lang);
     query.addRestriction(langRestriction);
-  }
-
-  public IEvent getFirstEvent(Date startDate, boolean isArchive, String lang,
-      List<String> allowedSpaces) {
-    return hqlEngine.getFirstEvent(startDate, isArchive, lang, allowedSpaces);
-  }
-
-  public IEvent getLastEvent(Date startDate, boolean isArchive, String lang,
-      List<String> allowedSpaces) {
-    return hqlEngine.getLastEvent(startDate, isArchive, lang, allowedSpaces);
   }
 
   void injectQueryService(IQueryService queryService) {

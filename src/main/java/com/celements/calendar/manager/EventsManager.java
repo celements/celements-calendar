@@ -19,9 +19,9 @@ import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.classes.CalendarClasses;
+import com.celements.calendar.search.EventSearchQuery;
 import com.celements.calendar.service.ICalendarService;
 import com.celements.common.classes.IClassCollectionRole;
-import com.celements.search.lucene.query.LuceneQueryApi;
 import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -64,26 +64,33 @@ public class EventsManager implements IEventManager {
   }
 
   public List<IEvent> getEventsInternal(ICalendar cal, int start, int nb) {
-    return getEventsInternal(cal, null, start, nb);
-  }
-
-  public List<IEvent> getEventsInternal(ICalendar cal, LuceneQueryApi query, int start,
-      int nb) {
     DocumentReference calDocRef = cal.getDocumentReference();
     try {
-      return getEvents_internal(cal, query, cal.getStartDate(), cal.isArchive(),
+      return getEvents_internal(cal, cal.getStartDate(), cal.isArchive(),
           webUtilsService.getDefaultLanguage(), calService.getAllowedSpaces(calDocRef),
-          start, nb);
+          start, nb, null);
     } catch (XWikiException exc) {
-      LOGGER.error("Exception while getting events for calendar '" + calDocRef + "'", 
-          exc);
+      LOGGER.error("Error while getting events from calendar '" + calDocRef + "'", exc);
     }
     return Collections.emptyList();
   }
 
-  private List<IEvent> getEvents_internal(ICalendar cal, LuceneQueryApi query,
-      Date startDate, boolean isArchive, String lang, List<String> allowedSpaces,
-      int start, int nb) throws XWikiException {
+  public List<IEvent> searchEvents(ICalendar cal, EventSearchQuery query, int start,
+      int nb) {
+    DocumentReference calDocRef = cal.getDocumentReference();
+    try {
+      return getEvents_internal(cal, cal.getStartDate(), cal.isArchive(),
+          webUtilsService.getDefaultLanguage(), calService.getAllowedSpaces(calDocRef),
+          start, nb, query);
+    } catch (XWikiException exc) {
+      LOGGER.error("Error while searching events in calendar '" + calDocRef + "'", exc);
+    }
+    return Collections.emptyList();
+  }
+
+  private List<IEvent> getEvents_internal(ICalendar cal, Date startDate, 
+      boolean isArchive, String lang, List<String> allowedSpaces, int start, int nb,
+      EventSearchQuery query) throws XWikiException {
     List<IEvent> eventList;
     if (nb == 0) {
       eventList = cal.getEngine().getEvents(startDate, isArchive, lang, allowedSpaces);
@@ -91,7 +98,7 @@ public class EventsManager implements IEventManager {
       eventList = cal.getEngine().getEvents(startDate, isArchive, lang, allowedSpaces,
           start, nb);
     } else {
-      eventList = cal.getEngine().getEvents(query, startDate, isArchive, lang,
+      eventList = cal.getEngine().searchEvents(query, startDate, isArchive, lang, 
           allowedSpaces, start, nb);
     }
     LOGGER.debug("getEvents_internal: " + eventList.size() + " events found.");
@@ -251,8 +258,8 @@ public class EventsManager implements IEventManager {
     List<IEvent> events;
     boolean hasMore, notFound;
     do {
-      events = getEvents_internal(cal, null, eventDate, false, lang, allowedSpaces,
-          start, nb);
+      events = getEvents_internal(cal, eventDate, false, lang, allowedSpaces, start, nb, 
+          null);
       hasMore = events.size() == nb;
       eventIndex = events.indexOf(event);
       notFound = eventIndex < 0;

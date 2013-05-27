@@ -6,7 +6,7 @@ import java.util.List;
 import org.xwiki.component.annotation.ComponentRole;
 
 import com.celements.calendar.IEvent;
-import com.celements.search.lucene.query.LuceneQueryApi;
+import com.celements.calendar.search.EventSearchQuery;
 
 @ComponentRole
 public interface ICalendarEngineRole {
@@ -20,13 +20,13 @@ public interface ICalendarEngineRole {
   public List<IEvent> getEvents(Date startDate, boolean isArchive, String lang,
       List<String> allowedSpaces, int offset, int limit);
 
-  public List<IEvent> getEvents(LuceneQueryApi query, Date startDate, boolean isArchive,
-      String lang, List<String> allowedSpaces, int offset, int limit);
-
   public IEvent getFirstEvent(Date startDate, boolean isArchive, String lang,
       List<String> allowedSpaces);
 
   public IEvent getLastEvent(Date startDate, boolean isArchive, String lang,
       List<String> allowedSpaces);
+  
+  public List<IEvent> searchEvents(EventSearchQuery query, Date startDate, 
+      boolean isArchive, String lang, List<String> allowedSpaces, int offset, int limit);
 
 }

@@ -17,7 +17,7 @@ import org.xwiki.query.QueryManager;
 import com.celements.calendar.Event;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.classes.CalendarClasses;
-import com.celements.search.lucene.query.LuceneQueryApi;
+import com.celements.calendar.search.EventSearchQuery;
 import com.celements.web.service.IWebUtilsService;
 
 @Component("hql")
@@ -69,12 +69,6 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
       LOGGER.error("getEvents: " + queryException);
     }
     return Collections.emptyList();
-  }
-
-  public List<IEvent> getEvents(LuceneQueryApi query, Date startDate, boolean isArchive,
-      String lang, List<String> allowedSpaces, int offset, int limit) {
-    throw new UnsupportedOperationException("getEvents() with LuceneQueryApi not "
-        + "supported for CalendarEngineHQL");
   }
 
   private List<IEvent> convertToEventList(List<String> eventDocs) {
@@ -155,7 +149,7 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
     return event;
   }
 
-  public IEvent getBorderEvent(boolean first, Date startDate, boolean isArchive,
+  private IEvent getBorderEvent(boolean first, Date startDate, boolean isArchive,
       String lang, List<String> allowedSpaces) {
     int start = 0;
     if ((first && isArchive) || (!first && !isArchive)) {
@@ -169,6 +163,12 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
       }
     }
     return null;
+  }
+
+  public List<IEvent> searchEvents(EventSearchQuery query, Date startDate,
+      boolean isArchive, String lang, List<String> allowedSpaces, int offset, int limit) {
+    throw new UnsupportedOperationException("searchEvents not supported for " +
+    		"CalendarEngineHQL");
   }
 
   void injectQueryManager(QueryManager queryManagerMock) {

@@ -13,6 +13,7 @@ import com.celements.calendar.Calendar;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.manager.IEventManager;
+import com.celements.calendar.search.EventSearchQuery;
 import com.xpn.xwiki.XWikiException;
 
 @Component("default")
@@ -23,6 +24,10 @@ public class CalendarNavigationService implements ICalendarNavigationService {
 
   @Requirement
   private IEventManager eventMgr;
+
+  public NavigationDetails getNavigationDetails(Date startDate, int offset) {
+    return new NavigationDetails(startDate, offset);
+  }
 
   public NavigationDetails getNavigationDetails(DocumentReference calConfigDocRef,
       IEvent event) throws XWikiException {
@@ -74,7 +79,7 @@ public class CalendarNavigationService implements ICalendarNavigationService {
     ICalendar calArchive = new Calendar(calConfigDocRef, true);
     cal.setStartDate(navDetails.getStartDate());
     calArchive.setStartDate(navDetails.getStartDate());
-    CalendarNavigation pagingNavigation = new CalendarNavigation(
+    CalendarNavigation calendarNavigation = new CalendarNavigation(
         getCountTotal(cal, calArchive),
         getCountBefore(calArchive, navDetails.getOffset()),
         getCountAfter(cal, navDetails.getOffset(), nb),
@@ -82,9 +87,9 @@ public class CalendarNavigationService implements ICalendarNavigationService {
         getEndNavDetails(cal, calArchive, nb),
         getPrevNavDetails(cal, calArchive, navDetails, nb),
         getNextNavDetails(cal, navDetails, nb));
-    LOGGER.debug("getCalendarNavigation: return '" + pagingNavigation + "' for cal '"
+    LOGGER.debug("getCalendarNavigation: return '" + calendarNavigation + "' for cal '"
         + calConfigDocRef + "' and navDetails '" + navDetails + "'");
-    return pagingNavigation;
+    return calendarNavigation;
   }
 
   private int getCountTotal(ICalendar cal, ICalendar calArchive) {
@@ -173,6 +178,13 @@ public class CalendarNavigationService implements ICalendarNavigationService {
 
   void injectEventManager(IEventManager eventMgr) {
     this.eventMgr = eventMgr;
+  }
+
+  public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
+      NavigationDetails navDetails, int nb, EventSearchQuery query) throws XWikiException {
+    // TODO Auto-generated method stub
+    LOGGER.error("implement getCalendarNavigation with query");
+    return null;
   }
 
 }

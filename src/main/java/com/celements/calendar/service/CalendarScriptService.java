@@ -72,10 +72,11 @@ public class CalendarScriptService implements ScriptService {
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
       Date eventDate, int offset, int nb) {
+    NavigationDetails navDetails = calNavService.getNavigationDetails(eventDate, offset);
     try {
-      return calNavService.getCalendarNavigation(calConfigDocRef, eventDate, offset, nb);
+      return calNavService.getCalendarNavigation(calConfigDocRef, navDetails, nb);
     } catch (XWikiException exc) {
-      mLogger.error("Failed to get PagingNavigation.", exc);
+      mLogger.error("Failed to get CalendarNavigation.", exc);
     }
     return null;
   }

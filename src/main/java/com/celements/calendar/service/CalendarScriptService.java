@@ -14,9 +14,9 @@ import com.celements.calendar.Event;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.api.CalendarApi;
 import com.celements.calendar.api.EventApi;
+import com.celements.calendar.navigation.CalendarNavigation;
 import com.celements.calendar.navigation.ICalendarNavigationService;
 import com.celements.calendar.navigation.NavigationDetails;
-import com.celements.calendar.navigation.PagingNavigation;
 import com.celements.calendar.search.EventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearch;
@@ -70,10 +70,10 @@ public class CalendarScriptService implements ScriptService {
     return null;
   }
 
-  public PagingNavigation getPagingNavigation(DocumentReference calConfigDocRef,
+  public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
       Date eventDate, int offset, int nb) {
     try {
-      return calNavService.getPagingNavigation(calConfigDocRef, eventDate, offset, nb);
+      return calNavService.getCalendarNavigation(calConfigDocRef, eventDate, offset, nb);
     } catch (XWikiException exc) {
       mLogger.error("Failed to get PagingNavigation.", exc);
     }

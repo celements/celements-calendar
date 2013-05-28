@@ -62,19 +62,19 @@ public class CalendarNavigationService implements ICalendarNavigationService {
     return null;
   }
 
-  public PagingNavigation getPagingNavigation(DocumentReference calConfigDocRef,
+  public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
       Date eventDate, int offset, int nb) throws XWikiException {
-    return getPagingNavigation(calConfigDocRef, new NavigationDetails(eventDate, offset),
-        nb);
+    return getCalendarNavigation(calConfigDocRef,
+        new NavigationDetails(eventDate, offset), nb);
   }
 
-  public PagingNavigation getPagingNavigation(DocumentReference calConfigDocRef,
+  public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
       NavigationDetails navDetails, int nb) throws XWikiException {
     ICalendar cal = new Calendar(calConfigDocRef, false);
     ICalendar calArchive = new Calendar(calConfigDocRef, true);
     cal.setStartDate(navDetails.getStartDate());
     calArchive.setStartDate(navDetails.getStartDate());
-    PagingNavigation pagingNavigation = new PagingNavigation(
+    CalendarNavigation pagingNavigation = new CalendarNavigation(
         getCountTotal(cal, calArchive),
         getCountBefore(calArchive, navDetails.getOffset()),
         getCountAfter(cal, navDetails.getOffset(), nb),
@@ -82,7 +82,7 @@ public class CalendarNavigationService implements ICalendarNavigationService {
         getEndNavDetails(cal, calArchive, nb),
         getPrevNavDetails(cal, calArchive, navDetails, nb),
         getNextNavDetails(cal, navDetails, nb));
-    LOGGER.debug("getPagingNavigation: return '" + pagingNavigation + "' for cal '"
+    LOGGER.debug("getCalendarNavigation: return '" + pagingNavigation + "' for cal '"
         + calConfigDocRef + "' and navDetails '" + navDetails + "'");
     return pagingNavigation;
   }

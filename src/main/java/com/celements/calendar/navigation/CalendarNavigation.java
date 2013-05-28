@@ -1,6 +1,6 @@
 package com.celements.calendar.navigation;
 
-public class PagingNavigation {
+public class CalendarNavigation {
 
   private int countTotal;
   private int countBefore;
@@ -11,7 +11,7 @@ public class PagingNavigation {
   private NavigationDetails prevNavDetails;
   private NavigationDetails nextNavDetails;
 
-  PagingNavigation(int countTotal, int countBefore, int countAfter,
+  CalendarNavigation(int countTotal, int countBefore, int countAfter,
       NavigationDetails startNavDetails, NavigationDetails endNavDetails,
       NavigationDetails prevNavDetails, NavigationDetails nextNavDetails) {
     this.countTotal = countTotal;
@@ -53,7 +53,7 @@ public class PagingNavigation {
 
   @Override
   public String toString() {
-    return "PagingNavigation [countTotal=" + countTotal + ", countBefore=" + countBefore
+    return "CalendarNavigation [countTotal=" + countTotal + ", countBefore=" + countBefore
         + ", countAfter=" + countAfter + ", startNavDetails=" + startNavDetails
         + ", endNavDetails=" + endNavDetails + ", prevNavDetails=" + prevNavDetails
         + ", nextNavDetails=" + nextNavDetails + "]";

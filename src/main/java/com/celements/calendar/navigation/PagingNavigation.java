@@ -1,4 +1,4 @@
-package com.celements.calendar.manager;
+package com.celements.calendar.navigation;
 
 public class PagingNavigation {
 

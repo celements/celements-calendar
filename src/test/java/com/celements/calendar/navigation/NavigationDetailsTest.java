@@ -1,51 +1,21 @@
-package com.celements.calendar.manager;
+package com.celements.calendar.navigation;
 
 import static org.junit.Assert.*;
 
 import java.util.Calendar;
 import java.util.Date;
 
-import org.junit.Before;
 import org.junit.Test;
 
 public class NavigationDetailsTest {
 
-  private NavigationDetails navDetail;
-
-  @Before
-  public void setUp() throws Exception {
-    navDetail = new NavigationDetails();
-  }
-
-  @Test
-  public void testGetOffset_default() {
-    assertEquals("expecting default of -1.", -1, navDetail.getOffset());
-  }
-
-  @Test
-  public void testSetOffset() {
-    navDetail.setOffset(10);
-    assertEquals(10, navDetail.getOffset());
-  }
-
-  @Test
-  public void testGetStartDate_default() {
-    assertNull("expecting default null", navDetail.getStartDate());
-  }
-
-  @Test
-  public void testSetStartDate() {
-    Date startDate = new Date();
-    navDetail.setStartDate(startDate);
-    assertSame("expecting startDate.", startDate, navDetail.getStartDate());
-  }
-
   @Test
   public void testNavigationDetails_Date_int() {
     Date startDate = new Date();
-    navDetail = new NavigationDetails(startDate, 20);
+    NavigationDetails navDetail = new NavigationDetails(startDate, 20);
     assertEquals(20, navDetail.getOffset());
-    assertSame(startDate, navDetail.getStartDate());
+    assertEquals(startDate, navDetail.getStartDate());
+    assertFalse(startDate == navDetail.getStartDate());
   }
 
   @Test
@@ -97,7 +67,8 @@ public class NavigationDetailsTest {
 
   @Test
   public void testToString() {
-    assertEquals("[ date : null, offset : -1 ]", navDetail.toString());
+    NavigationDetails navDetail = new NavigationDetails(null, -1);
+    assertEquals("NavigationDetails [startDate=null, offset=-1]", navDetail.toString());
   }
 
   @Test
@@ -105,10 +76,11 @@ public class NavigationDetailsTest {
     Calendar cal = java.util.Calendar.getInstance();
     cal.setTimeInMillis(1322575785000L);
     Date startDate = cal.getTime();
+    NavigationDetails navDetail = new NavigationDetails(null, -1);
     assertEquals(23236, navDetail.hashCode());
-    navDetail.setOffset(20);
+    navDetail = new NavigationDetails(null, 20);
     assertEquals(24013, navDetail.hashCode());
-    navDetail.setStartDate(startDate);
+    navDetail = new NavigationDetails(startDate, 20);
     assertEquals(-274117912, navDetail.hashCode());
   }
 

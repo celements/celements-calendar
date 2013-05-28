@@ -8,3 +8,4 @@ com.celements.calendar.manager.EventsManager
 com.celements.calendar.search.EventSearch
 com.celements.calendar.engine.CalendarEngineHQL
 com.celements.calendar.engine.CalendarEngineLucene
+com.celements.calendar.navigation.CalendarNavigationService

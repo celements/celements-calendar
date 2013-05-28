@@ -10,14 +10,13 @@ import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.script.service.ScriptService;
 
-import com.celements.calendar.Calendar;
 import com.celements.calendar.Event;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.api.CalendarApi;
 import com.celements.calendar.api.EventApi;
-import com.celements.calendar.manager.IEventManager;
-import com.celements.calendar.manager.NavigationDetails;
-import com.celements.calendar.manager.PagingNavigation;
+import com.celements.calendar.navigation.ICalendarNavigationService;
+import com.celements.calendar.navigation.NavigationDetails;
+import com.celements.calendar.navigation.PagingNavigation;
 import com.celements.calendar.search.EventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearch;
@@ -35,7 +34,7 @@ public class CalendarScriptService implements ScriptService {
   private ICalendarService calService;
 
   @Requirement
-  private IEventManager eventsMgr;
+  private ICalendarNavigationService calNavService;
 
   @Requirement
   Execution execution;
@@ -57,9 +56,14 @@ public class CalendarScriptService implements ScriptService {
   }
 
   public NavigationDetails getNavigationDetails(CalendarApi cal, EventApi event) {
+    return getNavigationDetails(cal.getDocumentReference(), event);
+  }
+
+  public NavigationDetails getNavigationDetails(DocumentReference calConfigDocRef,
+      EventApi event) {
     try {
-      return eventsMgr.getNavigationDetails(new Event(event.getDocumentReference()),
-          new Calendar(cal.getDocumentReference(), cal.isArchive()));
+      return calNavService.getNavigationDetails(calConfigDocRef,
+          new Event(event.getDocumentReference()));
     } catch (XWikiException e) {
       mLogger.error("Failed to getNavigationDetails.", e);
     }
@@ -69,7 +73,7 @@ public class CalendarScriptService implements ScriptService {
   public PagingNavigation getPagingNavigation(DocumentReference calConfigDocRef,
       Date eventDate, int offset, int nb) {
     try {
-      return eventsMgr.getPagingNavigation(calConfigDocRef, eventDate, offset, nb);
+      return calNavService.getPagingNavigation(calConfigDocRef, eventDate, offset, nb);
     } catch (XWikiException exc) {
       mLogger.error("Failed to get PagingNavigation.", exc);
     }

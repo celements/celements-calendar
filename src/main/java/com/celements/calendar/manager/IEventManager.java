@@ -10,7 +10,6 @@ import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.search.EventSearchQuery;
-import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 
 @ComponentRole
@@ -82,19 +81,10 @@ public interface IEventManager {
 
   public long countEvents(ICalendar cal);
 
-  public NavigationDetails getNavigationDetails(IEvent event, ICalendar cal
-      ) throws XWikiException;
-
   public IEvent getEvent(DocumentReference eventDocRef);
 
   public IEvent getFirstEvent(ICalendar cal);
 
   public IEvent getLastEvent(ICalendar cal);
-
-  public PagingNavigation getPagingNavigation(DocumentReference calConfigDocRef,
-      Date eventDate, int offset, int nb) throws XWikiException;
-
-  public PagingNavigation getPagingNavigation(DocumentReference calConfigDocRef,
-      NavigationDetails navDetails, int nb) throws XWikiException;
 
 }

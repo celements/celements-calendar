@@ -1,15 +1,18 @@
 package com.celements.calendar.navigation;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 public class CalendarNavigation {
 
-  private int countTotal;
-  private int countBefore;
-  private int countAfter;
+  private final int countTotal;
+  private final int countBefore;
+  private final int countAfter;
 
-  private NavigationDetails startNavDetails;
-  private NavigationDetails endNavDetails;
-  private NavigationDetails prevNavDetails;
-  private NavigationDetails nextNavDetails;
+  private final NavigationDetails startNavDetails;
+  private final NavigationDetails endNavDetails;
+  private final NavigationDetails prevNavDetails;
+  private final NavigationDetails nextNavDetails;
 
   CalendarNavigation(int countTotal, int countBefore, int countAfter,
       NavigationDetails startNavDetails, NavigationDetails endNavDetails,
@@ -49,6 +52,27 @@ public class CalendarNavigation {
 
   public NavigationDetails getNextNavDetails() {
     return nextNavDetails;
+  }
+
+  @Override
+  public int hashCode() {
+    return new HashCodeBuilder().append(countTotal).append(countBefore).append(countAfter
+        ).append(startNavDetails).append(endNavDetails).append(prevNavDetails).append(
+            nextNavDetails).toHashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof CalendarNavigation) {
+      CalendarNavigation other = (CalendarNavigation) obj;
+      return new EqualsBuilder().append(countTotal, other.countTotal).append(countBefore,
+          other.countBefore).append(countAfter, other.countAfter).append(startNavDetails,
+              other.startNavDetails).append(endNavDetails, other.endNavDetails).append(
+                  prevNavDetails, other.prevNavDetails).append(nextNavDetails,
+                      other.nextNavDetails).isEquals();
+    } else {
+      return false;
+    }
   }
 
   @Override

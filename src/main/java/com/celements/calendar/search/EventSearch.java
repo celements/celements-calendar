@@ -31,11 +31,20 @@ public class EventSearch implements IEventSearch {
     return (XWikiContext) execution.getContext().getProperty("xwikicontext");
   }
 
+  public EventSearchResult getSearchResult(EventSearchQuery query) {
+    return getSearchResult(query.getAsLuceneQuery());
+  }
+
   public EventSearchResult getSearchResult(LuceneQueryApi query) {
     query.addRestriction(createEventObjectRestriction());
     return new EventSearchResult(query.getQueryString(), getSortFields(false),
         getContext());
   }
+
+  public EventSearchResult getSearchResultFromDate(EventSearchQuery query, Date fromDate) {
+    return getSearchResultFromDate(query.getAsLuceneQuery(), fromDate);
+  }
+
 
   public EventSearchResult getSearchResultFromDate(LuceneQueryApi query, Date fromDate) {
     query.addRestriction(createEventObjectRestriction());
@@ -43,6 +52,9 @@ public class EventSearch implements IEventSearch {
         SDF.format(fromDate), DATE_HIGH, true));
     return new EventSearchResult(query.getQueryString(), getSortFields(false),
         getContext());
+  }
+  public EventSearchResult getSearchResultUptoDate(EventSearchQuery query, Date uptoDate) {
+    return getSearchResultUptoDate(query.getAsLuceneQuery(), uptoDate);
   }
 
   public EventSearchResult getSearchResultUptoDate(LuceneQueryApi query, Date uptoDate) {

@@ -19,6 +19,7 @@ import com.celements.calendar.IEvent;
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.classes.CalendarClasses;
 import com.celements.calendar.search.EventSearchQuery;
+import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.service.ICalendarService;
 import com.celements.common.classes.IClassCollectionRole;
 import com.celements.web.service.IWebUtilsService;
@@ -63,45 +64,24 @@ public class EventsManager implements IEventManager {
   }
 
   public List<IEvent> getEventsInternal(ICalendar cal, int start, int nb) {
+    List<IEvent> eventList = Collections.emptyList();
     DocumentReference calDocRef = cal.getDocumentReference();
     try {
-      return getEvents_internal(cal, cal.getStartDate(), cal.isArchive(),
-          webUtilsService.getDefaultLanguage(), calService.getAllowedSpaces(calDocRef),
-          start, nb, null);
+      String lang = webUtilsService.getDefaultLanguage();
+      List<String> allowedSpaces = calService.getAllowedSpaces(calDocRef);
+      if (nb == 0) {
+        eventList = cal.getEngine().getEvents(cal.getStartDate(), cal.isArchive(), lang,
+            allowedSpaces);
+      } else {
+        eventList = cal.getEngine().getEvents(cal.getStartDate(), cal.isArchive(), lang,
+            allowedSpaces, start, nb);
+      }
+      filterEventListForSubscription(cal.getDocumentReference(), eventList);
     } catch (XWikiException exc) {
       LOGGER.error("Error while getting events from calendar '" + calDocRef + "'", exc);
     }
-    return Collections.emptyList();
-  }
-
-  public List<IEvent> searchEvents(ICalendar cal, EventSearchQuery query, int start,
-      int nb) {
-    DocumentReference calDocRef = cal.getDocumentReference();
-    try {
-      return getEvents_internal(cal, cal.getStartDate(), cal.isArchive(),
-          webUtilsService.getDefaultLanguage(), calService.getAllowedSpaces(calDocRef),
-          start, nb, query);
-    } catch (XWikiException exc) {
-      LOGGER.error("Error while searching events in calendar '" + calDocRef + "'", exc);
-    }
-    return Collections.emptyList();
-  }
-
-  private List<IEvent> getEvents_internal(ICalendar cal, Date startDate,
-      boolean isArchive, String lang, List<String> allowedSpaces, int start, int nb,
-      EventSearchQuery query) throws XWikiException {
-    List<IEvent> eventList;
-    if (nb == 0) {
-      eventList = cal.getEngine().getEvents(startDate, isArchive, lang, allowedSpaces);
-    } else if (query == null) {
-      eventList = cal.getEngine().getEvents(startDate, isArchive, lang, allowedSpaces,
-          start, nb);
-    } else {
-      eventList = cal.getEngine().searchEvents(query, startDate, isArchive, lang,
-          allowedSpaces, start, nb);
-    }
-    LOGGER.debug("getEvents_internal: " + eventList.size() + " events found.");
-    return filterEventListForSubscription(cal.getDocumentReference(), eventList);
+    LOGGER.debug("getEventsInternal: " + eventList.size() + " events found.");
+    return eventList;
   }
 
   private List<IEvent> filterEventListForSubscription(DocumentReference calDocRef,
@@ -163,6 +143,17 @@ public class EventsManager implements IEventManager {
           webUtilsService.getRefLocalSerializer().serialize(calDocRef), false);
     }
     return subscriptObj;
+  }
+
+  public EventSearchResult searchEvents(ICalendar cal, EventSearchQuery query) {
+    DocumentReference calDocRef = cal.getDocumentReference();
+    try {
+      return cal.getEngine().searchEvents(query, cal.getStartDate(), cal.isArchive(),
+          webUtilsService.getDefaultLanguage(), calService.getAllowedSpaces(calDocRef));
+    } catch (XWikiException exc) {
+      LOGGER.error("Error while searching events in calendar '" + calDocRef + "'", exc);
+    }
+    return null;
   }
 
   /**

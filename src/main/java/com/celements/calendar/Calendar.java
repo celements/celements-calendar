@@ -34,6 +34,7 @@ import com.celements.calendar.classes.CalendarClasses;
 import com.celements.calendar.engine.ICalendarEngineRole;
 import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.search.EventSearchQuery;
+import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.service.ICalendarService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -135,9 +136,8 @@ public class Calendar implements ICalendar {
     return getEventMgr().getEventsInternal(this, start < 0 ? 0 : start, nb < 0 ? 0 : nb);
   }
 
-  public List<IEvent> searchEvents(EventSearchQuery query, int start, int nb) {
-    return getEventMgr().searchEvents(this, query, start < 0 ? 0 : start,
-        nb < 0 ? 0 : nb);
+  public EventSearchResult searchEvents(EventSearchQuery query) {
+    return getEventMgr().searchEvents(this, query);
   }
 
   /* (non-Javadoc)

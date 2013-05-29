@@ -53,8 +53,9 @@ public class CalendarApi extends Api {
     return getEventApiList(calendar.getEventsInternal(start, nb));
   }
 
-  public List<EventApi> searchEvents(EventSearchQuery query, int start, int nb) {
-    return getEventApiList(calendar.searchEvents(query, start, nb));
+  public EventSearchResultApi searchEvents(EventSearchQuery query) {
+    return new EventSearchResultApi(calendar.searchEvents(query), calendar.getLanguage(),
+        context);
   }
 
   public long getNrOfEvents() {

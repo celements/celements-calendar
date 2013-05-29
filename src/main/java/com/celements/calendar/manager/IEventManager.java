@@ -10,6 +10,7 @@ import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.search.EventSearchQuery;
+import com.celements.calendar.search.EventSearchResult;
 import com.xpn.xwiki.doc.XWikiDocument;
 
 @ComponentRole
@@ -30,8 +31,7 @@ public interface IEventManager {
 
   public List<IEvent> getEventsInternal(ICalendar cal, int start, int nb);
 
-  public List<IEvent> searchEvents(ICalendar cal, EventSearchQuery query, int start,
-      int nb);
+  public EventSearchResult searchEvents(ICalendar cal, EventSearchQuery query);
 
   /**
    * 

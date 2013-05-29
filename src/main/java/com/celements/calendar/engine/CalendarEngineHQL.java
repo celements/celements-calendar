@@ -18,6 +18,7 @@ import com.celements.calendar.Event;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.classes.CalendarClasses;
 import com.celements.calendar.search.EventSearchQuery;
+import com.celements.calendar.search.EventSearchResult;
 import com.celements.web.service.IWebUtilsService;
 
 @Component("hql")
@@ -165,10 +166,10 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
     return null;
   }
 
-  public List<IEvent> searchEvents(EventSearchQuery query, Date startDate,
-      boolean isArchive, String lang, List<String> allowedSpaces, int offset, int limit) {
+  public EventSearchResult searchEvents(EventSearchQuery query, Date startDate,
+      boolean isArchive, String lang, List<String> allowedSpaces) {
     throw new UnsupportedOperationException("searchEvents not supported for " +
-    		"CalendarEngineHQL");
+        "CalendarEngineHQL");
   }
 
   void injectQueryManager(QueryManager queryManagerMock) {

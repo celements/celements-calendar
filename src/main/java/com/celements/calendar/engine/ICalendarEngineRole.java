@@ -7,6 +7,7 @@ import org.xwiki.component.annotation.ComponentRole;
 
 import com.celements.calendar.IEvent;
 import com.celements.calendar.search.EventSearchQuery;
+import com.celements.calendar.search.EventSearchResult;
 
 @ComponentRole
 public interface ICalendarEngineRole {
@@ -25,8 +26,8 @@ public interface ICalendarEngineRole {
 
   public IEvent getLastEvent(Date startDate, boolean isArchive, String lang,
       List<String> allowedSpaces);
-  
-  public List<IEvent> searchEvents(EventSearchQuery query, Date startDate, 
-      boolean isArchive, String lang, List<String> allowedSpaces, int offset, int limit);
+
+  public EventSearchResult searchEvents(EventSearchQuery query, Date startDate,
+      boolean isArchive, String lang, List<String> allowedSpaces);
 
 }

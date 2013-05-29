@@ -13,6 +13,10 @@ public interface IEventSearch {
 
   public EventSearchResult getSearchResult(LuceneQueryApi query);
 
+  public EventSearchResult getSearchResult(EventSearchQuery query, boolean invertSort);
+
+  public EventSearchResult getSearchResult(LuceneQueryApi query, boolean invertSort);
+
   public EventSearchResult getSearchResultFromDate(EventSearchQuery query, Date fromDate);
 
   public EventSearchResult getSearchResultFromDate(LuceneQueryApi query, Date fromDate);

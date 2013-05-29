@@ -32,12 +32,20 @@ public class EventSearch implements IEventSearch {
   }
 
   public EventSearchResult getSearchResult(EventSearchQuery query) {
-    return getSearchResult(query.getAsLuceneQuery());
+    return getSearchResult(query, false);
   }
 
   public EventSearchResult getSearchResult(LuceneQueryApi query) {
+    return getSearchResult(query, false);
+  }
+
+  public EventSearchResult getSearchResult(EventSearchQuery query, boolean invertSort) {
+    return getSearchResult(query.getAsLuceneQuery(), invertSort);
+  }
+
+  public EventSearchResult getSearchResult(LuceneQueryApi query, boolean invertSort) {
     query.addRestriction(createEventObjectRestriction());
-    return new EventSearchResult(query.getQueryString(), getSortFields(false),
+    return new EventSearchResult(query.getQueryString(), getSortFields(invertSort),
         getContext());
   }
 

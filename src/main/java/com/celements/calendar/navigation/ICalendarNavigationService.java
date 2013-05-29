@@ -17,6 +17,9 @@ public interface ICalendarNavigationService {
   public NavigationDetails getNavigationDetails(DocumentReference calConfigDocRef,
       IEvent event) throws XWikiException;
 
+  public NavigationDetails getNavigationDetails(DocumentReference calConfigDocRef,
+      IEvent event, EventSearchQuery query) throws XWikiException;
+
   public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
       NavigationDetails navDetails, int nb) throws XWikiException;
 

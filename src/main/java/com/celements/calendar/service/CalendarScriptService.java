@@ -81,6 +81,17 @@ public class CalendarScriptService implements ScriptService {
     return null;
   }
 
+  public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
+      Date eventDate, int offset, int nb, EventSearchQuery query) {
+    NavigationDetails navDetails = calNavService.getNavigationDetails(eventDate, offset);
+    try {
+      return calNavService.getCalendarNavigation(calConfigDocRef, navDetails, nb, query);
+    } catch (XWikiException exc) {
+      mLogger.error("Failed to get CalendarNavigation.", exc);
+    }
+    return null;
+  }
+
   public CalendarApi getCalendarByCalRef(DocumentReference calDocRef, boolean isArchive) {
     ICalendar cal = calService.getCalendarByCalRef(calDocRef, isArchive);
     if (cal != null) {

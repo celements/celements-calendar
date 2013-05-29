@@ -5,29 +5,25 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 public class CalendarNavigation {
 
-  private final int countTotal;
   private final int countBefore;
   private final int countAfter;
+  private final int countTotal;
 
   private final NavigationDetails startNavDetails;
   private final NavigationDetails endNavDetails;
   private final NavigationDetails prevNavDetails;
   private final NavigationDetails nextNavDetails;
 
-  CalendarNavigation(int countTotal, int countBefore, int countAfter,
+  CalendarNavigation(int countBefore, int countAfter, int countTotal,
       NavigationDetails startNavDetails, NavigationDetails endNavDetails,
       NavigationDetails prevNavDetails, NavigationDetails nextNavDetails) {
-    this.countTotal = countTotal;
-    this.countBefore = countBefore;
-    this.countAfter = countAfter;
+    this.countBefore = countBefore >= 0 ? countBefore : 0;
+    this.countAfter = countAfter >= 0 ? countAfter : 0;
+    this.countTotal = countTotal >= 0 ? countTotal : 0;
     this.startNavDetails = startNavDetails;
     this.endNavDetails = endNavDetails;
     this.prevNavDetails = prevNavDetails;
     this.nextNavDetails = nextNavDetails;
-  }
-
-  public int getCountTotal() {
-    return countTotal;
   }
 
   public int getCountBefore() {
@@ -36,6 +32,10 @@ public class CalendarNavigation {
 
   public int getCountAfter() {
     return countAfter;
+  }
+
+  public int getCountTotal() {
+    return countTotal;
   }
 
   public NavigationDetails getStartNavDetails() {
@@ -77,8 +77,8 @@ public class CalendarNavigation {
 
   @Override
   public String toString() {
-    return "CalendarNavigation [countTotal=" + countTotal + ", countBefore=" + countBefore
-        + ", countAfter=" + countAfter + ", startNavDetails=" + startNavDetails
+    return "CalendarNavigation [countBefore=" + countBefore + ", countAfter=" + countAfter
+        + ", countTotal=" + countTotal + ", startNavDetails=" + startNavDetails
         + ", endNavDetails=" + endNavDetails + ", prevNavDetails=" + prevNavDetails
         + ", nextNavDetails=" + nextNavDetails + "]";
   }

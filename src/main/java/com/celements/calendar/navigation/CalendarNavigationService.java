@@ -14,6 +14,7 @@ import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.search.EventSearchQuery;
+import com.celements.calendar.search.EventSearchResult;
 import com.xpn.xwiki.XWikiException;
 
 @Component("default")
@@ -31,6 +32,11 @@ public class CalendarNavigationService implements ICalendarNavigationService {
 
   public NavigationDetails getNavigationDetails(DocumentReference calConfigDocRef,
       IEvent event) throws XWikiException {
+    return getNavigationDetails(calConfigDocRef, event, null);
+  }
+
+  public NavigationDetails getNavigationDetails(DocumentReference calConfigDocRef,
+      IEvent event, EventSearchQuery query) throws XWikiException {
     LOGGER.debug("getNavigationDetails for '" + event + "'");
     Date eventDate = event.getEventDate();
     if (eventDate != null) {
@@ -42,7 +48,11 @@ public class CalendarNavigationService implements ICalendarNavigationService {
       List<IEvent> events;
       boolean hasMore, notFound;
       do {
-        events = eventMgr.getEventsInternal(cal, start, nb);
+        if (query == null) {
+          events = eventMgr.getEventsInternal(cal, start, nb);
+        } else {
+          events = eventMgr.searchEvents(cal, query).getEventList(start, nb);
+        }
         hasMore = events.size() == nb;
         eventIndex = events.indexOf(event);
         notFound = eventIndex < 0;
@@ -75,14 +85,12 @@ public class CalendarNavigationService implements ICalendarNavigationService {
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
       NavigationDetails navDetails, int nb) throws XWikiException {
-    ICalendar cal = new Calendar(calConfigDocRef, false);
-    ICalendar calArchive = new Calendar(calConfigDocRef, true);
-    cal.setStartDate(navDetails.getStartDate());
-    calArchive.setStartDate(navDetails.getStartDate());
+    ICalendar cal = getCalendar(calConfigDocRef, false, navDetails.getStartDate());
+    ICalendar calArchive = getCalendar(calConfigDocRef, true, navDetails.getStartDate());
+    int[] counts = getCounts((int) cal.getNrOfEvents(), (int) calArchive.getNrOfEvents(),
+        navDetails.getOffset(), nb);
     CalendarNavigation calendarNavigation = new CalendarNavigation(
-        getCountTotal(cal, calArchive),
-        getCountBefore(calArchive, navDetails.getOffset()),
-        getCountAfter(cal, navDetails.getOffset(), nb),
+        counts[0], counts[1], counts[2],
         getStartNavDetails(cal, calArchive),
         getEndNavDetails(cal, calArchive, nb),
         getPrevNavDetails(cal, calArchive, navDetails, nb),
@@ -92,17 +100,15 @@ public class CalendarNavigationService implements ICalendarNavigationService {
     return calendarNavigation;
   }
 
-  private int getCountTotal(ICalendar cal, ICalendar calArchive) {
-    return (int) (cal.getNrOfEvents() + calArchive.getNrOfEvents());
-  }
-
-  private int getCountBefore(ICalendar calArchive, int offset) {
-    return (int) calArchive.getNrOfEvents() + offset;
-  }
-
-  private int getCountAfter(ICalendar cal, int offset, int nb) {
-    int countAfter = (int) cal.getNrOfEvents() - offset - nb;
-    return countAfter > 0 ? countAfter : 0;
+  private int[] getCounts(int calSize, int calArchiveSize, int offset, int nb) {
+    int[] counts = new int[3];
+    counts[0] = calArchiveSize + offset;
+    counts[1] = calSize - offset - nb;
+    if (counts[1] < 0) {
+      counts[1] = 0;
+    }
+    counts[2] = calSize + calArchiveSize;
+    return counts;
   }
 
   private NavigationDetails getStartNavDetails(ICalendar cal, ICalendar calArchive) {
@@ -162,6 +168,29 @@ public class CalendarNavigationService implements ICalendarNavigationService {
     return nextNavDetails;
   }
 
+  public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
+      NavigationDetails navDetails, int nb, EventSearchQuery query) throws XWikiException {
+    ICalendar cal = getCalendar(calConfigDocRef, false, navDetails.getStartDate());
+    ICalendar calArchive = getCalendar(calConfigDocRef, true, navDetails.getStartDate());
+    EventSearchResult calSearchResult = cal.searchEvents(query);
+    EventSearchResult calArchiveSearchResult = calArchive.searchEvents(query);
+    int[] counts = getCounts(calSearchResult.getSize(), calArchiveSearchResult.getSize(),
+        navDetails.getOffset(), nb);
+    CalendarNavigation calendarNavigation = new CalendarNavigation(
+        counts[0], counts[1], counts[2],
+        null, null, null, null); //TODO
+    LOGGER.debug("getCalendarNavigation: return '" + calendarNavigation + "' for cal '"
+        + calConfigDocRef + "', navDetails '" + navDetails + "' and query '" + query + "'");
+    return calendarNavigation;
+  }
+
+  private static ICalendar getCalendar(DocumentReference calConfigDocRef,
+      boolean isArchive, Date startDate) {
+    ICalendar cal = new Calendar(calConfigDocRef, isArchive);
+    cal.setStartDate(startDate);
+    return cal;
+  }
+
   private static <T> T getFirstElement(List<T> list) {
     if ((list != null) && (list.size() > 0)) {
       return list.get(0);
@@ -178,13 +207,6 @@ public class CalendarNavigationService implements ICalendarNavigationService {
 
   void injectEventManager(IEventManager eventMgr) {
     this.eventMgr = eventMgr;
-  }
-
-  public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
-      NavigationDetails navDetails, int nb, EventSearchQuery query) throws XWikiException {
-    // TODO Auto-generated method stub
-    LOGGER.error("implement getCalendarNavigation with query");
-    return null;
   }
 
 }

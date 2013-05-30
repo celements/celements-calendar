@@ -18,9 +18,10 @@ import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.classes.CalendarClasses;
+import com.celements.calendar.search.EventSearchQuery;
+import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.service.ICalendarService;
 import com.celements.common.classes.IClassCollectionRole;
-import com.celements.search.lucene.query.LuceneQueryApi;
 import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -63,37 +64,24 @@ public class EventsManager implements IEventManager {
   }
 
   public List<IEvent> getEventsInternal(ICalendar cal, int start, int nb) {
-    return getEventsInternal(cal, null, start, nb);
-  }
-
-  public List<IEvent> getEventsInternal(ICalendar cal, LuceneQueryApi query, int start,
-      int nb) {
+    List<IEvent> eventList = Collections.emptyList();
     DocumentReference calDocRef = cal.getDocumentReference();
     try {
-      return getEvents_internal(cal, query, cal.getStartDate(), cal.isArchive(),
-          webUtilsService.getDefaultLanguage(), calService.getAllowedSpaces(calDocRef),
-          start, nb);
+      String lang = webUtilsService.getDefaultLanguage();
+      List<String> allowedSpaces = calService.getAllowedSpaces(calDocRef);
+      if (nb == 0) {
+        eventList = cal.getEngine().getEvents(cal.getStartDate(), cal.isArchive(), lang,
+            allowedSpaces);
+      } else {
+        eventList = cal.getEngine().getEvents(cal.getStartDate(), cal.isArchive(), lang,
+            allowedSpaces, start, nb);
+      }
+      filterEventListForSubscription(cal.getDocumentReference(), eventList);
     } catch (XWikiException exc) {
-      LOGGER.error("Exception while getting events for calendar '" + calDocRef + "'", exc);
+      LOGGER.error("Error while getting events from calendar '" + calDocRef + "'", exc);
     }
-    return Collections.emptyList();
-  }
-
-  private List<IEvent> getEvents_internal(ICalendar cal, LuceneQueryApi query,
-      Date startDate, boolean isArchive, String lang, List<String> allowedSpaces,
-      int start, int nb) throws XWikiException {
-    List<IEvent> eventList;
-    if (nb == 0) {
-      eventList = cal.getEngine().getEvents(startDate, isArchive, lang, allowedSpaces);
-    } else if (query == null) {
-      eventList = cal.getEngine().getEvents(startDate, isArchive, lang, allowedSpaces,
-          start, nb);
-    } else {
-      eventList = cal.getEngine().getEvents(query, startDate, isArchive, lang,
-          allowedSpaces, start, nb);
-    }
-    LOGGER.debug("getEvents_internal: " + eventList.size() + " events found.");
-    return filterEventListForSubscription(cal.getDocumentReference(), eventList);
+    LOGGER.debug("getEventsInternal: " + eventList.size() + " events found.");
+    return eventList;
   }
 
   private List<IEvent> filterEventListForSubscription(DocumentReference calDocRef,
@@ -101,7 +89,7 @@ public class EventsManager implements IEventManager {
     Iterator<IEvent> iter = eventList.iterator();
     while (iter.hasNext()) {
       IEvent event = iter.next();
-      if(!checkEventSubscription(calDocRef, event)){
+      if (!checkEventSubscription(calDocRef, event)) {
         iter.remove();
         LOGGER.debug("filterEventListForSubscription: filtered '" + event + "'");
       }
@@ -121,8 +109,7 @@ public class EventsManager implements IEventManager {
     boolean isHomeCal = eventDocRef.getLastSpaceReference().getName(
         ).equals(eventSpaceForCal);
     LOGGER.trace("isHomeCalendar: for [" + eventDocRef + "] check on calDocRef ["
-        + calDocRef + "] with space [" + eventSpaceForCal
-        + "] returning " + isHomeCal);
+        + calDocRef + "] with space [" + eventSpaceForCal + "] returning " + isHomeCal);
     return isHomeCal;
   }
 
@@ -130,13 +117,13 @@ public class EventsManager implements IEventManager {
     BaseObject obj = getSubscriptionObject(calDocRef, event);
     ICalendar calendar = event.getCalendar();
     BaseObject calObj = null;
-    if ((calendar != null) && (calendar.getCalDoc() != null)){
+    if ((calendar != null) && (calendar.getCalDoc() != null)) {
       calObj = calendar.getCalDoc().getXObject(getCalClasses().getCalendarClassRef(
           getContext().getDatabase()));
     }
     boolean isSubscribed = false;
-    if((obj != null) && (obj.getIntValue("doSubscribe") == 1)
-        && (calObj != null) && (calObj.getIntValue("is_subscribable") == 1)){
+    if ((obj != null) && (obj.getIntValue("doSubscribe") == 1) && (calObj != null)
+        && (calObj.getIntValue("is_subscribable") == 1)) {
       isSubscribed = true;
     }
     LOGGER.trace("isEventSubscribed: for [" + event.getDocumentReference()
@@ -146,16 +133,27 @@ public class EventsManager implements IEventManager {
 
   private BaseObject getSubscriptionObject(DocumentReference calDocRef, IEvent event) {
     XWikiDocument eventDoc = event.getEventDocument();
-    BaseObject subscriptObj = eventDoc.getXObject(getCalClasses().getSubscriptionClassRef(
-        getContext().getDatabase()), "subscriber",
+    BaseObject subscriptObj = eventDoc.getXObject(getCalClasses(
+        ).getSubscriptionClassRef(getContext().getDatabase()), "subscriber",
         webUtilsService.getRefDefaultSerializer().serialize(calDocRef), false);
     if (subscriptObj == null) {
-      //for backwards compatibility
+      // for backwards compatibility
       subscriptObj = eventDoc.getXObject(getCalClasses().getSubscriptionClassRef(
           getContext().getDatabase()), "subscriber",
           webUtilsService.getRefLocalSerializer().serialize(calDocRef), false);
     }
     return subscriptObj;
+  }
+
+  public EventSearchResult searchEvents(ICalendar cal, EventSearchQuery query) {
+    DocumentReference calDocRef = cal.getDocumentReference();
+    try {
+      return cal.getEngine().searchEvents(query, cal.getStartDate(), cal.isArchive(),
+          webUtilsService.getDefaultLanguage(), calService.getAllowedSpaces(calDocRef));
+    } catch (XWikiException exc) {
+      LOGGER.error("Error while searching events in calendar '" + calDocRef + "'", exc);
+    }
+    return null;
   }
 
   /**
@@ -230,46 +228,6 @@ public class EventsManager implements IEventManager {
     LOGGER.debug("Event count for calendar '" + calDocRef + "' with startDate + '"
         + startDate + "' and isArchive '" + isArchive + "': " + count);
     return count;
-  }
-
-  public NavigationDetails getNavigationDetails(IEvent event, ICalendar cal
-      ) throws XWikiException {
-    Date eventDate = calService.getMidnightDate(event.getEventDate());
-    LOGGER.debug("getNavigationDetails for [" + event + "] with date [" + eventDate + "]");
-    if (eventDate == null) {
-      LOGGER.error("getNavigationDetails failed because eventDate is null for ["
-          + event.getDocumentReference() + "].");
-      return null;
-    }
-    DocumentReference calDocRef = cal.getDocumentReference();
-    String lang = webUtilsService.getDefaultLanguage();
-    List<String> allowedSpaces = calService.getAllowedSpaces(calDocRef);
-    NavigationDetails navDetail = new NavigationDetails(eventDate, 0);
-    int nb = 10;
-    int eventIndex, start = 0;
-    List<IEvent> events;
-    boolean hasMore, notFound;
-    do {
-      events = getEvents_internal(cal, null, eventDate, false, lang, allowedSpaces,
-          start, nb);
-      hasMore = events.size() == nb;
-      eventIndex = events.indexOf(event);
-      notFound = eventIndex < 0;
-      navDetail.setOffset(start + eventIndex);
-      start = start + nb;
-      nb = nb * 2;
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("getNavigationDetails: events '" + events + "'");
-        LOGGER.debug("getNavigationDetails: index for event '" + eventIndex);
-      }
-    } while (notFound && hasMore);
-    if (!notFound) {
-      LOGGER.debug("getNavigationDetails: found '" + navDetail + "'");
-      return navDetail;
-    } else {
-      LOGGER.debug("getNavigationDetails: not found");
-      return null;
-    }
   }
 
   public IEvent getEvent(DocumentReference eventDocRef) {

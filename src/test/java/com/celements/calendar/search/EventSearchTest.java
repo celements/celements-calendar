@@ -1,13 +1,7 @@
 package com.celements.calendar.search;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.same;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 import java.util.Date;
 
@@ -40,88 +34,94 @@ public class EventSearchTest extends AbstractBridgedComponentTestCase {
     eventSearch = (EventSearch) Utils.getComponent(IEventSearch.class);
     eventSearch.injectQueryService(queryServiceMock);
   }
-  
+
   @Test
   public void testGetSearchResult() throws Exception {
     String queryString = "asdf";
-    LuceneQueryRestrictionApi objectRestriction = new LuceneQueryRestrictionApi("object", 
+    LuceneQueryRestrictionApi objectRestriction = new LuceneQueryRestrictionApi("object",
         "Classes.CalendarEventClass");
-    
-    expect(queryServiceMock.createRestriction(eq("object"), 
+
+    expect(queryServiceMock.createRestriction(eq("object"),
         eq("Classes.CalendarEventClass"))).andReturn(objectRestriction).once();
     expect(queryMock.addRestriction(same(objectRestriction))).andReturn(queryMock).once();
     expect(queryMock.getQueryString()).andReturn(queryString).once();
-    
+
     replayAll();
     EventSearchResult searchResult = eventSearch.getSearchResult(queryMock);
     verifyAll();
-    
-    assertNotNull(searchResult);    
+
+    assertNotNull(searchResult);
     assertEquals("asdf", searchResult.getLuceneQuery());
     String[] sortFields = searchResult.getSortFields();
     assertNotNull(sortFields);
-    assertEquals(1, sortFields.length);
+    assertEquals(3, sortFields.length);
     assertEquals("Classes.CalendarEventClass.eventDate", sortFields[0]);
+    assertEquals("Classes.CalendarEventClass.eventDate_end", sortFields[1]);
+    assertEquals("Classes.CalendarEventClass.l_title", sortFields[2]);
   }
-  
+
   @Test
   public void testGetSearchResultFromDate() throws Exception {
     Date date = new Date(20*24*60*60*1000);
     String queryString = "asdf";
-    LuceneQueryRestrictionApi objectRestriction = new LuceneQueryRestrictionApi("object", 
+    LuceneQueryRestrictionApi objectRestriction = new LuceneQueryRestrictionApi("object",
         "asdf");
-    LuceneQueryRestrictionApi rangeRestriction = new LuceneQueryRestrictionApi("range", 
+    LuceneQueryRestrictionApi rangeRestriction = new LuceneQueryRestrictionApi("range",
         "asdf");
-    
-    expect(queryServiceMock.createRestriction(eq("object"), 
+
+    expect(queryServiceMock.createRestriction(eq("object"),
         eq("Classes.CalendarEventClass"))).andReturn(objectRestriction).once();
     expect(queryMock.addRestriction(same(objectRestriction))).andReturn(queryMock).once();
     expect(queryServiceMock.createRangeRestriction(
-        eq("Classes.CalendarEventClass.eventDate"), eq("197001210100"), 
+        eq("Classes.CalendarEventClass.eventDate"), eq("197001210100"),
         eq("999912312359"), eq(true))).andReturn(rangeRestriction).once();
     expect(queryMock.addRestriction(same(rangeRestriction))).andReturn(queryMock).once();
     expect(queryMock.getQueryString()).andReturn(queryString).once();
-    
+
     replayAll();
     EventSearchResult searchResult = eventSearch.getSearchResultFromDate(queryMock, date);
     verifyAll();
-    
-    assertNotNull(searchResult);    
+
+    assertNotNull(searchResult);
     assertEquals("asdf", searchResult.getLuceneQuery());
     String[] sortFields = searchResult.getSortFields();
     assertNotNull(sortFields);
-    assertEquals(1, sortFields.length);
+    assertEquals(3, sortFields.length);
     assertEquals("Classes.CalendarEventClass.eventDate", sortFields[0]);
+    assertEquals("Classes.CalendarEventClass.eventDate_end", sortFields[1]);
+    assertEquals("Classes.CalendarEventClass.l_title", sortFields[2]);
   }
-  
+
   @Test
   public void testGetSearchResultUptoDate() throws Exception {
     Date date = new Date(20*24*60*60*1000);
     String queryString = "asdf";
-    LuceneQueryRestrictionApi objectRestriction = new LuceneQueryRestrictionApi("object", 
+    LuceneQueryRestrictionApi objectRestriction = new LuceneQueryRestrictionApi("object",
         "asdf");
-    LuceneQueryRestrictionApi rangeRestriction = new LuceneQueryRestrictionApi("range", 
+    LuceneQueryRestrictionApi rangeRestriction = new LuceneQueryRestrictionApi("range",
         "asdf");
-    
-    expect(queryServiceMock.createRestriction(eq("object"), 
+
+    expect(queryServiceMock.createRestriction(eq("object"),
         eq("Classes.CalendarEventClass"))).andReturn(objectRestriction).once();
     expect(queryMock.addRestriction(same(objectRestriction))).andReturn(queryMock).once();
     expect(queryServiceMock.createRangeRestriction(
-        eq("Classes.CalendarEventClass.eventDate"), eq("000101010000"), 
+        eq("Classes.CalendarEventClass.eventDate"), eq("000101010000"),
         eq("197001210100"), eq(false))).andReturn(rangeRestriction).once();
     expect(queryMock.addRestriction(same(rangeRestriction))).andReturn(queryMock).once();
     expect(queryMock.getQueryString()).andReturn(queryString).once();
-    
+
     replayAll();
     EventSearchResult searchResult = eventSearch.getSearchResultUptoDate(queryMock, date);
     verifyAll();
-    
-    assertNotNull(searchResult);    
+
+    assertNotNull(searchResult);
     assertEquals("asdf", searchResult.getLuceneQuery());
     String[] sortFields = searchResult.getSortFields();
     assertNotNull(sortFields);
-    assertEquals(1, sortFields.length);
+    assertEquals(3, sortFields.length);
     assertEquals("-Classes.CalendarEventClass.eventDate", sortFields[0]);
+    assertEquals("-Classes.CalendarEventClass.eventDate_end", sortFields[1]);
+    assertEquals("-Classes.CalendarEventClass.l_title", sortFields[2]);
   }
 
   private void replayAll(Object ... mocks) {

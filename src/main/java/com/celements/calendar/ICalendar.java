@@ -26,7 +26,8 @@ import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.engine.ICalendarEngineRole;
-import com.celements.search.lucene.query.LuceneQueryApi;
+import com.celements.calendar.search.EventSearchQuery;
+import com.celements.calendar.search.EventSearchResult;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.doc.XWikiDocument;
 
@@ -65,7 +66,7 @@ public interface ICalendar {
    */
   public List<IEvent> getEventsInternal(int start, int nb);
 
-  public List<IEvent> getEventsInternal(LuceneQueryApi query, int start, int nb);
+  public EventSearchResult searchEvents(EventSearchQuery query);
 
   public long getNrOfEvents();
 

@@ -31,26 +31,46 @@ public class EventSearch implements IEventSearch {
     return (XWikiContext) execution.getContext().getProperty("xwikicontext");
   }
 
-  public EventSearchResult getSearchResult(LuceneQueryApi query) {
-    query.addRestriction(createEventObjectRestriction());
-    return new EventSearchResult(query.getQueryString(),
-        new String[] { getEventDateFieldName() }, getContext());
+  public EventSearchResult getSearchResult(EventSearchQuery query) {
+    return getSearchResult(query, false);
   }
+
+  public EventSearchResult getSearchResult(LuceneQueryApi query) {
+    return getSearchResult(query, false);
+  }
+
+  public EventSearchResult getSearchResult(EventSearchQuery query, boolean invertSort) {
+    return getSearchResult(query.getAsLuceneQuery(), invertSort);
+  }
+
+  public EventSearchResult getSearchResult(LuceneQueryApi query, boolean invertSort) {
+    query.addRestriction(createEventObjectRestriction());
+    return new EventSearchResult(query.getQueryString(), getSortFields(invertSort),
+        getContext());
+  }
+
+  public EventSearchResult getSearchResultFromDate(EventSearchQuery query, Date fromDate) {
+    return getSearchResultFromDate(query.getAsLuceneQuery(), fromDate);
+  }
+
 
   public EventSearchResult getSearchResultFromDate(LuceneQueryApi query, Date fromDate) {
     query.addRestriction(createEventObjectRestriction());
     query.addRestriction(queryService.createRangeRestriction(getEventDateFieldName(),
         SDF.format(fromDate), DATE_HIGH, true));
-    return new EventSearchResult(query.getQueryString(),
-        new String[] { getEventDateFieldName() }, getContext());
+    return new EventSearchResult(query.getQueryString(), getSortFields(false),
+        getContext());
+  }
+  public EventSearchResult getSearchResultUptoDate(EventSearchQuery query, Date uptoDate) {
+    return getSearchResultUptoDate(query.getAsLuceneQuery(), uptoDate);
   }
 
   public EventSearchResult getSearchResultUptoDate(LuceneQueryApi query, Date uptoDate) {
     query.addRestriction(createEventObjectRestriction());
     query.addRestriction(queryService.createRangeRestriction(getEventDateFieldName(),
         DATE_LOW, SDF.format(uptoDate), false));
-    return new EventSearchResult(query.getQueryString(),
-        new String[] { "-" + getEventDateFieldName() }, getContext());
+    return new EventSearchResult(query.getQueryString(), getSortFields(true),
+        getContext());
   }
 
   private LuceneQueryRestrictionApi createEventObjectRestriction() {
@@ -60,6 +80,13 @@ public class EventSearch implements IEventSearch {
   private String getEventDateFieldName() {
     return CalendarClasses.CALENDAR_EVENT_CLASS + "."
         + CalendarClasses.PROPERTY_EVENT_DATE;
+  }
+
+  private String[] getSortFields(boolean inverted) {
+    String pref = (inverted ? "-" : "") + CalendarClasses.CALENDAR_EVENT_CLASS + ".";
+    return new String[] { pref + CalendarClasses.PROPERTY_EVENT_DATE,
+        pref + CalendarClasses.PROPERTY_EVENT_DATE_END,
+        pref + CalendarClasses.PROPERTY_TITLE };
   }
 
   void injectQueryService(IQueryService queryService) {

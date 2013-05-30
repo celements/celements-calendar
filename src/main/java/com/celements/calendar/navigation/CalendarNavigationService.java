@@ -90,8 +90,8 @@ public class CalendarNavigationService implements ICalendarNavigationService {
       NavigationDetails navDetails, int nb) throws XWikiException {
     ICalendar cal = getCalendar(calConfigDocRef, false, navDetails.getStartDate());
     ICalendar calArchive = getCalendar(calConfigDocRef, true, navDetails.getStartDate());
-    int[] counts = getCounts((int) cal.getNrOfEvents(), (int) calArchive.getNrOfEvents(),
-        navDetails.getOffset(), nb);
+    UncertainCount[] counts = getCounts((int) cal.getNrOfEvents(),
+        (int) calArchive.getNrOfEvents(), navDetails.getOffset(), nb, false);
 
     CalendarNavigation calendarNavigation = new CalendarNavigation(
         counts[0], counts[1], counts[2],
@@ -172,8 +172,8 @@ public class CalendarNavigationService implements ICalendarNavigationService {
         ).searchEvents(query);
     EventSearchResult calAllArchiveResult = getCalendar(calDocRef, true, DATE_HIGH
         ).searchEvents(query);
-    int[] counts = getCounts(calResult.getSize(), calArchiveResult.getSize(),
-        navDetails.getOffset(), nb);
+    UncertainCount[] counts = getCounts(calResult.getSize(), calArchiveResult.getSize(),
+        navDetails.getOffset(), nb, query != null);
 
     CalendarNavigation calendarNavigation = new CalendarNavigation(
         counts[0], counts[1], counts[2],
@@ -244,14 +244,15 @@ public class CalendarNavigationService implements ICalendarNavigationService {
     return getNavigationDetails(calDocRef, lastEvent, query);
   }
 
-  private int[] getCounts(int calSize, int calArchiveSize, int offset, int nb) {
-    int[] counts = new int[3];
-    counts[0] = calArchiveSize + offset;
-    counts[1] = calSize - offset - nb;
-    if (counts[1] < 0) {
-      counts[1] = 0;
-    }
-    counts[2] = calSize + calArchiveSize;
+  private UncertainCount[] getCounts(int calSize, int calArchiveSize, int offset, int nb,
+      boolean isSearch) {
+    UncertainCount[] counts = new UncertainCount[3];
+    counts[0] = new UncertainCount(calArchiveSize + offset, isSearch
+        && (calArchiveSize >= 1000));
+    counts[1] = new UncertainCount(calSize - offset - nb, isSearch
+        && (calSize >= 1000));
+    counts[2] = new UncertainCount(calSize + calArchiveSize, isSearch
+        && ((calSize >= 1000) || (calArchiveSize >= 1000)));
     return counts;
   }
 

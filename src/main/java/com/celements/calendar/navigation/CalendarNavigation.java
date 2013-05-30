@@ -5,36 +5,37 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 public class CalendarNavigation {
 
-  private final int countBefore;
-  private final int countAfter;
-  private final int countTotal;
+  private final UncertainCount countBefore;
+  private final UncertainCount countAfter;
+  private final UncertainCount countTotal;
 
   private final NavigationDetails startNavDetails;
   private final NavigationDetails endNavDetails;
   private final NavigationDetails prevNavDetails;
   private final NavigationDetails nextNavDetails;
 
-  CalendarNavigation(int countBefore, int countAfter, int countTotal,
-      NavigationDetails startNavDetails, NavigationDetails endNavDetails,
-      NavigationDetails prevNavDetails, NavigationDetails nextNavDetails) {
-    this.countBefore = countBefore >= 0 ? countBefore : 0;
-    this.countAfter = countAfter >= 0 ? countAfter : 0;
-    this.countTotal = countTotal >= 0 ? countTotal : 0;
+  CalendarNavigation(UncertainCount countBefore, UncertainCount countAfter,
+      UncertainCount countTotal, NavigationDetails startNavDetails,
+      NavigationDetails endNavDetails, NavigationDetails prevNavDetails,
+      NavigationDetails nextNavDetails) {
+    this.countBefore = countBefore;
+    this.countAfter = countAfter;
+    this.countTotal = countTotal;
     this.startNavDetails = startNavDetails;
     this.endNavDetails = endNavDetails;
     this.prevNavDetails = prevNavDetails;
     this.nextNavDetails = nextNavDetails;
   }
 
-  public int getCountBefore() {
+  public UncertainCount getCountBefore() {
     return countBefore;
   }
 
-  public int getCountAfter() {
+  public UncertainCount getCountAfter() {
     return countAfter;
   }
 
-  public int getCountTotal() {
+  public UncertainCount getCountTotal() {
     return countTotal;
   }
 

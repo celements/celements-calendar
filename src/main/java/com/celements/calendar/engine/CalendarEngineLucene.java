@@ -41,8 +41,14 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
 
   public List<IEvent> getEvents(Date startDate, boolean isArchive, String lang,
       List<String> allowedSpaces, int offset, int limit) {
-    return searchEvents(null, startDate, isArchive, lang, allowedSpaces).getEventList(
-        offset, limit);
+    if ((offset <= 1000) && (limit <= 1000)) {
+      return searchEvents(null, startDate, isArchive, lang, allowedSpaces).getEventList(
+          offset, limit);
+    } else {
+      LOGGER.debug("getEvents: Delegating to CalendarEngineHQL for offset '" + offset
+          + "' and limit '" + limit + "'");
+      return hqlEngine.getEvents(startDate, isArchive, lang, allowedSpaces, offset, limit);
+    }
   }
 
   public long countEvents(Date startDate, boolean isArchive, String lang,

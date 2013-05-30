@@ -133,8 +133,9 @@ public class CalendarScriptService implements ScriptService {
     return eventSearch.getSearchResultUptoDate(query, uptoDate);
   }
 
-  public EventSearchQuery getEventSearchQuery(String spaceName, String searchTerm) {
-    return new EventSearchQuery(spaceName, searchTerm);
+  public EventSearchQuery getEventSearchQuery(String spaceName, Date fromDate,
+      Date toDate, String searchTerm) {
+    return new EventSearchQuery(spaceName, fromDate, toDate, searchTerm);
   }
 
 }

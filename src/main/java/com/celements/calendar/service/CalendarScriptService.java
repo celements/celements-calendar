@@ -10,13 +10,14 @@ import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.script.service.ScriptService;
 
-import com.celements.calendar.Calendar;
 import com.celements.calendar.Event;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.api.CalendarApi;
 import com.celements.calendar.api.EventApi;
-import com.celements.calendar.manager.IEventManager;
-import com.celements.calendar.manager.NavigationDetails;
+import com.celements.calendar.navigation.CalendarNavigation;
+import com.celements.calendar.navigation.ICalendarNavigationService;
+import com.celements.calendar.navigation.NavigationDetails;
+import com.celements.calendar.search.EventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearch;
 import com.celements.search.lucene.query.LuceneQueryApi;
@@ -33,7 +34,7 @@ public class CalendarScriptService implements ScriptService {
   private ICalendarService calService;
 
   @Requirement
-  private IEventManager eventsMgr;
+  private ICalendarNavigationService calNavService;
 
   @Requirement
   Execution execution;
@@ -55,11 +56,38 @@ public class CalendarScriptService implements ScriptService {
   }
 
   public NavigationDetails getNavigationDetails(CalendarApi cal, EventApi event) {
+    return getNavigationDetails(cal.getDocumentReference(), event);
+  }
+
+  public NavigationDetails getNavigationDetails(DocumentReference calConfigDocRef,
+      EventApi event) {
     try {
-      return eventsMgr.getNavigationDetails(new Event(event.getDocumentReference()), 
-      		new Calendar(cal.getDocumentReference(), cal.isArchive()));
+      return calNavService.getNavigationDetails(calConfigDocRef,
+          new Event(event.getDocumentReference()));
     } catch (XWikiException e) {
       mLogger.error("Failed to getNavigationDetails.", e);
+    }
+    return null;
+  }
+
+  public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
+      Date eventDate, int offset, int nb) {
+    NavigationDetails navDetails = calNavService.getNavigationDetails(eventDate, offset);
+    try {
+      return calNavService.getCalendarNavigation(calConfigDocRef, navDetails, nb);
+    } catch (XWikiException exc) {
+      mLogger.error("Failed to get CalendarNavigation.", exc);
+    }
+    return null;
+  }
+
+  public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
+      Date eventDate, int offset, int nb, EventSearchQuery query) {
+    NavigationDetails navDetails = calNavService.getNavigationDetails(eventDate, offset);
+    try {
+      return calNavService.getCalendarNavigation(calConfigDocRef, navDetails, nb, query);
+    } catch (XWikiException exc) {
+      mLogger.error("Failed to get CalendarNavigation.", exc);
     }
     return null;
   }
@@ -90,19 +118,24 @@ public class CalendarScriptService implements ScriptService {
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace) {
     return calService.getCalendarDocRefByCalendarSpace(calSpace);
   }
-  
+
   public EventSearchResult getEventSearchResult(LuceneQueryApi query) {
     return eventSearch.getSearchResult(query);
   }
-  
-  public EventSearchResult getEventSearchResultFromDate(LuceneQueryApi query, 
+
+  public EventSearchResult getEventSearchResultFromDate(LuceneQueryApi query,
       Date fromDate) {
     return eventSearch.getSearchResultFromDate(query, fromDate);
   }
-  
-  public EventSearchResult getEventSearchResultUpToDate(LuceneQueryApi query, 
+
+  public EventSearchResult getEventSearchResultUpToDate(LuceneQueryApi query,
       Date uptoDate) {
     return eventSearch.getSearchResultUptoDate(query, uptoDate);
+  }
+
+  public EventSearchQuery getEventSearchQuery(String spaceName, Date fromDate,
+      Date toDate, String searchTerm) {
+    return new EventSearchQuery(spaceName, fromDate, toDate, searchTerm);
   }
 
 }

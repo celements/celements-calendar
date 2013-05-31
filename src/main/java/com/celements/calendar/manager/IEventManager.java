@@ -9,8 +9,8 @@ import org.xwiki.model.reference.DocumentReference;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.api.EventApi;
-import com.celements.search.lucene.query.LuceneQueryApi;
-import com.xpn.xwiki.XWikiException;
+import com.celements.calendar.search.EventSearchQuery;
+import com.celements.calendar.search.EventSearchResult;
 import com.xpn.xwiki.doc.XWikiDocument;
 
 @ComponentRole
@@ -31,8 +31,7 @@ public interface IEventManager {
 
   public List<IEvent> getEventsInternal(ICalendar cal, int start, int nb);
 
-  public List<IEvent> getEventsInternal(ICalendar cal, LuceneQueryApi query, int start,
-      int nb);
+  public EventSearchResult searchEvents(ICalendar cal, EventSearchQuery query);
 
   /**
    * 
@@ -81,9 +80,6 @@ public interface IEventManager {
   public long countEvents(DocumentReference calDocRef, boolean isArchive, Date startDate);
 
   public long countEvents(ICalendar cal);
-
-  public NavigationDetails getNavigationDetails(IEvent event, ICalendar cal
-      ) throws XWikiException;
 
   public IEvent getEvent(DocumentReference eventDocRef);
 

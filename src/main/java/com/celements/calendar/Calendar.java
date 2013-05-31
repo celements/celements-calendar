@@ -33,8 +33,9 @@ import com.celements.calendar.api.EventApi;
 import com.celements.calendar.classes.CalendarClasses;
 import com.celements.calendar.engine.ICalendarEngineRole;
 import com.celements.calendar.manager.IEventManager;
+import com.celements.calendar.search.EventSearchQuery;
+import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.service.ICalendarService;
-import com.celements.search.lucene.query.LuceneQueryApi;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -43,6 +44,7 @@ import com.xpn.xwiki.objects.classes.BaseClass;
 import com.xpn.xwiki.web.Utils;
 
 public class Calendar implements ICalendar {
+
   private static final String _OVERVIEW_DEFAULT_CONFIG =
       "date,time,l_title,location";
 
@@ -134,9 +136,8 @@ public class Calendar implements ICalendar {
     return getEventMgr().getEventsInternal(this, start < 0 ? 0 : start, nb < 0 ? 0 : nb);
   }
 
-  public List<IEvent> getEventsInternal(LuceneQueryApi query, int start, int nb) {
-    return getEventMgr().getEventsInternal(this, query, start < 0 ? 0 : start,
-        nb < 0 ? 0 : nb);
+  public EventSearchResult searchEvents(EventSearchQuery query) {
+    return getEventMgr().searchEvents(this, query);
   }
 
   /* (non-Javadoc)
@@ -354,6 +355,13 @@ public class Calendar implements ICalendar {
       calService = Utils.getComponent(ICalendarService.class);
     }
     return calService;
+  }
+
+  @Override
+  public String toString() {
+    return "Calendar [calConfigDocRef=" + calConfigDocRef + ", startDate=" + startDate
+        + ", isArchive=" + isArchive + ", engine=" + getEngine() + ", language="
+        + getLanguage() + ", defaultLang=" + getDefaultLang() + "]";
   }
 
 }

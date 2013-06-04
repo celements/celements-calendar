@@ -61,35 +61,20 @@ public class CalendarScriptService implements ScriptService {
 
   public NavigationDetails getNavigationDetails(DocumentReference calConfigDocRef,
       EventApi event) {
-    try {
-      return calNavService.getNavigationDetails(calConfigDocRef,
-          new Event(event.getDocumentReference()));
-    } catch (XWikiException e) {
-      mLogger.error("Failed to getNavigationDetails.", e);
-    }
-    return null;
+    return calNavService.getNavigationDetails(calConfigDocRef,
+        new Event(event.getDocumentReference()));
   }
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
       Date eventDate, int offset, int nb) {
     NavigationDetails navDetails = calNavService.getNavigationDetails(eventDate, offset);
-    try {
-      return calNavService.getCalendarNavigation(calConfigDocRef, navDetails, nb);
-    } catch (XWikiException exc) {
-      mLogger.error("Failed to get CalendarNavigation.", exc);
-    }
-    return null;
+    return calNavService.getCalendarNavigation(calConfigDocRef, navDetails, nb);
   }
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
       Date eventDate, int offset, int nb, EventSearchQuery query) {
     NavigationDetails navDetails = calNavService.getNavigationDetails(eventDate, offset);
-    try {
-      return calNavService.getCalendarNavigation(calConfigDocRef, navDetails, nb, query);
-    } catch (XWikiException exc) {
-      mLogger.error("Failed to get CalendarNavigation.", exc);
-    }
-    return null;
+    return calNavService.getCalendarNavigation(calConfigDocRef, navDetails, nb, query);
   }
 
   public CalendarApi getCalendarByCalRef(DocumentReference calDocRef, boolean isArchive) {

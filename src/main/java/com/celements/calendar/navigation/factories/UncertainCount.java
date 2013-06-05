@@ -1,4 +1,4 @@
-package com.celements.calendar.navigation;
+package com.celements.calendar.navigation.factories;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;

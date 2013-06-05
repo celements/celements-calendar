@@ -1,4 +1,4 @@
-package com.celements.calendar.navigation;
+package com.celements.calendar.navigation.factories;
 
 import java.util.Date;
 

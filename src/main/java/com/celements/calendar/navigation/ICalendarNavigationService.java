@@ -6,6 +6,8 @@ import org.xwiki.component.annotation.ComponentRole;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.IEvent;
+import com.celements.calendar.navigation.factories.CalendarNavigation;
+import com.celements.calendar.navigation.factories.NavigationDetails;
 import com.celements.calendar.search.EventSearchQuery;
 
 @ComponentRole

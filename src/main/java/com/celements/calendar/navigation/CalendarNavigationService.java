@@ -83,8 +83,8 @@ public class CalendarNavigationService implements ICalendarNavigationService {
       NavigationDetails navDetails, int nb) {
     ICalendar cal = getCalendar(calConfigDocRef, false, navDetails.getStartDate());
     ICalendar calArchive = getCalendar(calConfigDocRef, true, navDetails.getStartDate());
-    UncertainCount[] counts = getCounts((int) cal.getNrOfEvents(),
-        (int) calArchive.getNrOfEvents(), navDetails.getOffset(), nb, false);
+    UncertainCount[] counts = getCounts((int) eventMgr.countEvents(cal),
+        (int) eventMgr.countEvents(calArchive), navDetails.getOffset(), nb, false);
 
     CalendarNavigation calendarNavigation = new CalendarNavigation(
         counts[0], counts[1], counts[2],
@@ -97,22 +97,24 @@ public class CalendarNavigationService implements ICalendarNavigationService {
     return calendarNavigation;
   }
 
-  private NavigationDetails getStartNavDetails(ICalendar cal, ICalendar calArchive) {
+  NavigationDetails getStartNavDetails(ICalendar cal, ICalendar calArchive) {
     NavigationDetails startNavDetails = null;
-    if (calArchive.getNrOfEvents() > 0) {
-      startNavDetails = new NavigationDetails(calArchive.getFirstEvent().getEventDate(), 0);
-    } else if (cal.getNrOfEvents() > 0) {
-      startNavDetails = new NavigationDetails(cal.getFirstEvent().getEventDate(), 0);
+    if (eventMgr.countEvents(calArchive) > 0) {
+      startNavDetails = new NavigationDetails(eventMgr.getFirstEvent(calArchive
+          ).getEventDate(), 0);
+    } else if (eventMgr.countEvents(cal) > 0) {
+      startNavDetails = new NavigationDetails(eventMgr.getFirstEvent(cal).getEventDate(),
+          0);
     }
     return startNavDetails;
   }
 
-  private NavigationDetails getEndNavDetails(ICalendar cal, ICalendar calArchive, int nb) {
+  NavigationDetails getEndNavDetails(ICalendar cal, ICalendar calArchive, int nb) {
     NavigationDetails endNavDetails = null;
-    int endOffset = (int) cal.getNrOfEvents() - nb;
+    int endOffset = (int) eventMgr.countEvents(cal) - nb;
     if (endOffset >= 0) {
       endNavDetails = getFirstNavDetails(cal, endOffset);
-    } else if (calArchive.getNrOfEvents() > 0) {
+    } else if (eventMgr.countEvents(calArchive) > 0) {
       endNavDetails = getLastNavDetails(calArchive, endOffset);
     }
     return endNavDetails;
@@ -122,9 +124,9 @@ public class CalendarNavigationService implements ICalendarNavigationService {
       NavigationDetails navDetails, int nb) {
     NavigationDetails prevNavDetails = null;
     int prevOffset = navDetails.getOffset() - nb;
-    if ((prevOffset >= 0) && (cal.getNrOfEvents() > 0)) {
+    if ((prevOffset >= 0) && (eventMgr.countEvents(cal) > 0)) {
       prevNavDetails = getFirstNavDetails(cal, prevOffset);
-    } else if ((prevOffset < 0) && (calArchive.getNrOfEvents() > 0)) {
+    } else if ((prevOffset < 0) && (eventMgr.countEvents(calArchive) > 0)) {
       prevNavDetails = getLastNavDetails(calArchive, prevOffset);
     }
     return prevNavDetails;
@@ -134,7 +136,7 @@ public class CalendarNavigationService implements ICalendarNavigationService {
       int nb) {
     NavigationDetails nextNavDetails;
     int nextOffset = navDetails.getOffset() + nb;
-    if (cal.getNrOfEvents() > nextOffset) {
+    if (eventMgr.countEvents(cal) > nextOffset) {
       nextNavDetails = getFirstNavDetails(cal, nextOffset);
     } else {
       nextNavDetails = navDetails;
@@ -143,12 +145,13 @@ public class CalendarNavigationService implements ICalendarNavigationService {
   }
 
   private NavigationDetails getFirstNavDetails(ICalendar cal, int offset) {
-    IEvent firstEvent = getFirstElement(cal.getEventsInternal(offset, 1));
+    IEvent firstEvent = getFirstElement(eventMgr.getEventsInternal(cal, offset, 1));
     return getNavigationDetails(cal.getDocumentReference(), firstEvent);
   }
 
   private NavigationDetails getLastNavDetails(ICalendar cal, int offset) {
-    IEvent lastEvent = getLastElement(cal.getEventsInternal(0, Math.abs(offset)));
+    offset = Math.abs(offset);
+    IEvent lastEvent = getLastElement(eventMgr.getEventsInternal(cal, 0, offset));
     return getNavigationDetails(cal.getDocumentReference(), lastEvent);
   }
 

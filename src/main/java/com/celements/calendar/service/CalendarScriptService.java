@@ -67,14 +67,14 @@ public class CalendarScriptService implements ScriptService {
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
       Date eventDate, int offset, int nb) {
-    NavigationDetails navDetails = calNavService.getNavigationDetails(eventDate, offset);
-    return calNavService.getCalendarNavigation(calConfigDocRef, navDetails, nb);
+    return calNavService.getCalendarNavigation(calConfigDocRef,
+        calNavService.getNavigationDetails(eventDate, offset), nb);
   }
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
       Date eventDate, int offset, int nb, EventSearchQuery query) {
-    NavigationDetails navDetails = calNavService.getNavigationDetails(eventDate, offset);
-    return calNavService.getCalendarNavigation(calConfigDocRef, navDetails, nb, query);
+    return calNavService.getCalendarNavigation(calConfigDocRef,
+        calNavService.getNavigationDetails(eventDate, offset), nb, query);
   }
 
   public CalendarApi getCalendarByCalRef(DocumentReference calDocRef, boolean isArchive) {

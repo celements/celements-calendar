@@ -27,45 +27,40 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
   private INavigationDetailsFactory navDetailsFactory;
 
-  public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
+  public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
       NavigationDetails navDetails, int nb) {
-    ICalendar cal = getCalendar(calConfigDocRef, false, navDetails.getStartDate());
-    ICalendar calArchive = getCalendar(calConfigDocRef, true, navDetails.getStartDate());
+    ICalendar cal = getCalendar(calDocRef, false, navDetails.getStartDate());
+    ICalendar calArchive = getCalendar(calDocRef, true, navDetails.getStartDate());
     UncertainCount[] counts = getCounts((int) getEventMgr().countEvents(cal),
         (int) getEventMgr().countEvents(calArchive), navDetails.getOffset(), nb, false);
 
     CalendarNavigation calendarNavigation = new CalendarNavigation(
         counts[0], counts[1], counts[2],
-        getStartNavDetails(cal, calArchive),
-        getEndNavDetails(cal, calArchive, nb),
+        getStartNavDetails(calDocRef),
+        getEndNavDetails(calDocRef, nb),
         getPrevNavDetails(cal, calArchive, navDetails, nb),
         getNextNavDetails(cal, navDetails, nb));
     LOGGER.debug("getCalendarNavigation: return '" + calendarNavigation + "' for cal '"
-        + calConfigDocRef + "' and navDetails '" + navDetails + "'");
+        + calDocRef+ "' and navDetails '" + navDetails + "'");
     return calendarNavigation;
   }
 
-  NavigationDetails getStartNavDetails(ICalendar cal, ICalendar calArchive) {
-    NavigationDetails startNavDetails = null;
-    if (getEventMgr().countEvents(calArchive) > 0) {
-      startNavDetails = new NavigationDetails(getEventMgr().getFirstEvent(calArchive
-          ).getEventDate(), 0);
-    } else if (getEventMgr().countEvents(cal) > 0) {
-      startNavDetails = new NavigationDetails(getEventMgr().getFirstEvent(cal
-          ).getEventDate(), 0);
+  NavigationDetails getStartNavDetails(DocumentReference calDocRef) {
+    ICalendar calAll = getCalendar(calDocRef, false, DATE_LOW);
+    if (getEventMgr().countEvents(calAll) > 0) {
+      return new NavigationDetails(getEventMgr().getFirstEvent(calAll).getEventDate(), 0);
     }
-    return startNavDetails;
+    return null;
   }
 
-  NavigationDetails getEndNavDetails(ICalendar cal, ICalendar calArchive, int nb) {
-    NavigationDetails endNavDetails = null;
-    int endOffset = (int) getEventMgr().countEvents(cal) - nb;
-    if (endOffset >= 0) {
-      endNavDetails = getFirstNavDetails(cal, endOffset);
-    } else if (getEventMgr().countEvents(calArchive) > 0) {
-      endNavDetails = getLastNavDetails(calArchive, endOffset);
+  NavigationDetails getEndNavDetails(DocumentReference calDocRef, int nb) {
+    ICalendar calAll = getCalendar(calDocRef, false, DATE_LOW);
+    int countAll = (int) getEventMgr().countEvents(calAll);
+    if (countAll > 0) {
+      int endOffset = countAll - nb;
+      return getFirstNavDetails(calAll, endOffset > 0 ? endOffset : 0);
     }
-    return endNavDetails;
+    return null;
   }
 
   private NavigationDetails getPrevNavDetails(ICalendar cal, ICalendar calArchive,

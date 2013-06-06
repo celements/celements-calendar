@@ -1,4 +1,4 @@
-package com.celements.calendar.navigation;
+package com.celements.calendar.navigation.factories;
 
 import static org.junit.Assert.*;
 
@@ -6,6 +6,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 import org.junit.Test;
+
+import com.celements.calendar.navigation.factories.NavigationDetails;
 
 public class NavigationDetailsTest {
 

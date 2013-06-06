@@ -19,21 +19,19 @@
  */
 package com.celements.calendar.api;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.ICalendar;
-import com.celements.calendar.IEvent;
 import com.celements.calendar.search.EventSearchQuery;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.api.Api;
 
 public class CalendarApi extends Api {
 
-  private ICalendar calendar;
+  private final ICalendar calendar;
 
   public CalendarApi(ICalendar calendar, XWikiContext context) {
     this(calendar, context.getLanguage(), context);
@@ -46,11 +44,13 @@ public class CalendarApi extends Api {
   }
 
   public List<EventApi> getAllEvents() {
-    return getEventApiList(calendar.getAllEventsInternal());
+    return EventConverter.getEventApiList(calendar.getAllEventsInternal(),
+        calendar.getLanguage(), context);
   }
 
   public List<EventApi> getEvents(int start, int nb) {
-    return getEventApiList(calendar.getEventsInternal(start, nb));
+    return EventConverter.getEventApiList(calendar.getEventsInternal(start, nb),
+        calendar.getLanguage(), context);
   }
 
   public EventSearchResultApi searchEvents(EventSearchQuery query) {
@@ -107,27 +107,13 @@ public class CalendarApi extends Api {
   }
 
   public EventApi getFirstEvent() {
-    return getEventApi(calendar.getFirstEvent());
+    return EventConverter.getEventApi(calendar.getFirstEvent(), calendar.getLanguage(),
+        context);
   }
 
   public EventApi getLastEvent() {
-    return getEventApi(calendar.getLastEvent());
-  }
-
-  private List<EventApi> getEventApiList(List<IEvent> eventList) {
-    List<EventApi> eventApiList = new ArrayList<EventApi>();
-    for (IEvent event : eventList) {
-      eventApiList.add(getEventApi(event));
-    }
-    return eventApiList;
-  }
-
-  private EventApi getEventApi(IEvent event) {
-    EventApi eventApi = null;
-    if (event != null) {
-      eventApi = new EventApi(event, calendar.getLanguage(), context);
-    }
-    return eventApi;
+    return EventConverter.getEventApi(calendar.getLastEvent(), calendar.getLanguage(),
+        context);
   }
 
 }

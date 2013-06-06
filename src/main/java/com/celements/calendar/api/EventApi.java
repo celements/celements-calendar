@@ -34,8 +34,9 @@ import com.xpn.xwiki.api.Element;
 import com.xpn.xwiki.objects.BaseObject;
 
 public class EventApi extends Api {
-  private IEvent event;
-  
+
+  private final IEvent event;
+
   public EventApi(IEvent event, XWikiContext context) {
     this(event, context.getLanguage(), context);
   }
@@ -45,7 +46,7 @@ public class EventApi extends Api {
     this.event = event;
     this.event.setLanguage(language);
   }
-  
+
   public CalendarApi getCalendar() {
     ICalendar calendar = event.getCalendar(context);
     if (calendar != null) {
@@ -57,27 +58,27 @@ public class EventApi extends Api {
   public String getTitle() {
     return event.getTitle();
   }
-  
+
   public String getDescription() {
     return event.getDescription();
   }
-  
+
   public String getLocation() {
     return event.getLocation();
   }
-  
+
   public String getDateString(String dateField, String format) {
     return event.getDateString(dateField, format);
   }
-  
+
   public Date getEventDate() {
     return event.getEventDate();
   }
-  
+
   public Boolean isSubscribable() {
     return event.isSubscribable();
   }
-  
+
   public Document getEventDocument() {
     return event.getEventDocument().newDocument(context);
   }
@@ -96,11 +97,11 @@ public class EventApi extends Api {
   public DocumentReference getDocumentReference() {
     return event.getDocumentReference();
   }
-  
+
   public boolean isFromSubscribableCalendar(String calendarSpace) {
     return event.isFromSubscribableCalendar(calendarSpace);
   }
-  
+
   /**
    * Get the value of a String property (String or TextArea). If the value in
    * the desired language is empty, the value of the default language will be
@@ -108,7 +109,7 @@ public class EventApi extends Api {
    * 
    * @param name Name of the property
    * @param lang Desired language (if not available default language will be taken).
-   * @return 
+   * @return
    */
   public String getStringPropertyDefaultIfEmpty(String name){
     return event.getStringPropertyDefaultIfEmpty(name, context.getLanguage());
@@ -133,27 +134,27 @@ public class EventApi extends Api {
     }
     return null;
   }
-  
+
   public Element[] getProperties() {
     return event.getProperties(context.getLanguage(), context);
   }
-  
+
   public String displayOverviewField(String name, String link) {
     return event.displayOverviewField(name, link, context);
   }
-  
+
   public String displayField(String name) {
     return event.displayField(name, context);
   }
-  
+
   public List<List<String>> getEditableProperties() throws XWikiException{
     return event.getEditableProperties(context.getLanguage(), context);
   }
-  
+
   public List<String> getNonEmptyFields(List<String> fieldList) {
     return event.getNonEmptyFields(fieldList, context);
   }
-  
+
   public boolean needsMoreLink(){
     return event.needsMoreLink(context);
   }
@@ -165,7 +166,7 @@ public class EventApi extends Api {
   public void setLanguage(String language) {
     event.setLanguage(language);
   }
-  
+
   @Override
   public String toString() {
     return event.toString();

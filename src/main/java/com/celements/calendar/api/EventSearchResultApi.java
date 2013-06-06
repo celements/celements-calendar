@@ -1,9 +1,7 @@
 package com.celements.calendar.api;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import com.celements.calendar.IEvent;
 import com.celements.calendar.search.EventSearchResult;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.api.Api;
@@ -35,11 +33,12 @@ public class EventSearchResultApi extends Api {
   }
 
   public List<EventApi> getEventList() {
-    return getEventApiList(searchResult.getEventList());
+    return EventConverter.getEventApiList(searchResult.getEventList(), language, context);
   }
 
   public List<EventApi> getEventList(int offset, int limit) {
-    return getEventApiList(searchResult.getEventList(offset, limit));
+    return EventConverter.getEventApiList(searchResult.getEventList(offset, limit),
+        language, context);
   }
 
   public int getSize() {
@@ -49,22 +48,6 @@ public class EventSearchResultApi extends Api {
   @Override
   public String toString() {
     return searchResult.toString();
-  }
-
-  private List<EventApi> getEventApiList(List<IEvent> eventList) {
-    List<EventApi> eventApiList = new ArrayList<EventApi>();
-    for (IEvent event : eventList) {
-      eventApiList.add(getEventApi(event));
-    }
-    return eventApiList;
-  }
-
-  private EventApi getEventApi(IEvent event) {
-    EventApi eventApi = null;
-    if (event != null) {
-      eventApi = new EventApi(event, language, context);
-    }
-    return eventApi;
   }
 
 }

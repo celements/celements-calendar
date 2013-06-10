@@ -6,10 +6,6 @@ import java.util.Date;
 
 import org.junit.Test;
 
-import com.celements.calendar.navigation.factories.CalendarNavigation;
-import com.celements.calendar.navigation.factories.NavigationDetails;
-import com.celements.calendar.navigation.factories.UncertainCount;
-
 public class CalendarNavigationTest {
 
   @Test
@@ -20,32 +16,22 @@ public class CalendarNavigationTest {
     UncertainCount countBefore = new UncertainCount(count++, false);
     UncertainCount countAfter = new UncertainCount(count++, false);
     UncertainCount countTotal = new UncertainCount(count++, false);
+    NavigationDetails currNavDetails = new NavigationDetails(new Date(time++), offset++);
     NavigationDetails startNavDetails = new NavigationDetails(new Date(time++), offset++);
     NavigationDetails endNavDetails = new NavigationDetails(new Date(time++), offset++);
     NavigationDetails prevNavDetails = new NavigationDetails(new Date(time++), offset++);
     NavigationDetails nextNavDetails = new NavigationDetails(new Date(time++), offset++);
     CalendarNavigation calNav =  new CalendarNavigation(countBefore, countAfter, countTotal,
-        startNavDetails, endNavDetails, prevNavDetails, nextNavDetails);
+        currNavDetails, startNavDetails, endNavDetails, prevNavDetails, nextNavDetails);
 
     assertSame(countBefore, calNav.getCountBefore());
     assertSame(countAfter, calNav.getCountAfter());
     assertSame(countTotal, calNav.getCountTotal());
+    assertSame(currNavDetails, calNav.getCurrNavDetails());
     assertSame(startNavDetails, calNav.getStartNavDetails());
     assertSame(endNavDetails, calNav.getEndNavDetails());
     assertSame(prevNavDetails, calNav.getPrevNavDetails());
     assertSame(nextNavDetails, calNav.getNextNavDetails());
-  }
-
-  private CalendarNavigation getCalNav(long time, int offset, int count) {
-    UncertainCount countBefore = new UncertainCount(count++, false);
-    UncertainCount countAfter = new UncertainCount(count++, false);
-    UncertainCount countTotal = new UncertainCount(count++, false);
-    NavigationDetails startNavDetails = new NavigationDetails(new Date(time++), offset++);
-    NavigationDetails endNavDetails = new NavigationDetails(new Date(time++), offset++);
-    NavigationDetails prevNavDetails = new NavigationDetails(new Date(time++), offset++);
-    NavigationDetails nextNavDetails = new NavigationDetails(new Date(time++), offset++);
-    return new CalendarNavigation(countBefore, countAfter, countTotal,
-        startNavDetails, endNavDetails, prevNavDetails, nextNavDetails);
   }
 
 
@@ -67,6 +53,19 @@ public class CalendarNavigationTest {
     calNav2 =  getCalNav(new Date(1000).getTime(), 20, 10);
     assertFalse(calNav1.equals(calNav2));
     assertFalse(calNav1.hashCode() == calNav2.hashCode());
+  }
+
+  private CalendarNavigation getCalNav(long time, int offset, int count) {
+    UncertainCount countBefore = new UncertainCount(count++, false);
+    UncertainCount countAfter = new UncertainCount(count++, false);
+    UncertainCount countTotal = new UncertainCount(count++, false);
+    NavigationDetails currNavDetails = new NavigationDetails(new Date(time++), offset++);
+    NavigationDetails startNavDetails = new NavigationDetails(new Date(time++), offset++);
+    NavigationDetails endNavDetails = new NavigationDetails(new Date(time++), offset++);
+    NavigationDetails prevNavDetails = new NavigationDetails(new Date(time++), offset++);
+    NavigationDetails nextNavDetails = new NavigationDetails(new Date(time++), offset++);
+    return new CalendarNavigation(countBefore, countAfter, countTotal, currNavDetails,
+        startNavDetails, endNavDetails, prevNavDetails, nextNavDetails);
   }
 
 }

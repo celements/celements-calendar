@@ -9,18 +9,20 @@ public class CalendarNavigation {
   private final UncertainCount countAfter;
   private final UncertainCount countTotal;
 
+  private final NavigationDetails currNavDetails;
   private final NavigationDetails startNavDetails;
   private final NavigationDetails endNavDetails;
   private final NavigationDetails prevNavDetails;
   private final NavigationDetails nextNavDetails;
 
-  CalendarNavigation(UncertainCount countBefore, UncertainCount countAfter,
-      UncertainCount countTotal, NavigationDetails startNavDetails,
-      NavigationDetails endNavDetails, NavigationDetails prevNavDetails,
-      NavigationDetails nextNavDetails) {
+  CalendarNavigation(UncertainCount countBefore,UncertainCount countAfter,
+      UncertainCount countTotal, NavigationDetails currNavDetails,
+      NavigationDetails startNavDetails, NavigationDetails endNavDetails,
+      NavigationDetails prevNavDetails, NavigationDetails nextNavDetails) {
     this.countBefore = countBefore;
     this.countAfter = countAfter;
     this.countTotal = countTotal;
+    this.currNavDetails = currNavDetails;
     this.startNavDetails = startNavDetails;
     this.endNavDetails = endNavDetails;
     this.prevNavDetails = prevNavDetails;
@@ -37,6 +39,10 @@ public class CalendarNavigation {
 
   public UncertainCount getCountTotal() {
     return countTotal;
+  }
+
+  public NavigationDetails getCurrNavDetails() {
+    return currNavDetails;
   }
 
   public NavigationDetails getStartNavDetails() {
@@ -57,9 +63,9 @@ public class CalendarNavigation {
 
   @Override
   public int hashCode() {
-    return new HashCodeBuilder().append(countTotal).append(countBefore).append(countAfter
-        ).append(startNavDetails).append(endNavDetails).append(prevNavDetails).append(
-            nextNavDetails).toHashCode();
+    return new HashCodeBuilder().append(countTotal).append(countBefore
+        ).append(countAfter).append(currNavDetails).append(startNavDetails).append(
+            endNavDetails).append(prevNavDetails).append(nextNavDetails).toHashCode();
   }
 
   @Override
@@ -67,10 +73,11 @@ public class CalendarNavigation {
     if (obj instanceof CalendarNavigation) {
       CalendarNavigation other = (CalendarNavigation) obj;
       return new EqualsBuilder().append(countTotal, other.countTotal).append(countBefore,
-          other.countBefore).append(countAfter, other.countAfter).append(startNavDetails,
-              other.startNavDetails).append(endNavDetails, other.endNavDetails).append(
-                  prevNavDetails, other.prevNavDetails).append(nextNavDetails,
-                      other.nextNavDetails).isEquals();
+          other.countBefore).append(countAfter, other.countAfter).append(currNavDetails,
+              other.currNavDetails).append(startNavDetails, other.startNavDetails).append(
+                  endNavDetails, other.endNavDetails).append(prevNavDetails,
+                      other.prevNavDetails).append(nextNavDetails, other.nextNavDetails
+                          ).isEquals();
     } else {
       return false;
     }
@@ -79,9 +86,10 @@ public class CalendarNavigation {
   @Override
   public String toString() {
     return "CalendarNavigation [countBefore=" + countBefore + ", countAfter=" + countAfter
-        + ", countTotal=" + countTotal + ", startNavDetails=" + startNavDetails
-        + ", endNavDetails=" + endNavDetails + ", prevNavDetails=" + prevNavDetails
-        + ", nextNavDetails=" + nextNavDetails + "]";
+        + ", countTotal=" + countTotal + ", currNavDetails=" + currNavDetails
+        + ", startNavDetails=" + startNavDetails + ", endNavDetails=" + endNavDetails
+        + ", prevNavDetails=" + prevNavDetails + ", nextNavDetails=" + nextNavDetails
+        + "]";
   }
 
 }

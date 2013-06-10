@@ -29,20 +29,33 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
       NavigationDetails navDetails, int nb) {
+    NavigationDetails startNavDetails = getStartNavDetails(calDocRef);
+    NavigationDetails endNavDetails = getEndNavDetails(calDocRef, nb);
     ICalendar cal = getCalendar(calDocRef, false, navDetails.getStartDate());
+    if (isInvalidNavDetails(navDetails, cal)) {
+      LOGGER.debug("isInvalidNavDetails true for '" + navDetails + "'");
+      navDetails = endNavDetails;
+      cal = getCalendar(calDocRef, false, navDetails.getStartDate());
+    } else {
+      LOGGER.debug("isInvalidNavDetails false for '" + navDetails + "'");
+    }
     ICalendar calArchive = getCalendar(calDocRef, true, navDetails.getStartDate());
     UncertainCount[] counts = getCounts((int) getEventMgr().countEvents(cal),
         (int) getEventMgr().countEvents(calArchive), navDetails.getOffset(), nb, false);
 
     CalendarNavigation calendarNavigation = new CalendarNavigation(
-        counts[0], counts[1], counts[2],
-        getStartNavDetails(calDocRef),
-        getEndNavDetails(calDocRef, nb),
+        counts[0], counts[1], counts[2], navDetails, startNavDetails, endNavDetails,
         getPrevNavDetails(cal, calArchive, navDetails, nb),
         getNextNavDetails(cal, navDetails, nb));
     LOGGER.debug("getCalendarNavigation: return '" + calendarNavigation + "' for cal '"
-        + calDocRef+ "' and navDetails '" + navDetails + "'");
+        + calDocRef + "' and navDetails '" + navDetails + "'");
     return calendarNavigation;
+  }
+
+  private boolean isInvalidNavDetails(NavigationDetails navDetails, ICalendar cal) {
+    return (getEventMgr().getEventsInternal(cal, navDetails.getOffset(), 1).size() == 0)
+        && (getEventMgr().countEvents(getCalendar(cal.getDocumentReference(), false,
+            DATE_LOW)) > 0);
   }
 
   NavigationDetails getStartNavDetails(DocumentReference calDocRef) {
@@ -102,21 +115,27 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
       NavigationDetails navDetails, int nb, EventSearchQuery query) {
-    EventSearchResult calResult = getCalendar(calDocRef, false,
-        navDetails.getStartDate()).searchEvents(query);
-    EventSearchResult calArchiveResult = getCalendar(calDocRef, true,
-        navDetails.getStartDate()).searchEvents(query);
     EventSearchResult calAllResult = getCalendar(calDocRef, false, DATE_LOW
         ).searchEvents(query);
-    EventSearchResult calAllArchiveResult = getCalendar(calDocRef, true, DATE_HIGH
+    NavigationDetails startNavDetails = getStartNavDetails(calAllResult);
+    NavigationDetails endNavDetails = getEndNavDetails(calDocRef, nb, query);
+    EventSearchResult calResult = getCalendar(calDocRef, false, navDetails.getStartDate()
         ).searchEvents(query);
+    int check = checkInvalidNavDetails(navDetails, query.getFromDate(), calResult,
+        calAllResult);
+    LOGGER.debug("checkInvalidNavDetails is '" + check + "' for '" + navDetails + "'");
+    if (check != 0) {
+      navDetails = check > 0 ? endNavDetails : startNavDetails;
+      calResult = getCalendar(calDocRef, false, navDetails.getStartDate()).searchEvents(
+          query);
+    }
+    EventSearchResult calArchiveResult = getCalendar(calDocRef, true,
+        navDetails.getStartDate()).searchEvents(query);
     UncertainCount[] counts = getCounts(calResult.getSize(), calArchiveResult.getSize(),
         navDetails.getOffset(), nb, query != null);
 
     CalendarNavigation calendarNavigation = new CalendarNavigation(
-        counts[0], counts[1], counts[2],
-        getStartNavDetails(calAllResult),
-        getEndNavDetails(calDocRef, nb, query, calAllArchiveResult),
+        counts[0], counts[1], counts[2], navDetails, startNavDetails, endNavDetails,
         getPrevNavDetails(calDocRef, navDetails, nb, query, calResult, calArchiveResult),
         getNextNavDetails(calDocRef, navDetails, nb, query, calResult));
     LOGGER.debug("getCalendarNavigation: return '" + calendarNavigation + "' for cal '"
@@ -124,20 +143,33 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
     return calendarNavigation;
   }
 
-  private NavigationDetails getStartNavDetails(EventSearchResult calAllSearchResult) {
+  private int checkInvalidNavDetails(NavigationDetails navDetails, Date fromDate,
+      EventSearchResult calResult, EventSearchResult calAllResult) {
+    if ((fromDate != null) && navDetails.getStartDate().before(fromDate)) {
+      return -1;
+    } else if ((calResult.getEventList(navDetails.getOffset(), 1).size() == 0)
+        && (calAllResult.getSize() > 0)) {
+      return 1;
+    }
+    return 0;
+  }
+
+  private NavigationDetails getStartNavDetails(EventSearchResult calAllResult) {
     NavigationDetails startNavDetails = null;
-    if (calAllSearchResult.getSize() > 0) {
-      IEvent startDate = getFirstElement(calAllSearchResult.getEventList(0, 1));
+    if (calAllResult.getSize() > 0) {
+      IEvent startDate = getFirstElement(calAllResult.getEventList(0, 1));
       startNavDetails = new NavigationDetails(startDate.getEventDate(), 0);
     }
     return startNavDetails;
   }
 
   private NavigationDetails getEndNavDetails(DocumentReference calDocRef, int nb,
-      EventSearchQuery query, EventSearchResult calAllInvSearchResult) {
+      EventSearchQuery query) {
     NavigationDetails endNavDetails = null;
-    if ((calAllInvSearchResult.getSize() > 0)) {
-      endNavDetails = getLastNavDetails(calDocRef, nb, query, calAllInvSearchResult);
+    EventSearchResult calAllArchiveResult = getCalendar(calDocRef, true, DATE_HIGH
+        ).searchEvents(query);
+    if ((calAllArchiveResult.getSize() > 0)) {
+      endNavDetails = getLastNavDetails(calDocRef, nb, query, calAllArchiveResult);
     }
     return endNavDetails;
   }

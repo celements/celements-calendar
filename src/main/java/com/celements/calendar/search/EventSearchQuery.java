@@ -33,6 +33,28 @@ public class EventSearchQuery {
     this.searchTerm = searchTerm;
   }
 
+  public String getSpaceName() {
+    return spaceName;
+  }
+
+  public Date getFromDate() {
+    if (fromDate != null) {
+      return new Date(fromDate.getTime());
+    }
+    return null;
+  }
+
+  public Date getToDate() {
+    if (toDate != null) {
+      return new Date(toDate.getTime());
+    }
+    return null;
+  }
+
+  public String getSearchTerm() {
+    return searchTerm;
+  }
+
   public LuceneQueryApi getAsLuceneQuery() {
     LuceneQueryApi query = getQueryService().createQuery();
     addRestriction(query, "space", spaceName);

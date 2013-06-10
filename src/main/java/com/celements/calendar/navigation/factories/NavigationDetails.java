@@ -7,7 +7,10 @@ public class NavigationDetails {
   private final Date startDate;
   private final int offset;
 
-  NavigationDetails(Date startDate, int offset) {
+  NavigationDetails(Date startDate, int offset){
+    if ((startDate == null) || (offset < 0)) {
+      throw new IllegalArgumentException();
+    }
     this.offset = offset;
     this.startDate = startDate;
   }

@@ -7,8 +7,6 @@ import java.util.Date;
 
 import org.junit.Test;
 
-import com.celements.calendar.navigation.factories.NavigationDetails;
-
 public class NavigationDetailsTest {
 
   @Test
@@ -69,8 +67,10 @@ public class NavigationDetailsTest {
 
   @Test
   public void testToString() {
-    NavigationDetails navDetail = new NavigationDetails(null, -1);
-    assertEquals("NavigationDetails [startDate=null, offset=-1]", navDetail.toString());
+    Date date = new Date();
+    NavigationDetails navDetail = new NavigationDetails(date, 5);
+    assertEquals("NavigationDetails [startDate=" + date.toString() + ", offset=5]",
+        navDetail.toString());
   }
 
   @Test
@@ -78,9 +78,11 @@ public class NavigationDetailsTest {
     Calendar cal = java.util.Calendar.getInstance();
     cal.setTimeInMillis(1322575785000L);
     Date startDate = cal.getTime();
-    NavigationDetails navDetail = new NavigationDetails(null, -1);
-    assertEquals(23236, navDetail.hashCode());
-    navDetail = new NavigationDetails(null, 20);
+    NavigationDetails navDetail = new NavigationDetails(new Date(0), 0);
+    assertEquals(23273, navDetail.hashCode());
+    navDetail = new NavigationDetails(startDate, 0);
+    assertEquals(-274118652, navDetail.hashCode());
+    navDetail = new NavigationDetails(new Date(0), 20);
     assertEquals(24013, navDetail.hashCode());
     navDetail = new NavigationDetails(startDate, 20);
     assertEquals(-274117912, navDetail.hashCode());

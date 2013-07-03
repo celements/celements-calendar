@@ -70,6 +70,8 @@ public class EventSearchResult {
       }
       return convertToEventList(list);
     } else {
+      LOGGER.warn("getEventList: luceneSearch returned 'null' value for offset ["
+          + offset + "] and limit [" + limit + "] on luceneQuery [" + luceneQuery +"].");
       return null;
     }
   }

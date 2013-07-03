@@ -235,6 +235,10 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   private static <T> T getFirstElement(List<T> list) {
     if ((list != null) && (list.size() > 0)) {
       return list.get(0);
+    } else if (list == null) {
+      LOGGER.warn("getFirstElement called with null-list.");
+    } else if (list.isEmpty()) {
+      LOGGER.warn("getFirstElement called with empty-list.");
     }
     return null;
   }
@@ -242,6 +246,10 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   private static <T> T getLastElement(List<T> list) {
     if ((list != null) && (list.size() > 0)) {
       return list.get(list.size() - 1);
+    } else if (list == null) {
+      LOGGER.warn("getLastElement called with null-list.");
+    } else if (list.isEmpty()) {
+      LOGGER.warn("getLastElement called with empty-list.");
     }
     return null;
   }

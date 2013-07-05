@@ -18,7 +18,7 @@ import com.xpn.xwiki.web.Utils;
 public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
   private static final Log LOGGER = LogFactory.getFactory().getInstance(
-      NavigationDetailsFactory.class);
+      CalendarNavigationFactory.class);
 
   private static final Date DATE_LOW = new Date(-62135773200000L);
   private static final Date DATE_HIGH = new Date(253402297140000L);

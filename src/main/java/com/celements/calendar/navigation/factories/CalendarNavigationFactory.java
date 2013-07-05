@@ -101,12 +101,16 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   }
 
   private NavigationDetails getFirstNavDetails(ICalendar cal, int offset) {
+    LOGGER.debug("getFirstNavDetails for cal [" + cal.getDocumentReference()
+        + "] and offset [" + offset + "].");
     IEvent firstEvent = getFirstElement(getEventMgr().getEventsInternal(cal, offset, 1));
     return getNavDetailsFactory().getNavigationDetails(cal.getDocumentReference(),
         firstEvent);
   }
 
   private NavigationDetails getLastNavDetails(ICalendar cal, int offset) {
+    LOGGER.debug("getLastNavDetails for cal [" + cal.getDocumentReference()
+        + "] and offset [" + offset + "].");
     offset = Math.abs(offset);
     IEvent lastEvent = getLastElement(getEventMgr().getEventsInternal(cal, 0, offset));
     return getNavDetailsFactory().getNavigationDetails(cal.getDocumentReference(),
@@ -225,7 +229,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
     return counts;
   }
 
-  private static ICalendar getCalendar(DocumentReference calConfigDocRef,
+  private ICalendar getCalendar(DocumentReference calConfigDocRef,
       boolean isArchive, Date startDate) {
     ICalendar cal = new Calendar(calConfigDocRef, isArchive);
     cal.setStartDate(startDate);

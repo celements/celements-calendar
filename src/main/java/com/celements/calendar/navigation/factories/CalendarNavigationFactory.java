@@ -232,7 +232,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
     return cal;
   }
 
-  private static <T> T getFirstElement(List<T> list) {
+  private <T> T getFirstElement(List<T> list) {
     if ((list != null) && (list.size() > 0)) {
       return list.get(0);
     } else if (list == null) {
@@ -243,7 +243,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
     return null;
   }
 
-  private static <T> T getLastElement(List<T> list) {
+  private <T> T getLastElement(List<T> list) {
     if ((list != null) && (list.size() > 0)) {
       return list.get(list.size() - 1);
     } else if (list == null) {

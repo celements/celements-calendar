@@ -29,15 +29,23 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
       NavigationDetails navDetails, int nb) {
-    NavigationDetails startNavDetails = getStartNavDetails(calDocRef);
-    NavigationDetails endNavDetails = getEndNavDetails(calDocRef, nb);
     ICalendar cal = getCalendar(calDocRef, false, navDetails.getStartDate());
-    if (isInvalidNavDetails(navDetails, cal)) {
-      LOGGER.debug("isInvalidNavDetails true for '" + navDetails + "'");
-      navDetails = endNavDetails;
-      cal = getCalendar(calDocRef, false, navDetails.getStartDate());
-    } else {
-      LOGGER.debug("isInvalidNavDetails false for '" + navDetails + "'");
+    NavigationDetails startNavDetails = null;
+    NavigationDetails endNavDetails = null;
+    try {
+      startNavDetails = getStartNavDetails(calDocRef);
+      endNavDetails = getEndNavDetails(calDocRef, nb);
+      if (isInvalidNavDetails(navDetails, cal)) {
+        LOGGER.debug("isInvalidNavDetails true for '" + navDetails + "'");
+        navDetails = endNavDetails;
+        cal = getCalendar(calDocRef, false, navDetails.getStartDate());
+      } else {
+        LOGGER.debug("isInvalidNavDetails false for '" + navDetails + "'");
+      }
+    } catch (EmptyCalendarListException emptyListExp) {
+      LOGGER.warn("getCalendarNavigation encountered emptyListExp for calDocRef ["
+          + calDocRef + "] and nb [" + nb + "] cal.getNrOfEvents [" + cal.getNrOfEvents()
+          + "].", emptyListExp);
     }
     ICalendar calArchive = getCalendar(calDocRef, true, navDetails.getStartDate());
     UncertainCount[] counts = getCounts((int) getEventMgr().countEvents(cal),
@@ -58,49 +66,64 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
             DATE_LOW)) > 0);
   }
 
-  NavigationDetails getStartNavDetails(DocumentReference calDocRef) {
+  NavigationDetails getStartNavDetails(DocumentReference calDocRef
+      ) throws EmptyCalendarListException {
     ICalendar calAll = getCalendar(calDocRef, false, DATE_LOW);
     if (getEventMgr().countEvents(calAll) > 0) {
       return new NavigationDetails(getEventMgr().getFirstEvent(calAll).getEventDate(), 0);
     }
-    return null;
+    throw new EmptyCalendarListException("getStartNavDetails failes on empty calendar ["
+        + calDocRef + "].");
   }
 
-  NavigationDetails getEndNavDetails(DocumentReference calDocRef, int nb) {
+  NavigationDetails getEndNavDetails(DocumentReference calDocRef, int nb
+      ) throws EmptyCalendarListException {
     ICalendar calAll = getCalendar(calDocRef, false, DATE_LOW);
     int countAll = (int) getEventMgr().countEvents(calAll);
     if (countAll > 0) {
       int endOffset = countAll - nb;
       return getFirstNavDetails(calAll, endOffset > 0 ? endOffset : 0);
     }
-    return null;
+    throw new EmptyCalendarListException("getEndNavDetails failes on empty calendar" +
+    		" part [" + calDocRef + "] nb [" + nb + "].");
   }
 
   private NavigationDetails getPrevNavDetails(ICalendar cal, ICalendar calArchive,
       NavigationDetails navDetails, int nb) {
     NavigationDetails prevNavDetails = null;
     int prevOffset = navDetails.getOffset() - nb;
-    if ((prevOffset >= 0) && (getEventMgr().countEvents(cal) > 0)) {
-      prevNavDetails = getFirstNavDetails(cal, prevOffset);
-    } else if ((prevOffset < 0) && (getEventMgr().countEvents(calArchive) > 0)) {
-      prevNavDetails = getLastNavDetails(calArchive, prevOffset);
+    try {
+      if ((prevOffset >= 0) && (getEventMgr().countEvents(cal) > 0)) {
+        prevNavDetails = getFirstNavDetails(cal, prevOffset);
+      } else if ((prevOffset < 0) && (getEventMgr().countEvents(calArchive) > 0)) {
+        prevNavDetails = getLastNavDetails(calArchive, prevOffset);
+      }
+    } catch (EmptyCalendarListException emptyListExp) {
+      LOGGER.warn("getPrevNavDetails encountered emptyListExp for cal ["
+          + cal.getDocumentReference() + "] and nb [" + nb + "] prevOffset [" + prevOffset
+          + "].", emptyListExp);
     }
     return prevNavDetails;
   }
 
   private NavigationDetails getNextNavDetails(ICalendar cal, NavigationDetails navDetails,
       int nb) {
-    NavigationDetails nextNavDetails;
+    NavigationDetails nextNavDetails = navDetails;
     int nextOffset = navDetails.getOffset() + nb;
-    if (getEventMgr().countEvents(cal) > nextOffset) {
-      nextNavDetails = getFirstNavDetails(cal, nextOffset);
-    } else {
-      nextNavDetails = navDetails;
+    try {
+      if (getEventMgr().countEvents(cal) > nextOffset) {
+        nextNavDetails = getFirstNavDetails(cal, nextOffset);
+      }
+    } catch (EmptyCalendarListException emptyListExp) {
+      LOGGER.warn("getNextNavDetails encountered emptyListExp for calDocRef ["
+          + cal.getDocumentReference() + "] and nb [" + nb + "] nextOffset [" + nextOffset
+          + "].", emptyListExp);
     }
     return nextNavDetails;
   }
 
-  private NavigationDetails getFirstNavDetails(ICalendar cal, int offset) {
+  private NavigationDetails getFirstNavDetails(ICalendar cal, int offset
+      ) throws EmptyCalendarListException {
     LOGGER.debug("getFirstNavDetails for cal [" + cal.getDocumentReference()
         + "] and offset [" + offset + "].");
     IEvent firstEvent = getFirstElement(getEventMgr().getEventsInternal(cal, offset, 1));
@@ -108,7 +131,8 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
         firstEvent);
   }
 
-  private NavigationDetails getLastNavDetails(ICalendar cal, int offset) {
+  private NavigationDetails getLastNavDetails(ICalendar cal, int offset
+      ) throws EmptyCalendarListException {
     LOGGER.debug("getLastNavDetails for cal [" + cal.getDocumentReference()
         + "] and offset [" + offset + "].");
     offset = Math.abs(offset);
@@ -121,17 +145,25 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
       NavigationDetails navDetails, int nb, EventSearchQuery query) {
     EventSearchResult calAllResult = getCalendar(calDocRef, false, DATE_LOW
         ).searchEvents(query);
-    NavigationDetails startNavDetails = getStartNavDetails(calAllResult);
-    NavigationDetails endNavDetails = getEndNavDetails(calDocRef, nb, query);
     EventSearchResult calResult = getCalendar(calDocRef, false, navDetails.getStartDate()
         ).searchEvents(query);
-    int check = checkInvalidNavDetails(navDetails, query.getFromDate(), calResult,
-        calAllResult);
-    LOGGER.debug("checkInvalidNavDetails is '" + check + "' for '" + navDetails + "'");
-    if (check != 0) {
-      navDetails = check > 0 ? endNavDetails : startNavDetails;
-      calResult = getCalendar(calDocRef, false, navDetails.getStartDate()).searchEvents(
-          query);
+    NavigationDetails startNavDetails = null;
+    NavigationDetails endNavDetails = null;
+    try {
+      startNavDetails = getStartNavDetails(calAllResult);
+      endNavDetails = getEndNavDetails(calDocRef, nb, query);
+      int check = checkInvalidNavDetails(navDetails, query.getFromDate(), calResult,
+          calAllResult);
+      LOGGER.debug("checkInvalidNavDetails is '" + check + "' for '" + navDetails + "'");
+      if (check != 0) {
+        navDetails = check > 0 ? endNavDetails : startNavDetails;
+        calResult = getCalendar(calDocRef, false, navDetails.getStartDate()).searchEvents(
+            query);
+      }
+    } catch (EmptyCalendarListException emptyListExp) {
+      LOGGER.warn("getCalendarNavigation encountered emptyListExp for calDocRef ["
+          + calDocRef + "] and nb [" + nb + "] calResult.getSize [" + calResult.getSize()
+          + "].", emptyListExp);
     }
     EventSearchResult calArchiveResult = getCalendar(calDocRef, true,
         navDetails.getStartDate()).searchEvents(query);
@@ -158,7 +190,8 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
     return 0;
   }
 
-  private NavigationDetails getStartNavDetails(EventSearchResult calAllResult) {
+  private NavigationDetails getStartNavDetails(EventSearchResult calAllResult
+      ) throws EmptyCalendarListException {
     NavigationDetails startNavDetails = null;
     if (calAllResult.getSize() > 0) {
       IEvent startDate = getFirstElement(calAllResult.getEventList(0, 1));
@@ -168,7 +201,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   }
 
   private NavigationDetails getEndNavDetails(DocumentReference calDocRef, int nb,
-      EventSearchQuery query) {
+      EventSearchQuery query) throws EmptyCalendarListException {
     NavigationDetails endNavDetails = null;
     EventSearchResult calAllArchiveResult = getCalendar(calDocRef, true, DATE_HIGH
         ).searchEvents(query);
@@ -183,11 +216,17 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
       calSearchResult, EventSearchResult calArchiveSearchResult) {
     NavigationDetails prevNavDetails = null;
     int prevOffset = navDetails.getOffset() - nb;
-    if ((prevOffset >= 0) && (calSearchResult.getSize() > 0)) {
-      prevNavDetails = getFirstNavDetails(calDocRef, prevOffset, query, calSearchResult);
-    } else if ((prevOffset < 0) && (calArchiveSearchResult.getSize() > 0)) {
-      prevNavDetails = getLastNavDetails(calDocRef, prevOffset, query,
-          calArchiveSearchResult);
+    try {
+      if ((prevOffset >= 0) && (calSearchResult.getSize() > 0)) {
+        prevNavDetails = getFirstNavDetails(calDocRef, prevOffset, query, calSearchResult);
+      } else if ((prevOffset < 0) && (calArchiveSearchResult.getSize() > 0)) {
+        prevNavDetails = getLastNavDetails(calDocRef, prevOffset, query,
+            calArchiveSearchResult);
+      }
+    } catch (EmptyCalendarListException emptyListExp) {
+      LOGGER.warn("getPrevNavDetails encountered emptyListExp for calDocRef ["
+          + calDocRef + "] and nb [" + nb + "] prevOffset [" + prevOffset
+          + "].", emptyListExp);
     }
     return prevNavDetails;
   }
@@ -195,24 +234,30 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   private NavigationDetails getNextNavDetails(DocumentReference calDocRef,
       NavigationDetails navDetails, int nb, EventSearchQuery query,
       EventSearchResult calSearchResult) {
-    NavigationDetails nextNavDetails;
+    NavigationDetails nextNavDetails = navDetails;
     int nextOffset = navDetails.getOffset() + nb;
-    if (calSearchResult.getSize() > nextOffset) {
-      nextNavDetails = getFirstNavDetails(calDocRef, nextOffset, query, calSearchResult);
-    } else {
-      nextNavDetails = navDetails;
+    try {
+      if (calSearchResult.getSize() > nextOffset) {
+        nextNavDetails = getFirstNavDetails(calDocRef, nextOffset, query, calSearchResult);
+      }
+    } catch (EmptyCalendarListException emptyListExp) {
+      LOGGER.warn("getNextNavDetails encountered emptyListExp for calDocRef ["
+          + calDocRef + "] and nb [" + nb + "] nextOffset [" + nextOffset
+          + "].", emptyListExp);
     }
     return nextNavDetails;
   }
 
   private NavigationDetails getFirstNavDetails(DocumentReference calDocRef, int offset,
-      EventSearchQuery query, EventSearchResult searchResult) {
+      EventSearchQuery query, EventSearchResult searchResult
+      ) throws EmptyCalendarListException {
     IEvent firstEvent = getFirstElement(searchResult.getEventList(offset, 1));
     return getNavDetailsFactory().getNavigationDetails(calDocRef, firstEvent, query);
   }
 
   private NavigationDetails getLastNavDetails(DocumentReference calDocRef, int offset,
-      EventSearchQuery query, EventSearchResult searchResult) {
+      EventSearchQuery query, EventSearchResult searchResult
+      ) throws EmptyCalendarListException {
     IEvent lastEvent = getLastElement(searchResult.getEventList(0, Math.abs(offset)));
     return getNavDetailsFactory().getNavigationDetails(calDocRef, lastEvent, query);
   }
@@ -236,26 +281,32 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
     return cal;
   }
 
-  private <T> T getFirstElement(List<T> list) {
+  private <T> T getFirstElement(List<T> list) throws EmptyCalendarListException {
     if ((list != null) && (list.size() > 0)) {
       return list.get(0);
     } else if (list == null) {
       LOGGER.warn("getFirstElement called with null-list.");
+      throw new EmptyCalendarListException("getFirstElement called with null-list.");
     } else if (list.isEmpty()) {
       LOGGER.warn("getFirstElement called with empty-list.");
+      throw new EmptyCalendarListException("getFirstElement called with empty-list.");
     }
-    return null;
+    throw new IllegalArgumentException("getFirstElement called with illegal list ["
+        + list + "].");
   }
 
-  private <T> T getLastElement(List<T> list) {
+  private <T> T getLastElement(List<T> list) throws EmptyCalendarListException {
     if ((list != null) && (list.size() > 0)) {
       return list.get(list.size() - 1);
     } else if (list == null) {
       LOGGER.warn("getLastElement called with null-list.");
+      throw new EmptyCalendarListException("getLastElement called with null-list.");
     } else if (list.isEmpty()) {
       LOGGER.warn("getLastElement called with empty-list.");
+      throw new EmptyCalendarListException("getLastElement called with empty-list.");
     }
-    return null;
+    throw new IllegalArgumentException("getLastElement called with illegal list [" + list
+        + "].");
   }
 
   private IEventManager getEventMgr() {

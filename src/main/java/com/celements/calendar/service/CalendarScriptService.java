@@ -27,7 +27,7 @@ import com.xpn.xwiki.XWikiException;
 @Component("celcalendar")
 public class CalendarScriptService implements ScriptService {
 
-  private static Log mLogger = LogFactory.getFactory().getInstance(
+  private static Log LOGGER = LogFactory.getFactory().getInstance(
       CalendarScriptService.class);
 
   @Requirement
@@ -50,7 +50,7 @@ public class CalendarScriptService implements ScriptService {
     try {
       return calService.getEventSpaceForCalendar(calDocRef);
     } catch (XWikiException exp) {
-      mLogger.error("failed to getEventSpaceForCalendar [" + calDocRef + "].", exp);
+      LOGGER.error("failed to getEventSpaceForCalendar [" + calDocRef + "].", exp);
     }
     return null;
   }
@@ -82,7 +82,7 @@ public class CalendarScriptService implements ScriptService {
     if (cal != null) {
       return new CalendarApi(cal, getContext());
     } else {
-      mLogger.warn("getCalendarByCalRef: failed to get calendar for [" + calDocRef
+      LOGGER.warn("getCalendarByCalRef: failed to get calendar for [" + calDocRef
           + "], [" + isArchive + "].");
     }
     return null;
@@ -94,7 +94,7 @@ public class CalendarScriptService implements ScriptService {
     if (cal != null) {
       return new CalendarApi(cal, language, getContext());
     } else {
-      mLogger.warn("getCalendarByCalRef: failed to get calendar for [" + calDocRef
+      LOGGER.warn("getCalendarByCalRef: failed to get calendar for [" + calDocRef
           + "], [" + isArchive + "], [" + language + "].");
     }
     return null;

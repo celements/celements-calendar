@@ -68,6 +68,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
   NavigationDetails getStartNavDetails(DocumentReference calDocRef
       ) throws EmptyCalendarListException {
+    LOGGER.debug("getStartNavDetails for calDocRef [" + calDocRef + "].");
     ICalendar calAll = getCalendar(calDocRef, false, DATE_LOW);
     if (getEventMgr().countEvents(calAll) > 0) {
       return new NavigationDetails(getEventMgr().getFirstEvent(calAll).getEventDate(), 0);
@@ -78,6 +79,8 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
   NavigationDetails getEndNavDetails(DocumentReference calDocRef, int nb
       ) throws EmptyCalendarListException {
+    LOGGER.debug("getEndNavDetails for calDocRef [" + calDocRef + "] and nb [" + nb
+        + "].");
     ICalendar calAll = getCalendar(calDocRef, false, DATE_LOW);
     int countAll = (int) getEventMgr().countEvents(calAll);
     if (countAll > 0) {
@@ -92,6 +95,8 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
       NavigationDetails navDetails, int nb) {
     NavigationDetails prevNavDetails = null;
     int prevOffset = navDetails.getOffset() - nb;
+    LOGGER.debug("getPrevNavDetails for calDocRef [" + cal.getDocumentReference()
+        + "] and nb [" + nb + "] prevOffset [" + prevOffset + "].");
     try {
       if ((prevOffset >= 0) && (getEventMgr().countEvents(cal) > 0)) {
         prevNavDetails = getFirstNavDetails(cal, prevOffset);
@@ -110,6 +115,8 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
       int nb) {
     NavigationDetails nextNavDetails = navDetails;
     int nextOffset = navDetails.getOffset() + nb;
+    LOGGER.debug("getNextNavDetails for calDocRef [" + cal.getDocumentReference()
+        + "] and nb [" + nb + "] nextOffset [" + nextOffset + "].");
     try {
       if (getEventMgr().countEvents(cal) > nextOffset) {
         nextNavDetails = getFirstNavDetails(cal, nextOffset);

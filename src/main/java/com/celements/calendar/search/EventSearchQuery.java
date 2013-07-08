@@ -57,7 +57,7 @@ public class EventSearchQuery {
 
   public LuceneQueryApi getAsLuceneQuery() {
     LuceneQueryApi query = getQueryService().createQuery();
-    addRestriction(query, "space", spaceName);
+    addRestriction(query, "space", "\"" + spaceName + "\"");
     addDateRestriction(query, getEventDateFieldName(), fromDate, toDate);
     if (checkString(searchTerm)) {
       String[] fields = getSearchTermFields();

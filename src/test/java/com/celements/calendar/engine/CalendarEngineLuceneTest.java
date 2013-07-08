@@ -58,7 +58,7 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
     LuceneQueryRestrictionApi spaceRestriction = new LuceneQueryRestrictionApi("space",
         spaces.get(0));
     LuceneQueryRestrictionApi langRestriction = new LuceneQueryRestrictionApi("lang",
-        "de");
+        "\"de\"");
     IEvent event = new Event(new DocumentReference(context.getDatabase(),
         "mySpace", "myEvent"));
     IEvent event2 = new Event(new DocumentReference(context.getDatabase(),
@@ -66,8 +66,8 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
 
     expect(queryServiceMock.createRestriction("space", spaces.get(0))).andReturn(
         spaceRestriction).once();
-    expect(queryServiceMock.createRestriction("Classes.CalendarEventClass.lang", lang)
-        ).andReturn(langRestriction).once();
+    expect(queryServiceMock.createRestriction("Classes.CalendarEventClass.lang",
+        "\"" + lang + "\"")).andReturn(langRestriction).once();
     expect(queryServiceMock.createQuery()).andReturn(queryMock).once();
     expect(queryMock.addOrRestrictionList(Arrays.asList(spaceRestriction))).andReturn(
         queryMock).once();
@@ -99,7 +99,7 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
     LuceneQueryRestrictionApi spaceRestriction = new LuceneQueryRestrictionApi("space",
         spaces.get(0));
     LuceneQueryRestrictionApi langRestriction = new LuceneQueryRestrictionApi("lang",
-        "de");
+        "\"de\"");
     IEvent event = new Event(new DocumentReference(context.getDatabase(),
         "mySpace", "myEvent"));
     IEvent event2 = new Event(new DocumentReference(context.getDatabase(),
@@ -107,8 +107,8 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
 
     expect(queryServiceMock.createRestriction("space", spaces.get(0))).andReturn(
         spaceRestriction).once();
-    expect(queryServiceMock.createRestriction("Classes.CalendarEventClass.lang", lang)
-        ).andReturn(langRestriction).once();
+    expect(queryServiceMock.createRestriction("Classes.CalendarEventClass.lang",
+        "\"" + lang + "\"")).andReturn(langRestriction).once();
     expect(queryServiceMock.createQuery()).andReturn(queryMock).once();
     expect(queryMock.addOrRestrictionList(Arrays.asList(spaceRestriction))).andReturn(
         queryMock).once();

@@ -87,7 +87,8 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
 
   private void addLangRestriction(LuceneQueryApi query, String lang) {
     LuceneQueryRestrictionApi langRestriction = queryService.createRestriction(
-        CalendarClasses.CALENDAR_EVENT_CLASS + "." + CalendarClasses.PROPERTY_LANG, lang);
+        CalendarClasses.CALENDAR_EVENT_CLASS + "." + CalendarClasses.PROPERTY_LANG,
+        "\"" + lang + "\"");
     query.addRestriction(langRestriction);
   }
 

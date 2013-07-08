@@ -39,8 +39,9 @@ public class EventSearchQueryTest {
     query.injectQueryService(queryServiceMock);
 
     expect(queryServiceMock.createQuery()).andReturn(new LuceneQueryApi(dbName)).once();
-    expect(queryServiceMock.createRestriction(eq(SPACE), eq(spaceName), eq(true))
-        ).andReturn(new LuceneQueryRestrictionApi(SPACE, spaceName, true)).once();
+    expect(queryServiceMock.createRestriction(eq(SPACE), eq("\"" + spaceName + "\""),
+       eq(true))).andReturn(new LuceneQueryRestrictionApi(SPACE, "\"" + spaceName + "\"",
+           true)).once();
     expect(queryServiceMock.createRangeRestriction(eq(DATE), eq("200001010000"),
         eq("201001010000"), eq(true))).andReturn(new LuceneQueryRestrictionApi(DATE,
             "[200001010000 TO 201001010000]", false));
@@ -53,7 +54,7 @@ public class EventSearchQueryTest {
     LuceneQueryApi luceneQuery = query.getAsLuceneQuery();
     verifyAll();
 
-    String compareQueryString = "space:(+mySpace*) AND " +
+    String compareQueryString = "space:(+\"mySpace\") AND " +
         "Classes.CalendarEventClass.eventDate:([200001010000 TO 201001010000]) AND " +
         "(Classes.CalendarEventClass.l_title:(+some*~ +search*~ +term*~) OR " +
         "Classes.CalendarEventClass.l_description:(+some*~ +search*~ +term*~)) AND " +

@@ -288,7 +288,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
     counts[1] = new UncertainCount(calSize - offset - nb, isSearch
         && (calSize >= _LUCENE_MAX_RESULT));
     counts[2] = new UncertainCount(calSize + calArchiveSize, isSearch
-        && ((calSize >= _LUCENE_MAX_RESULT) || (calArchiveSize >= _LUCENE_MAX_RESULT)));
+        && (counts[0].isUncertain() || counts[1].isUncertain()));
     return counts;
   }
 

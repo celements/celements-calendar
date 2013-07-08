@@ -148,8 +148,13 @@ public class EventsManager implements IEventManager {
   public EventSearchResult searchEvents(ICalendar cal, EventSearchQuery query) {
     DocumentReference calDocRef = cal.getDocumentReference();
     try {
-      return cal.getEngine().searchEvents(query, cal.getStartDate(), cal.isArchive(),
-          webUtilsService.getDefaultLanguage(), calService.getAllowedSpaces(calDocRef));
+      EventSearchResult eventsResult = cal.getEngine().searchEvents(query,
+          cal.getStartDate(), cal.isArchive(), webUtilsService.getDefaultLanguage(),
+          calService.getAllowedSpaces(calDocRef));
+      LOGGER.debug("EventsManager searchEvents: isArchive [" + cal.isArchive()
+          + "], startDate [" + cal.getStartDate() + "] query ["
+          + query.getAsLuceneQuery().getQueryString() + "].");
+      return eventsResult;
     } catch (XWikiException exc) {
       LOGGER.error("Error while searching events in calendar '" + calDocRef + "'", exc);
     }

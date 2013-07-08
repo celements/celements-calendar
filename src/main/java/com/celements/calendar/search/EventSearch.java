@@ -83,7 +83,8 @@ public class EventSearch implements IEventSearch {
   }
 
   private LuceneQueryRestrictionApi createEventObjectRestriction() {
-    return queryService.createRestriction("object", CalendarClasses.CALENDAR_EVENT_CLASS);
+    return queryService.createRestriction("object", "\""
+        + CalendarClasses.CALENDAR_EVENT_CLASS + "\"");
   }
 
   private String getEventDateFieldName() {

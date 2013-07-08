@@ -39,10 +39,10 @@ public class EventSearchTest extends AbstractBridgedComponentTestCase {
   public void testGetSearchResult() throws Exception {
     String queryString = "asdf";
     LuceneQueryRestrictionApi objectRestriction = new LuceneQueryRestrictionApi("object",
-        "Classes.CalendarEventClass");
+        "\"Classes.CalendarEventClass\"");
 
     expect(queryServiceMock.createRestriction(eq("object"),
-        eq("Classes.CalendarEventClass"))).andReturn(objectRestriction).once();
+        eq("\"Classes.CalendarEventClass\""))).andReturn(objectRestriction).once();
     expect(queryMock.addRestriction(same(objectRestriction))).andReturn(queryMock).once();
     expect(queryMock.getQueryString()).andReturn(queryString).once();
 
@@ -70,7 +70,7 @@ public class EventSearchTest extends AbstractBridgedComponentTestCase {
         "asdf");
 
     expect(queryServiceMock.createRestriction(eq("object"),
-        eq("Classes.CalendarEventClass"))).andReturn(objectRestriction).once();
+        eq("\"Classes.CalendarEventClass\""))).andReturn(objectRestriction).once();
     expect(queryMock.addRestriction(same(objectRestriction))).andReturn(queryMock).once();
     expect(queryServiceMock.createRangeRestriction(
         eq("Classes.CalendarEventClass.eventDate"), eq("197001210100"),
@@ -102,7 +102,7 @@ public class EventSearchTest extends AbstractBridgedComponentTestCase {
         "asdf");
 
     expect(queryServiceMock.createRestriction(eq("object"),
-        eq("Classes.CalendarEventClass"))).andReturn(objectRestriction).once();
+        eq("\"Classes.CalendarEventClass\""))).andReturn(objectRestriction).once();
     expect(queryMock.addRestriction(same(objectRestriction))).andReturn(queryMock).once();
     expect(queryServiceMock.createRangeRestriction(
         eq("Classes.CalendarEventClass.eventDate"), eq("000101010000"),

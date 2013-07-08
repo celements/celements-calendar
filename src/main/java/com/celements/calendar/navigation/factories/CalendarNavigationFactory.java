@@ -159,6 +159,8 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
         ).searchEvents(query);
     EventSearchResult calResult = getCalendar(calDocRef, false, navDetails.getStartDate()
         ).searchEvents(query);
+    LOGGER.debug("getCalendarNavigation with query before navigation correction."
+        + " calResult.getSize [" + calResult.getSize() + "].");
     NavigationDetails startNavDetails = null;
     NavigationDetails endNavDetails = null;
     try {

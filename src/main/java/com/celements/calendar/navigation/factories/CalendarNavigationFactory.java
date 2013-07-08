@@ -17,9 +17,11 @@ import com.xpn.xwiki.web.Utils;
 
 public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
+
   private static final Log LOGGER = LogFactory.getFactory().getInstance(
       CalendarNavigationFactory.class);
 
+  private static final int _LUCENE_MAX_RESULT = 1000;
   private static final Date DATE_LOW = new Date(-62135773200000L);
   private static final Date DATE_HIGH = new Date(253402297140000L);
 
@@ -282,11 +284,11 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
       boolean isSearch) {
     UncertainCount[] counts = new UncertainCount[3];
     counts[0] = new UncertainCount(calArchiveSize + offset, isSearch
-        && (calArchiveSize >= 1000));
+        && (calArchiveSize >= _LUCENE_MAX_RESULT));
     counts[1] = new UncertainCount(calSize - offset - nb, isSearch
-        && (calSize >= 1000));
+        && (calSize >= _LUCENE_MAX_RESULT));
     counts[2] = new UncertainCount(calSize + calArchiveSize, isSearch
-        && ((calSize >= 1000) || (calArchiveSize >= 1000)));
+        && ((calSize >= _LUCENE_MAX_RESULT) || (calArchiveSize >= _LUCENE_MAX_RESULT)));
     return counts;
   }
 

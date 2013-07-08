@@ -4,6 +4,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
@@ -16,6 +18,9 @@ import com.xpn.xwiki.XWikiContext;
 
 @Component
 public class EventSearch implements IEventSearch {
+
+  private static final Log LOGGER = LogFactory.getFactory().getInstance(
+      EventSearch.class);
 
   private static final DateFormat SDF = new SimpleDateFormat("yyyyMMddHHmm");
   private static final String DATE_LOW = "000101010000";
@@ -58,6 +63,8 @@ public class EventSearch implements IEventSearch {
     query.addRestriction(createEventObjectRestriction());
     query.addRestriction(queryService.createRangeRestriction(getEventDateFieldName(),
         SDF.format(fromDate), DATE_HIGH, true));
+    LOGGER.debug("getSearchResultFromDate: query [" + query.getQueryString()
+        + "] and sortFields [" + getSortFields(false) + "].");
     return new EventSearchResult(query.getQueryString(), getSortFields(false),
         getContext());
   }
@@ -69,6 +76,8 @@ public class EventSearch implements IEventSearch {
     query.addRestriction(createEventObjectRestriction());
     query.addRestriction(queryService.createRangeRestriction(getEventDateFieldName(),
         DATE_LOW, SDF.format(uptoDate), false));
+    LOGGER.debug("getSearchResultUptoDate: query [" + query.getQueryString()
+        + "] and sortFields [" + getSortFields(true) + "].");
     return new EventSearchResult(query.getQueryString(), getSortFields(true),
         getContext());
   }

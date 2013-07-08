@@ -84,7 +84,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
     ICalendar calAll = getCalendar(calDocRef, false, DATE_LOW);
     int countAll = (int) getEventMgr().countEvents(calAll);
     if (countAll > 0) {
-      int endOffset = countAll - nb - 1;
+      int endOffset = countAll - nb;
       LOGGER.debug("getEndNavDetails: get reverse calendar list to computing end. "
           + "endOffset [" + endOffset + "], countAll [" + countAll + "] nb [" + nb
           + "].");

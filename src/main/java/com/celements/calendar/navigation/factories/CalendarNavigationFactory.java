@@ -282,6 +282,8 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
   private UncertainCount[] getCounts(int calSize, int calArchiveSize, int offset, int nb,
       boolean isSearch) {
+    LOGGER.info("getCounts: calSize [" + calSize + "], calArchiveSize [" + calArchiveSize
+        + "], offset [" + offset + "], nb [" + nb + "] isSearch [" + isSearch + "].");
     UncertainCount[] counts = new UncertainCount[3];
     counts[0] = new UncertainCount(calArchiveSize + offset, isSearch
         && (calArchiveSize >= _LUCENE_MAX_RESULT));

@@ -28,12 +28,12 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
   @Before
   public void setUp_EventsManagerTest() {
     engine = (CalendarEngineHQL) Utils.getComponent(ICalendarEngineRole.class, "hql");
-    queryManagerMock = createMock(QueryManager.class);
+    queryManagerMock = createMockAndAddToDefault(QueryManager.class);
     engine.injectQueryManager(queryManagerMock);
   }
 
   @Test
-  public void testGetFirstEventDate() throws QueryException {
+  public void testGetFirstEventDate() throws QueryException, Exception {
     String lang = "de";
     List<String> spaces = Arrays.asList("myCalSpace");
     Date startDate = new Date(0);
@@ -50,9 +50,9 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     expect(queryMock.setLimit(1)).andReturn(queryMock).once();
     expect(queryMock.execute()).andReturn(list).once();
 
-    replayAll(queryMock);
+    replayDefault(queryMock);
     IEvent firstEvent = engine.getFirstEvent(startDate, isArchive, lang, spaces);
-    verifyAll(queryMock);
+    verifyDefault(queryMock);
 
     assertEquals(new Event(new DocumentReference("xwikidb", "TestSpace", "TestEvent")),
         firstEvent);
@@ -84,9 +84,9 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     expect(queryMock2.setLimit(eq(1))).andReturn(queryMock2).once();
     expect(queryMock2.execute()).andReturn(eventList).once();
 
-    replayAll(queryMock1, queryMock2);
+    replayDefault(queryMock1, queryMock2);
     IEvent firstEvent = engine.getFirstEvent(startDate, isArchive, lang, spaces);
-    verifyAll(queryMock1, queryMock2);
+    verifyDefault(queryMock1, queryMock2);
 
     assertEquals(new Event(new DocumentReference("xwikidb", "TestSpace", "TestEvent")),
         firstEvent);
@@ -118,9 +118,9 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     expect(queryMock2.setLimit(eq(1))).andReturn(queryMock2).once();
     expect(queryMock2.execute()).andReturn(eventList).once();
 
-    replayAll(queryMock1, queryMock2);
+    replayDefault(queryMock1, queryMock2);
     IEvent lastEvent = engine.getLastEvent(startDate, isArchive, lang, spaces);
-    verifyAll(queryMock1, queryMock2);
+    verifyDefault(queryMock1, queryMock2);
 
     assertEquals(new Event(new DocumentReference("xwikidb", "TestSpace", "TestEvent")),
         lastEvent);
@@ -144,9 +144,9 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     expect(queryMock.setLimit(1)).andReturn(queryMock).once();
     expect(queryMock.execute()).andReturn(list).once();
 
-    replayAll(queryMock);
+    replayDefault(queryMock);
     IEvent lastEvent = engine.getLastEvent(startDate, isArchive, lang, spaces);
-    verifyAll(queryMock);
+    verifyDefault(queryMock);
 
     assertEquals(new Event(new DocumentReference("xwikidb", "TestSpace", "TestEvent")),
         lastEvent);
@@ -162,16 +162,6 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     + "ec.lang='de' and (ec.eventDate " + comp + " '1970-01-01 01:00:00' "
     + selectEmptyDates + ") and (obj.name like 'myCalSpace.%') order by ec.eventDate "
     + order + ", ec.eventDate_end " + order + ", ec.l_title " + order;
-  }
-
-  private void replayAll(Object ... mocks) {
-    replay(queryManagerMock);
-    replay(mocks);
-  }
-
-  private void verifyAll(Object ... mocks) {
-    verify(queryManagerMock);
-    verify(mocks);
   }
 
 }

@@ -75,13 +75,7 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
   private List<IEvent> convertToEventList(List<String> eventDocs) {
     List<IEvent> eventList = new ArrayList<IEvent>();
     for (String eventDocName : eventDocs) {
-      Event event = new Event(webUtilsService.resolveDocumentReference(eventDocName));
-      if (event.getEventDate() != null) {
-        eventList.add(event);
-      } else {
-        LOGGER.warn("convertToEventList: skipping event without date [" + eventDocName
-            + "].");
-      }
+      eventList.add(new Event(webUtilsService.resolveDocumentReference(eventDocName)));
     }
     return eventList;
   }

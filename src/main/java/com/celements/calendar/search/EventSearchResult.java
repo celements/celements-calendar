@@ -87,6 +87,8 @@ public class EventSearchResult {
   }
 
   public int getSize() {
+    LOGGER.debug("EventSearchResult before getHitcount for query [" + getLuceneQuery()
+        + "].");
     return luceneSearch().getHitcount();
   }
 

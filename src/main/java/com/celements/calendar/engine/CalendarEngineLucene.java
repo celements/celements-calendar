@@ -97,7 +97,8 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
       List<LuceneQueryRestrictionApi> spaceRestrictionList =
           new ArrayList<LuceneQueryRestrictionApi>();
       for (String space : allowedSpaces) {
-        spaceRestrictionList.add(queryService.createRestriction("space", space));
+        spaceRestrictionList.add(queryService.createRestriction("space", "\"" + space
+            + "\""));
       }
       query.addOrRestrictionList(spaceRestrictionList);
     }

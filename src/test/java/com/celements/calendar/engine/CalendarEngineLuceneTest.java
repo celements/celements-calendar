@@ -56,7 +56,7 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
     ICalendar cal = new Calendar(calDocRef, false);
     cal.setStartDate(startDate);
     LuceneQueryRestrictionApi spaceRestriction = new LuceneQueryRestrictionApi("space",
-        spaces.get(0));
+        "\"" + spaces.get(0) + "\"");
     LuceneQueryRestrictionApi langRestriction = new LuceneQueryRestrictionApi("lang",
         "\"de\"");
     IEvent event = new Event(new DocumentReference(context.getDatabase(),
@@ -64,8 +64,8 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
     IEvent event2 = new Event(new DocumentReference(context.getDatabase(),
         "mySpace", "myEvent2"));
 
-    expect(queryServiceMock.createRestriction("space", spaces.get(0))).andReturn(
-        spaceRestriction).once();
+    expect(queryServiceMock.createRestriction(eq("space"), eq("\"" + spaces.get(0)
+        + "\""))).andReturn(spaceRestriction).once();
     expect(queryServiceMock.createRestriction("Classes.CalendarEventClass.lang",
         "\"" + lang + "\"")).andReturn(langRestriction).once();
     expect(queryServiceMock.createQuery()).andReturn(queryMock).once();
@@ -97,7 +97,7 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
     ICalendar cal = new Calendar(calDocRef, true);
     cal.setStartDate(startDate);
     LuceneQueryRestrictionApi spaceRestriction = new LuceneQueryRestrictionApi("space",
-        spaces.get(0));
+        "\"" + spaces.get(0) + "\"");
     LuceneQueryRestrictionApi langRestriction = new LuceneQueryRestrictionApi("lang",
         "\"de\"");
     IEvent event = new Event(new DocumentReference(context.getDatabase(),
@@ -105,7 +105,8 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
     IEvent event2 = new Event(new DocumentReference(context.getDatabase(),
         "mySpace", "myEvent2"));
 
-    expect(queryServiceMock.createRestriction("space", spaces.get(0))).andReturn(
+    expect(queryServiceMock.createRestriction(eq("space"), eq("\"" + spaces.get(0)
+        + "\""))).andReturn(
         spaceRestriction).once();
     expect(queryServiceMock.createRestriction("Classes.CalendarEventClass.lang",
         "\"" + lang + "\"")).andReturn(langRestriction).once();

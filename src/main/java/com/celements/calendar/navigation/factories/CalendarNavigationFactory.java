@@ -246,6 +246,8 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
       EventSearchResult calSearchResult) {
     NavigationDetails nextNavDetails = navDetails;
     int nextOffset = navDetails.getOffset() + nb;
+    LOGGER.debug("getNextNavDetails with query for calDocRef [" + calDocRef
+        + "] and nextOffset [" + nextOffset + "] nb [" + nb + "].");
     try {
       if (calSearchResult.getSize() > nextOffset) {
         nextNavDetails = getFirstNavDetails(calDocRef, nextOffset, query, calSearchResult);
@@ -261,6 +263,8 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   private NavigationDetails getFirstNavDetails(DocumentReference calDocRef, int offset,
       EventSearchQuery query, EventSearchResult searchResult
       ) throws EmptyCalendarListException {
+    LOGGER.debug("getFirstNavDetails with query for calDocRef [" + calDocRef
+        + "] and offset [" + offset + "].");
     IEvent firstEvent = getFirstElement(searchResult.getEventList(offset, 1));
     return getNavDetailsFactory().getNavigationDetails(calDocRef, firstEvent, query);
   }
@@ -268,6 +272,8 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   private NavigationDetails getLastNavDetails(DocumentReference calDocRef, int offset,
       EventSearchQuery query, EventSearchResult searchResult
       ) throws EmptyCalendarListException {
+    LOGGER.debug("getLastNavDetails with query for calDocRef [" + calDocRef
+        + "] and offset [" + offset + "].");
     IEvent lastEvent = getLastElement(searchResult.getEventList(0, Math.abs(offset)));
     return getNavDetailsFactory().getNavigationDetails(calDocRef, lastEvent, query);
   }

@@ -98,12 +98,15 @@ public class EventSearchResult {
       try {
         searchResultsCache = getLucenePlugin().getSearchResults(luceneQuery, sortFields,
             null, "default,de", context);
+        LOGGER.trace("luceneSearch: created new searchResults for query [" + luceneQuery
+            + "].");
       } catch (Exception exception) {
         LOGGER.error("Unable to get lucene search results for query '" + luceneQuery
             + "'", exception);
       }
     } else {
-      LOGGER.trace("returning cached searchResults for query [" + luceneQuery + "].");
+      LOGGER.trace("luceneSearch: returning cached searchResults for query ["
+          + luceneQuery + "].");
     }
     return searchResultsCache;
   }

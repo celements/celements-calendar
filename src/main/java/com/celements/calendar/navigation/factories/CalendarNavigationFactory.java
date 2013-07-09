@@ -159,35 +159,25 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
         ).searchEvents(query);
     EventSearchResult calResult = getCalendar(calDocRef, false, navDetails.getStartDate()
         ).searchEvents(query);
-//    LOGGER.trace("getCalendarNavigation with query before navigation correction."
-//        + " calResult.getSize [" + calResult.getSize() + "].");
     NavigationDetails startNavDetails = null;
     NavigationDetails endNavDetails = null;
     try {
       startNavDetails = getStartNavDetails(calAllResult);
       endNavDetails = getEndNavDetails(calDocRef, nb, query);
-//      LOGGER.trace("getCalendarNavigation with query before checkInvalidNavDetails."
-//          + " calResult.getSize [" + calResult.getSize() + "].");
       int check = checkInvalidNavDetails(navDetails, query.getFromDate(), calResult,
           calAllResult);
       LOGGER.debug("checkInvalidNavDetails is '" + check + "' for '" + navDetails
           + "', calResult.getSize [" + calResult.getSize() + "]");
       if (check != 0) {
         navDetails = check > 0 ? endNavDetails : startNavDetails;
-//        LOGGER.trace("getCalendarNavigation with query before resetting calResult."
-//            + " calResult.getSize [" + calResult.getSize() + "].");
         calResult = getCalendar(calDocRef, false, navDetails.getStartDate()).searchEvents(
             query);
-//        LOGGER.trace("getCalendarNavigation with query after resetting calResult."
-//            + " calResult.getSize [" + calResult.getSize() + "].");
       }
     } catch (EmptyCalendarListException emptyListExp) {
       LOGGER.warn("getCalendarNavigation encountered emptyListExp for calDocRef ["
           + calDocRef + "] and nb [" + nb + "] calResult.getSize [" + calResult.getSize()
           + "].", emptyListExp);
     }
-//    LOGGER.trace("getCalendarNavigation with query after checkInvalidNavDetails."
-//        + " calResult.getSize [" + calResult.getSize() + "].");
     EventSearchResult calArchiveResult = getCalendar(calDocRef, true,
         navDetails.getStartDate()).searchEvents(query);
     UncertainCount[] counts = getCounts(calResult.getSize(), calArchiveResult.getSize(),

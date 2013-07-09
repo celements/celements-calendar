@@ -19,6 +19,8 @@ import com.celements.calendar.Calendar;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.engine.ICalendarEngineRole;
+import com.celements.calendar.search.EventSearchQuery;
+import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.service.ICalendarService;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 import com.xpn.xwiki.XWiki;
@@ -150,6 +152,32 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
     assertTrue("Expect true for Event1 in space 'inbox' if EventSpaceForCalender is"
         + " 'inbox' too.", eventsMgr.isHomeCalendar(calDocRef, eventDocRef));
     verifyAll();
+  }
+
+  @Test
+  public void testSearchEvents_dirtyLuceneWorkaraound() throws Exception {
+    EventSearchQuery queryMock = new EventSearchQuery("mySpace", null, null, null);
+    ICalendar calMock = createMock(ICalendar.class);
+    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "Content",
+        "MyCal");
+    expect(calMock.getDocumentReference()).andReturn(calDocRef).anyTimes();
+    Date startDate = new Date();
+    expect(calMock.getStartDate()).andReturn(startDate).anyTimes();
+    expect(calMock.isArchive()).andReturn(false).anyTimes();
+    ICalendarEngineRole calEngineMock = createMock(ICalendarEngineRole.class);
+    expect(calMock.getEngine()).andReturn(calEngineMock).atLeastOnce();
+    expect(xwiki.getSpacePreference(eq("default_language"), same(context))).andReturn(
+        "de");
+    List<String> allowedSpaces = Arrays.asList("mySpace");
+    expect(calServiceMock.getAllowedSpaces(eq(calDocRef))).andReturn(allowedSpaces);
+    EventSearchResult mockEventSearchResults = createMock(EventSearchResult.class);
+    expect(calEngineMock.searchEvents(same(queryMock), eq(startDate), eq(false), eq("de"),
+        eq(allowedSpaces))).andReturn(mockEventSearchResults);
+    //!! IMPORTANT getSize MUST be called imadiatelly
+    expect(mockEventSearchResults.getSize()).andReturn(10).once();
+    replayAll(calMock, calEngineMock, mockEventSearchResults);
+    assertSame(mockEventSearchResults, eventsMgr.searchEvents(calMock, queryMock));
+    verifyAll(calMock, calEngineMock, mockEventSearchResults);
   }
 
   private ICalendarService getCalService() {

@@ -154,6 +154,10 @@ public class EventsManager implements IEventManager {
       LOGGER.debug("EventsManager searchEvents: isArchive [" + cal.isArchive()
           + "], startDate [" + cal.getStartDate() + "] query ["
           + query.getAsLuceneQuery().getQueryString() + "].");
+      //XXX calling getSize() imediatelly is a dirty Workaround!!!
+      //XXX accessing results directly prevents lucene inconsistancies
+      //XXX if multiple results are created (e.g. in Navigation).
+      eventsResult.getSize();
       return eventsResult;
     } catch (XWikiException exc) {
       LOGGER.error("Error while searching events in calendar '" + calDocRef + "'", exc);

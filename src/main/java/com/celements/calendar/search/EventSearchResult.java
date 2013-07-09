@@ -102,6 +102,8 @@ public class EventSearchResult {
         LOGGER.error("Unable to get lucene search results for query '" + luceneQuery
             + "'", exception);
       }
+    } else {
+      LOGGER.trace("returning cached searchResults for query [" + luceneQuery + "].");
     }
     return searchResultsCache;
   }

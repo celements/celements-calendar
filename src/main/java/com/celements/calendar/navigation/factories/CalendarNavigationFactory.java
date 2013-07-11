@@ -73,7 +73,11 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
     LOGGER.debug("getStartNavDetails for calDocRef [" + calDocRef + "].");
     ICalendar calAll = getCalendar(calDocRef, false, DATE_LOW);
     if (getEventMgr().countEvents(calAll) > 0) {
-      return new NavigationDetails(getEventMgr().getFirstEvent(calAll).getEventDate(), 0);
+      Date startDate = getEventMgr().getFirstEvent(calAll).getEventDate();
+      if (startDate != null) {
+        startDate = DATE_LOW;
+      }
+      return new NavigationDetails(startDate, 0);
     }
     throw new EmptyCalendarListException("getStartNavDetails failes on empty calendar ["
         + calDocRef + "].");
@@ -207,8 +211,11 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
       ) throws EmptyCalendarListException {
     NavigationDetails startNavDetails = null;
     if (calAllResult.getSize() > 0) {
-      IEvent startDate = getFirstElement(calAllResult.getEventList(0, 1));
-      startNavDetails = new NavigationDetails(startDate.getEventDate(), 0);
+      Date startDate = getFirstElement(calAllResult.getEventList(0, 1)).getEventDate();
+      if (startDate != null) {
+        startDate = DATE_LOW;
+      }
+      startNavDetails = new NavigationDetails(startDate, 0);
     }
     return startNavDetails;
   }

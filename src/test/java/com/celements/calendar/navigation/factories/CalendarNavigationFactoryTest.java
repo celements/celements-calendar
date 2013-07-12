@@ -1,5 +1,8 @@
 package com.celements.calendar.navigation.factories;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
@@ -11,6 +14,7 @@ import org.xwiki.model.reference.DocumentReference;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.manager.IEventManager;
+import com.celements.calendar.search.EventSearchResult;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
@@ -56,7 +60,7 @@ public class CalendarNavigationFactoryTest extends AbstractBridgedComponentTestC
   }
 
   @Test
-  public void testGetStartNavDetails_nullStartDate() throws Exception {
+  public void testGetStartNavDetails_DocRef_nullStartDate() throws Exception {
     expect(xwiki.getXWikiPreference(eq("calendar_engine"), eq("calendar.engine"),
         eq("hql"), same(context))).andReturn("lucene").anyTimes();
     expect(xwiki.getSpacePreference(eq("default_language"), same(context))).andReturn(
@@ -77,6 +81,30 @@ public class CalendarNavigationFactoryTest extends AbstractBridgedComponentTestC
     assertEquals(CalendarNavigationFactory.DATE_LOW, startNavDetails.getStartDate());
     assertEquals(0, startNavDetails.getOffset());
     assertSame(calCapture.getValue(), calCapture2.getValue());
+    verifyDefault();
+  }
+
+  @Test
+  public void testGetStartNavDetails_EventSearchResult_nullStartDate() throws Exception {
+    expect(xwiki.getXWikiPreference(eq("calendar_engine"), eq("calendar.engine"),
+        eq("hql"), same(context))).andReturn("lucene").anyTimes();
+    expect(xwiki.getSpacePreference(eq("default_language"), same(context))).andReturn(
+        "de").anyTimes();
+    expect(xwiki.getSpacePreference(eq("default_language"), eq("myCollection"), eq(""),
+        same(context))).andReturn("de").anyTimes();
+    EventSearchResult mockSearchResult = createMockAndAddToDefault(
+        EventSearchResult.class);
+    expect(mockSearchResult.getSize()).andReturn(5).anyTimes();
+    IEvent mockEvent = createMockAndAddToDefault(IEvent.class);
+    expect(mockEvent.getEventDate()).andReturn(null).anyTimes();
+    List<IEvent> resultList = Arrays.asList(mockEvent);
+    expect(mockSearchResult.getEventList(eq(0), eq(1))).andReturn(resultList);
+    replayDefault();
+    NavigationDetails startNavDetails = calNavFactory.getStartNavDetails(
+        mockSearchResult);
+    assertNotNull(startNavDetails);
+    assertEquals(CalendarNavigationFactory.DATE_LOW, startNavDetails.getStartDate());
+    assertEquals(0, startNavDetails.getOffset());
     verifyDefault();
   }
 

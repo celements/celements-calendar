@@ -305,11 +305,11 @@ public class Calendar implements ICalendar {
   private final String getDefaultLang() {
     if (defaultLang == null) {
       try {
-        defaultLang = getContext().getWiki().getWebPreference("default_language",
+        defaultLang = getContext().getWiki().getSpacePreference("default_language",
             getCalService().getEventSpaceForCalendar(getDocumentReference()), "",
             getContext());
       } catch (XWikiException exp) {
-        LOGGER.error("getDefaultLang: failed to get WebPreferences.", exp);
+        LOGGER.error("getDefaultLang: failed to get SpacePreferences.", exp);
       }
     }
     return defaultLang;

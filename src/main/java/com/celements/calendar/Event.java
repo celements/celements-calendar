@@ -646,7 +646,7 @@ public class Event implements IEvent {
 
   private final String getDefaultLang() {
     if (defaultLang == null) {
-      defaultLang = getContext().getWiki().getWebPreference("default_language",
+      defaultLang = getContext().getWiki().getSpacePreference("default_language",
           getEventPrimarySpace(), "", getContext());
     }
     return defaultLang;

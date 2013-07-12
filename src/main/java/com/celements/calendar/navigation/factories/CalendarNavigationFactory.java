@@ -22,8 +22,8 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
       CalendarNavigationFactory.class);
 
   private static final int _LUCENE_MAX_RESULT = 1000;
-  private static final Date DATE_LOW = new Date(-62135773200000L);
-  private static final Date DATE_HIGH = new Date(253402297140000L);
+  public static final Date DATE_LOW = new Date(-62135773200000L);
+  public static final Date DATE_HIGH = new Date(253402297140000L);
 
   private IEventManager eventMgr;
 
@@ -207,7 +207,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
     return 0;
   }
 
-  private NavigationDetails getStartNavDetails(EventSearchResult calAllResult
+  NavigationDetails getStartNavDetails(EventSearchResult calAllResult
       ) throws EmptyCalendarListException {
     NavigationDetails startNavDetails = null;
     if (calAllResult.getSize() > 0) {
@@ -337,7 +337,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
         + "].");
   }
 
-  private IEventManager getEventMgr() {
+  IEventManager getEventMgr() {
     if (eventMgr == null) {
       eventMgr = Utils.getComponent(IEventManager.class);
     }

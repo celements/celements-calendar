@@ -74,7 +74,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
     ICalendar calAll = getCalendar(calDocRef, false, DATE_LOW);
     if (getEventMgr().countEvents(calAll) > 0) {
       Date startDate = getEventMgr().getFirstEvent(calAll).getEventDate();
-      if (startDate != null) {
+      if (startDate == null) {
         startDate = DATE_LOW;
       }
       return new NavigationDetails(startDate, 0);
@@ -212,7 +212,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
     NavigationDetails startNavDetails = null;
     if (calAllResult.getSize() > 0) {
       Date startDate = getFirstElement(calAllResult.getEventList(0, 1)).getEventDate();
-      if (startDate != null) {
+      if (startDate == null) {
         startDate = DATE_LOW;
       }
       startNavDetails = new NavigationDetails(startDate, 0);

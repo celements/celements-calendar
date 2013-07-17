@@ -24,6 +24,7 @@ public class EventSearchQuery {
   protected final Date fromDate;
   protected final Date toDate;
   protected final String searchTerm;
+  private boolean isFuzzy;
 
   public EventSearchQuery(String spaceName, Date fromDate, Date toDate,
       String searchTerm) {
@@ -31,6 +32,7 @@ public class EventSearchQuery {
     this.fromDate = fromDate;
     this.toDate = toDate;
     this.searchTerm = searchTerm;
+    isFuzzy = false;
   }
 
   public String getSpaceName() {
@@ -62,7 +64,7 @@ public class EventSearchQuery {
     if (checkString(searchTerm)) {
       String[] fields = getSearchTermFields();
       for (String s : searchTerm.split(",")) {
-        addOrRestrictions(query, fields, s, true, true);
+        addOrRestrictions(query, fields, s, true, isFuzzy);
       }
     }
     return query;
@@ -136,6 +138,10 @@ public class EventSearchQuery {
 
   void injectQueryService(IQueryService queryService) {
     this.queryService = queryService;
+  }
+
+  public void setFuzzy() {
+    this.isFuzzy = true;
   }
 
 }

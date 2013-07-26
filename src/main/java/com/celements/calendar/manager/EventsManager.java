@@ -70,6 +70,7 @@ public class EventsManager implements IEventManager {
       String lang = webUtilsService.getDefaultLanguage();
       List<String> allowedSpaces = calService.getAllowedSpaces(calDocRef);
       if (nb == 0) {
+        //FIXME eventList==null causes NPE in filterEventListForSubscription
         eventList = cal.getEngine().getEvents(cal.getStartDate(), cal.isArchive(), lang,
             allowedSpaces);
       } else {

@@ -180,7 +180,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
             query);
       }
     } catch (EmptyCalendarListException emptyListExp) {
-      LOGGER.warn("getCalendarNavigation encountered emptyListExp for calDocRef ["
+      LOGGER.info("getCalendarNavigation encountered emptyListExp for calDocRef ["
           + calDocRef + "] and nb [" + nb + "] calResult.getSize [" + calResult.getSize()
           + "].", emptyListExp);
     }
@@ -211,15 +211,17 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
   NavigationDetails getStartNavDetails(EventSearchResult calAllResult
       ) throws EmptyCalendarListException {
-    NavigationDetails startNavDetails = null;
     if (calAllResult.getSize() > 0) {
       Date startDate = getFirstElement(calAllResult.getEventList(0, 1)).getEventDate();
       if (startDate == null) {
         startDate = DATE_LOW;
       }
-      startNavDetails = new NavigationDetails(startDate, 0);
+      return new NavigationDetails(startDate, 0);
+    } else {
+      LOGGER.info("getStartNavDetails called with empty calendar.");
+      throw new EmptyCalendarListException("getStartNavDetails called with empty"
+          + " calendar.");
     }
-    return startNavDetails;
   }
 
   private NavigationDetails getEndNavDetails(DocumentReference calDocRef, int nb,
@@ -229,6 +231,10 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
         ).searchEvents(query);
     if ((calAllArchiveResult.getSize() > 0)) {
       endNavDetails = getLastNavDetails(calDocRef, nb, query, calAllArchiveResult);
+    } else {
+      LOGGER.info("getEndNavDetails called with empty calendar.");
+      throw new EmptyCalendarListException("getEndNavDetails called with empty"
+          + " calendar.");
     }
     return endNavDetails;
   }

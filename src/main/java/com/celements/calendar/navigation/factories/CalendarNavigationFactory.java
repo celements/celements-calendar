@@ -171,9 +171,11 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
       int check = checkInvalidNavDetails(navDetails, query.getFromDate(), calResult,
           calAllResult);
       LOGGER.debug("checkInvalidNavDetails is '" + check + "' for '" + navDetails
-          + "', calResult.getSize [" + calResult.getSize() + "]");
+          + "', calResult.getSize [" + calResult.getSize() + "], startNavDetail ["
+          + startNavDetails + "], endNavDetails [" + endNavDetails + "].");
       if (check != 0) {
         navDetails = check > 0 ? endNavDetails : startNavDetails;
+        LOGGER.trace("navDetails FIXED [" + navDetails + "].");
         calResult = getCalendar(calDocRef, false, navDetails.getStartDate()).searchEvents(
             query);
       }

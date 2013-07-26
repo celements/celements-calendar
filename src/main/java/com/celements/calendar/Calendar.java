@@ -339,7 +339,7 @@ public class Calendar implements ICalendar {
     return (XWikiContext)execution.getContext().getProperty("xwikicontext");
   }
 
-  void inject_getEventCmd(IEventManager getEventCmdMock) {
+  public void inject_getEventCmd(IEventManager getEventCmdMock) {
     eventMgr = getEventCmdMock;
   }
 

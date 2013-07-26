@@ -1,10 +1,10 @@
 package com.celements.calendar.navigation.factories;
 
-import java.util.Arrays;
-import java.util.List;
-
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+
+import java.util.Arrays;
+import java.util.List;
 
 import org.easymock.Capture;
 import org.junit.Before;
@@ -14,6 +14,7 @@ import org.xwiki.model.reference.DocumentReference;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.manager.IEventManager;
+import com.celements.calendar.search.EventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 import com.xpn.xwiki.XWiki;
@@ -105,6 +106,45 @@ public class CalendarNavigationFactoryTest extends AbstractBridgedComponentTestC
     assertNotNull(startNavDetails);
     assertEquals(CalendarNavigationFactory.DATE_LOW, startNavDetails.getStartDate());
     assertEquals(0, startNavDetails.getOffset());
+    verifyDefault();
+  }
+
+  @Test
+  public void testGetStartNavDetails_emptyCalendar_NPE() {
+    EventSearchResult mockSearchResult = createMockAndAddToDefault(
+        EventSearchResult.class);
+    expect(mockSearchResult.getSize()).andReturn(0).anyTimes();
+    replayDefault();
+    try {
+      calNavFactory.getStartNavDetails(mockSearchResult);
+      fail("Expecting EmptyCalendarListException for empty calendar");
+    } catch(EmptyCalendarListException eCalListExp) {
+      //expected
+    }
+    verifyDefault();
+  }
+
+  @Test
+  public void testGetEndNavDetails_emptyCalendar_NPE() throws Exception {
+    expect(xwiki.getXWikiPreference(eq("calendar_engine"), eq("calendar.engine"),
+        eq("hql"), same(context))).andReturn("lucene").anyTimes();
+    expect(xwiki.getSpacePreference(eq("default_language"), same(context))).andReturn(
+        "de").anyTimes();
+    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "progon",
+        "myCollection");
+    EventSearchResult mockSearchResult = createMockAndAddToDefault(
+        EventSearchResult.class);
+    EventSearchQuery query = createMockAndAddToDefault(EventSearchQuery.class);
+    expect(eventMgrMock.searchEvents(isA(ICalendar.class), same(query))).andReturn(
+        mockSearchResult).atLeastOnce();
+    expect(mockSearchResult.getSize()).andReturn(0).anyTimes();
+    replayDefault();
+    try {
+      calNavFactory.getEndNavDetails(calDocRef, 10, query);
+      fail("Expecting EmptyCalendarListException for empty calendar");
+    } catch(EmptyCalendarListException eCalListExp) {
+      //expected
+    }
     verifyDefault();
   }
 

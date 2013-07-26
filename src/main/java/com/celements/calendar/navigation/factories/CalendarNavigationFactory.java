@@ -224,19 +224,17 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
     }
   }
 
-  private NavigationDetails getEndNavDetails(DocumentReference calDocRef, int nb,
+  NavigationDetails getEndNavDetails(DocumentReference calDocRef, int nb,
       EventSearchQuery query) throws EmptyCalendarListException {
-    NavigationDetails endNavDetails = null;
     EventSearchResult calAllArchiveResult = getCalendar(calDocRef, true, DATE_HIGH
         ).searchEvents(query);
     if ((calAllArchiveResult.getSize() > 0)) {
-      endNavDetails = getLastNavDetails(calDocRef, nb, query, calAllArchiveResult);
+      return getLastNavDetails(calDocRef, nb, query, calAllArchiveResult);
     } else {
       LOGGER.info("getEndNavDetails called with empty calendar.");
       throw new EmptyCalendarListException("getEndNavDetails called with empty"
           + " calendar.");
     }
-    return endNavDetails;
   }
 
   private NavigationDetails getPrevNavDetails(DocumentReference calDocRef,
@@ -312,7 +310,8 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
   private ICalendar getCalendar(DocumentReference calConfigDocRef,
       boolean isArchive, Date startDate) {
-    ICalendar cal = new Calendar(calConfigDocRef, isArchive);
+    Calendar cal = new Calendar(calConfigDocRef, isArchive);
+    cal.inject_getEventCmd(getEventMgr());
     cal.setStartDate(startDate);
     return cal;
   }

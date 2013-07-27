@@ -2,6 +2,7 @@ package com.celements.calendar.search;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -68,7 +69,14 @@ public class EventSearchResult {
       } else {
         list = results.getResults(offset + 1, results.getHitcount());
       }
-      return convertToEventList(list);
+      List<IEvent> eventList = convertToEventList(list);
+      if (eventList == null) {
+        LOGGER.error("prevent returning null in getEventList of EvemtSearchResult for"
+            + " offset [" + offset + "], limit [" + limit + "], list [" + list
+            + "], luceneQuery [" + luceneQuery + "].");
+        eventList = Collections.emptyList();
+      }
+      return eventList;
     } else {
       LOGGER.warn("getEventList: luceneSearch returned 'null' value for offset ["
           + offset + "] and limit [" + limit + "] on luceneQuery [" + luceneQuery +"].");

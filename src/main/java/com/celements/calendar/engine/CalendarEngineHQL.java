@@ -52,7 +52,15 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
     try {
       String query = getQuery(startDate, isArchive, lang,	allowedSpaces, false);
       List<String> eventDocs = queryManager.createQuery(query, Query.HQL).execute();
-      return convertToEventList(eventDocs);
+      List<IEvent> eventList = convertToEventList(eventDocs);
+      if (eventList == null) {
+        LOGGER.error("prevent returning null in getEvents of CalendarEngineHQL for"
+            + " startDate [" + startDate + "], isArchive [" + isArchive + "], lang ["
+            + lang + "], allowedSpaces [" + allowedSpaces + "], eventDocs [" + eventDocs
+            + "], query [" + query + "].");
+        eventList = Collections.emptyList();
+      }
+      return eventList;
     } catch (QueryException queryException) {
       LOGGER.error("getEvents: " + queryException);
     }
@@ -65,7 +73,16 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
       String query = getQuery(startDate, isArchive, lang,	allowedSpaces, false);
       List<String> eventDocs = queryManager.createQuery(query, Query.HQL).setOffset(offset
           ).setLimit(limit).execute();
-      return convertToEventList(eventDocs);
+      List<IEvent> eventList = convertToEventList(eventDocs);
+      if (eventList == null) {
+        LOGGER.error("prevent returning null in getEvents of CalendarEngineHQL for"
+            + " startDate [" + startDate + "], isArchive [" + isArchive + "], lang ["
+            + lang + "], allowedSpaces [" + allowedSpaces + "], offset [" + offset
+            + "], limit [" + limit + "], eventDocs [" + eventDocs + "], query [" + query
+            + "].");
+        eventList = Collections.emptyList();
+      }
+      return eventList;
     } catch (QueryException queryException) {
       LOGGER.error("getEvents: " + queryException);
     }

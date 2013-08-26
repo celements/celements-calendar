@@ -64,7 +64,8 @@ public class NavigationDetailsFactory implements INavigationDetailsFactory {
         LOGGER.debug("getNavigationDetails: found '" + navDetail + "'");
         return navDetail;
       } else {
-        LOGGER.warn("getNavigationDetails: not found");
+        LOGGER.warn("getNavigationDetails: not found for query [" + query
+            + "] and event [" + event + "].");
       }
     } else {
       LOGGER.error("getNavigationDetails: eventDate is null for '" + event + "'");

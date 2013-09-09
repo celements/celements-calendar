@@ -18,18 +18,25 @@ import org.xwiki.query.QueryManager;
 import com.celements.calendar.Event;
 import com.celements.calendar.IEvent;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
+import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.web.Utils;
 
 public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
 
   private CalendarEngineHQL engine;
   private QueryManager queryManagerMock;
+  private XWiki xwiki;
 
   @Before
   public void setUp_EventsManagerTest() {
     engine = (CalendarEngineHQL) Utils.getComponent(ICalendarEngineRole.class, "hql");
     queryManagerMock = createMockAndAddToDefault(QueryManager.class);
     engine.injectQueryManager(queryManagerMock);
+    xwiki = createMock(XWiki.class);
+    getContext().setWiki(xwiki);
+    expect(xwiki.getXWikiPreferenceAsInt(eq("calendar_toArchiveOnEndDate"), 
+        eq("celements.calendar.toArchiveOnEndDate"), eq(1), same(getContext()))
+        ).andReturn(0).anyTimes();
   }
 
   @Test
@@ -84,9 +91,9 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     expect(queryMock2.setLimit(eq(1))).andReturn(queryMock2).once();
     expect(queryMock2.execute()).andReturn(eventList).once();
 
-    replayDefault(queryMock1, queryMock2);
+    replayDefault(queryMock1, queryMock2, xwiki);
     IEvent firstEvent = engine.getFirstEvent(startDate, isArchive, lang, spaces);
-    verifyDefault(queryMock1, queryMock2);
+    verifyDefault(queryMock1, queryMock2, xwiki);
 
     assertEquals(new Event(new DocumentReference("xwikidb", "TestSpace", "TestEvent")),
         firstEvent);
@@ -118,9 +125,9 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     expect(queryMock2.setLimit(eq(1))).andReturn(queryMock2).once();
     expect(queryMock2.execute()).andReturn(eventList).once();
 
-    replayDefault(queryMock1, queryMock2);
+    replayDefault(queryMock1, queryMock2, xwiki);
     IEvent lastEvent = engine.getLastEvent(startDate, isArchive, lang, spaces);
-    verifyDefault(queryMock1, queryMock2);
+    verifyDefault(queryMock1, queryMock2, xwiki);
 
     assertEquals(new Event(new DocumentReference("xwikidb", "TestSpace", "TestEvent")),
         lastEvent);

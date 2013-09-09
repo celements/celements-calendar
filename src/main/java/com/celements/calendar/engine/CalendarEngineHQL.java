@@ -10,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
+import org.xwiki.context.Execution;
 import org.xwiki.query.Query;
 import org.xwiki.query.QueryException;
 import org.xwiki.query.QueryManager;
@@ -20,6 +21,7 @@ import com.celements.calendar.classes.CalendarClasses;
 import com.celements.calendar.search.EventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.web.service.IWebUtilsService;
+import com.xpn.xwiki.XWikiContext;
 
 @Component("hql")
 public class CalendarEngineHQL implements ICalendarEngineRole {
@@ -32,6 +34,9 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
 
   @Requirement
   private IWebUtilsService webUtilsService;
+  
+  @Requirement
+  Execution execution;
 
   public long countEvents(Date startDate, boolean isArchive, String lang,
       List<String> allowedSpaces) {
@@ -118,8 +123,13 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
     hql += " from BaseObject as obj, " + CalendarClasses.CALENDAR_EVENT_CLASS + " as ec";
     hql += " where ec.id.id=obj.id and obj.className = '"
         + CalendarClasses.CALENDAR_EVENT_CLASS + "' ";
-    hql += "and ec.lang='" + lang + "' ";
-    hql += "and (ec.eventDate " + timeComp + " '" + format.format(startDate) + "' "
+    hql += "and ec.lang='" + lang + "' and (";
+    if(toArchiveOnEndDate()) {
+      hql += "COALESCE(ec.eventDate_end, ec.eventDate)";
+    } else {
+      hql += "ec.eventDate";
+    }
+    hql += " " + timeComp + " '" + format.format(startDate) + "' "
         + selectEmptyDates + ") ";
     hql += "and " + getAllowedSpacesHQL(allowedSpaces);
     hql += " order by ec.eventDate " + sortOrder + ", ec.eventDate_end " + sortOrder;
@@ -127,6 +137,11 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
     LOGGER.debug(hql);
 
     return hql;
+  }
+
+  boolean toArchiveOnEndDate() {
+    return getContext().getWiki().getXWikiPreferenceAsInt("calendar_toArchiveOnEndDate", 
+        "celements.calendar.toArchiveOnEndDate", 1, getContext()) == 1;
   }
 
   private String getAllowedSpacesHQL(List<String> allowedSpaces) {
@@ -191,6 +206,10 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
 
   void injectQueryManager(QueryManager queryManagerMock) {
     this.queryManager = queryManagerMock;
+  }
+  
+  private XWikiContext getContext() {
+    return (XWikiContext)execution.getContext().getProperty("xwikicontext");
   }
 
 }

@@ -89,11 +89,12 @@ public class EventSearchQueryTest {
     LuceneQueryApi luceneQuery = query.getAsLuceneQuery();
     verifyAll();
 
-    String compareQueryString = "space:(+\"mySpace\") AND " +
-        "Classes.CalendarEventClass.eventDate:([200001010000 TO 201001010000]) AND " +
-        "(Classes.CalendarEventClass.l_title:(+some*~ +search*~ +term*~) OR " +
-        "Classes.CalendarEventClass.l_description:(+some*~ +search*~ +term*~)) AND " +
-        "wiki:myDB";
+    String compareQueryString = "space:(+\"mySpace\") AND "
+        + "Classes.CalendarEventClass.eventDate:([200001010000 TO 201001010000]) AND "
+        + "(Classes.CalendarEventClass.l_title:((some* OR some~) AND (search* OR search~)"
+        + " AND (term* OR term~)) OR Classes.CalendarEventClass.l_description:("
+        + "(some* OR some~) AND (search* OR search~) AND (term* OR term~))"
+        + ") AND wiki:myDB";
     assertEquals(compareQueryString, luceneQuery.getQueryString());
   }
 

@@ -7,10 +7,14 @@
   #end
   $context.getResponse().sendRedirect($xredirect)
 #end
-##TODO move to a Event api method "getObject($language)
 #set($obj = $doc.getObject('Classes.CalendarEventClass', 'lang', "$!language", false))
 #if("$!obj" == '')
-  #set($obj = $doc.newObject('Classes.CalendarEventClass'))
+  #set($obj = $doc.getObject('XWiki.ArticleClass', 'lang', "", false))
+  #if("$!obj" == '')
+    #set($obj = $doc.newObject('Classes.CalendarEventClass'))
+  #end
+  $obj.set('lang', "$default_language")
+#*  #set($obj = $doc.newObject('Classes.CalendarEventClass'))
   #set($defObj = $doc.getObject('Classes.CalendarEventClass', 'lang', "$!default_language", false))
   #if("$!defObj" != '')
     $obj.set('lang', "$!language")
@@ -26,9 +30,8 @@
   #set($l = "$xwiki.getURL($doc.getFullName(), 'edit')")
   #set($l = "${l}?language=${language}")
   #set($cmenu_pageLink = "${l}&xredirect=$!request.get('xredirect')")
-  $context.getResponse().sendRedirect($cmenu_pageLink)
+  $context.getResponse().sendRedirect($cmenu_pageLink)*#
 #end
-##TODO END
 #set($event = $xwiki.celcalendar.getEvent(${doc.getFullName()}))
 ##TinyMCE configs
 #set($contextPath = ${request.contextPath})

@@ -39,6 +39,7 @@ import com.celements.calendar.classes.CalendarClasses;
 import com.celements.calendar.util.CalendarUtils;
 import com.celements.common.collections.ListUtils;
 import com.celements.web.plugin.cmd.EmptyCheckCommand;
+import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.api.Element;
@@ -48,7 +49,7 @@ import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.web.Utils;
 
 public class Event implements IEvent {
-
+  
   private static Log LOGGER = LogFactory.getFactory().getInstance(Event.class);
 
   private Map<String, BaseObject> eventObj;
@@ -386,7 +387,8 @@ public class Event implements IEvent {
   }
 
   /* (non-Javadoc)
-   * @see com.celements.calendar.IEvent#getStringPropertyDefaultIfEmpty(java.lang.String, java.lang.String)
+   * @see com.celements.calendar.IEvent#getStringPropertyDefaultIfEmpty(java.lang.String, 
+   *     java.lang.String)
    */
   public String getStringPropertyDefaultIfEmpty(String name, String lang){
     String result = getStringProperty(getObj(lang), name);
@@ -397,7 +399,8 @@ public class Event implements IEvent {
   }
 
   /* (non-Javadoc)
-   * @see com.celements.calendar.IEvent#getStringProperty(java.lang.String, java.lang.String)
+   * @see com.celements.calendar.IEvent#getStringProperty(java.lang.String, 
+   *     java.lang.String)
    */
   public String getStringProperty(String name, String lang){
     return getStringProperty(getObj(lang), name);
@@ -412,7 +415,8 @@ public class Event implements IEvent {
   }
 
   /* (non-Javadoc)
-   * @see com.celements.calendar.IEvent#getDateProperty(java.lang.String, java.lang.String)
+   * @see com.celements.calendar.IEvent#getDateProperty(java.lang.String, 
+   *     java.lang.String)
    */
   public Date getDateProperty(String name, String lang){
     return getDateProperty(getObj(lang), name);
@@ -427,7 +431,8 @@ public class Event implements IEvent {
   }
 
   /* (non-Javadoc)
-   * @see com.celements.calendar.IEvent#getBooleanProperty(java.lang.String, java.lang.String)
+   * @see com.celements.calendar.IEvent#getBooleanProperty(java.lang.String, 
+   *     java.lang.String)
    */
   public Boolean getBooleanProperty(String name, String lang){
     return getBooleanProperty(getObj(lang), name);
@@ -475,6 +480,26 @@ public class Event implements IEvent {
     }
     LOGGER.info("Object found: doc " + (obj != null ? "name='"
         + obj.getDocumentReference() + "'" : "no object found! ") + " obj='" + obj + "'");
+    String template = getContext().getRequest().get("template");
+    if((obj == null) && (!getContext().getWiki().exists(getDocumentReference(), 
+        getContext())) && (template != null) && !"".equals(template.trim())){
+      IWebUtilsService webUtils = Utils.getComponent(IWebUtilsService.class);
+      DocumentReference templateRef = webUtils.resolveDocumentReference(template);
+      if(getContext().getWiki().exists(templateRef, getContext())) {
+        try {
+          XWikiDocument templateDoc = getContext().getWiki().getDocument(templateRef, 
+              getContext());
+          BaseObject defaultObj = templateDoc.getXObject(new DocumentReference(
+              getContext().getDatabase(), CalendarClasses.CALENDAR_EVENT_CLASS_SPACE,
+              CalendarClasses.CALENDAR_EVENT_CLASS_DOC));
+          if(defaultObj != null) {
+            obj = defaultObj;
+          }
+        } catch (XWikiException e) {
+          LOGGER.error("Exception while trying to get template doc.");
+        }
+      }
+    }
     return obj;
   }
 
@@ -541,12 +566,11 @@ public class Event implements IEvent {
       confIndep.add(CalendarClasses.PROPERTY_EVENT_IS_SUBSCRIBABLE);
     }
     Element[] allProps = getProperties(lang);
-    LOGGER.debug("getEditableProperties: allProps - "
-        + Arrays.deepToString(allProps));
-    LOGGER.debug("getEditableProperties: confIndep - "
-        + Arrays.deepToString(confIndep.toArray()));
-    LOGGER.debug("getEditableProperties: confDep - "
-        + Arrays.deepToString(confDep.toArray()));
+    LOGGER.debug("getEditableProperties: allProps - " + Arrays.deepToString(allProps));
+    LOGGER.debug("getEditableProperties: confIndep - " + Arrays.deepToString(
+        confIndep.toArray()));
+    LOGGER.debug("getEditableProperties: confDep - " + Arrays.deepToString(
+        confDep.toArray()));
     List<String> lIndependantProps = getProps(allProps, confIndep);
     List<String> lDependantProps= getProps(allProps, confDep);
     List<List<String>> editProp = new ArrayList<List<String>>();

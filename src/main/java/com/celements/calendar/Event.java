@@ -481,8 +481,8 @@ public class Event implements IEvent {
     LOGGER.info("Object found: doc " + (obj != null ? "name='"
         + obj.getDocumentReference() + "'" : "no object found! ") + " obj='" + obj + "'");
     String template = getContext().getRequest().get("template");
-    if((obj == null) && (!getContext().getWiki().exists(getDocumentReference(), 
-        getContext())) && (template != null) && !"".equals(template.trim())){
+    if((obj == null) && (template != null) && !"".equals(template.trim()) && (!getContext(
+        ).getWiki().exists(getDocumentReference(), getContext()))){
       IWebUtilsService webUtils = Utils.getComponent(IWebUtilsService.class);
       DocumentReference templateRef = webUtils.resolveDocumentReference(template);
       if(getContext().getWiki().exists(templateRef, getContext())) {

@@ -487,19 +487,10 @@ public class Event implements IEvent {
       IWebUtilsService webUtils = Utils.getComponent(IWebUtilsService.class);
       DocumentReference templateRef = webUtils.resolveDocumentReference(template);
       if(getContext().getWiki().exists(templateRef, getContext())) {
-        try {
-          XWikiDocument templateDoc = getContext().getWiki().getDocument(templateRef, 
-              getContext());
-          BaseObject defaultObj = templateDoc.getXObject(new DocumentReference(
-              getContext().getDatabase(), CalendarClasses.CALENDAR_EVENT_CLASS_SPACE,
-              CalendarClasses.CALENDAR_EVENT_CLASS_DOC));
-          LOGGER.trace("default obj: " + defaultObj + " from document " + templateDoc);
-          if(defaultObj != null) {
-            obj = defaultObj;
-          }
-        } catch (XWikiException e) {
-          LOGGER.error("Exception while trying to get template doc.");
-        }
+        obj = new BaseObject();
+        obj.setXClassReference(new DocumentReference(getContext().getDatabase(), 
+            CalendarClasses.CALENDAR_EVENT_CLASS_SPACE,
+            CalendarClasses.CALENDAR_EVENT_CLASS_DOC));
       }
     }
     return obj;

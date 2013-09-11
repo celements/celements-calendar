@@ -481,6 +481,7 @@ public class Event implements IEvent {
     LOGGER.info("Object found: doc " + (obj != null ? "name='"
         + obj.getDocumentReference() + "'" : "no object found! ") + " obj='" + obj + "'");
     String template = getContext().getRequest().get("template");
+    LOGGER.trace("template=" + template);
     if((obj == null) && (template != null) && !"".equals(template.trim()) && (!getContext(
         ).getWiki().exists(getDocumentReference(), getContext()))){
       IWebUtilsService webUtils = Utils.getComponent(IWebUtilsService.class);
@@ -492,6 +493,7 @@ public class Event implements IEvent {
           BaseObject defaultObj = templateDoc.getXObject(new DocumentReference(
               getContext().getDatabase(), CalendarClasses.CALENDAR_EVENT_CLASS_SPACE,
               CalendarClasses.CALENDAR_EVENT_CLASS_DOC));
+          LOGGER.trace("default obj: " + defaultObj);
           if(defaultObj != null) {
             obj = defaultObj;
           }

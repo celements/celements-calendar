@@ -493,7 +493,7 @@ public class Event implements IEvent {
           BaseObject defaultObj = templateDoc.getXObject(new DocumentReference(
               getContext().getDatabase(), CalendarClasses.CALENDAR_EVENT_CLASS_SPACE,
               CalendarClasses.CALENDAR_EVENT_CLASS_DOC));
-          LOGGER.trace("default obj: " + defaultObj);
+          LOGGER.trace("default obj: " + defaultObj + " from document " + templateDoc);
           if(defaultObj != null) {
             obj = defaultObj;
           }

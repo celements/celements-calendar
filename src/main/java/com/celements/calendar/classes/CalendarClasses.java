@@ -9,6 +9,7 @@ import com.celements.common.classes.AbstractClassCollection;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.classes.BaseClass;
+import com.xpn.xwiki.objects.classes.DateClass;
 
 @Component("celements.CalendarClasses")
 public class CalendarClasses extends AbstractClassCollection {
@@ -124,7 +125,6 @@ public class CalendarClasses extends AbstractClassCollection {
       doc = new XWikiDocument(classRef);
       needsUpdate = true;
     }
-
     BaseClass bclass = doc.getXClass();
     bclass.setDocumentReference(classRef);
     needsUpdate |= bclass.addTextField(PROPERTY_LANG, PROPERTY_LANG, 30);
@@ -137,8 +137,12 @@ public class CalendarClasses extends AbstractClassCollection {
     needsUpdate |= bclass.addTextAreaField(PROPERTY_LOCATION_RTE, PROPERTY_LOCATION_RTE,
         80, 15);
     needsUpdate |= bclass.addDateField(PROPERTY_EVENT_DATE, PROPERTY_EVENT_DATE, null, 0);
-    needsUpdate |= bclass.addDateField(PROPERTY_EVENT_DATE_END, PROPERTY_EVENT_DATE_END,
-        null, 0);
+    needsUpdate |= addDateField(bclass, PROPERTY_EVENT_DATE, PROPERTY_EVENT_DATE,
+        "dd.MM.yyyy HH:mm:ss", 20, 0, getRegexDate(false, true), 
+        "cel_calendar_validation_event_date");
+    needsUpdate |= addDateField(bclass, PROPERTY_EVENT_DATE_END, PROPERTY_EVENT_DATE_END,
+        "dd.MM.yyyy HH:mm:ss", 20, 0, getRegexDate(true, true), 
+        "cel_calendar_validation_event_end_date");
     needsUpdate |= bclass.addBooleanField(PROPERTY_EVENT_IS_SUBSCRIBABLE,
         PROPERTY_EVENT_IS_SUBSCRIBABLE, "yesno");
 
@@ -182,6 +186,14 @@ public class CalendarClasses extends AbstractClassCollection {
   public DocumentReference getSubscriptionClassRef(String wikiName) {
     return new DocumentReference(wikiName, SUBSCRIPTION_CLASS_SPACE,
         SUBSCRIPTION_CLASS_DOC);
+  }
+  
+  private String getRegexDate(boolean allowEmpty, boolean withTime) {
+    String regex = "(0[1-9]|[12][0-9]|3[01])\\.(0[1-9]|1[012])\\.([0-9]{4})";
+    if (withTime) {
+      regex += " ([01][0-9]|2[0-4])(\\:[0-5][0-9]){1,2}";
+    }
+    return "/" + (allowEmpty ? "(^$)|" : "") + "^(" + regex + ")$" + "/";
   }
 
 }

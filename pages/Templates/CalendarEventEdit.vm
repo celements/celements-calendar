@@ -33,6 +33,7 @@
   $context.getResponse().sendRedirect($cmenu_pageLink)*#
 #end
 #set($event = $xwiki.celcalendar.getEvent(${doc.getFullName()}))
+<!-- event: $event -->
 ##TinyMCE configs
 #set($contextPath = ${request.contextPath})
 #set($rte_supress_cancel = true)
@@ -47,12 +48,18 @@ $celementsweb.addExtJSfileOnce("${xwiki.getSkinFile('celJS/editResize.js', true)
 $xwiki.includeForm('celements2web:Macros.includeRTELanguageSelect', false)
 
 <form id="edit" action="?" method="post">
+  <input type="hidden" name="xpage" value="celements_ajax" />
+  <input type="hidden" name="ajax_mode" value="saveDocumentWithValidation" />
+  <input type="hidden" name="createIfNotExists" value="true" />
+  <input type="hidden" name="template" value="$!request.get('template')" />
   <input type="hidden" name="xredirect" value="$!request.get('xredirect')" />
   <input type="hidden" name="eventDoc" value="$doc.getFullName()" />
   <input type="hidden" name="lang" value="$language" />
   <input type="hidden" name="language" value="$default_language" />
   <div class="editgroup language_independent_fields">
-  	$adminMsg.get("cel_cal_ev_lang_indep_fields")
+    $adminMsg.get("cel_cal_ev_lang_indep_fields")
+  <!-- edit props: ${event.getEditableProperties()} -->
+  <!-- edit props: ${event.getEditableProperties().get(0)} -->
   #foreach($prop in ${event.getEditableProperties().get(0)})
     #set($dispProp = '')
     #set($dispProp = $doc.display("$!prop", 'edit', $obj))

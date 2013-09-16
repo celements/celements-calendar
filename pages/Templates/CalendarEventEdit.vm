@@ -60,6 +60,7 @@ $xwiki.includeForm('celements2web:Macros.includeRTELanguageSelect', false)
     $adminMsg.get("cel_cal_ev_lang_indep_fields")
   <!-- edit props: ${event.getEditableProperties()} -->
   <!-- edit props: ${event.getEditableProperties().get(0)} -->
+    <input type="hidden" name="Classes.CalendarEventClass_${obj.getNumber()}_lang" value="$obj.getProperty('lang').getValue()" />
   #foreach($prop in ${event.getEditableProperties().get(0)})
     #set($dispProp = '')
     #set($dispProp = $doc.display("$!prop", 'edit', $obj))

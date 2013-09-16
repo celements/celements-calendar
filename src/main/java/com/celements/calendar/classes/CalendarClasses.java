@@ -136,7 +136,6 @@ public class CalendarClasses extends AbstractClassCollection {
     needsUpdate |= bclass.addTextField(PROPERTY_LOCATION, PROPERTY_LOCATION, 30);
     needsUpdate |= bclass.addTextAreaField(PROPERTY_LOCATION_RTE, PROPERTY_LOCATION_RTE,
         80, 15);
-    needsUpdate |= bclass.addDateField(PROPERTY_EVENT_DATE, PROPERTY_EVENT_DATE, null, 0);
     needsUpdate |= addDateField(bclass, PROPERTY_EVENT_DATE, PROPERTY_EVENT_DATE,
         "dd.MM.yyyy HH:mm:ss", 20, 0, getRegexDate(false, true), 
         "cel_calendar_validation_event_date");

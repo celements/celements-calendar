@@ -47,10 +47,14 @@ $celementsweb.addExtJSfileOnce("${xwiki.getSkinFile('celJS/editResize.js', true)
 
 $xwiki.includeForm('celements2web:Macros.includeRTELanguageSelect', false)
 
-<form id="edit" action="?" method="post">
-  <input type="hidden" name="xpage" value="celements_ajax" />
-  <input type="hidden" name="ajax_mode" value="saveDocumentWithValidation" />
-  <input type="hidden" name="createIfNotExists" value="true" />
+#if($services.celementsweb.useNewButtons())
+<form id="calendarform" method="post" action="?">
+<input type="hidden" name="xpage" value="celements_ajax" />
+<input type="hidden" name="ajax_mode" value="saveDocumentWithValidation" />
+<input type="hidden" name="createIfNotExists" value="true" />
+#else
+<form id="edit" method="post" action="$doc.getURL('save')">
+#end
   <input type="hidden" name="template" value="$!request.get('template')" />
   <input type="hidden" name="xredirect" value="$!request.get('xredirect')" />
   <input type="hidden" name="eventDoc" value="$doc.getFullName()" />

@@ -7,30 +7,38 @@
   #end
   $context.getResponse().sendRedirect($xredirect)
 #end
+#set($eventTransList = [])
+#set($all_objs = [])
+#set($defObj = '')
+#foreach($sobj in $doc.getObjects('Classes.CalendarEventClass'))
+  #if("$sobj.getProperty('lang').getValue()" != "$default_language")
+    #set($nooutput = $all_objs.add($sobj))
+  #else
+    #set($defObj = $sobj)
+  #end
+  #if("$!sobj.getProperty('lang').getValue()" != '')
+    #set($contentIsEmpty = true)
+    #foreach($prop in ${event.getEditableProperties().get(1)})
+      #set($dispProp = '')
+      #set($dispProp = $doc.display("$!prop", 'edit', $obj))
+      #set($dispProp = ${dispProp.replaceAll('\{/?pre\}','')})
+      #set($contentIsEmpty &= !$xwiki.celementsweb.isEmptyRTEString("$dispProp")))
+    #end
+    #if($contentIsEmpty)
+      #set($!devnull = $!eventTransList.add($sobj.getProperty('lang').getValue()))
+    #end
+  #end
+#end
 #set($obj = $doc.getObject('Classes.CalendarEventClass', 'lang', "$!language", false))
 #if("$!obj" == '')
-  #set($obj = $doc.getObject('XWiki.ArticleClass', 'lang', "", false))
+  #set($obj = $doc.getObject('Classes.CalendarEventClass', 'lang', "", false))
   #if("$!obj" == '')
     #set($obj = $doc.newObject('Classes.CalendarEventClass'))
   #end
   $obj.set('lang', "$default_language")
-#*  #set($obj = $doc.newObject('Classes.CalendarEventClass'))
-  #set($defObj = $doc.getObject('Classes.CalendarEventClass', 'lang', "$!default_language", false))
-  #if("$!defObj" != '')
-    $obj.set('lang', "$!language")
-    $obj.set('title', "$!{defObj.getProperty('title').getValue()}")
-    $obj.set('description', "$!{defObj.getProperty('description').getValue()}")
-    $obj.set('location', "$!{defObj.getProperty('location').getValue()}")
-    $obj.set('eventDate', "$!{defObj.getProperty('eventDate').getValue()}")
-    $obj.set('isSubscribable', "$!{defObj.getProperty('isSubscribable').getValue()}")
-  #else
-    $obj.set('lang', "$!default_language")
-  #end
-  $doc.save()
-  #set($l = "$xwiki.getURL($doc.getFullName(), 'edit')")
-  #set($l = "${l}?language=${language}")
-  #set($cmenu_pageLink = "${l}&xredirect=$!request.get('xredirect')")
-  $context.getResponse().sendRedirect($cmenu_pageLink)*#
+#end
+#if("$!defObj" != '')
+  #set($defObj = $obj)
 #end
 #set($event = $xwiki.celcalendar.getEvent(${doc.getFullName()}))
 <!-- event: $event -->
@@ -45,6 +53,7 @@ $xwiki.includeForm('celements2web:Macros.includeCelementsRTE', false)
 $celementsweb.addExtJSfileOnce("${xwiki.getSkinFile('celJS/editResize.js', true)}")
 <div id="con_titblock" class="titleblock">$adminMsg.get('cel_cal_ev_edit')</div>
 
+#set($docTransList = $eventTransList)
 $xwiki.includeForm('celements2web:Macros.includeRTELanguageSelect', false)
 
 <form id="edit" action="?" method="post">
@@ -60,10 +69,10 @@ $xwiki.includeForm('celements2web:Macros.includeRTELanguageSelect', false)
     $adminMsg.get("cel_cal_ev_lang_indep_fields")
   <!-- edit props: ${event.getEditableProperties()} -->
   <!-- edit props: ${event.getEditableProperties().get(0)} -->
-    <input type="hidden" name="Classes.CalendarEventClass_${obj.getNumber()}_lang" value="$obj.getProperty('lang').getValue()" />
+    <input type="hidden" name="Classes.CalendarEventClass_${obj.getNumber()}_lang" value="$defObj.getProperty('lang').getValue()" />
   #foreach($prop in ${event.getEditableProperties().get(0)})
     #set($dispProp = '')
-    #set($dispProp = $doc.display("$!prop", 'edit', $obj))
+    #set($dispProp = $doc.display("$!prop", 'edit', $defObj))
     #set($dispProp = ${dispProp.replaceAll('\{/?pre\}','')})
     #set($isRTE = ($!prop.endsWith('_rte') || ($!prop.equals('description')) || $!prop.endsWith('_description')))
     <!-- isRTE : $isRTE -->

@@ -8,27 +8,28 @@
   $context.getResponse().sendRedirect($xredirect)
 #end
 #set($eventTransList = [])
-#set($all_objs = [])
+##set($all_objs = [])
 #set($defObj = '')
 #foreach($sobj in $doc.getObjects('Classes.CalendarEventClass'))
-  #if("$sobj.getProperty('lang').getValue()" != "$default_language")
-    #set($nooutput = $all_objs.add($sobj))
-  #else
+  #if("$sobj.getProperty('lang').getValue()" == "$default_language")
     #set($defObj = $sobj)
+  #else
+##    #set($nooutput = $all_objs.add($sobj))
   #end
   #if("$!sobj.getProperty('lang').getValue()" != '')
     #set($contentIsEmpty = true)
     #foreach($prop in ${event.getEditableProperties().get(1)})
       #set($dispProp = '')
-      #set($dispProp = $doc.display("$!prop", 'edit', $obj))
+      #set($dispProp = $doc.display("$!prop", 'edit', $sobj))
       #set($dispProp = ${dispProp.replaceAll('\{/?pre\}','')})
-      #set($contentIsEmpty &= !$xwiki.celementsweb.isEmptyRTEString("$dispProp")))
+      #set($contentIsEmpty &= $xwiki.celementsweb.isEmptyRTEString("$dispProp")))
     #end
     #if($contentIsEmpty)
       #set($!devnull = $!eventTransList.add($sobj.getProperty('lang').getValue()))
     #end
   #end
 #end
+<!-- trans list: $eventTransList $defObj-->
 #set($obj = $doc.getObject('Classes.CalendarEventClass', 'lang', "$!language", false))
 #if("$!obj" == '')
   #set($obj = $doc.getObject('Classes.CalendarEventClass', 'lang', "", false))
@@ -40,6 +41,7 @@
 #if("$!defObj" != '')
   #set($defObj = $obj)
 #end
+<!-- obj, devobj: $obj $defObj-->
 #set($event = $xwiki.celcalendar.getEvent(${doc.getFullName()}))
 <!-- event: $event -->
 ##TinyMCE configs

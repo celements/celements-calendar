@@ -1,4 +1,3 @@
-{pre}
 #if("$!request.get('eventDoc')" != '')
   $xwiki.celcalendar.saveEvent();
   #set($xredirect = "$request.get('xredirect')")
@@ -117,4 +116,3 @@ $xwiki.includeForm('celements2web:Macros.includeRTELanguageSelect', false)
   #end
   </div>
 </form>
-{/pre}

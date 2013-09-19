@@ -1,4 +1,3 @@
-{pre}
 #if("$!xredirect" == '')
   #if("$!request.get('xredirect')" != '')
     #set($xredirect = "$!request.get('xredirect')")
@@ -64,4 +63,3 @@ $doc.save();
     ${isSubscribableStr.replaceAll('\{/?pre\}','')}
   </div>
 </form>
-{/pre}

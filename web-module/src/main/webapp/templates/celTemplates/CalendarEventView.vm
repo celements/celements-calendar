@@ -1,4 +1,3 @@
-{pre}
 #set($event = $xwiki.celcalendar.getEvent(${doc.getFullName()}))
 <div id="Event${doc.getName()}:${doc.getFullName()}" class="cel_calendar_details cel_cm_calendar_event">
 #if("$!event" != '')
@@ -15,4 +14,3 @@
   $msg.get('cel_cal_no_event')
 #end
 </div>
-{/pre}

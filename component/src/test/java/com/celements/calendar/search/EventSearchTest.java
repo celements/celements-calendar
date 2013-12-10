@@ -52,6 +52,59 @@ public class EventSearchTest extends AbstractBridgedComponentTestCase {
 
     assertNotNull(searchResult);
     assertEquals("asdf", searchResult.getLuceneQuery());
+    assertFalse(searchResult.getSkipChecks());
+    String[] sortFields = searchResult.getSortFields();
+    assertNotNull(sortFields);
+    assertEquals(3, sortFields.length);
+    assertEquals("Classes.CalendarEventClass.eventDate", sortFields[0]);
+    assertEquals("Classes.CalendarEventClass.eventDate_end", sortFields[1]);
+    assertEquals("Classes.CalendarEventClass.l_title", sortFields[2]);
+  }
+
+  @Test
+  public void testGetSearchResult_invertSort() throws Exception {
+    String queryString = "asdf";
+    LuceneQueryRestrictionApi objectRestriction = new LuceneQueryRestrictionApi("object",
+        "\"Classes.CalendarEventClass\"");
+
+    expect(queryServiceMock.createRestriction(eq("object"),
+        eq("\"Classes.CalendarEventClass\""))).andReturn(objectRestriction).once();
+    expect(queryMock.addRestriction(same(objectRestriction))).andReturn(queryMock).once();
+    expect(queryMock.getQueryString()).andReturn(queryString).once();
+
+    replayAll();
+    EventSearchResult searchResult = eventSearch.getSearchResult(queryMock, true);
+    verifyAll();
+
+    assertNotNull(searchResult);
+    assertEquals("asdf", searchResult.getLuceneQuery());
+    assertFalse(searchResult.getSkipChecks());
+    String[] sortFields = searchResult.getSortFields();
+    assertNotNull(sortFields);
+    assertEquals(3, sortFields.length);
+    assertEquals("-Classes.CalendarEventClass.eventDate", sortFields[0]);
+    assertEquals("-Classes.CalendarEventClass.eventDate_end", sortFields[1]);
+    assertEquals("-Classes.CalendarEventClass.l_title", sortFields[2]);
+  }
+
+  @Test
+  public void testGetSearchResultWithoutChecks() throws Exception {
+    String queryString = "asdf";
+    LuceneQueryRestrictionApi objectRestriction = new LuceneQueryRestrictionApi("object",
+        "\"Classes.CalendarEventClass\"");
+
+    expect(queryServiceMock.createRestriction(eq("object"),
+        eq("\"Classes.CalendarEventClass\""))).andReturn(objectRestriction).once();
+    expect(queryMock.addRestriction(same(objectRestriction))).andReturn(queryMock).once();
+    expect(queryMock.getQueryString()).andReturn(queryString).once();
+
+    replayAll();
+    EventSearchResult searchResult = eventSearch.getSearchResultWithoutChecks(queryMock);
+    verifyAll();
+
+    assertNotNull(searchResult);
+    assertEquals("asdf", searchResult.getLuceneQuery());
+    assertTrue(searchResult.getSkipChecks());
     String[] sortFields = searchResult.getSortFields();
     assertNotNull(sortFields);
     assertEquals(3, sortFields.length);

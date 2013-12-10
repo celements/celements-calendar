@@ -31,34 +31,35 @@ public class EventSearch implements IEventSearch {
   }
 
   public EventSearchResult getSearchResult(EventSearchQuery query) {
-    return getSearchResult(query.getAsLuceneQuery(), false);
+    return getSearchResult(query.getAsLuceneQuery(), false, false);
   }
 
   public EventSearchResult getSearchResult(EventSearchQuery query, boolean invertSort) {
-    return getSearchResult(query.getAsLuceneQuery(), invertSort);
+    return getSearchResult(query.getAsLuceneQuery(), invertSort, false);
   }
 
   public EventSearchResult getSearchResult(LuceneQueryApi query) {
-    return getSearchResult(query, false);
+    return getSearchResult(query, false, false);
   }
 
   public EventSearchResult getSearchResult(LuceneQueryApi query, boolean invertSort) {
-    return getSearchResult(query, invertSort);
+    return getSearchResult(query, invertSort, false);
   }
 
   public EventSearchResult getSearchResultWithoutChecks(LuceneQueryApi query) {
-    return getSearchResult(query, false);
+    return getSearchResult(query, false, true);
   }
 
   public EventSearchResult getSearchResultWithoutChecks(LuceneQueryApi query, 
       boolean invertSort) {
-    return getSearchResult(query, invertSort);
+    return getSearchResult(query, invertSort, true);
   }
   
-  private EventSearchResult getSearchResult_int(LuceneQueryApi query, boolean invertSort) {
+  private EventSearchResult getSearchResult(LuceneQueryApi query, boolean invertSort, 
+      boolean skipChecks) {
     query.addRestriction(createEventObjectRestriction());
     return new EventSearchResult(query.getQueryString(), getSortFields(invertSort), 
-        getContext());
+        skipChecks, getContext());
   }
 
   public EventSearchResult getSearchResultFromDate(EventSearchQuery query, Date fromDate) {
@@ -73,7 +74,7 @@ public class EventSearch implements IEventSearch {
     String queryString = query.getQueryString();
     LOGGER.debug("getSearchResultFromDate: query [" + queryString + "] and sortFields ["
         + getSortFields(false) + "].");
-    return new EventSearchResult(queryString, getSortFields(false), getContext());
+    return new EventSearchResult(queryString, getSortFields(false), false, getContext());
   }
   public EventSearchResult getSearchResultUptoDate(EventSearchQuery query, Date uptoDate) {
     return getSearchResultUptoDate(query.getAsLuceneQuery(), uptoDate);
@@ -86,7 +87,7 @@ public class EventSearch implements IEventSearch {
     String queryString = query.getQueryString();
     LOGGER.debug("getSearchResultUptoDate: query [" + queryString + "] and sortFields ["
         + getSortFields(true) + "].");
-    return new EventSearchResult(queryString, getSortFields(true), getContext());
+    return new EventSearchResult(queryString, getSortFields(true), false, getContext());
   }
 
   private LuceneQueryRestrictionApi createEventObjectRestriction() {

@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.Event;
 import com.celements.calendar.IEvent;
@@ -30,11 +29,14 @@ public class EventSearchResult {
 
   private final String luceneQuery;
   private final String[] sortFields;
+  private final boolean skipChecks;
   private final XWikiContext context;
 
-  EventSearchResult(String luceneQuery, String[] sortFields, XWikiContext context) {
+  EventSearchResult(String luceneQuery, String[] sortFields, boolean skipChecks, 
+      XWikiContext context) {
     this.luceneQuery = luceneQuery;
     this.sortFields = sortFields;
+    this.skipChecks = skipChecks;
     this.context = context;
   }
 
@@ -44,6 +46,10 @@ public class EventSearchResult {
 
   public String[] getSortFields() {
     return Arrays.copyOf(sortFields, sortFields.length);
+  }
+  
+  boolean getSkipChecks() {
+    return skipChecks;
   }
 
   /**
@@ -87,9 +93,8 @@ public class EventSearchResult {
   private List<IEvent> convertToEventList(List<SearchResult> results) {
     List<IEvent> eventList = new ArrayList<IEvent>();
     for (SearchResult result : results) {
-      DocumentReference eventDocRef = getWebUtils().resolveDocumentReference(
-          result.getFullName());
-      eventList.add(new Event(eventDocRef));
+      eventList.add(new Event(getWebUtils().resolveDocumentReference(
+          result.getFullName())));
     }
     return eventList;
   }
@@ -101,11 +106,16 @@ public class EventSearchResult {
     return hitcount;
   }
 
-  private SearchResults luceneSearch() {
+  SearchResults luceneSearch() {
     if (searchResultsCache == null) {
       try {
-        searchResultsCache = getLucenePlugin().getSearchResults(luceneQuery, sortFields,
-            null, "default,de", context);
+        if (skipChecks) {
+          searchResultsCache = getLucenePlugin().getSearchResultsWithoutChecks(
+              luceneQuery, sortFields, null, "default,de", context);
+        } else {
+          searchResultsCache = getLucenePlugin().getSearchResults(luceneQuery, sortFields,
+              null, "default,de", context);
+        }
         LOGGER.trace("luceneSearch: created new searchResults for query [" + luceneQuery
             + "].");
       } catch (Exception exception) {

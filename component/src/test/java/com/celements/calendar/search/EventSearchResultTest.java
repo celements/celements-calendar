@@ -1,12 +1,7 @@
 package com.celements.calendar.search;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.same;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,8 +33,33 @@ public class EventSearchResultTest extends AbstractBridgedComponentTestCase {
     lucenePluginMock = createMock(LucenePlugin.class);
     searchResultsMock = createMock(SearchResults.class);
     context.setWiki(xwiki);
-    searchResult = new EventSearchResult("", null, context);
+    searchResult = new EventSearchResult("", null, false, context);
     searchResult.injectLucenePlugin(lucenePluginMock);
+  }
+  
+  @Test
+  public void testLuceneSearch() throws Exception {
+    expect(lucenePluginMock.getSearchResults(eq(""), eq((String[]) null), 
+        eq((String) null), eq("default,de"), same(context))).andReturn(searchResultsMock
+        ).once();
+    
+    replayAll();
+    assertSame(searchResultsMock, searchResult.luceneSearch());
+    verifyAll();
+  }
+  
+  @Test
+  public void testLuceneSearch_skipChecks() throws Exception {
+    searchResult = new EventSearchResult("", null, true, context);
+    searchResult.injectLucenePlugin(lucenePluginMock);
+    
+    expect(lucenePluginMock.getSearchResultsWithoutChecks(eq(""), eq((String[]) null), 
+        eq((String) null), eq("default,de"), same(context))).andReturn(searchResultsMock
+        ).once();
+    
+    replayAll();
+    assertSame(searchResultsMock, searchResult.luceneSearch());
+    verifyAll();
   }
   
   @Test

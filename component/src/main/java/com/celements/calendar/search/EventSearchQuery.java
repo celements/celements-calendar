@@ -132,7 +132,7 @@ public class EventSearchQuery {
     this.fuzzy = fuzzy;
   }
 
-  void injectQueryService(IQueryService queryService) {
+  protected void injectQueryService(IQueryService queryService) {
     this.queryService = queryService;
   }
 

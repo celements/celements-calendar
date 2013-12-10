@@ -76,6 +76,7 @@ public class EventSearch implements IEventSearch {
         + getSortFields(false) + "].");
     return new EventSearchResult(queryString, getSortFields(false), false, getContext());
   }
+  
   public EventSearchResult getSearchResultUptoDate(EventSearchQuery query, Date uptoDate) {
     return getSearchResultUptoDate(query.getAsLuceneQuery(), uptoDate);
   }

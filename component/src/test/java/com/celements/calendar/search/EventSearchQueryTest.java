@@ -38,15 +38,17 @@ public class EventSearchQueryTest {
 
     expect(queryServiceMock.createQuery()).andReturn(new LuceneQueryApi(dbName)).once();
     expect(queryServiceMock.createRestriction(eq(SPACE), eq("\"" + spaceName + "\""),
-       eq(true))).andReturn(new LuceneQueryRestrictionApi(SPACE, "\"" + spaceName + "\"",
-           true)).once();
-    expect(queryServiceMock.createRangeRestriction(eq(DATE), eq("200001010000"),
-        eq("201001010000"), eq(true))).andReturn(new LuceneQueryRestrictionApi(DATE,
+       eq(true), eq(false))).andReturn(new LuceneQueryRestrictionApi(SPACE, 
+           "\"" + spaceName + "\"", true)).once();
+    expect(queryServiceMock.createFromToDateRestriction(eq(DATE), eq(fromDate), 
+        eq(toDate), eq(true))).andReturn(new LuceneQueryRestrictionApi(DATE,
             "[200001010000 TO 201001010000]", false));
-    expect(queryServiceMock.createRestriction(eq(TITLE), eq(searchTerm), eq(true))
-        ).andReturn(new LuceneQueryRestrictionApi(TITLE, searchTerm, true)).once();
-    expect(queryServiceMock.createRestriction(eq(DESCR), eq(searchTerm), eq(true))
-        ).andReturn(new LuceneQueryRestrictionApi(DESCR, searchTerm, true)).once();
+    expect(queryServiceMock.createRestriction(eq(TITLE), eq(searchTerm), eq(true), 
+        eq(false))).andReturn(new LuceneQueryRestrictionApi(TITLE, searchTerm, true)
+        ).once();
+    expect(queryServiceMock.createRestriction(eq(DESCR), eq(searchTerm), eq(true), 
+        eq(false))).andReturn(new LuceneQueryRestrictionApi(DESCR, searchTerm, true)
+        ).once();
 
     replayAll();
     EventSearchQuery query = new EventSearchQuery(spaceName, fromDate, toDate, searchTerm);
@@ -72,20 +74,22 @@ public class EventSearchQueryTest {
 
     expect(queryServiceMock.createQuery()).andReturn(new LuceneQueryApi(dbName)).once();
     expect(queryServiceMock.createRestriction(eq(SPACE), eq("\"" + spaceName + "\""),
-       eq(true))).andReturn(new LuceneQueryRestrictionApi(SPACE, "\"" + spaceName + "\"",
-           true)).once();
-    expect(queryServiceMock.createRangeRestriction(eq(DATE), eq("200001010000"),
-        eq("201001010000"), eq(true))).andReturn(new LuceneQueryRestrictionApi(DATE,
+       eq(true), eq(false))).andReturn(new LuceneQueryRestrictionApi(SPACE, 
+           "\"" + spaceName + "\"", true)).once();
+    expect(queryServiceMock.createFromToDateRestriction(eq(DATE), eq(fromDate), 
+        eq(toDate), eq(true))).andReturn(new LuceneQueryRestrictionApi(DATE, 
             "[200001010000 TO 201001010000]", false));
-    expect(queryServiceMock.createRestriction(eq(TITLE), eq(searchTerm), eq(true))
-        ).andReturn(new LuceneQueryRestrictionApi(TITLE, searchTerm, true)).once();
-    expect(queryServiceMock.createRestriction(eq(DESCR), eq(searchTerm), eq(true))
-        ).andReturn(new LuceneQueryRestrictionApi(DESCR, searchTerm, true)).once();
+    expect(queryServiceMock.createRestriction(eq(TITLE), eq(searchTerm), eq(true), 
+        eq(true))).andReturn(new LuceneQueryRestrictionApi(TITLE, searchTerm, true
+            ).setFuzzy()).once();
+    expect(queryServiceMock.createRestriction(eq(DESCR), eq(searchTerm), eq(true), 
+        eq(true))).andReturn(new LuceneQueryRestrictionApi(DESCR, searchTerm, true
+            ).setFuzzy()).once();
 
     replayAll();
     EventSearchQuery query = new EventSearchQuery(spaceName, fromDate, toDate, searchTerm);
     query.injectQueryService(queryServiceMock);
-    query.setFuzzy();
+    query.setFuzzy(true);
     LuceneQueryApi luceneQuery = query.getAsLuceneQuery();
     verifyAll();
 

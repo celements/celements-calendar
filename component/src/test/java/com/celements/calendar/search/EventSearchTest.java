@@ -72,9 +72,9 @@ public class EventSearchTest extends AbstractBridgedComponentTestCase {
     expect(queryServiceMock.createRestriction(eq("object"),
         eq("\"Classes.CalendarEventClass\""))).andReturn(objectRestriction).once();
     expect(queryMock.addRestriction(same(objectRestriction))).andReturn(queryMock).once();
-    expect(queryServiceMock.createRangeRestriction(
-        eq("Classes.CalendarEventClass.eventDate"), eq("197001210100"),
-        eq("999912312359"), eq(true))).andReturn(rangeRestriction).once();
+    expect(queryServiceMock.createFromDateRestriction(
+        eq("Classes.CalendarEventClass.eventDate"), eq(date), eq(true))).andReturn(
+            rangeRestriction).once();
     expect(queryMock.addRestriction(same(rangeRestriction))).andReturn(queryMock).once();
     expect(queryMock.getQueryString()).andReturn(queryString).once();
 
@@ -104,9 +104,9 @@ public class EventSearchTest extends AbstractBridgedComponentTestCase {
     expect(queryServiceMock.createRestriction(eq("object"),
         eq("\"Classes.CalendarEventClass\""))).andReturn(objectRestriction).once();
     expect(queryMock.addRestriction(same(objectRestriction))).andReturn(queryMock).once();
-    expect(queryServiceMock.createRangeRestriction(
-        eq("Classes.CalendarEventClass.eventDate"), eq("000101010000"),
-        eq("197001210100"), eq(false))).andReturn(rangeRestriction).once();
+    expect(queryServiceMock.createToDateRestriction(
+        eq("Classes.CalendarEventClass.eventDate"), eq(date), eq(false))).andReturn(
+            rangeRestriction).once();
     expect(queryMock.addRestriction(same(rangeRestriction))).andReturn(queryMock).once();
     expect(queryMock.getQueryString()).andReturn(queryString).once();
 

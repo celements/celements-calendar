@@ -1,7 +1,5 @@
 package com.celements.calendar.search;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -14,17 +12,13 @@ import com.xpn.xwiki.web.Utils;
 
 public class EventSearchQuery {
 
-  private static final DateFormat SDF = new SimpleDateFormat("yyyyMMddHHmm");
-  private static final String DATE_LOW = "000101010000";
-  private static final String DATE_HIGH = "999912312359";
-
   protected IQueryService queryService;
 
   protected final String spaceName;
   protected final Date fromDate;
   protected final Date toDate;
   protected final String searchTerm;
-  private boolean isFuzzy;
+  protected boolean fuzzy;
 
   public EventSearchQuery(String spaceName, Date fromDate, Date toDate,
       String searchTerm) {
@@ -32,7 +26,7 @@ public class EventSearchQuery {
     this.fromDate = fromDate;
     this.toDate = toDate;
     this.searchTerm = searchTerm;
-    isFuzzy = false;
+    fuzzy = false;
   }
 
   public String getSpaceName() {
@@ -56,6 +50,10 @@ public class EventSearchQuery {
   public String getSearchTerm() {
     return searchTerm;
   }
+  
+  public boolean isFuzzy() {
+    return fuzzy;
+  }
 
   public LuceneQueryApi getAsLuceneQuery() {
     LuceneQueryApi query = getQueryService().createQuery();
@@ -64,7 +62,7 @@ public class EventSearchQuery {
     if (checkString(searchTerm)) {
       String[] fields = getSearchTermFields();
       for (String s : searchTerm.split(",")) {
-        addOrRestrictions(query, fields, s, true, isFuzzy);
+        addOrRestrictions(query, fields, s, true, fuzzy);
       }
     }
     return query;
@@ -89,7 +87,8 @@ public class EventSearchQuery {
   protected final void addRestriction(LuceneQueryApi query, String field, String value,
       boolean tokenize, boolean fuzzy) {
     if (checkString(value)) {
-      query.addRestriction(getRestriction(field, value, tokenize, fuzzy));
+      query.addRestriction(getQueryService().createRestriction(field, value.trim(), 
+          tokenize, fuzzy));
     }
   }
 
@@ -99,7 +98,8 @@ public class EventSearchQuery {
       List<LuceneQueryRestrictionApi> orRestrictionList =
           new ArrayList<LuceneQueryRestrictionApi>();
       for (String field : fields) {
-        orRestrictionList.add(getRestriction(field, value, tokenize, fuzzy));
+        orRestrictionList.add(getQueryService().createRestriction(field, value.trim(), 
+            tokenize, fuzzy));
       }
       query.addOrRestrictionList(orRestrictionList);
     }
@@ -107,16 +107,8 @@ public class EventSearchQuery {
 
   protected final void addDateRestriction(LuceneQueryApi query, String field,
       Date fromDate, Date toDate) {
-    String from = fromDate != null ? SDF.format(fromDate) : DATE_LOW;
-    String to = toDate != null ? SDF.format(toDate) : DATE_HIGH;
-    query.addRestriction(getQueryService().createRangeRestriction(field, from, to, true));
-  }
-
-  protected final LuceneQueryRestrictionApi getRestriction(String field, String value,
-      boolean tokenize, boolean fuzzy) {
-    LuceneQueryRestrictionApi restriction = getQueryService().createRestriction(field,
-        value.trim(), tokenize);
-    return fuzzy ? restriction.setFuzzy() : restriction;
+    query.addRestriction(getQueryService().createFromToDateRestriction(field, fromDate, 
+        toDate, true));
   }
 
   protected final boolean checkString(String s) {
@@ -133,15 +125,15 @@ public class EventSearchQuery {
   @Override
   public String toString() {
     return "EventSearchQuery [spaceName=" + spaceName + ", searchTerm=" + searchTerm
-        + "]";
+        + ", fuzzy=" + fuzzy + "]";
+  }
+
+  public void setFuzzy(boolean fuzzy) {
+    this.fuzzy = fuzzy;
   }
 
   void injectQueryService(IQueryService queryService) {
     this.queryService = queryService;
-  }
-
-  public void setFuzzy() {
-    this.isFuzzy = true;
   }
 
 }

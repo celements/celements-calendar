@@ -126,6 +126,10 @@ public class EventApi extends Api {
   public Boolean getBooleanProperty(String name, String lang) {
     return event.getBooleanProperty(name, context.getLanguage());
   }
+  
+  public Integer getIntegerProperty(String name) {
+    return event.getIntegerProperty(name, context.getLanguage());
+  }
 
   public com.xpn.xwiki.api.Object getObj(String lang) {
     BaseObject obj = event.getObj(lang);

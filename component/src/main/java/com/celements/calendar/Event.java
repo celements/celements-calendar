@@ -447,6 +447,18 @@ public class Event implements IEvent {
     return result;
   }
 
+  public Integer getIntegerProperty(String name, String lang) {
+    return getIntegerProperty(getObj(lang), name);
+  }
+
+  private Integer getIntegerProperty(BaseObject obj, String name){
+    Integer result = null;
+    if (obj != null) {
+      result = obj.getIntValue(name);
+    }
+    return result;
+  }
+
   //FIXME public should return an API Object and not base Object -> refactore to use
   //      BaseObject only internally.
   public BaseObject getObj(){

@@ -73,6 +73,8 @@ public interface IEvent {
 
   public Boolean getBooleanProperty(String name, String lang);
 
+  public Integer getIntegerProperty(String name, String lang);
+
   public BaseObject getObj(String lang);
 
   /**

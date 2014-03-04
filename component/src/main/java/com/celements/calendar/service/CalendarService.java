@@ -74,7 +74,7 @@ public class CalendarService implements ICalendarService {
   }
 
   private String getAllXWQL() {
-    return "from doc.object(" + CalendarClasses.CALENDAR_EVENT_CLASS 
+    return "from doc.object(" + CalendarClasses.CALENDAR_CONFIG_CLASS 
         + ") as cal where doc.translation = 0";
   }
 

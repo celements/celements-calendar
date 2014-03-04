@@ -1,8 +1,11 @@
 package com.celements.calendar.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,6 +49,33 @@ public class CalendarService implements ICalendarService {
 
   private XWikiContext getContext() {
     return (XWikiContext) execution.getContext().getProperty("xwikicontext");
+  }
+
+  public List<DocumentReference> getAllCalendars() {
+    return getAllCalendars(new HashSet<DocumentReference>());
+  }
+
+  public List<DocumentReference> getAllCalendars(Collection<DocumentReference> excludes) {
+    List<DocumentReference> allCalendars = new ArrayList<DocumentReference>();
+    Set<DocumentReference> excludesSet = new HashSet<DocumentReference>(excludes);
+    try {
+      Query query = queryManager.createQuery(getAllXWQL(), Query.XWQL);
+      for (Object fullName : query.execute()) {
+        DocumentReference calDocRef = webUtils.resolveDocumentReference(
+            fullName.toString());
+        if (!excludesSet.contains(calDocRef)) {
+          allCalendars.add(calDocRef);
+        }
+      }
+    } catch (QueryException exc) {
+      LOGGER.error("failed to execute query [" + getAllXWQL() + "]", exc);
+    }
+    return allCalendars;
+  }
+
+  private String getAllXWQL() {
+    return "from doc.object(" + CalendarClasses.CALENDAR_EVENT_CLASS 
+        + ") as cal where doc.translation = 0";
   }
 
   public String getEventSpaceForCalendar(DocumentReference calDocRef

@@ -1,5 +1,6 @@
 package com.celements.calendar.service;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -12,6 +13,10 @@ import com.xpn.xwiki.doc.XWikiDocument;
 
 @ComponentRole
 public interface ICalendarService {
+
+  public List<DocumentReference> getAllCalendars();
+
+  public List<DocumentReference> getAllCalendars(Collection<DocumentReference> excludes);
 
   public String getEventSpaceForCalendar(DocumentReference calDocRef
       ) throws XWikiException;

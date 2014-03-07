@@ -442,7 +442,10 @@ public class Event implements IEvent {
   private Boolean getBooleanProperty(BaseObject obj, String name){
     Boolean result = null;
     if (obj != null) {
-      result = obj.getIntValue(name) == 1;
+      int intVal = obj.getIntValue(name, -1);
+      if (intVal != -1) {
+        result = intVal == 1;
+      }
     }
     return result;
   }
@@ -454,7 +457,10 @@ public class Event implements IEvent {
   private Integer getIntegerProperty(BaseObject obj, String name){
     Integer result = null;
     if (obj != null) {
-      result = obj.getIntValue(name);
+      int intVal = obj.getIntValue(name, -1);
+      if (intVal != -1) {
+        result = intVal;
+      }
     }
     return result;
   }

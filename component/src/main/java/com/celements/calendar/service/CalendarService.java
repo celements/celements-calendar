@@ -192,5 +192,9 @@ public class CalendarService implements ICalendarService {
   private CalendarClasses getCalClasses() {
     return (CalendarClasses) calClasses;
   }
+  
+  void injectQueryManager(QueryManager queryManager) {
+    this.queryManager = queryManager;
+  }
 
 }

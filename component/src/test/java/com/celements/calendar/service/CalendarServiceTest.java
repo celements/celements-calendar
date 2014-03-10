@@ -1,13 +1,7 @@
 package com.celements.calendar.service;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.same;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,6 +9,9 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.query.Query;
+import org.xwiki.query.QueryException;
+import org.xwiki.query.QueryManager;
 
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 import com.xpn.xwiki.XWiki;
@@ -29,6 +26,9 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
   private CalendarService calService;
   private XWikiContext context;
   private XWiki xwiki;
+  
+  private QueryManager queryManagerMock;
+  private Query queryMock;
 
   @Before
   public void setUp_CalendarServiceTest() throws Exception {
@@ -36,6 +36,62 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     calService = (CalendarService) Utils.getComponent(ICalendarService.class);
     xwiki = createMock(XWiki.class);
     context.setWiki(xwiki);
+    queryManagerMock = createMock(QueryManager.class);
+    calService.injectQueryManager(queryManagerMock);
+    queryMock = createMock(Query.class);
+  }
+  
+  @Test
+  public void testGetAllCalendars() throws QueryException {
+    List<Object> fullNames = Arrays.asList(new Object[] {"space.asdf", "space.asdf2"});
+    String xwql = "from doc.object(Classes.CalendarConfigClass) as cal where "
+        + "doc.translation = 0";
+    expect(queryManagerMock.createQuery(eq(xwql), eq(Query.XWQL))).andReturn(queryMock
+        ).once();
+    expect(queryMock.execute()).andReturn(fullNames).once();
+    
+    replayAll();
+    List<DocumentReference> allCals = calService.getAllCalendars();
+    assertNotNull(allCals);
+    assertEquals(2, allCals.size());
+    assertEquals(new DocumentReference("xwikidb", "space", "asdf"), allCals.get(0));
+    assertEquals(new DocumentReference("xwikidb", "space", "asdf2"), allCals.get(1));
+    verifyAll();
+  }
+  
+  @Test
+  public void testGetAllCalendars_Exception() throws QueryException {
+    Throwable cause = new QueryException("", null, null);
+    String xwql = "from doc.object(Classes.CalendarConfigClass) as cal where "
+        + "doc.translation = 0";
+    expect(queryManagerMock.createQuery(eq(xwql), eq(Query.XWQL))).andThrow(cause).once();
+    
+    replayAll();
+    List<DocumentReference> allCals = calService.getAllCalendars();
+    assertNotNull(allCals);
+    assertEquals(0, allCals.size());
+    verifyAll();
+  }
+  
+  @Test
+  public void testGetAllCalendars_exclude() throws QueryException {
+    List<Object> fullNames = Arrays.asList(new Object[] {"space.asdf", "space.asdf2", 
+        "space.asdf3"});
+    List<DocumentReference> excludes = Arrays.asList(new DocumentReference("xwikidb", 
+        "space", "asdf2"));
+    String xwql = "from doc.object(Classes.CalendarConfigClass) as cal where "
+        + "doc.translation = 0";
+    expect(queryManagerMock.createQuery(eq(xwql), eq(Query.XWQL))).andReturn(queryMock
+        ).once();
+    expect(queryMock.execute()).andReturn(fullNames).once();
+    
+    replayAll();
+    List<DocumentReference> allCals = calService.getAllCalendars(excludes);
+    assertNotNull(allCals);
+    assertEquals(2, allCals.size());
+    assertEquals(new DocumentReference("xwikidb", "space", "asdf"), allCals.get(0));
+    assertEquals(new DocumentReference("xwikidb", "space", "asdf3"), allCals.get(1));
+    verifyAll();
   }
 
   @Test
@@ -288,12 +344,12 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
 
 
   private void replayAll(Object ... mocks) {
-    replay(xwiki);
+    replay(xwiki, queryManagerMock, queryMock);
     replay(mocks);
   }
 
   private void verifyAll(Object ... mocks) {
-    verify(xwiki);
+    verify(xwiki, queryManagerMock, queryMock);
     verify(mocks);
   }
 }

@@ -154,7 +154,13 @@ public class CalendarService implements ICalendarService {
   }
 
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace) {
-    List<DocumentReference> calConfigs = getCalendarDocRefsByCalendarSpace(calSpace);
+    return getCalendarDocRefByCalendarSpace(calSpace, null);
+  }
+
+  public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace, 
+      String inSpace) {
+    List<DocumentReference> calConfigs = getCalendarDocRefsByCalendarSpace(calSpace, 
+        inSpace);
     if (calConfigs.size() > 0) {
       return calConfigs.get(0);
     } else {
@@ -163,24 +169,40 @@ public class CalendarService implements ICalendarService {
   }
 
   public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace) {
+    return getCalendarDocRefsByCalendarSpace(calSpace, null);
+  }
+
+  public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace, 
+      String inSpace) {
     List<DocumentReference> ret = new ArrayList<DocumentReference>();
-    String xwql = "from doc.object(Classes.CalendarConfigClass) as calConfig "
-        + "where calConfig.calendarspace = :calSpace";
+    String xwql = getCalendarsForCalSpaceXWQL(inSpace != null);
     try {
       Query query = queryManager.createQuery(xwql, Query.XWQL);
       query.bindValue("calSpace", calSpace);
+      if (inSpace != null) {
+        query.bindValue("docSpace", inSpace);
+      }
       for (Object calConfigFullName : query.execute()) {
         ret.add(webUtils.resolveDocumentReference((String) calConfigFullName));
       }
     } catch (QueryException exp) {
       LOGGER.error("getCalendarDocRefsByCalendarSpace: failed to execute XWQL '" + xwql
-          + "' with calSpace '" + calSpace + "'", exp);
+          + "' with calSpace '" + calSpace + "' and inSpace '" + inSpace + "'", exp);
     }
     if (ret.size() == 0) {
       LOGGER.info("getCalendarDocRefsByCalendarSpace: no calendar found for space '"
-          + calSpace + "'");
+          + calSpace + "' and inSpace '" + inSpace + "'");
     }
     return ret;
+  }
+  
+  String getCalendarsForCalSpaceXWQL(boolean withDocSpace) {
+    String xwql = "FROM doc.object(Classes.CalendarConfigClass) AS calConfig "
+        + "WHERE calConfig.calendarspace = :calSpace";
+    if (withDocSpace) {
+      xwql += " AND doc.space = :docSpace";
+    }
+    return xwql;
   }
 
   public Date getMidnightDate(Date date) {

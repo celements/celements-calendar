@@ -34,6 +34,8 @@ public interface ICalendarService {
 
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace);
 
+  public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace);
+
   public Date getMidnightDate(Date date);
 
 }

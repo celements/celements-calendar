@@ -154,24 +154,33 @@ public class CalendarService implements ICalendarService {
   }
 
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace) {
-    String xwql = "from doc.object(Classes.CalendarConfigClass) as calConfig";
-    xwql += " where calConfig.calendarspace = :calSpace";
-    Query query;
+    List<DocumentReference> calConfigs = getCalendarDocRefsByCalendarSpace(calSpace);
+    if (calConfigs.size() > 0) {
+      return calConfigs.get(0);
+    } else {
+      return null;
+    }
+  }
+
+  public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace) {
+    List<DocumentReference> ret = new ArrayList<DocumentReference>();
+    String xwql = "from doc.object(Classes.CalendarConfigClass) as calConfig "
+        + "where calConfig.calendarspace = :calSpace";
     try {
-      query = queryManager.createQuery(xwql, Query.XWQL);
+      Query query = queryManager.createQuery(xwql, Query.XWQL);
       query.bindValue("calSpace", calSpace);
-      List<String> blogList = query.execute();
-      if (blogList.size() > 0) {
-        return webUtils.resolveDocumentReference(blogList.get(0));
-      } else {
-        LOGGER.error("getCalendarDocRefByCalendarSpace: no calendar found for space ["
-            + calSpace + "].");
+      for (Object calConfigFullName : query.execute()) {
+        ret.add(webUtils.resolveDocumentReference((String) calConfigFullName));
       }
     } catch (QueryException exp) {
-      LOGGER.error("getCalendarDocRefByCalendarSpace: failed to execute XWQL [" + xwql
-          + "].", exp);
+      LOGGER.error("getCalendarDocRefsByCalendarSpace: failed to execute XWQL '" + xwql
+          + "' with calSpace '" + calSpace + "'", exp);
     }
-    return null;
+    if (ret.size() == 0) {
+      LOGGER.info("getCalendarDocRefsByCalendarSpace: no calendar found for space '"
+          + calSpace + "'");
+    }
+    return ret;
   }
 
   public Date getMidnightDate(Date date) {

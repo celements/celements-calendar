@@ -191,7 +191,7 @@ public class Calendar implements ICalendar {
     return detailviewConfig;
   }
 
-  private BaseObject getConfigObject() {
+  protected BaseObject getConfigObject() {
     return getCalDoc().getXObject(new DocumentReference(getContext().getDatabase(),
         CalendarClasses.CALENDAR_CONFIG_CLASS_SPACE,
         CalendarClasses.CALENDAR_CONFIG_CLASS_DOC));

@@ -44,6 +44,8 @@ public class CalendarClasses extends AbstractClassCollection {
   public static final String SUBSCRIPTION_CLASS_DOC = "SubscriptionClass";
   public static final String SUBSCRIPTION_CLASS = SUBSCRIPTION_CLASS_SPACE + "."
       + SUBSCRIPTION_CLASS_DOC;
+  public static final String PROPERTY_SUBSCRIBER = "subscriber";
+  public static final String PROPERTY_DO_SUBSCRIBE = "doSubscribe";
 
   private static Log LOGGER = LogFactory.getFactory().getInstance(CalendarClasses.class);
 
@@ -177,8 +179,9 @@ public class CalendarClasses extends AbstractClassCollection {
 
     BaseClass bclass = doc.getXClass();
     bclass.setDocumentReference(classRef);
-    needsUpdate |= bclass.addTextField("subscriber", "subscriber", 30);
-    needsUpdate |= bclass.addBooleanField("doSubscribe", "doSubscribe", "yesno");
+    needsUpdate |= bclass.addTextField(PROPERTY_SUBSCRIBER, PROPERTY_SUBSCRIBER, 30);
+    needsUpdate |= bclass.addBooleanField(PROPERTY_DO_SUBSCRIBE, PROPERTY_DO_SUBSCRIBE, 
+        "yesno");
 
     setContentAndSaveClassDocument(doc, needsUpdate);
     return bclass;

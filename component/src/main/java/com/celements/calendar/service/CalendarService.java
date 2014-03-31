@@ -12,7 +12,11 @@ import org.apache.commons.logging.LogFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
+import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.EntityReference;
+import org.xwiki.model.reference.SpaceReference;
+import org.xwiki.model.reference.WikiReference;
 import org.xwiki.query.Query;
 import org.xwiki.query.QueryException;
 import org.xwiki.query.QueryManager;
@@ -169,31 +173,50 @@ public class CalendarService implements ICalendarService {
   }
 
   public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace) {
-    return getCalendarDocRefsByCalendarSpace(calSpace, null);
+    return getCalendarDocRefsByCalendarSpace(calSpace, (SpaceReference) null);
   }
 
   public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace, 
       String inSpace) {
+    SpaceReference inSpaceRef = null;
+    if (inSpace != null) {
+      inSpaceRef = new SpaceReference(inSpace, new WikiReference(getContext(
+          ).getDatabase()));
+    }
+    return getCalendarDocRefsByCalendarSpace(calSpace, inSpaceRef);
+  }
+
+  public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace, 
+      EntityReference inRef) {
     List<DocumentReference> ret = new ArrayList<DocumentReference>();
-    String xwql = getCalendarsForCalSpaceXWQL(inSpace != null);
+    SpaceReference inSpaceRef = (SpaceReference) extractRef(inRef, EntityType.SPACE);
+    WikiReference inWikiRef = (WikiReference) extractRef(inRef, EntityType.WIKI);
+    String xwql = getCalendarsForCalSpaceXWQL(inSpaceRef != null);
     try {
       Query query = queryManager.createQuery(xwql, Query.XWQL);
       query.bindValue("calSpace", calSpace);
-      if (inSpace != null) {
-        query.bindValue("docSpace", inSpace);
+      if (inSpaceRef != null) {
+        query.bindValue("docSpace", inSpaceRef.getName());
+      }
+      if (inWikiRef != null && !inWikiRef.getName().equals(getContext().getDatabase())) {
+        query.setWiki(inWikiRef.getName());
       }
       for (Object calConfigFullName : query.execute()) {
         ret.add(webUtils.resolveDocumentReference((String) calConfigFullName));
       }
     } catch (QueryException exp) {
       LOGGER.error("getCalendarDocRefsByCalendarSpace: failed to execute XWQL '" + xwql
-          + "' with calSpace '" + calSpace + "' and inSpace '" + inSpace + "'", exp);
+          + "' with calSpace '" + calSpace + "' and inSpaceRef '" + inSpaceRef + "'", exp);
     }
     if (ret.size() == 0) {
       LOGGER.info("getCalendarDocRefsByCalendarSpace: no calendar found for space '"
-          + calSpace + "' and inSpace '" + inSpace + "'");
+          + calSpace + "' and inSpaceRef '" + inSpaceRef + "'");
     }
     return ret;
+  }
+  
+  private EntityReference extractRef(EntityReference ref, EntityType type) {
+    return ref != null ? ref.extractReference(type) : null;
   }
   
   String getCalendarsForCalSpaceXWQL(boolean withDocSpace) {

@@ -10,6 +10,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.SpaceReference;
+import org.xwiki.model.reference.WikiReference;
 import org.xwiki.query.Query;
 import org.xwiki.query.QueryException;
 import org.xwiki.query.QueryManager;
@@ -341,6 +343,52 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     assertNotNull(spacesHQL);
     assertEquals("(obj.name like 'myCalSpace.%' or obj.name like 'myCalSpace2.%'"
         + " or obj.name like 'myCalSpace3.%')", spacesHQL);
+  }
+  
+  @Test
+  public void testGetCalendarDocRefsByCalendarSpace_wikiRef() throws Exception {
+    String calSpace = "myCalSpace";
+    WikiReference inWikiRef = new WikiReference("db");
+    List<Object> fullNames = Arrays.asList((Object) "myInSpace.doc1", 
+        (Object) "myInSpace.doc2");
+    
+    expect(queryManagerMock.createQuery(eq(getXWQL(false)), eq(Query.XWQL))).andReturn(
+        queryMock).once();
+    expect(queryMock.bindValue(eq("calSpace"), eq(calSpace))).andReturn(queryMock).once();
+    expect(queryMock.setWiki("db")).andReturn(queryMock).once();
+    expect(queryMock.execute()).andReturn(fullNames).once();
+    
+    replayAll();
+    List<DocumentReference> ret = calService.getCalendarDocRefsByCalendarSpace(calSpace, 
+        inWikiRef);
+    assertEquals(2, ret.size());
+    assertEquals(new DocumentReference("xwikidb", "myInSpace", "doc1"), ret.get(0));
+    assertEquals(new DocumentReference("xwikidb", "myInSpace", "doc2"), ret.get(1));
+    verifyAll();
+  }
+  
+  @Test
+  public void testGetCalendarDocRefsByCalendarSpace_spaceRef() throws Exception {
+    String calSpace = "myCalSpace";
+    SpaceReference inSpaceRef = new SpaceReference("myInSpace", new WikiReference("db"));
+    List<Object> fullNames = Arrays.asList((Object) "myInSpace.doc1", 
+        (Object) "myInSpace.doc2");
+    
+    expect(queryManagerMock.createQuery(eq(getXWQL(true)), eq(Query.XWQL))).andReturn(
+        queryMock).once();
+    expect(queryMock.bindValue(eq("calSpace"), eq(calSpace))).andReturn(queryMock).once();
+    expect(queryMock.bindValue(eq("docSpace"), eq("myInSpace"))).andReturn(queryMock
+        ).once();
+    expect(queryMock.setWiki("db")).andReturn(queryMock).once();
+    expect(queryMock.execute()).andReturn(fullNames).once();
+    
+    replayAll();
+    List<DocumentReference> ret = calService.getCalendarDocRefsByCalendarSpace(calSpace, 
+        inSpaceRef);
+    assertEquals(2, ret.size());
+    assertEquals(new DocumentReference("xwikidb", "myInSpace", "doc1"), ret.get(0));
+    assertEquals(new DocumentReference("xwikidb", "myInSpace", "doc2"), ret.get(1));
+    verifyAll();
   }
   
   @Test

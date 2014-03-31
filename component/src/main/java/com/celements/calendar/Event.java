@@ -505,6 +505,8 @@ public class Event implements IEvent {
       IWebUtilsService webUtils = Utils.getComponent(IWebUtilsService.class);
       DocumentReference templateRef = webUtils.resolveDocumentReference(template);
       if(getContext().getWiki().exists(templateRef, getContext())) {
+        //FIXME using new BaseObject can cause problems. doc.newXObject is preferable
+        //      check if this is really the right solution in this place.
         obj = new BaseObject();
         obj.setXClassReference(new DocumentReference(getContext().getDatabase(), 
             CalendarClasses.CALENDAR_EVENT_CLASS_SPACE,

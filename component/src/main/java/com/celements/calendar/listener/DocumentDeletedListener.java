@@ -13,9 +13,9 @@ import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.observation.EventListener;
 import org.xwiki.observation.event.Event;
 
+import com.celements.calendar.classes.CalendarClasses;
 import com.celements.calendar.event.CalendarDeletedEvent;
 import com.celements.calendar.event.EventDeletedEvent;
-import com.celements.calendar.plugin.CelementsCalendarPlugin;
 import com.xpn.xwiki.doc.XWikiDocument;
 
 @Component("calendar.docDeleted")
@@ -38,33 +38,40 @@ public class DocumentDeletedListener extends AbstractDocumentListener
   }
 
   public void onEvent(Event event, Object source, Object data) {
-    XWikiDocument document = (XWikiDocument) source;
-    mLogger.debug("onEvent: got event for [" + event.getClass() + "] on document ["
-        + document.getDocumentReference() + "].");
-    String wikiName = document.getDocumentReference().getWikiReference().getName();
-    DocumentReference calClass = new DocumentReference(wikiName,
-        CelementsCalendarPlugin.CLASS_CALENDAR_SPACE,
-        CelementsCalendarPlugin.CLASS_CALENDAR_DOC);
-    DocumentReference eventClass = new DocumentReference(wikiName,
-        CelementsCalendarPlugin.CLASS_EVENT_SPACE,
-        CelementsCalendarPlugin.CLASS_EVENT_DOC);
-
-    if (document.getXObject(calClass) != null) {
-      // Fire the user created event
-      CalendarDeletedEvent newEvent = new CalendarDeletedEvent();
-      getObservationManager().notify(newEvent, source, getCalDataMap(document));
-    } else {
-      mLogger.trace("onEvent: no calendar class object found. skipping for calendar. ["
+    XWikiDocument document = getOrginialDocument(source);
+    if (document != null) {
+      mLogger.debug("onEvent: got event for [" + event.getClass() + "] on document ["
           + document.getDocumentReference() + "].");
+      String wikiName = document.getDocumentReference().getWikiReference().getName();
+      DocumentReference calClass = new DocumentReference(wikiName, 
+          CalendarClasses.CALENDAR_CONFIG_CLASS_SPACE,
+          CalendarClasses.CALENDAR_CONFIG_CLASS_DOC);
+      DocumentReference eventClass = new DocumentReference(wikiName,
+          CalendarClasses.CALENDAR_EVENT_CLASS_SPACE,
+          CalendarClasses.CALENDAR_EVENT_CLASS_DOC);
+  
+      if (document.getXObject(calClass) != null) {
+        CalendarDeletedEvent newEvent = new CalendarDeletedEvent();
+        getObservationManager().notify(newEvent, source, getCalDataMap(document));
+      } else {
+        mLogger.trace("onEvent: no calendar class object found. skipping for calendar. ["
+            + document.getDocumentReference() + "].");
+      }
+      if (document.getXObject(eventClass) != null) {
+        EventDeletedEvent newEvent = new EventDeletedEvent();
+        getObservationManager().notify(newEvent, source, getEventDataMap(document));
+      } else {
+        mLogger.trace("onEvent: no event class object found. skipping for events. ["
+            + document.getDocumentReference() + "].");
+      }
     }
-    if (document.getXObject(eventClass) != null) {
-      // Fire the user created event
-      EventDeletedEvent newEvent = new EventDeletedEvent();
-      getObservationManager().notify(newEvent, source, getEventDataMap(document));
-    } else {
-      mLogger.trace("onEvent: no event class object found. skipping for events. ["
-          + document.getDocumentReference() + "].");
+  }
+  
+  private XWikiDocument getOrginialDocument(Object source) {
+    if (source != null) {
+      return ((XWikiDocument) source).getOriginalDocument();
     }
+    return null;
   }
 
   @Override

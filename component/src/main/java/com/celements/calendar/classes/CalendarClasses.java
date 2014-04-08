@@ -17,7 +17,6 @@ public class CalendarClasses extends AbstractClassCollection {
   public static final String CALENDAR_CONFIG_CLASS_DOC = "CalendarConfigClass";
   public static final String CALENDAR_CONFIG_CLASS = CALENDAR_CONFIG_CLASS_SPACE + "."
       + CALENDAR_CONFIG_CLASS_DOC;
-  public static final String PROPERTY_IS_IMAGE_EXPORT = "is_image_export";
   public static final String PROPERTY_IS_SUBSCRIBABLE = "is_subscribable";
   public static final String PROPERTY_EVENT_PER_PAGE = "event_per_page";
   public static final String PROPERTY_OVERVIEW_COLUMN_CONFIG = "overview_column_config";
@@ -104,8 +103,6 @@ public class CalendarClasses extends AbstractClassCollection {
         "yesno");
     needsUpdate |= bclass.addBooleanField(PROPERTY_IS_SUBSCRIBABLE,
         PROPERTY_IS_SUBSCRIBABLE, "yesno");
-    needsUpdate |= bclass.addBooleanField(PROPERTY_IS_IMAGE_EXPORT, 
-        PROPERTY_IS_IMAGE_EXPORT, "yesno");
 
     setContentAndSaveClassDocument(doc, needsUpdate);
     return bclass;

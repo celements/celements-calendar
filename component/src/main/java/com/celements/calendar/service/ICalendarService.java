@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.xwiki.component.annotation.ComponentRole;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.EntityReference;
 
 import com.celements.calendar.ICalendar;
 import com.xpn.xwiki.XWikiException;
@@ -34,13 +35,37 @@ public interface ICalendarService {
 
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace);
 
-  public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace, 
+  public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace,
       String inSpace);
 
+  /**
+   * 
+   * @param calSpace
+   *          space name which to get calendars for
+   * @return all calendar config docs with given space name
+   */
   public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace);
 
-  public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace, 
+  /**
+   * @param calSpace
+   *          space name which to get calendars for
+   * @param inSpace
+   *          only returns calendars within this space
+   * @return all calendar config docs with given space name and within given space
+   */
+  public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace,
       String inSpace);
+
+  /**
+   * @param calSpace
+   *          space name which to get calendars for
+   * @param inRef
+   *          only returns calendars within this reference - either {@link WikiReference}
+   *          or {@link SpaceReference}
+   * @return all calendar config docs with given space name and within given reference
+   */
+  public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace,
+      EntityReference inRef);
 
   public Date getMidnightDate(Date date);
 

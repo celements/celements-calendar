@@ -7,6 +7,8 @@ import java.util.List;
 import org.xwiki.component.annotation.ComponentRole;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
+import org.xwiki.model.reference.SpaceReference;
+import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.ICalendar;
 import com.xpn.xwiki.XWikiException;
@@ -17,7 +19,12 @@ public interface ICalendarService {
 
   public List<DocumentReference> getAllCalendars();
 
+  public List<DocumentReference> getAllCalendars(WikiReference wikiRef);
+
   public List<DocumentReference> getAllCalendars(Collection<DocumentReference> excludes);
+
+  public List<DocumentReference> getAllCalendars(WikiReference wikiRef, 
+      Collection<DocumentReference> excludes);
 
   public String getEventSpaceForCalendar(DocumentReference calDocRef
       ) throws XWikiException;

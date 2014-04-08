@@ -91,6 +91,10 @@ public class CalendarService implements ICalendarService {
     } catch (QueryException exc) {
       LOGGER.error("failed to execute query [" + getAllXWQL() + "]", exc);
     }
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("getAllCalendars: returned for wiki '" + wikiRef + "' and excludes '" 
+          + excludes + "' calendars: " + allCalendars);
+    }
     return allCalendars;
   }
 
@@ -209,7 +213,7 @@ public class CalendarService implements ICalendarService {
     if (inWikiRef == null) {
       inWikiRef = new WikiReference(getContext().getDatabase());
     }
-    List<DocumentReference> ret = Collections.emptyList();
+    List<DocumentReference> ret = null;
     try {
       List<DocumentReference> calDocRefs = getCalSpaceCache(inWikiRef).get(calSpace);
       if (calDocRefs != null) {
@@ -218,6 +222,9 @@ public class CalendarService implements ICalendarService {
       }
     } catch (XWikiException exc) {
       LOGGER.error("Failed getting calSpaceCache for wiki '" + inWikiRef + "'");
+    }
+    if (ret == null) {
+      ret = new ArrayList<DocumentReference>();
     }
     LOGGER.trace("getCalendarDocRefsByCalendarSpace: for calSpace '" + calSpace 
         + "' and inRef '" + inRef + "' returned calendars: " + ret);
@@ -236,15 +243,19 @@ public class CalendarService implements ICalendarService {
         (Map<String, List<DocumentReference>>) execution.getContext().getProperty(
             contextKey);
     if (calSpaceCache == null) {
+      LOGGER.debug("getCalSpaceCache: none found for wiki '" + wikiRef + "', loading now");
       calSpaceCache = new HashMap<String, List<DocumentReference>>();
       for (DocumentReference calDocRef : getAllCalendars(wikiRef)) {
         String calSpace = getEventSpaceForCalendar(calDocRef);
         if (!calSpaceCache.containsKey(calSpace)) {
           calSpaceCache.put(calSpace, new ArrayList<DocumentReference>());
         }
+        LOGGER.trace("getCalSpaceCache: put to space '" + calSpace + "': " + calDocRef);
         calSpaceCache.get(calSpace).add(calDocRef);
       }
       execution.getContext().setProperty(contextKey, calSpaceCache);
+    } else {
+      LOGGER.trace("getCalSpaceCache: got from context for wiki '" + wikiRef + "'");
     }
     return calSpaceCache;
   }

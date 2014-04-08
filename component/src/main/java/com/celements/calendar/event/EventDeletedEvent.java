@@ -13,9 +13,8 @@ public class EventDeletedEvent extends AbstractDocumentEvent {
    * {@link org.xwiki.observation.event.filter.AlwaysMatchingEventFilter}, meaning that this event will match any
    * other document delete event.
    */
-  public EventDeletedEvent()
-  {
-      super();
+  public EventDeletedEvent() {
+    super();
   }
   
   /**
@@ -24,9 +23,8 @@ public class EventDeletedEvent extends AbstractDocumentEvent {
    * 
    * @param documentReference the reference of the document to match
    */
-  public EventDeletedEvent(DocumentReference documentReference)    
-  {
-      super(documentReference);
+  public EventDeletedEvent(DocumentReference documentReference) {
+    super(documentReference);
   }
   
   /**
@@ -34,8 +32,7 @@ public class EventDeletedEvent extends AbstractDocumentEvent {
    * 
    * @param eventFilter the filter to use for matching events
    */
-  public EventDeletedEvent(EventFilter eventFilter)
-  {
-      super(eventFilter);
+  public EventDeletedEvent(EventFilter eventFilter) {
+    super(eventFilter);
   }
 }

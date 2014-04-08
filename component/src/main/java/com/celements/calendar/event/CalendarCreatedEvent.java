@@ -13,9 +13,8 @@ public class CalendarCreatedEvent extends AbstractDocumentEvent {
    * {@link org.xwiki.observation.event.filter.AlwaysMatchingEventFilter}, meaning that this event will match any
    * other document delete event.
    */
-  public CalendarCreatedEvent()
-  {
-      super();
+  public CalendarCreatedEvent() {
+    super();
   }
   
   /**
@@ -24,9 +23,8 @@ public class CalendarCreatedEvent extends AbstractDocumentEvent {
    * 
    * @param documentReference the reference of the document to match
    */
-  public CalendarCreatedEvent(DocumentReference documentReference)    
-  {
-      super(documentReference);
+  public CalendarCreatedEvent(DocumentReference documentReference) {
+    super(documentReference);
   }
   
   /**
@@ -34,8 +32,7 @@ public class CalendarCreatedEvent extends AbstractDocumentEvent {
    * 
    * @param eventFilter the filter to use for matching events
    */
-  public CalendarCreatedEvent(EventFilter eventFilter)
-  {
-      super(eventFilter);
+  public CalendarCreatedEvent(EventFilter eventFilter) {
+    super(eventFilter);
   }
 }

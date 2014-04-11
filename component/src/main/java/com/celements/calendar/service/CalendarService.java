@@ -50,7 +50,7 @@ public class CalendarService implements ICalendarService {
   private QueryManager queryManager;
   
   @Requirement
-  EntityReferenceResolver<String> referenceResolver;
+  private EntityReferenceResolver<String> referenceResolver;
 
   @Requirement
   private Execution execution;
@@ -98,7 +98,7 @@ public class CalendarService implements ICalendarService {
     return allCalendars;
   }
 
-  private String getAllXWQL() {
+  String getAllXWQL() {
     return "from doc.object(" + CalendarClasses.CALENDAR_CONFIG_CLASS 
         + ") as cal where doc.translation = 0";
   }

@@ -5,9 +5,12 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +19,9 @@ import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.model.reference.WikiReference;
 import org.xwiki.query.Query;
 import org.xwiki.query.QueryException;
+import org.xwiki.query.QueryExecutor;
 import org.xwiki.query.QueryManager;
+import org.xwiki.query.internal.DefaultQuery;
 
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 import com.xpn.xwiki.XWiki;
@@ -31,9 +36,9 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
   private CalendarService calService;
   private XWikiContext context;
   private XWiki xwiki;
-  
+
   private QueryManager queryManagerMock;
-  private Query queryMock;
+  private QueryExecutor queryExecutorMock;
 
   @Before
   public void setUp_CalendarServiceTest() throws Exception {
@@ -42,63 +47,98 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     xwiki = createMockAndAddToDefault(XWiki.class);
     context.setWiki(xwiki);
     queryManagerMock = createMockAndAddToDefault(QueryManager.class);
+    queryExecutorMock = createMockAndAddToDefault(QueryExecutor.class);
     calService.injectQueryManager(queryManagerMock);
-    queryMock = createMockAndAddToDefault(Query.class);
   }
   
   @Test
-  public void testGetAllCalendars() throws QueryException {
-    List<Object> fullNames = Arrays.asList(new Object[] {"space.asdf", "space.asdf2"});
-    String xwql = getXWQL();
+  public void testGetAllCalendars_wiki_exclude() throws Exception {
+    WikiReference inWiki = new WikiReference("db");
+    Set<DocumentReference> excludes = new HashSet<DocumentReference>();
+    excludes.add(new DocumentReference("db", "space1", "toExclude"));
+    Query query = new DefaultQuery("theStatement", Query.XWQL, queryExecutorMock);
+    List<Object> fullNames = Arrays.asList(new Object[] {"space1.calDoc", 
+        "space1.toExclude", "space2.calDoc"});
     
-    expect(queryManagerMock.createQuery(eq(xwql), eq(Query.XWQL))).andReturn(queryMock
+    expect(queryManagerMock.createQuery(eq(getXWQL()), eq(Query.XWQL))).andReturn(query
         ).once();
-    expect(queryMock.setWiki("xwikidb")).andReturn(queryMock).once();
-    expect(queryMock.execute()).andReturn(fullNames).once();
+    expect(queryExecutorMock.execute(eq(query))).andReturn(fullNames).once();
     
+    assertNull(query.getWiki());
+    assertEquals(0, query.getNamedParameters().size());
     replayDefault();
-    List<DocumentReference> allCals = calService.getAllCalendars();
-    assertNotNull(allCals);
-    assertEquals(2, allCals.size());
-    assertEquals(new DocumentReference("xwikidb", "space", "asdf"), allCals.get(0));
-    assertEquals(new DocumentReference("xwikidb", "space", "asdf2"), allCals.get(1));
+    List<DocumentReference> ret = calService.getAllCalendars(inWiki, excludes);
     verifyDefault();
+    assertEquals(2, ret.size());
+    assertEquals(new DocumentReference("db", "space1", "calDoc"), ret.get(0));
+    assertEquals(new DocumentReference("db", "space2", "calDoc"), ret.get(1));
+    assertEquals("db", query.getWiki());
+    assertEquals(0, query.getNamedParameters().size());
   }
   
   @Test
-  public void testGetAllCalendars_Exception() throws QueryException {
+  public void testGetAllCalendars_nullWiki() throws Exception {
+    WikiReference inWiki = null;
+    Set<DocumentReference> excludes = Collections.emptySet();
+    Query query = new DefaultQuery("theStatement", Query.XWQL, queryExecutorMock);
+    List<Object> fullNames = Arrays.asList(new Object[] {"space1.calDoc", 
+        "space2.calDoc"});
+    
+    expect(queryManagerMock.createQuery(eq(getXWQL()), eq(Query.XWQL))).andReturn(query
+        ).once();
+    expect(queryExecutorMock.execute(eq(query))).andReturn(fullNames).once();
+    
+    assertNull(query.getWiki());
+    assertEquals(0, query.getNamedParameters().size());
+    replayDefault();
+    List<DocumentReference> ret = calService.getAllCalendars(inWiki, excludes);
+    verifyDefault();
+    assertEquals(2, ret.size());
+    assertEquals(new DocumentReference("xwikidb", "space1", "calDoc"), ret.get(0));
+    assertEquals(new DocumentReference("xwikidb", "space2", "calDoc"), ret.get(1));
+    assertEquals("xwikidb", query.getWiki());
+    assertEquals(0, query.getNamedParameters().size());
+  }
+  
+  @Test
+  public void testGetAllCalendars_noCals() throws Exception {
+    WikiReference inWiki = new WikiReference("db");
+    Set<DocumentReference> excludes = Collections.emptySet();
+    Query query = new DefaultQuery("theStatement", Query.XWQL, queryExecutorMock);
+    
+    expect(queryManagerMock.createQuery(eq(getXWQL()), eq(Query.XWQL))).andReturn(query
+        ).once();
+    expect(queryExecutorMock.execute(eq(query))).andReturn(Collections.emptyList()).once();
+    
+    assertNull(query.getWiki());
+    assertEquals(0, query.getNamedParameters().size());
+    replayDefault();
+    List<DocumentReference> ret = calService.getAllCalendars(inWiki, excludes);
+    verifyDefault();
+    assertEquals(0, ret.size());
+    assertEquals("db", query.getWiki());
+    assertEquals(0, query.getNamedParameters().size());
+  }
+  
+  @Test
+  public void testGetAllCalendars_queryException() throws Exception {
     Throwable cause = new QueryException("", null, null);
-    String xwql = getXWQL();
+    Set<DocumentReference> excludes = Collections.emptySet();
     
-    expect(queryManagerMock.createQuery(eq(xwql), eq(Query.XWQL))).andThrow(cause).once();
+    expect(queryManagerMock.createQuery(eq(getXWQL()), eq(Query.XWQL))).andThrow(cause
+        ).once();
     
     replayDefault();
-    List<DocumentReference> allCals = calService.getAllCalendars();
-    assertNotNull(allCals);
-    assertEquals(0, allCals.size());
+    List<DocumentReference> ret = calService.getAllCalendars(null, excludes);
     verifyDefault();
+    assertNotNull(ret);
+    assertEquals(0, ret.size());
   }
   
   @Test
-  public void testGetAllCalendars_exclude() throws QueryException {
-    List<Object> fullNames = Arrays.asList(new Object[] {"space.asdf", "space.asdf2", 
-        "space.asdf3"});
-    List<DocumentReference> excludes = Arrays.asList(new DocumentReference("xwikidb", 
-        "space", "asdf2"));
-    String xwql = getXWQL();
-    
-    expect(queryManagerMock.createQuery(eq(xwql), eq(Query.XWQL))).andReturn(queryMock
-        ).once();
-    expect(queryMock.setWiki("xwikidb")).andReturn(queryMock).once();
-    expect(queryMock.execute()).andReturn(fullNames).once();
-    
-    replayDefault();
-    List<DocumentReference> allCals = calService.getAllCalendars(excludes);
-    assertNotNull(allCals);
-    assertEquals(2, allCals.size());
-    assertEquals(new DocumentReference("xwikidb", "space", "asdf"), allCals.get(0));
-    assertEquals(new DocumentReference("xwikidb", "space", "asdf3"), allCals.get(1));
-    verifyDefault();
+  public void testGetAllXWQL() {
+    assertEquals("from doc.object(Classes.CalendarConfigClass) as cal "
+        + "where doc.translation = 0", calService.getAllXWQL());
   }
 
   @Test

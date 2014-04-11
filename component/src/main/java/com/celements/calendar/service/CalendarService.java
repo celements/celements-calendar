@@ -2,7 +2,6 @@ package com.celements.calendar.service;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,6 +17,7 @@ import org.xwiki.context.Execution;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
+import org.xwiki.model.reference.EntityReferenceResolver;
 import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.model.reference.WikiReference;
 import org.xwiki.query.Query;
@@ -28,7 +28,6 @@ import com.celements.calendar.Calendar;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.classes.CalendarClasses;
 import com.celements.common.classes.IClassCollectionRole;
-import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -49,9 +48,9 @@ public class CalendarService implements ICalendarService {
 
   @Requirement
   private QueryManager queryManager;
-
+  
   @Requirement
-  private IWebUtilsService webUtils;
+  EntityReferenceResolver<String> referenceResolver;
 
   @Requirement
   private Execution execution;
@@ -75,15 +74,16 @@ public class CalendarService implements ICalendarService {
   public List<DocumentReference> getAllCalendars(WikiReference wikiRef, 
       Collection<DocumentReference> excludes) {
     List<DocumentReference> allCalendars = new ArrayList<DocumentReference>();
+    if (wikiRef == null) {
+      wikiRef = new WikiReference(getContext().getDatabase());
+    }
     Set<DocumentReference> excludesSet = new HashSet<DocumentReference>(excludes);
     try {
       Query query = queryManager.createQuery(getAllXWQL(), Query.XWQL);
-      if (wikiRef != null) {
-        query.setWiki(wikiRef.getName());
-      }
+      query.setWiki(wikiRef.getName());
       for (Object fullName : query.execute()) {
-        DocumentReference calDocRef = webUtils.resolveDocumentReference(
-            fullName.toString());
+        DocumentReference calDocRef = new DocumentReference(referenceResolver.resolve(
+            fullName.toString(), EntityType.DOCUMENT, wikiRef));
         if (!excludesSet.contains(calDocRef)) {
           allCalendars.add(calDocRef);
         }
@@ -130,12 +130,12 @@ public class CalendarService implements ICalendarService {
   private List<String> getSubscribedSpaces(BaseObject calObj) throws XWikiException {
     List<String> spaces = new ArrayList<String>();
     if (calObj != null) {
-      DocumentReference calConfRef = getCalClasses().getCalendarClassRef(getContext(
-          ).getDatabase());
+      String database = getContext().getDatabase();
+      DocumentReference calConfRef = getCalClasses().getCalendarClassRef(database);
       for (Object subDocName : calObj.getListValue(
           CalendarClasses.PROPERTY_SUBSCRIBE_TO)) {
-        DocumentReference subDocRef = webUtils.resolveDocumentReference(
-            subDocName.toString());
+        DocumentReference subDocRef = new DocumentReference(referenceResolver.resolve(
+            subDocName.toString(), EntityType.DOCUMENT, new WikiReference(database)));
         BaseObject subscCalObj = getContext().getWiki().getDocument(subDocRef,
             getContext()).getXObject(calConfRef);
         if (subscCalObj != null) {

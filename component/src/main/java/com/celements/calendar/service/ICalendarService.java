@@ -17,12 +17,40 @@ import com.xpn.xwiki.doc.XWikiDocument;
 @ComponentRole
 public interface ICalendarService {
 
+  /**
+   * gets all calendars in current database
+   * 
+   * @return list of calendar config doc refs
+   */
   public List<DocumentReference> getAllCalendars();
 
+  /**
+   * gets all calendars in given database
+   * 
+   * @param wikiRef
+   *          database
+   * @return list of calendar config doc refs
+   */
   public List<DocumentReference> getAllCalendars(WikiReference wikiRef);
 
+  /**
+   * gets all calendars in current database without excludes
+   * 
+   * @param excludes
+   *          calendar config doc refs which to exclude
+   * @return list of calendar config doc refs
+   */
   public List<DocumentReference> getAllCalendars(Collection<DocumentReference> excludes);
 
+  /**
+   * gets all calendars in given database without excludes
+   * 
+   * @param wikiRef
+   *          database
+   * @param excludes
+   *          calendar config doc refs which to exclude
+   * @return list of calendar config doc refs
+   */
   public List<DocumentReference> getAllCalendars(WikiReference wikiRef, 
       Collection<DocumentReference> excludes);
 

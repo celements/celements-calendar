@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,8 +50,10 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
   public void testGetAllCalendars() throws QueryException {
     List<Object> fullNames = Arrays.asList(new Object[] {"space.asdf", "space.asdf2"});
     String xwql = getXWQL();
+    
     expect(queryManagerMock.createQuery(eq(xwql), eq(Query.XWQL))).andReturn(queryMock
         ).once();
+    expect(queryMock.setWiki("xwikidb")).andReturn(queryMock).once();
     expect(queryMock.execute()).andReturn(fullNames).once();
     
     replayDefault();
@@ -68,6 +69,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
   public void testGetAllCalendars_Exception() throws QueryException {
     Throwable cause = new QueryException("", null, null);
     String xwql = getXWQL();
+    
     expect(queryManagerMock.createQuery(eq(xwql), eq(Query.XWQL))).andThrow(cause).once();
     
     replayDefault();
@@ -84,8 +86,10 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     List<DocumentReference> excludes = Arrays.asList(new DocumentReference("xwikidb", 
         "space", "asdf2"));
     String xwql = getXWQL();
+    
     expect(queryManagerMock.createQuery(eq(xwql), eq(Query.XWQL))).andReturn(queryMock
         ).once();
+    expect(queryMock.setWiki("xwikidb")).andReturn(queryMock).once();
     expect(queryMock.execute()).andReturn(fullNames).once();
     
     replayDefault();

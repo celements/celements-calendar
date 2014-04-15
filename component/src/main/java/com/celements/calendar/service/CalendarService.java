@@ -2,6 +2,7 @@ package com.celements.calendar.service;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,7 +44,8 @@ public class CalendarService implements ICalendarService {
 
   public static final String CALENDAR_SERVICE_START_DATE =
       "com.celements.calendar.service.CalendarService.startDate";
-  
+
+  private static final String EXECUTIONCONTEXT_KEY_CAL_CACHE = "calCache";
   private static final String EXECUTIONCONTEXT_KEY_CAL_SPACE_CACHE = "calSpaceCache";
 
   @Requirement
@@ -73,23 +75,15 @@ public class CalendarService implements ICalendarService {
 
   public List<DocumentReference> getAllCalendars(WikiReference wikiRef, 
       Collection<DocumentReference> excludes) {
-    List<DocumentReference> allCalendars = new ArrayList<DocumentReference>();
     if (wikiRef == null) {
       wikiRef = new WikiReference(getContext().getDatabase());
     }
+    List<DocumentReference> allCalendars = new ArrayList<DocumentReference>();
     Set<DocumentReference> excludesSet = new HashSet<DocumentReference>(excludes);
-    try {
-      Query query = queryManager.createQuery(getAllXWQL(), Query.XWQL);
-      query.setWiki(wikiRef.getName());
-      for (Object fullName : query.execute()) {
-        DocumentReference calDocRef = new DocumentReference(referenceResolver.resolve(
-            fullName.toString(), EntityType.DOCUMENT, wikiRef));
-        if (!excludesSet.contains(calDocRef)) {
-          allCalendars.add(calDocRef);
-        }
+    for (DocumentReference calDocRef : getAllCalendarsInternal(wikiRef)) {
+      if (!excludesSet.contains(calDocRef)) {
+        allCalendars.add(calDocRef);
       }
-    } catch (QueryException exc) {
-      LOGGER.error("failed to execute query [" + getAllXWQL() + "]", exc);
     }
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace("getAllCalendars: returned for wiki '" + wikiRef + "' and excludes '" 
@@ -98,7 +92,41 @@ public class CalendarService implements ICalendarService {
     return allCalendars;
   }
 
-  String getAllXWQL() {
+  @SuppressWarnings("unchecked")
+  List<DocumentReference> getAllCalendarsInternal(WikiReference wikiRef) {
+    String contextKey = EXECUTIONCONTEXT_KEY_CAL_CACHE; 
+    Map<WikiReference, List<DocumentReference>> calCache; 
+    calCache = (Map<WikiReference, List<DocumentReference>>) execution.getContext(
+        ).getProperty(contextKey);
+    if (calCache == null) {
+      calCache = new HashMap<WikiReference, List<DocumentReference>>();
+      execution.getContext().setProperty(contextKey, calCache);
+    }
+    List<DocumentReference> allCalendars = calCache.get(wikiRef);
+    if (allCalendars == null) {
+      allCalendars = executeAllCalendarsQuery(wikiRef);
+      calCache.put(wikiRef, allCalendars);
+      LOGGER.debug("getCalsFromCache: put for wiki '" + wikiRef + "': " + allCalendars);
+    }
+    return allCalendars;
+  }
+  
+  List<DocumentReference> executeAllCalendarsQuery(WikiReference wikiRef) {
+    List<DocumentReference> allCalendars = new ArrayList<DocumentReference>();
+    try {
+      Query query = queryManager.createQuery(getAllCalendarsXWQL(), Query.XWQL);
+      query.setWiki(wikiRef.getName());
+      for (Object fullName : query.execute()) {
+        allCalendars.add(new DocumentReference(referenceResolver.resolve(
+            fullName.toString(), EntityType.DOCUMENT, wikiRef)));
+      }
+    } catch (QueryException exc) {
+      LOGGER.error("failed to execute query [" + getAllCalendarsXWQL() + "]", exc);
+    }
+    return Collections.unmodifiableList(allCalendars);
+  }
+
+  String getAllCalendarsXWQL() {
     return "from doc.object(" + CalendarClasses.CALENDAR_CONFIG_CLASS 
         + ") as cal where doc.translation = 0";
   }
@@ -209,55 +237,65 @@ public class CalendarService implements ICalendarService {
 
   public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace, 
       EntityReference inRef) {
-    WikiReference inWikiRef = (WikiReference) extractRef(inRef, EntityType.WIKI);
-    if (inWikiRef == null) {
+    WikiReference inWikiRef;
+    if (inRef != null) {
+      inWikiRef = (WikiReference) inRef.extractReference(EntityType.WIKI);
+    } else {
       inWikiRef = new WikiReference(getContext().getDatabase());
     }
-    List<DocumentReference> ret = null;
-    try {
-      List<DocumentReference> calDocRefs = getCalSpaceCache(inWikiRef).get(calSpace);
-      if (calDocRefs != null) {
-        SpaceReference inSpaceRef = (SpaceReference) extractRef(inRef, EntityType.SPACE);
-        ret = filterForSpaceRef(calDocRefs, inSpaceRef);
-      }
-    } catch (XWikiException exc) {
-      LOGGER.error("Failed getting calSpaceCache for wiki '" + inWikiRef + "'");
-    }
-    if (ret == null) {
+    List<DocumentReference> calDocRefs = getCalSpaceCache(inWikiRef).get(calSpace);
+    List<DocumentReference> ret;
+    if (calDocRefs == null) {
       ret = new ArrayList<DocumentReference>();
+    } else if ((inRef != null) && (inRef.getType() == EntityType.SPACE)) {
+        ret = filterForSpaceRef(calDocRefs, (SpaceReference) inRef.extractReference(
+            EntityType.SPACE));
+    } else {
+      ret = new ArrayList<DocumentReference>(calDocRefs);
     }
     LOGGER.trace("getCalendarDocRefsByCalendarSpace: for calSpace '" + calSpace 
         + "' and inRef '" + inRef + "' returned calendars: " + ret);
     return ret;
   }
 
-  private EntityReference extractRef(EntityReference ref, EntityType type) {
-    return ref != null ? ref.extractReference(type) : null;
-  }
-
   @SuppressWarnings("unchecked")
-  Map<String, List<DocumentReference>> getCalSpaceCache(WikiReference wikiRef
-      ) throws XWikiException {
+  Map<String, List<DocumentReference>> getCalSpaceCache(WikiReference wikiRef) {
     String contextKey = EXECUTIONCONTEXT_KEY_CAL_SPACE_CACHE + "|" + wikiRef.getName(); 
     Map<String, List<DocumentReference>> calSpaceCache = 
         (Map<String, List<DocumentReference>>) execution.getContext().getProperty(
             contextKey);
     if (calSpaceCache == null) {
       LOGGER.debug("getCalSpaceCache: none found for wiki '" + wikiRef + "', loading now");
-      calSpaceCache = new HashMap<String, List<DocumentReference>>();
-      for (DocumentReference calDocRef : getAllCalendars(wikiRef)) {
-        String calSpace = getEventSpaceForCalendar(calDocRef);
-        if (!calSpaceCache.containsKey(calSpace)) {
-          calSpaceCache.put(calSpace, new ArrayList<DocumentReference>());
-        }
-        LOGGER.trace("getCalSpaceCache: put to space '" + calSpace + "': " + calDocRef);
-        calSpaceCache.get(calSpace).add(calDocRef);
+      try {
+        calSpaceCache = generateCalSpaceMap(wikiRef);
+        execution.getContext().setProperty(contextKey, calSpaceCache);
+      } catch (XWikiException exc) {
+        LOGGER.error("Failed getting calSpaceCache for wiki '" + wikiRef + "'");
+        calSpaceCache = new HashMap<String, List<DocumentReference>>();
       }
-      execution.getContext().setProperty(contextKey, calSpaceCache);
     } else {
-      LOGGER.trace("getCalSpaceCache: got from context for wiki '" + wikiRef + "'");
+      LOGGER.trace("getCalSpaceCache: got from execution for wiki '" + wikiRef + "'");
     }
     return calSpaceCache;
+  }
+  
+  private Map<String, List<DocumentReference>> generateCalSpaceMap(WikiReference wikiRef
+      ) throws XWikiException {
+    Map<String, List<DocumentReference>> calSpaceMap = 
+        new HashMap<String, List<DocumentReference>>();
+    for (DocumentReference calDocRef : getAllCalendars(wikiRef)) {
+      String calSpace = getEventSpaceForCalendar(calDocRef);
+      if (!calSpaceMap.containsKey(calSpace)) {
+        calSpaceMap.put(calSpace, new ArrayList<DocumentReference>());
+      }
+      LOGGER.trace("generateCalSpaceMap: put for space '" + calSpace + "': " + calDocRef);
+      calSpaceMap.get(calSpace).add(calDocRef);
+    }
+    // since all calendars have been loaded, this map is not allowed to change anymore
+    for (String key : new HashSet<String>(calSpaceMap.keySet())) {
+      calSpaceMap.put(key, Collections.unmodifiableList(calSpaceMap.remove(key)));
+    }
+    return Collections.unmodifiableMap(calSpaceMap);
   }
   
   List<DocumentReference> filterForSpaceRef(List<DocumentReference> calDocRefs,
@@ -298,10 +336,28 @@ public class CalendarService implements ICalendarService {
     this.queryManager = queryManager;
   }
   
-  void injectCalCacheMap(String database, 
+  void injectCalCache(Map<WikiReference, List<DocumentReference>> calCache) {
+    execution.getContext().setProperty(EXECUTIONCONTEXT_KEY_CAL_CACHE, calCache);
+  }
+  
+  // for test purposes only
+  @SuppressWarnings("unchecked")
+  Map<WikiReference, List<DocumentReference>> getCalCacheForTests() {
+    return (Map<WikiReference, List<DocumentReference>>) execution.getContext(
+        ).getProperty(EXECUTIONCONTEXT_KEY_CAL_CACHE);
+  }
+  
+  void injectCalSpaceCache(String database, 
       Map<String, List<DocumentReference>> calSpaceCache) {
     String contextKey = EXECUTIONCONTEXT_KEY_CAL_SPACE_CACHE + "|" + database; 
     execution.getContext().setProperty(contextKey, calSpaceCache);
+  }
+  
+  // for test purposes only
+  @SuppressWarnings("unchecked")
+  Map<String, List<DocumentReference>> getCalSpaceCacheForTests(String database) {
+    return (Map<String, List<DocumentReference>>) execution.getContext(
+        ).getProperty(EXECUTIONCONTEXT_KEY_CAL_SPACE_CACHE + "|" + database);
   }
 
 }

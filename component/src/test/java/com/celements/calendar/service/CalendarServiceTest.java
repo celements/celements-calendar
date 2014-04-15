@@ -7,14 +7,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.model.reference.WikiReference;
 import org.xwiki.query.Query;
@@ -53,67 +52,149 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
   
   @Test
   public void testGetAllCalendars_wiki_exclude() throws Exception {
-    WikiReference inWiki = new WikiReference("db");
-    Set<DocumentReference> excludes = new HashSet<DocumentReference>();
-    excludes.add(new DocumentReference("db", "space1", "toExclude"));
-    Query query = new DefaultQuery("theStatement", Query.XWQL, queryExecutorMock);
-    List<Object> fullNames = Arrays.asList(new Object[] {"space1.calDoc", 
-        "space1.toExclude", "space2.calDoc"});
+    WikiReference wikiRef = new WikiReference("db");
+    DocumentReference toExclude = new DocumentReference("db", "space", "toExclude");
+    List<DocumentReference> excludes = Arrays.asList(toExclude);
+    Map<WikiReference, List<DocumentReference>> calCache = 
+        new HashMap<WikiReference, List<DocumentReference>>();
+    calCache.put(wikiRef, Arrays.asList(new DocumentReference("db", "space", "calDoc1"), 
+        toExclude, new DocumentReference("db", "space", "calDoc2")));
+    calService.injectCalCache(calCache);
     
-    expect(queryManagerMock.createQuery(eq(getXWQL()), eq(Query.XWQL))).andReturn(query
-        ).once();
-    expect(queryExecutorMock.execute(eq(query))).andReturn(fullNames).once();
-    
-    assertNull(query.getWiki());
-    assertEquals(0, query.getNamedParameters().size());
     replayDefault();
-    List<DocumentReference> ret = calService.getAllCalendars(inWiki, excludes);
+    List<DocumentReference> ret = calService.getAllCalendars(wikiRef, excludes);
     verifyDefault();
     assertEquals(2, ret.size());
-    assertEquals(new DocumentReference("db", "space1", "calDoc"), ret.get(0));
-    assertEquals(new DocumentReference("db", "space2", "calDoc"), ret.get(1));
-    assertEquals("db", query.getWiki());
-    assertEquals(0, query.getNamedParameters().size());
+    assertEquals(calCache.get(wikiRef).get(0), ret.get(0));
+    assertEquals(calCache.get(wikiRef).get(2), ret.get(1));
   }
   
   @Test
   public void testGetAllCalendars_nullWiki() throws Exception {
-    WikiReference inWiki = null;
-    Set<DocumentReference> excludes = Collections.emptySet();
-    Query query = new DefaultQuery("theStatement", Query.XWQL, queryExecutorMock);
-    List<Object> fullNames = Arrays.asList(new Object[] {"space1.calDoc", 
-        "space2.calDoc"});
+    WikiReference wikiRef = new WikiReference("xwikidb");
+    List<DocumentReference> excludes = Collections.emptyList();
+    Map<WikiReference, List<DocumentReference>> calCache = 
+        new HashMap<WikiReference, List<DocumentReference>>();
+    calCache.put(wikiRef, Arrays.asList(new DocumentReference("xwikidb", "space", 
+        "calDoc1"), new DocumentReference("xwikidb", "space", "calDoc2")));
+    calService.injectCalCache(calCache);
     
-    expect(queryManagerMock.createQuery(eq(getXWQL()), eq(Query.XWQL))).andReturn(query
-        ).once();
-    expect(queryExecutorMock.execute(eq(query))).andReturn(fullNames).once();
-    
-    assertNull(query.getWiki());
-    assertEquals(0, query.getNamedParameters().size());
     replayDefault();
-    List<DocumentReference> ret = calService.getAllCalendars(inWiki, excludes);
+    List<DocumentReference> ret = calService.getAllCalendars(null, excludes);
     verifyDefault();
     assertEquals(2, ret.size());
-    assertEquals(new DocumentReference("xwikidb", "space1", "calDoc"), ret.get(0));
-    assertEquals(new DocumentReference("xwikidb", "space2", "calDoc"), ret.get(1));
-    assertEquals("xwikidb", query.getWiki());
-    assertEquals(0, query.getNamedParameters().size());
+    assertEquals(calCache.get(wikiRef).get(0), ret.get(0));
+    assertEquals(calCache.get(wikiRef).get(1), ret.get(1));
   }
   
   @Test
   public void testGetAllCalendars_noCals() throws Exception {
-    WikiReference inWiki = new WikiReference("db");
-    Set<DocumentReference> excludes = Collections.emptySet();
-    Query query = new DefaultQuery("theStatement", Query.XWQL, queryExecutorMock);
+    WikiReference wikiRef = new WikiReference("db");
+    List<DocumentReference> excludes = Collections.emptyList();
+    Map<WikiReference, List<DocumentReference>> calCache = 
+        new HashMap<WikiReference, List<DocumentReference>>();
+    calCache.put(wikiRef, new ArrayList<DocumentReference>());
+    calService.injectCalCache(calCache);
     
-    expect(queryManagerMock.createQuery(eq(getXWQL()), eq(Query.XWQL))).andReturn(query
-        ).once();
-    expect(queryExecutorMock.execute(eq(query))).andReturn(Collections.emptyList()).once();
-    
-    assertNull(query.getWiki());
-    assertEquals(0, query.getNamedParameters().size());
     replayDefault();
-    List<DocumentReference> ret = calService.getAllCalendars(inWiki, excludes);
+    List<DocumentReference> ret = calService.getAllCalendars(wikiRef, excludes);
+    verifyDefault();
+    assertEquals(0, ret.size());
+  }
+  
+  @Test
+  public void testGetAllCalendarsInternal_noCache() throws Exception {
+    WikiReference wikiRef = new WikiReference("db");
+    Query query = new DefaultQuery("theStatement", Query.XWQL, queryExecutorMock);
+    List<Object> fullNames = Arrays.asList(new Object[] {"space.calDoc1", 
+        "space.calDoc2"});
+    
+    expect(queryManagerMock.createQuery(eq(calService.getAllCalendarsXWQL()), 
+        eq(Query.XWQL))).andReturn(query).once();
+    expect(queryExecutorMock.execute(eq(query))).andReturn(fullNames).once();
+    
+    assertNull(calService.getCalCacheForTests());
+    replayDefault();
+    List<DocumentReference> ret = calService.getAllCalendarsInternal(wikiRef);
+    Map<WikiReference, List<DocumentReference>> calCache = calService.getCalCacheForTests();
+    verifyDefault();
+    assertEquals(2, ret.size());
+    assertEquals(new DocumentReference("db", "space", "calDoc1"), ret.get(0));
+    assertEquals(new DocumentReference("db", "space", "calDoc2"), ret.get(1));
+    assertEquals(1, calCache.size());
+    assertEquals(ret, calCache.get(wikiRef));
+  }
+  
+  @Test
+  public void testGetAllCalendarsInternal_fromQuery() throws Exception {
+    WikiReference wikiRef = new WikiReference("db");
+    Map<WikiReference, List<DocumentReference>> calCache = 
+        new HashMap<WikiReference, List<DocumentReference>>();
+    calCache.put(new WikiReference("db2"), Arrays.asList(new DocumentReference(
+        "db2", "space", "calDoc1"), new DocumentReference("db2", "space", "calDoc2")));
+    calService.injectCalCache(calCache);
+    Query query = new DefaultQuery("theStatement", Query.XWQL, queryExecutorMock);
+    List<Object> fullNames = Collections.emptyList();
+    
+    expect(queryManagerMock.createQuery(eq(calService.getAllCalendarsXWQL()), 
+        eq(Query.XWQL))).andReturn(query).once();
+    expect(queryExecutorMock.execute(eq(query))).andReturn(fullNames).once();
+    
+    replayDefault();
+    List<DocumentReference> ret = calService.getAllCalendarsInternal(wikiRef);
+    verifyDefault();
+    assertEquals(0, ret.size());
+    assertEquals(0, calCache.get(wikiRef).size());
+  }
+  
+  @Test
+  public void testGetAllCalendarsInternal_fromCache() throws Exception {
+    WikiReference wikiRef = new WikiReference("db");
+    Map<WikiReference, List<DocumentReference>> calCache = 
+        new HashMap<WikiReference, List<DocumentReference>>();
+    calCache.put(wikiRef, Arrays.asList(new DocumentReference("db", "space", "calDoc1"), 
+        new DocumentReference("db", "space", "calDoc2")));
+    calService.injectCalCache(calCache);
+    
+    replayDefault();
+    List<DocumentReference> ret = calService.getAllCalendarsInternal(wikiRef);
+    verifyDefault();
+    assertEquals(calCache.get(wikiRef), ret);
+  }
+  
+  @Test
+  public void testExecuteAllCalendarsQuery() throws QueryException {
+    WikiReference wikiRef = new WikiReference("db");
+    Query query = new DefaultQuery("theStatement", Query.XWQL, queryExecutorMock);
+    List<Object> fullNames = Arrays.asList(new Object[] {"space.calDoc1", 
+        "space.calDoc2"});
+    
+    expect(queryManagerMock.createQuery(eq(calService.getAllCalendarsXWQL()), 
+        eq(Query.XWQL))).andReturn(query).once();
+    expect(queryExecutorMock.execute(eq(query))).andReturn(fullNames).once();
+
+    replayDefault();
+    List<DocumentReference> ret = calService.executeAllCalendarsQuery(wikiRef);
+    verifyDefault();
+    assertEquals(2, ret.size());
+    assertEquals(new DocumentReference("db", "space", "calDoc1"), ret.get(0));
+    assertEquals(new DocumentReference("db", "space", "calDoc2"), ret.get(1));
+    assertEquals("db", query.getWiki());
+    assertEquals(0, query.getNamedParameters().size());
+  }
+  
+  @Test
+  public void testExecuteAllCalendarsQuery_empty() throws QueryException {
+    WikiReference wikiRef = new WikiReference("db");
+    Query query = new DefaultQuery("theStatement", Query.XWQL, queryExecutorMock);
+    List<Object> fullNames = Collections.emptyList();
+    
+    expect(queryManagerMock.createQuery(eq(calService.getAllCalendarsXWQL()), 
+        eq(Query.XWQL))).andReturn(query).once();
+    expect(queryExecutorMock.execute(eq(query))).andReturn(fullNames).once();
+
+    replayDefault();
+    List<DocumentReference> ret = calService.executeAllCalendarsQuery(wikiRef);
     verifyDefault();
     assertEquals(0, ret.size());
     assertEquals("db", query.getWiki());
@@ -121,24 +202,23 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
   }
   
   @Test
-  public void testGetAllCalendars_queryException() throws Exception {
+  public void testExecuteAllCalendarsQuery_exception() throws QueryException {
+    WikiReference wikiRef = new WikiReference("db");
     Throwable cause = new QueryException("", null, null);
-    Set<DocumentReference> excludes = Collections.emptySet();
     
-    expect(queryManagerMock.createQuery(eq(getXWQL()), eq(Query.XWQL))).andThrow(cause
-        ).once();
+    expect(queryManagerMock.createQuery(eq(calService.getAllCalendarsXWQL()), 
+        eq(Query.XWQL))).andThrow(cause).once();
     
     replayDefault();
-    List<DocumentReference> ret = calService.getAllCalendars(null, excludes);
+    List<DocumentReference> ret = calService.executeAllCalendarsQuery(wikiRef);
     verifyDefault();
-    assertNotNull(ret);
     assertEquals(0, ret.size());
   }
   
   @Test
-  public void testGetAllXWQL() {
+  public void testGetAllCalendarsXWQL() {
     assertEquals("from doc.object(Classes.CalendarConfigClass) as cal "
-        + "where doc.translation = 0", calService.getAllXWQL());
+        + "where doc.translation = 0", calService.getAllCalendarsXWQL());
   }
 
   @Test
@@ -153,7 +233,6 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     String space = calService.getEventSpaceForCalendar(calDocRef);
     verifyDefault();
 
-    assertNotNull(space);
     assertEquals("myCalDoc", space);
   }
 
@@ -174,7 +253,6 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     String space = calService.getEventSpaceForCalendar(calDocRef);
     verifyDefault();
 
-    assertNotNull(space);
     assertEquals("", space);
   }
 
@@ -196,10 +274,28 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     String space = calService.getEventSpaceForCalendar(calDocRef);
     verifyDefault();
 
-    assertNotNull(space);
     assertEquals("myCalSpace", space);
   }
 
+  @Test
+  public void testGetEventSpaceForCalendar_differentDB() throws XWikiException {
+    DocumentReference calDocRef = new DocumentReference("db", "mySpace", "myCalDoc");
+    XWikiDocument calDoc = new XWikiDocument(calDocRef);
+    DocumentReference configClassRef = new DocumentReference("db", "Classes", 
+        "CalendarConfigClass");
+    BaseObject calConfObj = new BaseObject();
+    calConfObj.setXClassReference(configClassRef);
+    calDoc.setXObject(0, calConfObj);
+    calConfObj.setStringValue("calendarspace", "myCalSpace");
+
+    expect(xwiki.getDocument(same(calDocRef), same(context))).andReturn(calDoc);
+
+    replayDefault();
+    String space = calService.getEventSpaceForCalendar(calDocRef);
+    verifyDefault();
+
+    assertEquals("myCalSpace", space);
+  }
 
   @Test
   public void testGetAllowedSpaces_noObject() throws XWikiException {
@@ -213,7 +309,6 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     List<String> spaces = calService.getAllowedSpaces(calDocRef);
     verifyDefault();
 
-    assertNotNull(spaces);
     assertEquals(0, spaces.size());
   }
 
@@ -234,7 +329,6 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     List<String> spaces = calService.getAllowedSpaces(calDocRef);
     verifyDefault();
 
-    assertNotNull(spaces);
     assertEquals(0, spaces.size());
   }
 
@@ -256,7 +350,6 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     List<String> spaces = calService.getAllowedSpaces(calDocRef);
     verifyDefault();
 
-    assertNotNull(spaces);
     assertEquals(1, spaces.size());
     assertEquals("myCalSpace", spaces.get(0));
   }
@@ -300,7 +393,6 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     List<String> spaces = calService.getAllowedSpaces(calDocRef);
     verifyDefault();
 
-    assertNotNull(spaces);
     assertEquals(3, spaces.size());
     assertEquals("myCalSpace", spaces.get(0));
     assertEquals("myCalSpace2", spaces.get(1));
@@ -319,7 +411,6 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     String spacesHQL = calService.getAllowedSpacesHQL(calDoc);
     verifyDefault();
 
-    assertNotNull(spacesHQL);
     assertEquals("(obj.name like '.%')", spacesHQL);
   }
 
@@ -341,7 +432,6 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     String spacesHQL = calService.getAllowedSpacesHQL(calDoc);
     verifyDefault();
 
-    assertNotNull(spacesHQL);
     assertEquals("(obj.name like 'myCalSpace.%')", spacesHQL);
   }
 
@@ -384,71 +474,39 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     String spacesHQL = calService.getAllowedSpacesHQL(calDoc);
     verifyDefault();
 
-    assertNotNull(spacesHQL);
     assertEquals("(obj.name like 'myCalSpace.%' or obj.name like 'myCalSpace2.%'"
         + " or obj.name like 'myCalSpace3.%')", spacesHQL);
   }
   
   @Test
-  public void testGetCalendarDocRefsByCalendarSpace_wikiRef() throws Exception {
-    String database = "db";
-    String calSpace = "myCalSpace";
-    Map<String, List<DocumentReference>> calSpaceCache = 
-        new HashMap<String, List<DocumentReference>>();
-    calSpaceCache.put(calSpace, Arrays.asList(new DocumentReference(database, "myInSpace", 
-        "doc1"), new DocumentReference(database, "notMyInSpace", "doc"), 
-        new DocumentReference(database, "myInSpace", "doc2")));
-    calService.injectCalCacheMap(database, calSpaceCache);
-    
-    replayDefault();
-    List<DocumentReference> ret = calService.getCalendarDocRefsByCalendarSpace(calSpace, 
-        new WikiReference(database));
-    assertEquals(3, ret.size());
-    assertEquals(calSpaceCache.get(calSpace).get(0), ret.get(0));
-    assertEquals(calSpaceCache.get(calSpace).get(1), ret.get(1));
-    assertEquals(calSpaceCache.get(calSpace).get(2), ret.get(2));
-    verifyDefault();
-  }
-  
-  @Test
-  public void testGetCalendarDocRefsByCalendarSpace_spaceRef() throws Exception {
-    String database = "db";
-    String calSpace = "myCalSpace";
-    Map<String, List<DocumentReference>> calSpaceCache = 
-        new HashMap<String, List<DocumentReference>>();
-    calSpaceCache.put(calSpace, Arrays.asList(new DocumentReference(database, "myInSpace", 
-        "doc1"), new DocumentReference(database, "notMyInSpace", "doc"), 
-        new DocumentReference(database, "myInSpace", "doc2")));
-    calService.injectCalCacheMap(database, calSpaceCache);
-    
-    replayDefault();
-    List<DocumentReference> ret = calService.getCalendarDocRefsByCalendarSpace(calSpace, 
-        new SpaceReference("myInSpace", new WikiReference(database)));
-    assertEquals(2, ret.size());
-    assertEquals(calSpaceCache.get(calSpace).get(0), ret.get(0));
-    assertEquals(calSpaceCache.get(calSpace).get(2), ret.get(1));
-    verifyDefault();
-  }
-  
-  @Test
-  public void testGetCalendarDocRefsByCalendarSpace_nullRef() throws Exception {
+  public void testGetCalendarDocRefByCalendarSpace() throws Exception {
     String database = "xwikidb";
     String calSpace = "myCalSpace";
     Map<String, List<DocumentReference>> calSpaceCache = 
         new HashMap<String, List<DocumentReference>>();
-    calSpaceCache.put(calSpace, Arrays.asList(new DocumentReference(database, "myInSpace", 
-        "doc1"), new DocumentReference(database, "notMyInSpace", "doc"), 
-        new DocumentReference(database, "myInSpace", "doc2")));
-    calService.injectCalCacheMap(database, calSpaceCache);
+    calSpaceCache.put(calSpace, Arrays.asList(new DocumentReference(database, 
+        "notMyInSpace", "doc"), new DocumentReference(database, "myInSpace", "doc2")));
+    calService.injectCalSpaceCache(database, calSpaceCache);
     
     replayDefault();
-    List<DocumentReference> ret = calService.getCalendarDocRefsByCalendarSpace(calSpace, 
-        (SpaceReference) null);
-    assertEquals(3, ret.size());
-    assertEquals(calSpaceCache.get(calSpace).get(0), ret.get(0));
-    assertEquals(calSpaceCache.get(calSpace).get(1), ret.get(1));
-    assertEquals(calSpaceCache.get(calSpace).get(2), ret.get(2));
+    DocumentReference ret = calService.getCalendarDocRefByCalendarSpace(calSpace, 
+        "myInSpace");
     verifyDefault();
+    assertEquals(calSpaceCache.get(calSpace).get(1), ret);
+  }
+  
+  @Test
+  public void testGetCalendarDocRefByCalendarSpace_empty() throws Exception {
+    String database = "xwikidb";
+    String calSpace = "myCalSpace";
+    Map<String, List<DocumentReference>> calSpaceCache = 
+        new HashMap<String, List<DocumentReference>>();
+    calService.injectCalSpaceCache(database, calSpaceCache);
+    
+    replayDefault();
+    DocumentReference ret = calService.getCalendarDocRefByCalendarSpace(calSpace);
+    verifyDefault();
+    assertNull(ret);
   }
   
   @Test
@@ -460,78 +518,195 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     calSpaceCache.put(calSpace, Arrays.asList(new DocumentReference(database, "myInSpace", 
         "doc1"), new DocumentReference(database, "notMyInSpace", "doc"), 
         new DocumentReference(database, "myInSpace", "doc2")));
-    calService.injectCalCacheMap(database, calSpaceCache);
+    calService.injectCalSpaceCache(database, calSpaceCache);
     
     replayDefault();
     List<DocumentReference> ret = calService.getCalendarDocRefsByCalendarSpace(calSpace);
+    verifyDefault();
     assertEquals(3, ret.size());
     assertEquals(calSpaceCache.get(calSpace).get(0), ret.get(0));
     assertEquals(calSpaceCache.get(calSpace).get(1), ret.get(1));
     assertEquals(calSpaceCache.get(calSpace).get(2), ret.get(2));
-    verifyDefault();
   }
   
   @Test
-  public void testGetCalendarDocRefsByCalendarSpace_empty() throws Exception {
+  public void testGetCalendarDocRefsByCalendarSpace_noInSpace_empty() throws Exception {
     String database = "xwikidb";
     String calSpace = "myCalSpace";
     Map<String, List<DocumentReference>> calSpaceCache = 
         new HashMap<String, List<DocumentReference>>();
-    calService.injectCalCacheMap(database, calSpaceCache);
+    calService.injectCalSpaceCache(database, calSpaceCache);
     
     replayDefault();
     List<DocumentReference> ret = calService.getCalendarDocRefsByCalendarSpace(calSpace);
+    verifyDefault();
     assertEquals(0, ret.size());
-    verifyDefault();
   }
   
   @Test
-  public void testGetCalendarDocRefByCalendarSpace() throws Exception {    
-    String database = "xwikidb";
-    String inSpace = "myInSpace";
-    String calSpace = "myCalSpace";
-    Map<String, List<DocumentReference>> calSpaceCache = 
-        new HashMap<String, List<DocumentReference>>();
-    calSpaceCache.put(calSpace, Arrays.asList(new DocumentReference(database, 
-        "notMyInSpace", "doc"), new DocumentReference(database, inSpace, "doc1"), 
-        new DocumentReference(database, inSpace, "doc2")));
-    calService.injectCalCacheMap(database, calSpaceCache);
-    
-    replayDefault();
-    DocumentReference ret = calService.getCalendarDocRefByCalendarSpace(calSpace, inSpace);
-    assertEquals(calSpaceCache.get(calSpace).get(1), ret);
-    verifyDefault();
-  }
-  
-  @Test
-  public void testGetCalendarDocRefByCalendarSpace_empty() throws Exception {
+  public void testGetCalendarDocRefsByCalendarSpace_inSpace() throws Exception {
     String database = "xwikidb";
     String calSpace = "myCalSpace";
     Map<String, List<DocumentReference>> calSpaceCache = 
         new HashMap<String, List<DocumentReference>>();
-    calService.injectCalCacheMap(database, calSpaceCache);
+    calSpaceCache.put(calSpace, Arrays.asList(new DocumentReference(database, "myInSpace", 
+        "doc1"), new DocumentReference(database, "notMyInSpace", "doc"), 
+        new DocumentReference(database, "myInSpace", "doc2")));
+    calService.injectCalSpaceCache(database, calSpaceCache);
     
     replayDefault();
-    DocumentReference ret = calService.getCalendarDocRefByCalendarSpace(calSpace);
-    assertNull(ret);
+    List<DocumentReference> ret = calService.getCalendarDocRefsByCalendarSpace(calSpace, 
+        "myInSpace");
     verifyDefault();
+    assertEquals(2, ret.size());
+    assertEquals(calSpaceCache.get(calSpace).get(0), ret.get(0));
+    assertEquals(calSpaceCache.get(calSpace).get(2), ret.get(1));
+  }
+  
+  @Test
+  public void testGetCalendarDocRefsByCalendarSpace_inRef_wiki() throws Exception {
+    String database = "db";
+    String calSpace = "myCalSpace";
+    Map<String, List<DocumentReference>> calSpaceCache = 
+        new HashMap<String, List<DocumentReference>>();
+    calSpaceCache.put(calSpace, Arrays.asList(new DocumentReference(database, "myInSpace", 
+        "doc1"), new DocumentReference(database, "notMyInSpace", "doc"), 
+        new DocumentReference(database, "myInSpace", "doc2")));
+    calService.injectCalSpaceCache(database, calSpaceCache);
+    
+    replayDefault();
+    List<DocumentReference> ret = calService.getCalendarDocRefsByCalendarSpace(calSpace, 
+        new WikiReference(database));
+    verifyDefault();
+    assertEquals(3, ret.size());
+    assertEquals(calSpaceCache.get(calSpace).get(0), ret.get(0));
+    assertEquals(calSpaceCache.get(calSpace).get(1), ret.get(1));
+    assertEquals(calSpaceCache.get(calSpace).get(2), ret.get(2));
+  }
+  
+  @Test
+  public void testGetCalendarDocRefsByCalendarSpace_inRef_space() throws Exception {
+    String database = "db";
+    String calSpace = "myCalSpace";
+    Map<String, List<DocumentReference>> calSpaceCache = 
+        new HashMap<String, List<DocumentReference>>();
+    calSpaceCache.put(calSpace, Arrays.asList(new DocumentReference(database, "myInSpace", 
+        "doc1"), new DocumentReference(database, "notMyInSpace", "doc"), 
+        new DocumentReference(database, "myInSpace", "doc2")));
+    calService.injectCalSpaceCache(database, calSpaceCache);
+    
+    replayDefault();
+    List<DocumentReference> ret = calService.getCalendarDocRefsByCalendarSpace(calSpace, 
+        new SpaceReference("myInSpace", new WikiReference(database)));
+    verifyDefault();
+    assertEquals(2, ret.size());
+    assertEquals(calSpaceCache.get(calSpace).get(0), ret.get(0));
+    assertEquals(calSpaceCache.get(calSpace).get(2), ret.get(1));
+  }
+  
+  @Test
+  public void testGetCalendarDocRefsByCalendarSpace_inRef_null() throws Exception {
+    String database = "xwikidb";
+    String calSpace = "myCalSpace";
+    Map<String, List<DocumentReference>> calSpaceCache = 
+        new HashMap<String, List<DocumentReference>>();
+    calSpaceCache.put(calSpace, Arrays.asList(new DocumentReference(database, "myInSpace", 
+        "doc1"), new DocumentReference(database, "notMyInSpace", "doc"), 
+        new DocumentReference(database, "myInSpace", "doc2")));
+    calService.injectCalSpaceCache(database, calSpaceCache);
+    
+    replayDefault();
+    List<DocumentReference> ret = calService.getCalendarDocRefsByCalendarSpace(calSpace, 
+        (EntityReference) null);
+    verifyDefault();
+    assertEquals(3, ret.size());
+    assertEquals(calSpaceCache.get(calSpace).get(0), ret.get(0));
+    assertEquals(calSpaceCache.get(calSpace).get(1), ret.get(1));
+    assertEquals(calSpaceCache.get(calSpace).get(2), ret.get(2));
   }
   
   @Test
   public void testGetCalSpaceCache_inject() throws Exception {
-    //TODO
-  }
-  
-  @Test
-  public void testGetCalSpaceCache_inject_empty() throws Exception {
     WikiReference wikiRef = new WikiReference("db");
     Map<String, List<DocumentReference>> calSpaceCache = 
         new HashMap<String, List<DocumentReference>>();
-    calService.injectCalCacheMap("db", calSpaceCache);
+    calService.injectCalSpaceCache("db", calSpaceCache);
     
     replayDefault();
-    assertSame(calSpaceCache, calService.getCalSpaceCache(wikiRef));
+    Map<String, List<DocumentReference>> ret = calService.getCalSpaceCache(wikiRef);
     verifyDefault();
+    assertSame(calSpaceCache, ret);
+  }
+  
+  @Test
+  public void testGetCalSpaceCache() throws Exception {
+    WikiReference wikiRef = new WikiReference("db");
+    String calSpace1 = "calSpace1";
+    String calSpace2 = "calSpace2";
+    SpaceReference calConfigSpaceRef = new SpaceReference("space", wikiRef);
+    DocumentReference calDocRef1 = new DocumentReference("calDoc1", calConfigSpaceRef);
+    DocumentReference calDocRef2 = new DocumentReference("calDoc2", calConfigSpaceRef);
+    DocumentReference calDocRef3 = new DocumentReference("calDoc3", calConfigSpaceRef);
+    Map<WikiReference, List<DocumentReference>> calSpaceCache = 
+        new HashMap<WikiReference, List<DocumentReference>>();
+    calSpaceCache.put(wikiRef, Arrays.asList(calDocRef1, calDocRef2, calDocRef3));
+    calService.injectCalCache(calSpaceCache);
+    XWikiDocument calDoc1 = new XWikiDocument(calDocRef1);
+    setCalConfigObj(calDoc1, calSpace1);
+    XWikiDocument calDoc2 = new XWikiDocument(calDocRef2);
+    setCalConfigObj(calDoc2, calSpace2);
+    XWikiDocument calDoc3 = new XWikiDocument(calDocRef3);
+    setCalConfigObj(calDoc3, calSpace1);
+    
+    expect(xwiki.getDocument(eq(calDocRef1), same(context))).andReturn(calDoc1).once();
+    expect(xwiki.getDocument(eq(calDocRef2), same(context))).andReturn(calDoc2).once();
+    expect(xwiki.getDocument(eq(calDocRef3), same(context))).andReturn(calDoc3).once();
+    
+    replayDefault();
+    Map<String, List<DocumentReference>> ret = calService.getCalSpaceCache(wikiRef);
+    verifyDefault();
+    assertEquals(2, ret.size());
+    assertEquals(2, ret.get(calSpace1).size());
+    assertEquals(calDocRef1, ret.get(calSpace1).get(0));
+    assertEquals(calDocRef3, ret.get(calSpace1).get(1));
+    assertEquals(1, ret.get(calSpace2).size());
+    assertEquals(calDocRef2, ret.get(calSpace2).get(0));
+    assertSame(ret, calService.getCalSpaceCacheForTests(wikiRef.getName()));
+  }
+  
+  @Test
+  public void testGetCalSpaceCache_noCal() throws Exception {
+    WikiReference wikiRef = new WikiReference("db");
+    Map<WikiReference, List<DocumentReference>> calSpaceCache = 
+        new HashMap<WikiReference, List<DocumentReference>>();
+    calSpaceCache.put(wikiRef, new ArrayList<DocumentReference>());
+    calService.injectCalCache(calSpaceCache);
+    
+    replayDefault();
+    Map<String, List<DocumentReference>> ret = calService.getCalSpaceCache(wikiRef);
+    verifyDefault();
+    assertEquals(0, ret.size());
+    assertSame(ret, calService.getCalSpaceCacheForTests(wikiRef.getName()));
+  }
+  
+  @Test
+  public void testGetCalSpaceCache_exception() throws Exception {
+    WikiReference wikiRef = new WikiReference("db");
+    SpaceReference calConfigSpaceRef = new SpaceReference("space", wikiRef);
+    DocumentReference calDocRef1 = new DocumentReference("calDoc1", calConfigSpaceRef);
+    Map<WikiReference, List<DocumentReference>> calSpaceCache = 
+        new HashMap<WikiReference, List<DocumentReference>>();
+    calSpaceCache.put(wikiRef, Arrays.asList(calDocRef1));
+    calService.injectCalCache(calSpaceCache);
+    
+    expect(xwiki.getDocument(eq(calDocRef1), same(context))).andThrow(new XWikiException()
+        ).once();
+    
+    replayDefault();
+    Map<String, List<DocumentReference>> ret = calService.getCalSpaceCache(wikiRef);
+    verifyDefault();
+    assertEquals(0, ret.size());
+    assertNull(calService.getCalSpaceCacheForTests(wikiRef.getName()));
   }
   
   @Test
@@ -562,10 +737,13 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     assertEquals(calDocRefs.get(2), ret.get(1));
   }
   
-  private String getXWQL() {
-    String xwql = "from doc.object(Classes.CalendarConfigClass) as cal where "
-        + "doc.translation = 0";
-    return xwql;
+  private void setCalConfigObj(XWikiDocument calDoc, String calSpaceName) {
+    BaseObject calConfObj = new BaseObject();
+    DocumentReference configClassRef = new DocumentReference(calDoc.getDocumentReference(
+        ).getWikiReference().getName(), "Classes", "CalendarConfigClass");
+    calConfObj.setXClassReference(configClassRef);
+    calConfObj.setStringValue("calendarspace", calSpaceName);
+    calDoc.addXObject(calConfObj);
   }
   
 }

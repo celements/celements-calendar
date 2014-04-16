@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.SpaceReference;
@@ -48,6 +49,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     queryManagerMock = createMockAndAddToDefault(QueryManager.class);
     queryExecutorMock = createMockAndAddToDefault(QueryExecutor.class);
     calService.injectQueryManager(queryManagerMock);
+    setCalCache(null);
   }
   
   @Test
@@ -59,7 +61,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
         new HashMap<WikiReference, List<DocumentReference>>();
     calCache.put(wikiRef, Arrays.asList(new DocumentReference("db", "space", "calDoc1"), 
         toExclude, new DocumentReference("db", "space", "calDoc2")));
-    calService.injectCalCache(calCache);
+    setCalCache(calCache);
     
     replayDefault();
     List<DocumentReference> ret = calService.getAllCalendars(wikiRef, excludes);
@@ -77,7 +79,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
         new HashMap<WikiReference, List<DocumentReference>>();
     calCache.put(wikiRef, Arrays.asList(new DocumentReference("xwikidb", "space", 
         "calDoc1"), new DocumentReference("xwikidb", "space", "calDoc2")));
-    calService.injectCalCache(calCache);
+    setCalCache(calCache);
     
     replayDefault();
     List<DocumentReference> ret = calService.getAllCalendars(null, excludes);
@@ -94,7 +96,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     Map<WikiReference, List<DocumentReference>> calCache = 
         new HashMap<WikiReference, List<DocumentReference>>();
     calCache.put(wikiRef, new ArrayList<DocumentReference>());
-    calService.injectCalCache(calCache);
+    setCalCache(calCache);
     
     replayDefault();
     List<DocumentReference> ret = calService.getAllCalendars(wikiRef, excludes);
@@ -113,16 +115,15 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
         eq(Query.XWQL))).andReturn(query).once();
     expect(queryExecutorMock.execute(eq(query))).andReturn(fullNames).once();
     
-    assertNull(calService.getCalCacheForTests());
+    assertNull(getCalCache());
     replayDefault();
     List<DocumentReference> ret = calService.getAllCalendarsInternal(wikiRef);
-    Map<WikiReference, List<DocumentReference>> calCache = calService.getCalCacheForTests();
     verifyDefault();
     assertEquals(2, ret.size());
     assertEquals(new DocumentReference("db", "space", "calDoc1"), ret.get(0));
     assertEquals(new DocumentReference("db", "space", "calDoc2"), ret.get(1));
-    assertEquals(1, calCache.size());
-    assertEquals(ret, calCache.get(wikiRef));
+    assertEquals(1, getCalCache().size());
+    assertEquals(ret, getCalCache().get(wikiRef));
   }
   
   @Test
@@ -132,7 +133,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
         new HashMap<WikiReference, List<DocumentReference>>();
     calCache.put(new WikiReference("db2"), Arrays.asList(new DocumentReference(
         "db2", "space", "calDoc1"), new DocumentReference("db2", "space", "calDoc2")));
-    calService.injectCalCache(calCache);
+    setCalCache(calCache);
     Query query = new DefaultQuery("theStatement", Query.XWQL, queryExecutorMock);
     List<Object> fullNames = Collections.emptyList();
     
@@ -154,7 +155,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
         new HashMap<WikiReference, List<DocumentReference>>();
     calCache.put(wikiRef, Arrays.asList(new DocumentReference("db", "space", "calDoc1"), 
         new DocumentReference("db", "space", "calDoc2")));
-    calService.injectCalCache(calCache);
+    setCalCache(calCache);
     
     replayDefault();
     List<DocumentReference> ret = calService.getAllCalendarsInternal(wikiRef);
@@ -486,7 +487,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
         new HashMap<String, List<DocumentReference>>();
     calSpaceCache.put(calSpace, Arrays.asList(new DocumentReference(database, 
         "notMyInSpace", "doc"), new DocumentReference(database, "myInSpace", "doc2")));
-    calService.injectCalSpaceCache(database, calSpaceCache);
+    setCalSpaceCache(database, calSpaceCache);
     
     replayDefault();
     DocumentReference ret = calService.getCalendarDocRefByCalendarSpace(calSpace, 
@@ -501,7 +502,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     String calSpace = "myCalSpace";
     Map<String, List<DocumentReference>> calSpaceCache = 
         new HashMap<String, List<DocumentReference>>();
-    calService.injectCalSpaceCache(database, calSpaceCache);
+    setCalSpaceCache(database, calSpaceCache);
     
     replayDefault();
     DocumentReference ret = calService.getCalendarDocRefByCalendarSpace(calSpace);
@@ -518,7 +519,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     calSpaceCache.put(calSpace, Arrays.asList(new DocumentReference(database, "myInSpace", 
         "doc1"), new DocumentReference(database, "notMyInSpace", "doc"), 
         new DocumentReference(database, "myInSpace", "doc2")));
-    calService.injectCalSpaceCache(database, calSpaceCache);
+    setCalSpaceCache(database, calSpaceCache);
     
     replayDefault();
     List<DocumentReference> ret = calService.getCalendarDocRefsByCalendarSpace(calSpace);
@@ -535,7 +536,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     String calSpace = "myCalSpace";
     Map<String, List<DocumentReference>> calSpaceCache = 
         new HashMap<String, List<DocumentReference>>();
-    calService.injectCalSpaceCache(database, calSpaceCache);
+    setCalSpaceCache(database, calSpaceCache);
     
     replayDefault();
     List<DocumentReference> ret = calService.getCalendarDocRefsByCalendarSpace(calSpace);
@@ -552,7 +553,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     calSpaceCache.put(calSpace, Arrays.asList(new DocumentReference(database, "myInSpace", 
         "doc1"), new DocumentReference(database, "notMyInSpace", "doc"), 
         new DocumentReference(database, "myInSpace", "doc2")));
-    calService.injectCalSpaceCache(database, calSpaceCache);
+    setCalSpaceCache(database, calSpaceCache);
     
     replayDefault();
     List<DocumentReference> ret = calService.getCalendarDocRefsByCalendarSpace(calSpace, 
@@ -572,7 +573,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     calSpaceCache.put(calSpace, Arrays.asList(new DocumentReference(database, "myInSpace", 
         "doc1"), new DocumentReference(database, "notMyInSpace", "doc"), 
         new DocumentReference(database, "myInSpace", "doc2")));
-    calService.injectCalSpaceCache(database, calSpaceCache);
+    setCalSpaceCache(database, calSpaceCache);
     
     replayDefault();
     List<DocumentReference> ret = calService.getCalendarDocRefsByCalendarSpace(calSpace, 
@@ -593,7 +594,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     calSpaceCache.put(calSpace, Arrays.asList(new DocumentReference(database, "myInSpace", 
         "doc1"), new DocumentReference(database, "notMyInSpace", "doc"), 
         new DocumentReference(database, "myInSpace", "doc2")));
-    calService.injectCalSpaceCache(database, calSpaceCache);
+    setCalSpaceCache(database, calSpaceCache);
     
     replayDefault();
     List<DocumentReference> ret = calService.getCalendarDocRefsByCalendarSpace(calSpace, 
@@ -613,7 +614,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     calSpaceCache.put(calSpace, Arrays.asList(new DocumentReference(database, "myInSpace", 
         "doc1"), new DocumentReference(database, "notMyInSpace", "doc"), 
         new DocumentReference(database, "myInSpace", "doc2")));
-    calService.injectCalSpaceCache(database, calSpaceCache);
+    setCalSpaceCache(database, calSpaceCache);
     
     replayDefault();
     List<DocumentReference> ret = calService.getCalendarDocRefsByCalendarSpace(calSpace, 
@@ -630,7 +631,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     WikiReference wikiRef = new WikiReference("db");
     Map<String, List<DocumentReference>> calSpaceCache = 
         new HashMap<String, List<DocumentReference>>();
-    calService.injectCalSpaceCache("db", calSpaceCache);
+    setCalSpaceCache("db", calSpaceCache);
     
     replayDefault();
     Map<String, List<DocumentReference>> ret = calService.getCalSpaceCache(wikiRef);
@@ -650,7 +651,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     Map<WikiReference, List<DocumentReference>> calSpaceCache = 
         new HashMap<WikiReference, List<DocumentReference>>();
     calSpaceCache.put(wikiRef, Arrays.asList(calDocRef1, calDocRef2, calDocRef3));
-    calService.injectCalCache(calSpaceCache);
+    setCalCache(calSpaceCache);
     XWikiDocument calDoc1 = new XWikiDocument(calDocRef1);
     setCalConfigObj(calDoc1, calSpace1);
     XWikiDocument calDoc2 = new XWikiDocument(calDocRef2);
@@ -671,7 +672,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     assertEquals(calDocRef3, ret.get(calSpace1).get(1));
     assertEquals(1, ret.get(calSpace2).size());
     assertEquals(calDocRef2, ret.get(calSpace2).get(0));
-    assertSame(ret, calService.getCalSpaceCacheForTests(wikiRef.getName()));
+    assertSame(ret, getCalSpaceCache(wikiRef.getName()));
   }
   
   @Test
@@ -680,13 +681,13 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     Map<WikiReference, List<DocumentReference>> calSpaceCache = 
         new HashMap<WikiReference, List<DocumentReference>>();
     calSpaceCache.put(wikiRef, new ArrayList<DocumentReference>());
-    calService.injectCalCache(calSpaceCache);
+    setCalCache(calSpaceCache);
     
     replayDefault();
     Map<String, List<DocumentReference>> ret = calService.getCalSpaceCache(wikiRef);
     verifyDefault();
     assertEquals(0, ret.size());
-    assertSame(ret, calService.getCalSpaceCacheForTests(wikiRef.getName()));
+    assertSame(ret, getCalSpaceCache(wikiRef.getName()));
   }
   
   @Test
@@ -697,7 +698,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     Map<WikiReference, List<DocumentReference>> calSpaceCache = 
         new HashMap<WikiReference, List<DocumentReference>>();
     calSpaceCache.put(wikiRef, Arrays.asList(calDocRef1));
-    calService.injectCalCache(calSpaceCache);
+    setCalCache(calSpaceCache);
     
     expect(xwiki.getDocument(eq(calDocRef1), same(context))).andThrow(new XWikiException()
         ).once();
@@ -706,7 +707,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     Map<String, List<DocumentReference>> ret = calService.getCalSpaceCache(wikiRef);
     verifyDefault();
     assertEquals(0, ret.size());
-    assertNull(calService.getCalSpaceCacheForTests(wikiRef.getName()));
+    assertNull(getCalSpaceCache(wikiRef.getName()));
   }
   
   @Test
@@ -744,6 +745,32 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     calConfObj.setXClassReference(configClassRef);
     calConfObj.setStringValue("calendarspace", calSpaceName);
     calDoc.addXObject(calConfObj);
+  }
+  
+  private void setCalCache(Map<WikiReference, List<DocumentReference>> calCache) {
+    Utils.getComponent(Execution.class).getContext().setProperty(
+        CalendarService.EXECUTIONCONTEXT_KEY_CAL_CACHE, calCache);
+  }
+  
+  @SuppressWarnings("unchecked")
+  private Map<WikiReference, List<DocumentReference>> getCalCache() {
+    return (Map<WikiReference, List<DocumentReference>>) Utils.getComponent(
+        Execution.class).getContext().getProperty(
+            CalendarService.EXECUTIONCONTEXT_KEY_CAL_CACHE);
+  }
+  
+  private void setCalSpaceCache(String database, 
+      Map<String, List<DocumentReference>> calSpaceCache) {
+    Utils.getComponent(Execution.class).getContext().setProperty(
+        CalendarService.EXECUTIONCONTEXT_KEY_CAL_SPACE_CACHE + "|" + database, 
+        calSpaceCache);
+  }
+  
+  @SuppressWarnings("unchecked")
+  private Map<String, List<DocumentReference>> getCalSpaceCache(String database) {
+    return (Map<String, List<DocumentReference>>) Utils.getComponent(
+        Execution.class).getContext().getProperty(
+            CalendarService.EXECUTIONCONTEXT_KEY_CAL_SPACE_CACHE + "|" + database);
   }
   
 }

@@ -45,8 +45,8 @@ public class CalendarService implements ICalendarService {
   public static final String CALENDAR_SERVICE_START_DATE =
       "com.celements.calendar.service.CalendarService.startDate";
 
-  private static final String EXECUTIONCONTEXT_KEY_CAL_CACHE = "calCache";
-  private static final String EXECUTIONCONTEXT_KEY_CAL_SPACE_CACHE = "calSpaceCache";
+  static final String EXECUTIONCONTEXT_KEY_CAL_CACHE = "calCache";
+  static final String EXECUTIONCONTEXT_KEY_CAL_SPACE_CACHE = "calSpaceCache";
 
   @Requirement
   private QueryManager queryManager;
@@ -106,7 +106,8 @@ public class CalendarService implements ICalendarService {
     if (allCalendars == null) {
       allCalendars = executeAllCalendarsQuery(wikiRef);
       calCache.put(wikiRef, allCalendars);
-      LOGGER.debug("getCalsFromCache: put for wiki '" + wikiRef + "': " + allCalendars);
+      LOGGER.debug("getAllCalendarsInternal: put to cache for key '" + wikiRef + "': " 
+          + allCalendars);
     }
     return allCalendars;
   }
@@ -334,30 +335,6 @@ public class CalendarService implements ICalendarService {
   
   void injectQueryManager(QueryManager queryManager) {
     this.queryManager = queryManager;
-  }
-  
-  void injectCalCache(Map<WikiReference, List<DocumentReference>> calCache) {
-    execution.getContext().setProperty(EXECUTIONCONTEXT_KEY_CAL_CACHE, calCache);
-  }
-  
-  // for test purposes only
-  @SuppressWarnings("unchecked")
-  Map<WikiReference, List<DocumentReference>> getCalCacheForTests() {
-    return (Map<WikiReference, List<DocumentReference>>) execution.getContext(
-        ).getProperty(EXECUTIONCONTEXT_KEY_CAL_CACHE);
-  }
-  
-  void injectCalSpaceCache(String database, 
-      Map<String, List<DocumentReference>> calSpaceCache) {
-    String contextKey = EXECUTIONCONTEXT_KEY_CAL_SPACE_CACHE + "|" + database; 
-    execution.getContext().setProperty(contextKey, calSpaceCache);
-  }
-  
-  // for test purposes only
-  @SuppressWarnings("unchecked")
-  Map<String, List<DocumentReference>> getCalSpaceCacheForTests(String database) {
-    return (Map<String, List<DocumentReference>>) execution.getContext(
-        ).getProperty(EXECUTIONCONTEXT_KEY_CAL_SPACE_CACHE + "|" + database);
   }
 
 }

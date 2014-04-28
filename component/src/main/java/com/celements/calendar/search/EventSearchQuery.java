@@ -14,23 +14,16 @@ public class EventSearchQuery {
 
   protected IQueryService queryService;
 
-  protected final String spaceName;
   protected final Date fromDate;
   protected final Date toDate;
   protected final String searchTerm;
   protected boolean fuzzy;
 
-  public EventSearchQuery(String spaceName, Date fromDate, Date toDate,
-      String searchTerm) {
-    this.spaceName = spaceName;
+  public EventSearchQuery(Date fromDate, Date toDate, String searchTerm) {
     this.fromDate = fromDate;
     this.toDate = toDate;
     this.searchTerm = searchTerm;
     fuzzy = false;
-  }
-
-  public String getSpaceName() {
-    return spaceName;
   }
 
   public Date getFromDate() {
@@ -57,7 +50,6 @@ public class EventSearchQuery {
 
   public LuceneQueryApi getAsLuceneQuery() {
     LuceneQueryApi query = getQueryService().createQuery();
-    addRestriction(query, "space", "\"" + spaceName + "\"");
     addDateRestriction(query, getEventDateFieldName(), fromDate, toDate);
     if (checkString(searchTerm)) {
       String[] fields = getSearchTermFields();
@@ -122,14 +114,14 @@ public class EventSearchQuery {
     return queryService;
   }
 
-  @Override
-  public String toString() {
-    return "EventSearchQuery [spaceName=" + spaceName + ", searchTerm=" + searchTerm
-        + ", fuzzy=" + fuzzy + "]";
-  }
-
   public void setFuzzy(boolean fuzzy) {
     this.fuzzy = fuzzy;
+  }
+
+  @Override
+  public String toString() {
+    return "EventSearchQuery [fromDate=" + fromDate + ", toDate=" + toDate
+        + ", searchTerm=" + searchTerm + ", fuzzy=" + fuzzy + "]";
   }
 
   protected void injectQueryService(IQueryService queryService) {

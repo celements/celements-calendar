@@ -61,7 +61,7 @@ public class CalendarNavigationServiceTest extends AbstractBridgedComponentTestC
     DocumentReference calDocRef = new DocumentReference("myWiki", "mySpace", "myCalDoc");
     DocumentReference eventDocRef = new DocumentReference("myWiki", "mySpace", "myEvent");
     IEvent event = new Event(eventDocRef);
-    EventSearchQuery query = new EventSearchQuery("", new Date(), new Date(), "");
+    EventSearchQuery query = new EventSearchQuery(new Date(), new Date(), "");
     expect(navDetailsFactoryMock.getNavigationDetails(calDocRef, event, query)
         ).andReturn(null).once();
     replayAll();

@@ -120,8 +120,7 @@ public class NavigationDetailsFactoryTest extends AbstractBridgedComponentTestCa
     List<IEvent> eventList = Arrays.asList(event2, event3, eventMock, event4);
     DocumentReference calDocRef = new DocumentReference("myWiki", "mySpace", "myCalDoc");
     String lang = "de";
-    EventSearchQuery query = new EventSearchQuery("mySpace", new Date(0), new Date(),
-        "some term");
+    EventSearchQuery query = new EventSearchQuery(new Date(0), new Date(), "some term");
     EventSearchResult searchResultMock = createMock(EventSearchResult.class);
 
     expect(eventMock.getEventDate()).andReturn(eventDate).once();

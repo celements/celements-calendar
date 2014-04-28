@@ -156,7 +156,7 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testSearchEvents_dirtyLuceneWorkaraound() throws Exception {
-    EventSearchQuery queryMock = new EventSearchQuery("mySpace", null, null, null);
+    EventSearchQuery query = new EventSearchQuery(null, null, null);
     ICalendar calMock = createMock(ICalendar.class);
     DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "Content",
         "MyCal");
@@ -171,12 +171,12 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
     List<String> allowedSpaces = Arrays.asList("mySpace");
     expect(calServiceMock.getAllowedSpaces(eq(calDocRef))).andReturn(allowedSpaces);
     EventSearchResult mockEventSearchResults = createMock(EventSearchResult.class);
-    expect(calEngineMock.searchEvents(same(queryMock), eq(startDate), eq(false), eq("de"),
+    expect(calEngineMock.searchEvents(same(query), eq(startDate), eq(false), eq("de"),
         eq(allowedSpaces))).andReturn(mockEventSearchResults);
     //!! IMPORTANT getSize MUST be called imadiatelly
     expect(mockEventSearchResults.getSize()).andReturn(10).once();
     replayAll(calMock, calEngineMock, mockEventSearchResults);
-    assertSame(mockEventSearchResults, eventsMgr.searchEvents(calMock, queryMock));
+    assertSame(mockEventSearchResults, eventsMgr.searchEvents(calMock, query));
     verifyAll(calMock, calEngineMock, mockEventSearchResults);
   }
 

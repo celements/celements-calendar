@@ -3,7 +3,9 @@ package com.celements.calendar.search;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -53,19 +55,20 @@ public class EventSearchTest extends AbstractBridgedComponentTestCase {
     assertNotNull(searchResult);
     assertEquals("asdf", searchResult.getLuceneQuery());
     assertFalse(searchResult.getSkipChecks());
-    String[] sortFields = searchResult.getSortFields();
+    List<String> sortFields = searchResult.getSortFields();
     assertNotNull(sortFields);
-    assertEquals(3, sortFields.length);
-    assertEquals("Classes.CalendarEventClass.eventDate", sortFields[0]);
-    assertEquals("Classes.CalendarEventClass.eventDate_end", sortFields[1]);
-    assertEquals("Classes.CalendarEventClass.l_title", sortFields[2]);
+    assertEquals(3, sortFields.size());
+    assertEquals("Classes.CalendarEventClass.eventDate", sortFields.get(0));
+    assertEquals("Classes.CalendarEventClass.eventDate_end", sortFields.get(1));
+    assertEquals("Classes.CalendarEventClass.l_title", sortFields.get(2));
   }
 
   @Test
-  public void testGetSearchResult_invertSort() throws Exception {
+  public void testGetSearchResult_withSortFields() throws Exception {
     String queryString = "asdf";
     LuceneQueryRestrictionApi objectRestriction = new LuceneQueryRestrictionApi("object",
         "\"Classes.CalendarEventClass\"");
+    List<String> sortFields = Arrays.asList("field1", "field2");
 
     expect(queryServiceMock.createRestriction(eq("object"),
         eq("\"Classes.CalendarEventClass\""))).andReturn(objectRestriction).once();
@@ -73,18 +76,14 @@ public class EventSearchTest extends AbstractBridgedComponentTestCase {
     expect(queryMock.getQueryString()).andReturn(queryString).once();
 
     replayAll();
-    EventSearchResult searchResult = eventSearch.getSearchResult(queryMock, true);
+    EventSearchResult searchResult = eventSearch.getSearchResult(queryMock, sortFields);
     verifyAll();
 
     assertNotNull(searchResult);
     assertEquals("asdf", searchResult.getLuceneQuery());
     assertFalse(searchResult.getSkipChecks());
-    String[] sortFields = searchResult.getSortFields();
-    assertNotNull(sortFields);
-    assertEquals(3, sortFields.length);
-    assertEquals("-Classes.CalendarEventClass.eventDate", sortFields[0]);
-    assertEquals("-Classes.CalendarEventClass.eventDate_end", sortFields[1]);
-    assertEquals("-Classes.CalendarEventClass.l_title", sortFields[2]);
+    assertEquals(sortFields, searchResult.getSortFields());
+
   }
 
   @Test
@@ -105,12 +104,12 @@ public class EventSearchTest extends AbstractBridgedComponentTestCase {
     assertNotNull(searchResult);
     assertEquals("asdf", searchResult.getLuceneQuery());
     assertTrue(searchResult.getSkipChecks());
-    String[] sortFields = searchResult.getSortFields();
+    List<String> sortFields = searchResult.getSortFields();
     assertNotNull(sortFields);
-    assertEquals(3, sortFields.length);
-    assertEquals("Classes.CalendarEventClass.eventDate", sortFields[0]);
-    assertEquals("Classes.CalendarEventClass.eventDate_end", sortFields[1]);
-    assertEquals("Classes.CalendarEventClass.l_title", sortFields[2]);
+    assertEquals(3, sortFields.size());
+    assertEquals("Classes.CalendarEventClass.eventDate", sortFields.get(0));
+    assertEquals("Classes.CalendarEventClass.eventDate_end", sortFields.get(1));
+    assertEquals("Classes.CalendarEventClass.l_title", sortFields.get(2));
   }
 
   @Test
@@ -137,12 +136,12 @@ public class EventSearchTest extends AbstractBridgedComponentTestCase {
 
     assertNotNull(searchResult);
     assertEquals("asdf", searchResult.getLuceneQuery());
-    String[] sortFields = searchResult.getSortFields();
+    List<String> sortFields = searchResult.getSortFields();
     assertNotNull(sortFields);
-    assertEquals(3, sortFields.length);
-    assertEquals("Classes.CalendarEventClass.eventDate", sortFields[0]);
-    assertEquals("Classes.CalendarEventClass.eventDate_end", sortFields[1]);
-    assertEquals("Classes.CalendarEventClass.l_title", sortFields[2]);
+    assertEquals(3, sortFields.size());
+    assertEquals("Classes.CalendarEventClass.eventDate", sortFields.get(0));
+    assertEquals("Classes.CalendarEventClass.eventDate_end", sortFields.get(1));
+    assertEquals("Classes.CalendarEventClass.l_title", sortFields.get(2));
   }
 
   @Test
@@ -169,12 +168,12 @@ public class EventSearchTest extends AbstractBridgedComponentTestCase {
 
     assertNotNull(searchResult);
     assertEquals("asdf", searchResult.getLuceneQuery());
-    String[] sortFields = searchResult.getSortFields();
+    List<String> sortFields = searchResult.getSortFields();
     assertNotNull(sortFields);
-    assertEquals(3, sortFields.length);
-    assertEquals("-Classes.CalendarEventClass.eventDate", sortFields[0]);
-    assertEquals("-Classes.CalendarEventClass.eventDate_end", sortFields[1]);
-    assertEquals("-Classes.CalendarEventClass.l_title", sortFields[2]);
+    assertEquals(3, sortFields.size());
+    assertEquals("-Classes.CalendarEventClass.eventDate", sortFields.get(0));
+    assertEquals("-Classes.CalendarEventClass.eventDate_end", sortFields.get(1));
+    assertEquals("-Classes.CalendarEventClass.l_title", sortFields.get(2));
   }
 
   private void replayAll(Object ... mocks) {

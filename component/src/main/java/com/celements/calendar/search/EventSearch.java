@@ -1,6 +1,8 @@
 package com.celements.calendar.search;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,35 +33,37 @@ public class EventSearch implements IEventSearch {
   }
 
   public EventSearchResult getSearchResult(EventSearchQuery query) {
-    return getSearchResult(query.getAsLuceneQuery(), false, false);
+    return getSearchResult(query.getAsLuceneQuery(), null, false);
   }
 
-  public EventSearchResult getSearchResult(EventSearchQuery query, boolean invertSort) {
-    return getSearchResult(query.getAsLuceneQuery(), invertSort, false);
+  public EventSearchResult getSearchResult(EventSearchQuery query, 
+      List<String> sortFields) {
+    return getSearchResult(query.getAsLuceneQuery(), sortFields, false);
   }
 
   public EventSearchResult getSearchResult(LuceneQueryApi query) {
-    return getSearchResult(query, false, false);
+    return getSearchResult(query, null, false);
   }
 
-  public EventSearchResult getSearchResult(LuceneQueryApi query, boolean invertSort) {
-    return getSearchResult(query, invertSort, false);
+  public EventSearchResult getSearchResult(LuceneQueryApi query, List<String> sortFields) {
+    return getSearchResult(query, sortFields, false);
   }
 
   public EventSearchResult getSearchResultWithoutChecks(LuceneQueryApi query) {
-    return getSearchResult(query, false, true);
+    return getSearchResult(query, null, true);
   }
 
   public EventSearchResult getSearchResultWithoutChecks(LuceneQueryApi query, 
-      boolean invertSort) {
-    return getSearchResult(query, invertSort, true);
+      List<String> sortFields) {
+    return getSearchResult(query, sortFields, true);
   }
   
-  private EventSearchResult getSearchResult(LuceneQueryApi query, boolean invertSort, 
+  private EventSearchResult getSearchResult(LuceneQueryApi query, List<String> sortFields, 
       boolean skipChecks) {
     query.addRestriction(createEventObjectRestriction());
-    return new EventSearchResult(query.getQueryString(), getSortFields(invertSort), 
-        skipChecks, getContext());
+    sortFields = (sortFields == null ? getDefaultSortFields(false) : sortFields);
+    return new EventSearchResult(query.getQueryString(), sortFields, skipChecks, 
+        getContext());
   }
 
   public EventSearchResult getSearchResultFromDate(EventSearchQuery query, Date fromDate) {
@@ -72,9 +76,10 @@ public class EventSearch implements IEventSearch {
     query.addRestriction(queryService.createFromDateRestriction(getEventDateFieldName(), 
         fromDate, true));
     String queryString = query.getQueryString();
+    List<String> sortFields = getDefaultSortFields(false);
     LOGGER.debug("getSearchResultFromDate: query [" + queryString + "] and sortFields ["
-        + getSortFields(false) + "].");
-    return new EventSearchResult(queryString, getSortFields(false), false, getContext());
+        + sortFields + "]");
+    return new EventSearchResult(queryString, sortFields, false, getContext());
   }
   
   public EventSearchResult getSearchResultUptoDate(EventSearchQuery query, Date uptoDate) {
@@ -86,9 +91,10 @@ public class EventSearch implements IEventSearch {
     query.addRestriction(queryService.createToDateRestriction(getEventDateFieldName(), 
         uptoDate, false));
     String queryString = query.getQueryString();
+    List<String> sortFields = getDefaultSortFields(true);
     LOGGER.debug("getSearchResultUptoDate: query [" + queryString + "] and sortFields ["
-        + getSortFields(true) + "].");
-    return new EventSearchResult(queryString, getSortFields(true), false, getContext());
+        + sortFields + "]");
+    return new EventSearchResult(queryString, sortFields, false, getContext());
   }
 
   private LuceneQueryRestrictionApi createEventObjectRestriction() {
@@ -101,11 +107,11 @@ public class EventSearch implements IEventSearch {
         + CalendarClasses.PROPERTY_EVENT_DATE;
   }
 
-  private String[] getSortFields(boolean inverted) {
+  private List<String> getDefaultSortFields(boolean inverted) {
     String pref = (inverted ? "-" : "") + CalendarClasses.CALENDAR_EVENT_CLASS + ".";
-    return new String[] { pref + CalendarClasses.PROPERTY_EVENT_DATE,
+    return Arrays.asList(new String[] { pref + CalendarClasses.PROPERTY_EVENT_DATE,
         pref + CalendarClasses.PROPERTY_EVENT_DATE_END,
-        pref + CalendarClasses.PROPERTY_TITLE };
+        pref + CalendarClasses.PROPERTY_TITLE });
   }
 
   void injectQueryService(IQueryService queryService) {

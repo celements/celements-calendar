@@ -1,6 +1,7 @@
 package com.celements.calendar.search;
 
 import java.util.Date;
+import java.util.List;
 
 import org.xwiki.component.annotation.ComponentRole;
 
@@ -11,16 +12,18 @@ public interface IEventSearch {
   
   public EventSearchResult getSearchResult(EventSearchQuery query);
 
-  public EventSearchResult getSearchResult(EventSearchQuery query, boolean invertSort);
+  public EventSearchResult getSearchResult(EventSearchQuery query, 
+      List<String> sortFields);
 
   public EventSearchResult getSearchResult(LuceneQueryApi query);
 
-  public EventSearchResult getSearchResult(LuceneQueryApi query, boolean invertSort);
+  public EventSearchResult getSearchResult(LuceneQueryApi query, 
+      List<String> sortFields);
 
   public EventSearchResult getSearchResultWithoutChecks(LuceneQueryApi query);
 
   public EventSearchResult getSearchResultWithoutChecks(LuceneQueryApi query, 
-      boolean invertSort);
+      List<String> sortFields);
 
   public EventSearchResult getSearchResultFromDate(EventSearchQuery query, Date fromDate);
 

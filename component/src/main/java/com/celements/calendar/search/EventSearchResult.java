@@ -1,7 +1,6 @@
 package com.celements.calendar.search;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,14 +27,15 @@ public class EventSearchResult {
   private LucenePlugin lucenePlugin;
 
   private final String luceneQuery;
-  private final String[] sortFields;
+  private final List<String> sortFields;
   private final boolean skipChecks;
   private final XWikiContext context;
 
-  EventSearchResult(String luceneQuery, String[] sortFields, boolean skipChecks, 
+  EventSearchResult(String luceneQuery, List<String> sortFields, boolean skipChecks, 
       XWikiContext context) {
     this.luceneQuery = luceneQuery;
-    this.sortFields = sortFields;
+    this.sortFields = (sortFields != null ? Collections.unmodifiableList(
+        new ArrayList<String>(sortFields)) : null);
     this.skipChecks = skipChecks;
     this.context = context;
   }
@@ -44,8 +44,8 @@ public class EventSearchResult {
     return luceneQuery;
   }
 
-  public String[] getSortFields() {
-    return Arrays.copyOf(sortFields, sortFields.length);
+  public List<String> getSortFields() {
+    return sortFields;
   }
   
   boolean getSkipChecks() {
@@ -109,12 +109,14 @@ public class EventSearchResult {
   SearchResults luceneSearch() {
     if (searchResultsCache == null) {
       try {
+        String[] sortFieldsArray = (sortFields != null ? sortFields.toArray(
+            new String[sortFields.size()]) : null);
         if (skipChecks) {
           searchResultsCache = getLucenePlugin().getSearchResultsWithoutChecks(
-              luceneQuery, sortFields, null, "default,de", context);
+              luceneQuery, sortFieldsArray, null, "default,de", context);
         } else {
-          searchResultsCache = getLucenePlugin().getSearchResults(luceneQuery, sortFields,
-              null, "default,de", context);
+          searchResultsCache = getLucenePlugin().getSearchResults(luceneQuery, 
+              sortFieldsArray, null, "default,de", context);
         }
         LOGGER.trace("luceneSearch: created new searchResults for query [" + luceneQuery
             + "].");
@@ -145,8 +147,8 @@ public class EventSearchResult {
 
   @Override
   public String toString() {
-    return "EventSearchResult [luceneQuery=" + luceneQuery + ", sortFields="
-        + Arrays.toString(sortFields) + "]";
+    return "EventSearchResult [luceneQuery=" + luceneQuery + ", sortFields=" + sortFields 
+        + "]";
   }
 
   void injectLucenePlugin(LucenePlugin lucenePlugin) {

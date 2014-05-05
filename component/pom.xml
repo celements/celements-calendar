@@ -49,7 +49,7 @@
     <dependency>
       <groupId>com.celements</groupId>
       <artifactId>celements-search</artifactId>
-      <version>1.10</version>
+      <version>1.11</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>  

@@ -113,10 +113,11 @@ public class EventSearchResult {
             new String[sortFields.size()]) : null);
         if (skipChecks) {
           searchResultsCache = getLucenePlugin().getSearchResultsWithoutChecks(
-              luceneQuery, sortFieldsArray, null, "default,de", context);
+              luceneQuery, sortFieldsArray, null, "default," + context.getLanguage(),
+              context);
         } else {
           searchResultsCache = getLucenePlugin().getSearchResults(luceneQuery, 
-              sortFieldsArray, null, "default,de", context);
+              sortFieldsArray, null, "default," + context.getLanguage(), context);
         }
         LOGGER.trace("luceneSearch: created new searchResults for query [" + luceneQuery
             + "].");

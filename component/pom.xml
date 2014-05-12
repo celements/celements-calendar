@@ -28,7 +28,7 @@
       <artifactId>celements</artifactId>
       <version>2.6</version>
   </parent>
-  <modelVersion>4.0.0</modelVersion>  
+  <modelVersion>4.0.0</modelVersion>
   <artifactId>celements-calendar</artifactId>
   <version>1.31-SNAPSHOT</version>
   <description>Celements Calendar</description> 
@@ -49,7 +49,7 @@
     <dependency>
       <groupId>com.celements</groupId>
       <artifactId>celements-search</artifactId>
-      <version>1.11</version>
+      <version>1.12-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>  

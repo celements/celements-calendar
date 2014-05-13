@@ -18,8 +18,8 @@ import org.xwiki.query.QueryManager;
 import com.celements.calendar.Event;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.classes.CalendarClasses;
-import com.celements.calendar.search.EventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
+import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiContext;
 
@@ -198,7 +198,7 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
     return null;
   }
 
-  public EventSearchResult searchEvents(EventSearchQuery query, Date startDate,
+  public EventSearchResult searchEvents(IEventSearchQuery query, Date startDate,
       boolean isArchive, String lang, List<String> allowedSpaces) {
     throw new UnsupportedOperationException("searchEvents not supported for " +
         "CalendarEngineHQL");

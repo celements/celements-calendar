@@ -9,8 +9,8 @@ import org.xwiki.model.reference.DocumentReference;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.api.EventApi;
-import com.celements.calendar.search.EventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
+import com.celements.calendar.search.IEventSearchQuery;
 import com.xpn.xwiki.doc.XWikiDocument;
 
 @ComponentRole
@@ -31,7 +31,7 @@ public interface IEventManager {
 
   public List<IEvent> getEventsInternal(ICalendar cal, int start, int nb);
 
-  public EventSearchResult searchEvents(ICalendar cal, EventSearchQuery query);
+  public EventSearchResult searchEvents(ICalendar cal, IEventSearchQuery query);
 
   /**
    * 

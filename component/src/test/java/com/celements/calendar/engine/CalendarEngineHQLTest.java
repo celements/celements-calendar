@@ -158,6 +158,17 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     assertEquals(new Event(new DocumentReference("xwikidb", "TestSpace", "TestEvent")),
         lastEvent);
   }
+  
+  @Test
+  public void testSearchEvent() throws Exception {
+    replayDefault();
+    try {
+      engine.searchEvents(null, null, false, null, null);
+      fail("Expecting UnsupportedOperationException");
+    } catch (UnsupportedOperationException exc) {      
+    }
+    verifyDefault();
+  }
 
   private String getHQL(boolean isCount, boolean isArchive) {
     String select = isCount ? "count(obj.name)" : "obj.name";

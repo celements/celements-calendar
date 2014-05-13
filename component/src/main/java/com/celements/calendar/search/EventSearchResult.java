@@ -20,8 +20,7 @@ public class EventSearchResult {
 
   private IWebUtilsService webUtils;
 
-  private static Log LOGGER = LogFactory.getFactory().getInstance(
-      EventSearchResult.class);
+  private static Log LOGGER = LogFactory.getFactory().getInstance(EventSearchResult.class);
 
   private SearchResults searchResultsCache;
   private LucenePlugin lucenePlugin;
@@ -34,8 +33,11 @@ public class EventSearchResult {
   EventSearchResult(String luceneQuery, List<String> sortFields, boolean skipChecks, 
       XWikiContext context) {
     this.luceneQuery = luceneQuery;
-    this.sortFields = (sortFields != null ? Collections.unmodifiableList(
-        new ArrayList<String>(sortFields)) : null);
+    if (sortFields != null) {
+      this.sortFields = sortFields;
+    } else {
+      this.sortFields = Collections.emptyList();
+    }
     this.skipChecks = skipChecks;
     this.context = context;
   }
@@ -109,15 +111,14 @@ public class EventSearchResult {
   SearchResults luceneSearch() {
     if (searchResultsCache == null) {
       try {
-        String[] sortFieldsArray = (sortFields != null ? sortFields.toArray(
-            new String[sortFields.size()]) : null);
+        String[] sortFieldsArray = sortFields.toArray(new String[sortFields.size()]);
+        String languages = "default," + context.getLanguage();
         if (skipChecks) {
           searchResultsCache = getLucenePlugin().getSearchResultsWithoutChecks(
-              luceneQuery, sortFieldsArray, null, "default," + context.getLanguage(),
-              context);
+              luceneQuery, sortFieldsArray, null, languages, context);
         } else {
           searchResultsCache = getLucenePlugin().getSearchResults(luceneQuery, 
-              sortFieldsArray, null, "default," + context.getLanguage(), context);
+              sortFieldsArray, null, languages, context);
         }
         LOGGER.trace("luceneSearch: created new searchResults for query [" + luceneQuery
             + "].");
@@ -149,7 +150,7 @@ public class EventSearchResult {
   @Override
   public String toString() {
     return "EventSearchResult [luceneQuery=" + luceneQuery + ", sortFields=" + sortFields 
-        + "]";
+        + ", skipChecks=" + skipChecks + "]";
   }
 
   void injectLucenePlugin(LucenePlugin lucenePlugin) {

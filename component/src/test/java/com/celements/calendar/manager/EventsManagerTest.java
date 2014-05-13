@@ -19,8 +19,9 @@ import com.celements.calendar.Calendar;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.engine.ICalendarEngineRole;
-import com.celements.calendar.search.EventSearchQuery;
+import com.celements.calendar.search.DefaultEventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
+import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.service.ICalendarService;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 import com.xpn.xwiki.XWiki;
@@ -156,7 +157,7 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testSearchEvents_dirtyLuceneWorkaraound() throws Exception {
-    EventSearchQuery query = new EventSearchQuery(null, null, null);
+    IEventSearchQuery query = new DefaultEventSearchQuery(getContext().getDatabase());
     ICalendar calMock = createMock(ICalendar.class);
     DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "Content",
         "MyCal");
@@ -172,7 +173,7 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
     expect(calServiceMock.getAllowedSpaces(eq(calDocRef))).andReturn(allowedSpaces);
     EventSearchResult mockEventSearchResults = createMock(EventSearchResult.class);
     expect(calEngineMock.searchEvents(same(query), eq(startDate), eq(false), eq("de"),
-        eq(allowedSpaces))).andReturn(mockEventSearchResults);
+        eq(allowedSpaces))).andReturn(mockEventSearchResults).once();
     //!! IMPORTANT getSize MUST be called imadiatelly
     expect(mockEventSearchResults.getSize()).andReturn(10).once();
     replayAll(calMock, calEngineMock, mockEventSearchResults);

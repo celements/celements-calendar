@@ -18,8 +18,8 @@ import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.classes.CalendarClasses;
-import com.celements.calendar.search.EventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
+import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.service.ICalendarService;
 import com.celements.common.classes.IClassCollectionRole;
 import com.celements.web.service.IWebUtilsService;
@@ -146,15 +146,14 @@ public class EventsManager implements IEventManager {
     return subscriptObj;
   }
 
-  public EventSearchResult searchEvents(ICalendar cal, EventSearchQuery query) {
+  public EventSearchResult searchEvents(ICalendar cal, IEventSearchQuery query) {
     DocumentReference calDocRef = cal.getDocumentReference();
     try {
       EventSearchResult eventsResult = cal.getEngine().searchEvents(query,
           cal.getStartDate(), cal.isArchive(), webUtilsService.getDefaultLanguage(),
           calService.getAllowedSpaces(calDocRef));
       LOGGER.debug("EventsManager searchEvents: isArchive [" + cal.isArchive()
-          + "], startDate [" + cal.getStartDate() + "] query ["
-          + query.getAsLuceneQuery().getQueryString() + "].");
+          + "], startDate [" + cal.getStartDate() + "] query [" + query + "].");
       //XXX calling getSize() imediatelly is a dirty Workaround!!!
       //XXX accessing results directly prevents lucene inconsistancies
       //XXX if multiple results are created (e.g. in Navigation).

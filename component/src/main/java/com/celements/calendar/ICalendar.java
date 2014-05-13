@@ -26,8 +26,8 @@ import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.engine.ICalendarEngineRole;
-import com.celements.calendar.search.EventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
+import com.celements.calendar.search.IEventSearchQuery;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.doc.XWikiDocument;
 
@@ -66,7 +66,7 @@ public interface ICalendar {
    */
   public List<IEvent> getEventsInternal(int start, int nb);
 
-  public EventSearchResult searchEvents(EventSearchQuery query);
+  public EventSearchResult searchEvents(IEventSearchQuery query);
 
   public long getNrOfEvents();
 
@@ -119,6 +119,8 @@ public interface ICalendar {
   public String getLanguage();
 
   public void setLanguage(String language);
+  
+  public List<String> getAllowedSpaces();
 
   public ICalendarEngineRole getEngine();
 

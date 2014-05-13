@@ -33,8 +33,8 @@ import com.celements.calendar.api.EventApi;
 import com.celements.calendar.classes.CalendarClasses;
 import com.celements.calendar.engine.ICalendarEngineRole;
 import com.celements.calendar.manager.IEventManager;
-import com.celements.calendar.search.EventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
+import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.service.ICalendarService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -136,7 +136,7 @@ public class Calendar implements ICalendar {
     return getEventMgr().getEventsInternal(this, start < 0 ? 0 : start, nb < 0 ? 0 : nb);
   }
 
-  public EventSearchResult searchEvents(EventSearchQuery query) {
+  public EventSearchResult searchEvents(IEventSearchQuery query) {
     return getEventMgr().searchEvents(this, query);
   }
 
@@ -314,6 +314,16 @@ public class Calendar implements ICalendar {
     }
     return defaultLang;
   }
+  
+  public List<String> getAllowedSpaces() {
+    try {
+      return getCalService().getAllowedSpaces(getDocumentReference());
+    } catch (XWikiException exp) {
+      LOGGER.error("Failed to get allowed spaces for [" + getDocumentReference() + "].", 
+          exp);
+    }
+    return new ArrayList<String>();
+  }
 
   public ICalendarEngineRole getEngine() {
     if (engine == null) {
@@ -355,6 +365,10 @@ public class Calendar implements ICalendar {
       calService = Utils.getComponent(ICalendarService.class);
     }
     return calService;
+  }
+  
+  void injectCalService(ICalendarService calService) {
+    this.calService = calService;
   }
 
   @Override

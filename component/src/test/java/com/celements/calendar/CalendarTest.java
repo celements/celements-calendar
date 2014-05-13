@@ -23,6 +23,7 @@ import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -33,6 +34,9 @@ import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.manager.IEventManager;
+import com.celements.calendar.search.DefaultEventSearchQuery;
+import com.celements.calendar.search.EventSearchResult;
+import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.service.ICalendarService;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 import com.xpn.xwiki.XWiki;
@@ -183,6 +187,20 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     verifyAll(event);
     assertEquals("Expecting to get the full eventlist", eventList, events);
   }
+  
+  @Test
+  public void testSearchEvents() {
+    IEventSearchQuery query = new DefaultEventSearchQuery(getContext().getDatabase());
+    EventSearchResult result = createMock(EventSearchResult.class);
+    
+    expect(eventMgrMock.searchEvents(same(cal), same(query))).andReturn(result).once();
+    
+    replayAll(result);
+    EventSearchResult ret = cal.searchEvents(query);
+    verifyAll(result);
+    
+    assertSame(result, ret);
+  }
 
   @Test
   public void testGetNrOfEvents_emptyList() {
@@ -256,6 +274,22 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     cal.setStartDate(null);
     assertNotNull(cal.getStartDate());
     assertSame(startDate, cal.getStartDate());
+  }
+
+  @Test
+  public void testGetAllowedSpaces() throws Exception {
+    ICalendarService calServiceMock = createMock(ICalendarService.class);
+    cal.injectCalService(calServiceMock);
+    String eventSpace1 = "calEventSpace1";
+    String eventSpace2 = "calEventSpace2";
+    expect(calServiceMock.getAllowedSpaces(eq(calDocRef))).andReturn(Arrays.asList(
+        new String[] {eventSpace1, eventSpace2}));
+    replayAll(calServiceMock);
+    List<String> allowedSpaces = cal.getAllowedSpaces();
+    assertEquals(2, allowedSpaces.size());
+    assertEquals(eventSpace1, allowedSpaces.get(0));
+    assertEquals(eventSpace2, allowedSpaces.get(1));
+    verifyAll(calServiceMock);
   }
 
   private ICalendarService getCalService() {

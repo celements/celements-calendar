@@ -1,6 +1,7 @@
 package com.celements.calendar.service;
 
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,9 +18,11 @@ import com.celements.calendar.api.EventApi;
 import com.celements.calendar.navigation.ICalendarNavigationService;
 import com.celements.calendar.navigation.factories.CalendarNavigation;
 import com.celements.calendar.navigation.factories.NavigationDetails;
-import com.celements.calendar.search.EventSearchQuery;
+import com.celements.calendar.search.DefaultEventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearch;
+import com.celements.calendar.search.IEventSearchQuery;
+import com.celements.calendar.search.SearchTermEventSearchQuery;
 import com.celements.search.lucene.query.LuceneQueryApi;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -72,7 +75,7 @@ public class CalendarScriptService implements ScriptService {
   }
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
-      Date eventDate, int offset, int nb, EventSearchQuery query) {
+      Date eventDate, int offset, int nb, SearchTermEventSearchQuery query) {
     return calNavService.getCalendarNavigation(calConfigDocRef,
         calNavService.getNavigationDetails(eventDate, offset), nb, query);
   }
@@ -104,23 +107,20 @@ public class CalendarScriptService implements ScriptService {
     return calService.getCalendarDocRefByCalendarSpace(calSpace);
   }
 
-  public EventSearchResult getEventSearchResult(LuceneQueryApi query) {
+  public EventSearchResult getEventSearchResult(IEventSearchQuery query) {
     return eventSearch.getSearchResult(query);
   }
 
-  public EventSearchResult getEventSearchResultFromDate(LuceneQueryApi query,
-      Date fromDate) {
-    return eventSearch.getSearchResultFromDate(query, fromDate);
+  public IEventSearchQuery getEventSearchQuery(LuceneQueryApi luceneQuery, 
+      List<String> sortFields) {
+    return new DefaultEventSearchQuery(getContext().getDatabase(), luceneQuery, 
+        sortFields, false);
   }
 
-  public EventSearchResult getEventSearchResultUpToDate(LuceneQueryApi query,
-      Date uptoDate) {
-    return eventSearch.getSearchResultUptoDate(query, uptoDate);
-  }
-
-  public EventSearchQuery getEventSearchQuery(Date fromDate, Date toDate, 
-      String searchTerm) {
-    return new EventSearchQuery(fromDate, toDate, searchTerm);
+  public SearchTermEventSearchQuery getSearchTermEventSearchQuery(Date fromDate, 
+      Date toDate, String searchTerm, List<String> sortFields) {
+    return new SearchTermEventSearchQuery(getContext().getDatabase(), fromDate, toDate, 
+        searchTerm, false, sortFields, false);
   }
 
 }

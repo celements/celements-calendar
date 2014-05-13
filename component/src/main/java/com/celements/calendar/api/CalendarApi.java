@@ -25,7 +25,7 @@ import java.util.List;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.ICalendar;
-import com.celements.calendar.search.EventSearchQuery;
+import com.celements.calendar.search.IEventSearchQuery;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.api.Api;
 
@@ -53,7 +53,7 @@ public class CalendarApi extends Api {
         calendar.getLanguage(), context);
   }
 
-  public EventSearchResultApi searchEvents(EventSearchQuery query) {
+  public EventSearchResultApi searchEvents(IEventSearchQuery query) {
     return new EventSearchResultApi(calendar.searchEvents(query), calendar.getLanguage(),
         context);
   }

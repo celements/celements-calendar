@@ -14,8 +14,9 @@ import org.xwiki.model.reference.DocumentReference;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.manager.IEventManager;
-import com.celements.calendar.search.EventSearchQuery;
+import com.celements.calendar.search.DefaultEventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
+import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
@@ -32,7 +33,7 @@ public class CalendarNavigationFactoryTest extends AbstractBridgedComponentTestC
   public void setUp_CalendarNavigationFactoryTest() throws Exception {
     context = getContext();
     xwiki = getWikiMock();
-    calNavFactory = new CalendarNavigationFactory();
+    calNavFactory = new CalendarNavigationFactory(context);
     eventMgrMock = createMockAndAddToDefault(IEventManager.class);
     calNavFactory.injectEventMgr(eventMgrMock);
   }
@@ -130,11 +131,10 @@ public class CalendarNavigationFactoryTest extends AbstractBridgedComponentTestC
         eq("hql"), same(context))).andReturn("lucene").anyTimes();
     expect(xwiki.getSpacePreference(eq("default_language"), same(context))).andReturn(
         "de").anyTimes();
-    DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "progon",
-        "myCollection");
+    DocumentReference calDocRef = new DocumentReference("db", "progon", "myCollection");
     EventSearchResult mockSearchResult = createMockAndAddToDefault(
         EventSearchResult.class);
-    EventSearchQuery query = createMockAndAddToDefault(EventSearchQuery.class);
+    IEventSearchQuery query = new DefaultEventSearchQuery("db");
     expect(eventMgrMock.searchEvents(isA(ICalendar.class), same(query))).andReturn(
         mockSearchResult).atLeastOnce();
     expect(mockSearchResult.getSize()).andReturn(0).anyTimes();

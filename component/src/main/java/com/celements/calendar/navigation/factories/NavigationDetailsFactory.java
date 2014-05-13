@@ -11,7 +11,7 @@ import com.celements.calendar.Calendar;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.manager.IEventManager;
-import com.celements.calendar.search.EventSearchQuery;
+import com.celements.calendar.search.IEventSearchQuery;
 import com.xpn.xwiki.web.Utils;
 
 public class NavigationDetailsFactory implements INavigationDetailsFactory {
@@ -31,7 +31,7 @@ public class NavigationDetailsFactory implements INavigationDetailsFactory {
   }
 
   public NavigationDetails getNavigationDetails(DocumentReference calConfigDocRef,
-      IEvent event, EventSearchQuery query) {
+      IEvent event, IEventSearchQuery query) {
     LOGGER.debug("getNavigationDetails for '" + event + "'");
     Date eventDate = event.getEventDate();
     if (eventDate != null) {

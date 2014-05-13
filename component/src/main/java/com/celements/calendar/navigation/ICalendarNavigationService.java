@@ -8,7 +8,8 @@ import org.xwiki.model.reference.DocumentReference;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.navigation.factories.CalendarNavigation;
 import com.celements.calendar.navigation.factories.NavigationDetails;
-import com.celements.calendar.search.EventSearchQuery;
+import com.celements.calendar.search.IEventSearchQuery;
+import com.celements.calendar.search.SearchTermEventSearchQuery;
 
 @ComponentRole
 public interface ICalendarNavigationService {
@@ -19,12 +20,12 @@ public interface ICalendarNavigationService {
       IEvent event);
 
   public NavigationDetails getNavigationDetails(DocumentReference calConfigDocRef,
-      IEvent event, EventSearchQuery query);
+      IEvent event, IEventSearchQuery query);
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
       NavigationDetails navDetails, int nb);
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
-      NavigationDetails navDetails, int nb, EventSearchQuery query);
+      NavigationDetails navDetails, int nb, SearchTermEventSearchQuery query);
 
 }

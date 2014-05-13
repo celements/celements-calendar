@@ -18,7 +18,8 @@ import com.celements.calendar.Event;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.manager.IEventManager;
-import com.celements.calendar.search.EventSearchQuery;
+import com.celements.calendar.search.DefaultEventSearchQuery;
+import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.service.ICalendarService;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
@@ -120,7 +121,7 @@ public class NavigationDetailsFactoryTest extends AbstractBridgedComponentTestCa
     List<IEvent> eventList = Arrays.asList(event2, event3, eventMock, event4);
     DocumentReference calDocRef = new DocumentReference("myWiki", "mySpace", "myCalDoc");
     String lang = "de";
-    EventSearchQuery query = new EventSearchQuery(new Date(0), new Date(), "some term");
+    IEventSearchQuery query = new DefaultEventSearchQuery("myWiki");
     EventSearchResult searchResultMock = createMock(EventSearchResult.class);
 
     expect(eventMock.getEventDate()).andReturn(eventDate).once();

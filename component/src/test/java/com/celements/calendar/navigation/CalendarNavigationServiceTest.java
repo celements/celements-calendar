@@ -13,7 +13,8 @@ import com.celements.calendar.Event;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.navigation.factories.ICalendarNavigationFactory;
 import com.celements.calendar.navigation.factories.INavigationDetailsFactory;
-import com.celements.calendar.search.EventSearchQuery;
+import com.celements.calendar.search.DefaultEventSearchQuery;
+import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 import com.xpn.xwiki.web.Utils;
 
@@ -61,9 +62,9 @@ public class CalendarNavigationServiceTest extends AbstractBridgedComponentTestC
     DocumentReference calDocRef = new DocumentReference("myWiki", "mySpace", "myCalDoc");
     DocumentReference eventDocRef = new DocumentReference("myWiki", "mySpace", "myEvent");
     IEvent event = new Event(eventDocRef);
-    EventSearchQuery query = new EventSearchQuery(new Date(), new Date(), "");
-    expect(navDetailsFactoryMock.getNavigationDetails(calDocRef, event, query)
-        ).andReturn(null).once();
+    IEventSearchQuery query = new DefaultEventSearchQuery("myWiki");
+    expect(navDetailsFactoryMock.getNavigationDetails(eq(calDocRef), same(event), same(
+        query))).andReturn(null).once();
     replayAll();
     assertNull(calNavService.getNavigationDetails(calDocRef, event, query));
     verifyAll();

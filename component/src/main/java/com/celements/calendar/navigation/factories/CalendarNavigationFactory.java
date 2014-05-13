@@ -11,23 +11,28 @@ import com.celements.calendar.Calendar;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.manager.IEventManager;
-import com.celements.calendar.search.EventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
+import com.celements.calendar.search.IEventSearchQuery;
+import com.celements.calendar.search.SearchTermEventSearchQuery;
+import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.plugin.lucene.LucenePlugin;
 import com.xpn.xwiki.web.Utils;
 
 public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
-
   private static final Log LOGGER = LogFactory.getFactory().getInstance(
       CalendarNavigationFactory.class);
 
-  private static final int _LUCENE_MAX_RESULT = 1000;
   public static final Date DATE_LOW = new Date(-62135773200000L);
   public static final Date DATE_HIGH = new Date(253402297140000L);
 
+  private XWikiContext context;
   private IEventManager eventMgr;
-
   private INavigationDetailsFactory navDetailsFactory;
+  
+  public CalendarNavigationFactory(XWikiContext context) {
+    this.context = context;
+  }
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
       NavigationDetails navDetails, int nb) {
@@ -51,7 +56,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
     }
     ICalendar calArchive = getCalendar(calDocRef, true, navDetails.getStartDate());
     UncertainCount[] counts = getCounts((int) getEventMgr().countEvents(cal),
-        (int) getEventMgr().countEvents(calArchive), navDetails.getOffset(), nb, false);
+        (int) getEventMgr().countEvents(calArchive), navDetails.getOffset(), nb, null);
 
     CalendarNavigation calendarNavigation = new CalendarNavigation(
         counts[0], counts[1], counts[2], navDetails, startNavDetails, endNavDetails,
@@ -158,9 +163,9 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   }
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
-      NavigationDetails navDetails, int nb, EventSearchQuery query) {
-    EventSearchResult calAllResult = getCalendar(calDocRef, false, DATE_LOW
-        ).searchEvents(query);
+      NavigationDetails navDetails, int nb, SearchTermEventSearchQuery query) {
+    EventSearchResult calAllResult = getCalendar(calDocRef, false, DATE_LOW).searchEvents(
+        query);
     EventSearchResult calResult = getCalendar(calDocRef, false, navDetails.getStartDate()
         ).searchEvents(query);
     NavigationDetails startNavDetails = null;
@@ -187,7 +192,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
     EventSearchResult calArchiveResult = getCalendar(calDocRef, true,
         navDetails.getStartDate()).searchEvents(query);
     UncertainCount[] counts = getCounts(calResult.getSize(), calArchiveResult.getSize(),
-        navDetails.getOffset(), nb, query != null);
+        navDetails.getOffset(), nb, query);
 
     CalendarNavigation calendarNavigation = new CalendarNavigation(
         counts[0], counts[1], counts[2], navDetails, startNavDetails, endNavDetails,
@@ -225,7 +230,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   }
 
   NavigationDetails getEndNavDetails(DocumentReference calDocRef, int nb,
-      EventSearchQuery query) throws EmptyCalendarListException {
+      IEventSearchQuery query) throws EmptyCalendarListException {
     EventSearchResult calAllArchiveResult = getCalendar(calDocRef, true, DATE_HIGH
         ).searchEvents(query);
     if ((calAllArchiveResult.getSize() > 0)) {
@@ -238,7 +243,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   }
 
   private NavigationDetails getPrevNavDetails(DocumentReference calDocRef,
-      NavigationDetails navDetails, int nb, EventSearchQuery query, EventSearchResult
+      NavigationDetails navDetails, int nb, IEventSearchQuery query, EventSearchResult
       calSearchResult, EventSearchResult calArchiveSearchResult) {
     NavigationDetails prevNavDetails = null;
     int prevOffset = navDetails.getOffset() - nb;
@@ -258,7 +263,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   }
 
   private NavigationDetails getNextNavDetails(DocumentReference calDocRef,
-      NavigationDetails navDetails, int nb, EventSearchQuery query,
+      NavigationDetails navDetails, int nb, IEventSearchQuery query,
       EventSearchResult calSearchResult) {
     NavigationDetails nextNavDetails = navDetails;
     int nextOffset = navDetails.getOffset() + nb;
@@ -277,7 +282,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   }
 
   private NavigationDetails getFirstNavDetails(DocumentReference calDocRef, int offset,
-      EventSearchQuery query, EventSearchResult searchResult
+      IEventSearchQuery query, EventSearchResult searchResult
       ) throws EmptyCalendarListException {
     LOGGER.debug("getFirstNavDetails with query for calDocRef [" + calDocRef
         + "] and offset [" + offset + "].");
@@ -286,7 +291,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   }
 
   private NavigationDetails getLastNavDetails(DocumentReference calDocRef, int offset,
-      EventSearchQuery query, EventSearchResult searchResult
+      IEventSearchQuery query, EventSearchResult searchResult
       ) throws EmptyCalendarListException {
     LOGGER.debug("getLastNavDetails with query for calDocRef [" + calDocRef
         + "] and offset [" + offset + "].");
@@ -295,16 +300,21 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   }
 
   private UncertainCount[] getCounts(int calSize, int calArchiveSize, int offset, int nb,
-      boolean isSearch) {
+      IEventSearchQuery query) {
     LOGGER.info("getCounts: calSize [" + calSize + "], calArchiveSize [" + calArchiveSize
-        + "], offset [" + offset + "], nb [" + nb + "] isSearch [" + isSearch + "].");
+        + "], offset [" + offset + "], nb [" + nb + "], query [" + query + "].");
+    boolean[] uncertain = new boolean[3];
+    if (query != null) {
+      int resultLimit = ((LucenePlugin) context.getWiki().getPlugin("lucene", context)
+          ).getResultLimit(query.skipChecks(), context);
+      uncertain[0] = calArchiveSize >= resultLimit;
+      uncertain[1] = calSize >= resultLimit;
+      uncertain[2] = uncertain[0] || uncertain[1];
+    }
     UncertainCount[] counts = new UncertainCount[3];
-    counts[0] = new UncertainCount(calArchiveSize + offset, isSearch
-        && (calArchiveSize >= _LUCENE_MAX_RESULT));
-    counts[1] = new UncertainCount(calSize - offset - nb, isSearch
-        && (calSize >= _LUCENE_MAX_RESULT));
-    counts[2] = new UncertainCount(calSize + calArchiveSize, isSearch
-        && (counts[0].isUncertain() || counts[1].isUncertain()));
+    counts[0] = new UncertainCount(calArchiveSize + offset, uncertain[0]);
+    counts[1] = new UncertainCount(calSize - offset - nb, uncertain[1]);
+    counts[2] = new UncertainCount(calSize + calArchiveSize, uncertain[2]);
     return counts;
   }
 

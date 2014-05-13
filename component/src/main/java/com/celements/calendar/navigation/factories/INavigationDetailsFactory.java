@@ -5,7 +5,7 @@ import java.util.Date;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.IEvent;
-import com.celements.calendar.search.EventSearchQuery;
+import com.celements.calendar.search.IEventSearchQuery;
 
 public interface INavigationDetailsFactory {
 
@@ -15,6 +15,6 @@ public interface INavigationDetailsFactory {
       IEvent event);
 
   public NavigationDetails getNavigationDetails(DocumentReference calConfigDocRef,
-      IEvent event, EventSearchQuery query);
+      IEvent event, IEventSearchQuery query);
 
 }

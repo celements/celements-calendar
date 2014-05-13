@@ -5,6 +5,8 @@ import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xwiki.component.annotation.Component;
+import org.xwiki.component.annotation.Requirement;
+import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.IEvent;
@@ -14,13 +16,23 @@ import com.celements.calendar.navigation.factories.ICalendarNavigationFactory;
 import com.celements.calendar.navigation.factories.INavigationDetailsFactory;
 import com.celements.calendar.navigation.factories.NavigationDetails;
 import com.celements.calendar.navigation.factories.NavigationDetailsFactory;
-import com.celements.calendar.search.EventSearchQuery;
+import com.celements.calendar.search.IEventSearchQuery;
+import com.celements.calendar.search.SearchTermEventSearchQuery;
+import com.xpn.xwiki.XWikiContext;
 
 @Component("default")
 public class CalendarNavigationService implements ICalendarNavigationService {
 
   private INavigationDetailsFactory navDetailsFactory;
   private ICalendarNavigationFactory calNavFactory;
+
+  @Requirement
+  private Execution execution;
+
+  private XWikiContext getContext() {
+    return (XWikiContext) execution.getContext().getProperty(
+        XWikiContext.EXECUTIONCONTEXT_KEY);
+  }
 
   private static final Log LOGGER = LogFactory.getFactory().getInstance(
       CalendarNavigationService.class);
@@ -37,7 +49,7 @@ public class CalendarNavigationService implements ICalendarNavigationService {
   }
 
   public NavigationDetails getNavigationDetails(DocumentReference calConfigDocRef,
-      IEvent event, EventSearchQuery query) {
+      IEvent event, IEventSearchQuery query) {
     LOGGER.debug("called getNavigationDetails");
     return getNavDetailsFactory().getNavigationDetails(calConfigDocRef, event, query);
   }
@@ -49,7 +61,7 @@ public class CalendarNavigationService implements ICalendarNavigationService {
   }
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
-      NavigationDetails navDetails, int nb, EventSearchQuery query) {
+      NavigationDetails navDetails, int nb, SearchTermEventSearchQuery query) {
     LOGGER.debug("called getCalendarNavigation");
     return getCalNavFactory().getCalendarNavigation(calDocRef, navDetails, nb, query);
   }
@@ -67,7 +79,7 @@ public class CalendarNavigationService implements ICalendarNavigationService {
 
   private ICalendarNavigationFactory getCalNavFactory() {
     if (calNavFactory == null) {
-      calNavFactory = new CalendarNavigationFactory();
+      calNavFactory = new CalendarNavigationFactory(getContext());
     }
     return calNavFactory;
   }

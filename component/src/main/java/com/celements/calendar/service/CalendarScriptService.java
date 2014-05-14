@@ -11,10 +11,10 @@ import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.script.service.ScriptService;
 
-import com.celements.calendar.Event;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.api.CalendarApi;
 import com.celements.calendar.api.EventApi;
+import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.navigation.ICalendarNavigationService;
 import com.celements.calendar.navigation.factories.CalendarNavigation;
 import com.celements.calendar.navigation.factories.NavigationDetails;
@@ -23,6 +23,7 @@ import com.celements.calendar.search.IEventSearch;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.search.SearchTermEventSearchQuery;
 import com.celements.search.lucene.query.LuceneQueryApi;
+import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 
@@ -31,6 +32,9 @@ public class CalendarScriptService implements ScriptService {
 
   private static Log LOGGER = LogFactory.getFactory().getInstance(
       CalendarScriptService.class);
+  
+  @Requirement
+  private IEventManager eventManager;
 
   @Requirement
   private ICalendarService calService;
@@ -39,13 +43,17 @@ public class CalendarScriptService implements ScriptService {
   private ICalendarNavigationService calNavService;
 
   @Requirement
-  Execution execution;
+  private IEventSearch eventSearch;
+  
+  @Requirement
+  private IWebUtilsService webUtilsService;
 
   @Requirement
-  IEventSearch eventSearch;
+  private Execution execution;
 
   private XWikiContext getContext() {
-    return (XWikiContext)execution.getContext().getProperty("xwikicontext");
+    return (XWikiContext) execution.getContext().getProperty(
+        XWikiContext.EXECUTIONCONTEXT_KEY);
   }
 
   public String getEventSpaceForCalendar(DocumentReference calDocRef) {
@@ -63,20 +71,32 @@ public class CalendarScriptService implements ScriptService {
 
   public NavigationDetails getNavigationDetails(DocumentReference calConfigDocRef,
       EventApi event) {
-    return calNavService.getNavigationDetails(calConfigDocRef,
-        new Event(event.getDocumentReference()));
+    NavigationDetails navDetails = null;
+    if (hasViewRights(calConfigDocRef)) {
+      navDetails = calNavService.getNavigationDetails(calConfigDocRef, 
+          eventManager.getEvent(event.getDocumentReference()));
+    }
+    return navDetails;
   }
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
       Date eventDate, int offset, int nb) {
-    return calNavService.getCalendarNavigation(calConfigDocRef,
-        calNavService.getNavigationDetails(eventDate, offset), nb);
+    CalendarNavigation calNav = null;
+    if (hasViewRights(calConfigDocRef)) {
+      calNav = calNavService.getCalendarNavigation(calConfigDocRef,
+          calNavService.getNavigationDetails(eventDate, offset), nb);
+    }
+    return calNav;
   }
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
       Date eventDate, int offset, int nb, SearchTermEventSearchQuery query) {
-    return calNavService.getCalendarNavigation(calConfigDocRef,
-        calNavService.getNavigationDetails(eventDate, offset), nb, query);
+    CalendarNavigation calNav = null;
+    if (hasViewRights(calConfigDocRef)) {
+      calNav = calNavService.getCalendarNavigation(calConfigDocRef, 
+          calNavService.getNavigationDetails(eventDate, offset), nb, query);
+    }
+    return calNav;
   }
 
   public CalendarApi getCalendarByCalRef(DocumentReference calDocRef, boolean isArchive) {
@@ -116,6 +136,19 @@ public class CalendarScriptService implements ScriptService {
       Date toDate, String searchTerm, List<String> sortFields) {
     return new SearchTermEventSearchQuery(getContext().getDatabase(), fromDate, toDate, 
         searchTerm, false, sortFields, false);
+  }
+  
+  private boolean hasViewRights(DocumentReference docRef) {
+    boolean ret = false;
+    try {
+      String fullName = webUtilsService.getRefDefaultSerializer().serialize(docRef);
+      ret = getContext().getWiki().getRightService().hasAccessLevel("view", getContext(
+          ).getUser(), fullName, getContext());
+    } catch (XWikiException exc) {
+      LOGGER.error("Failed to check rights for docRef [" + docRef + "]", exc);
+    }
+    LOGGER.debug("hasViewRights for docRef [" + docRef + "] returned [" + ret + "]");
+    return ret;
   }
 
 }

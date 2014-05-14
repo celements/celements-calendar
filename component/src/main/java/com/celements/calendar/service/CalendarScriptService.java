@@ -19,7 +19,6 @@ import com.celements.calendar.navigation.ICalendarNavigationService;
 import com.celements.calendar.navigation.factories.CalendarNavigation;
 import com.celements.calendar.navigation.factories.NavigationDetails;
 import com.celements.calendar.search.DefaultEventSearchQuery;
-import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearch;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.search.SearchTermEventSearchQuery;
@@ -105,10 +104,6 @@ public class CalendarScriptService implements ScriptService {
 
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace) {
     return calService.getCalendarDocRefByCalendarSpace(calSpace);
-  }
-
-  public EventSearchResult getEventSearchResult(IEventSearchQuery query) {
-    return eventSearch.getSearchResult(query);
   }
 
   public IEventSearchQuery getEventSearchQuery(LuceneQueryApi luceneQuery, 

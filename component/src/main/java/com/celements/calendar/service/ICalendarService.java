@@ -103,5 +103,7 @@ public interface ICalendarService {
       EntityReference inRef);
 
   public Date getMidnightDate(Date date);
+  
+  public Date getEndOfDayDate(Date date);
 
 }

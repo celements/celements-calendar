@@ -3,9 +3,12 @@ package com.celements.calendar.service;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +35,8 @@ import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.web.Utils;
 
 public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
+  
+  private static final DateFormat SDF = new SimpleDateFormat("yyyyMMddHHmmss");
 
   private CalendarService calService;
   private XWikiContext context;
@@ -736,6 +741,34 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     assertEquals(2, ret.size());
     assertEquals(calDocRefs.get(0), ret.get(0));
     assertEquals(calDocRefs.get(2), ret.get(1));
+  }
+  
+  @Test
+  public void testGetMidnightDate() throws Exception {
+    Date date = SDF.parse("20140513163132");
+    Date midnightDate = calService.getMidnightDate(date);
+    assertEquals(SDF.parse("20140513000000"), midnightDate);
+  }
+  
+  @Test
+  public void testGetMidnightDate_noChange() throws Exception {
+    Date date = SDF.parse("20140513000000");
+    Date midnightDate = calService.getMidnightDate(date);
+    assertEquals(date, midnightDate);
+  }
+  
+  @Test
+  public void testGetEndOfDay() throws Exception {
+    Date date = SDF.parse("20140513163132");
+    Date endOfDayDate = calService.getEndOfDayDate(date);
+    assertEquals(SDF.parse("20140513235959"), endOfDayDate);
+  }
+  
+  @Test
+  public void testGetEndOfDay_noChange() throws Exception {
+    Date date = SDF.parse("20140513235959");
+    Date endOfDayDate = calService.getEndOfDayDate(date);
+    assertEquals(date, endOfDayDate);
   }
   
   private void setCalConfigObj(XWikiDocument calDoc, String calSpaceName) {

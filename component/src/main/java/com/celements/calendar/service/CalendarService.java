@@ -1,6 +1,7 @@
 package com.celements.calendar.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -47,6 +48,10 @@ public class CalendarService implements ICalendarService {
 
   static final String EXECUTIONCONTEXT_KEY_CAL_CACHE = "calCache";
   static final String EXECUTIONCONTEXT_KEY_CAL_SPACE_CACHE = "calSpaceCache";
+  
+  private static final List<Integer> TIMESTAMP_FIELDS = Arrays.asList(
+      java.util.Calendar.HOUR_OF_DAY, java.util.Calendar.MINUTE, 
+      java.util.Calendar.SECOND);
 
   @Requirement
   private QueryManager queryManager;
@@ -319,14 +324,27 @@ public class CalendarService implements ICalendarService {
     if (date != null) {
       java.util.Calendar cal = java.util.Calendar.getInstance();
       cal.setTime(date);
-      cal.set(java.util.Calendar.HOUR, 0);
-      cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
-      cal.set(java.util.Calendar.MINUTE, 0);
-      cal.set(java.util.Calendar.SECOND, 0);
+      for (int field : TIMESTAMP_FIELDS) {
+        cal.set(field, 0);
+      }
       dateMidnight = cal.getTime();
     }
     LOGGER.debug("date is: " + dateMidnight);
     return dateMidnight;
+  }
+  
+  public Date getEndOfDayDate(Date date) {
+    Date dateEndOfDay = null;
+    if (date != null) {
+      java.util.Calendar cal = java.util.Calendar.getInstance();
+      cal.setTime(date);
+      for (int field : TIMESTAMP_FIELDS) {
+        cal.set(field, cal.getMaximum(field));
+      }
+      dateEndOfDay = cal.getTime();
+    }
+    LOGGER.debug("date is: " + dateEndOfDay);
+    return dateEndOfDay;
   }
   
   private DocumentReference getCalendarClassRef(WikiReference wikiRef) {

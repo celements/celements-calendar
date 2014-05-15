@@ -25,7 +25,7 @@ public class SearchTermEventSearchQueryTest extends AbstractBridgedComponentTest
     Date toDate = SDF.parse("201405090125");
     boolean fuzzy = false;
     SearchTermEventSearchQuery query = new SearchTermEventSearchQuery(db, fromDate, 
-        toDate, searchTerm, fuzzy);
+        toDate, searchTerm, fuzzy, null, false);
 
     assertEquals(db, query.getDatabase());
     assertEquals(0, query.getSortFields().size());
@@ -51,7 +51,7 @@ public class SearchTermEventSearchQueryTest extends AbstractBridgedComponentTest
     Date toDate = SDF.parse("201405090125");
     boolean fuzzy = true;
     SearchTermEventSearchQuery query = new SearchTermEventSearchQuery(db, fromDate, 
-        toDate, searchTerm, fuzzy);
+        toDate, searchTerm, fuzzy, null, false);
 
     assertEquals(db, query.getDatabase());
     assertEquals(0, query.getSortFields().size());

@@ -11,9 +11,9 @@ import com.celements.calendar.Calendar;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.manager.IEventManager;
+import com.celements.calendar.search.DateEventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearchQuery;
-import com.celements.calendar.search.SearchTermEventSearchQuery;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.plugin.lucene.LucenePlugin;
 import com.xpn.xwiki.web.Utils;
@@ -163,7 +163,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   }
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
-      NavigationDetails navDetails, int nb, SearchTermEventSearchQuery query) {
+      NavigationDetails navDetails, int nb, DateEventSearchQuery query) {
     EventSearchResult calAllResult = getCalendar(calDocRef, false, DATE_LOW).searchEvents(
         query);
     EventSearchResult calResult = getCalendar(calDocRef, false, navDetails.getStartDate()

@@ -36,6 +36,7 @@ import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.classes.CalendarClasses;
+import com.celements.calendar.service.ICalendarService;
 import com.celements.calendar.util.CalendarUtils;
 import com.celements.common.collections.ListUtils;
 import com.celements.web.plugin.cmd.EmptyCheckCommand;
@@ -56,7 +57,8 @@ public class Event implements IEvent {
   private DocumentReference eventDocRef;
   private String defaultLang;
   private String language;
-  private ICalendar calendar;
+  private ICalendar calendar;  
+  private ICalendarService calService;
 
   @Deprecated
   public Event(XWikiDocument eventDoc, XWikiContext context) {
@@ -192,6 +194,12 @@ public class Event implements IEvent {
    */
   public Date getEventDate(){
     return getDateProperty(getObj(), CalendarClasses.PROPERTY_EVENT_DATE);
+  }
+
+  public boolean hasTime() {
+    Date timestamp = getEventDate();
+    return (timestamp != null) && !timestamp.equals(getCalService().getMidnightDate(
+        timestamp));
   }
 
   /* (non-Javadoc)
@@ -749,9 +757,16 @@ public class Event implements IEvent {
         + calendar + ", eventDate=" + getEventDate() + "]";
   }
 
-  private XWikiContext getContext() {
+  protected XWikiContext getContext() {
     Execution execution = Utils.getComponent(Execution.class);
     return (XWikiContext)execution.getContext().getProperty("xwikicontext");
+  }
+  
+  protected ICalendarService getCalService() {
+    if (calService == null) {
+      calService = Utils.getComponent(ICalendarService.class);
+    }
+    return calService;
   }
 
 }

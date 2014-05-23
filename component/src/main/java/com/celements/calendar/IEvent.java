@@ -41,6 +41,8 @@ public interface IEvent {
   public String getDateString(String dateField, String format);
 
   public Date getEventDate();
+  
+  public boolean hasTime();
 
   public Boolean isSubscribable();
 

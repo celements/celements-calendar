@@ -1,7 +1,10 @@
 ##TODO refactoring needed: please move all business logic to the plugin
 #set($theCalDoc = $doc)
 #set($configObj = $theCalDoc.getObject('Classes.CalendarConfigClass'))
-#if(("$!configObj" == '') && ("$!renderDocument" != ''))
+#if(("$!configObj" == '') && ("$!celldoc" != ''))
+#set($theCalDoc = $celldoc)
+#set($configObj = $theCalDoc.getObject('Classes.CalendarConfigClass'))
+#elseif(("$!configObj" == '') && ("$!renderDocument" != ''))
 #set($theCalDoc = $renderDocument)
 #set($configObj = $theCalDoc.getObject('Classes.CalendarConfigClass'))
 #end
@@ -30,8 +33,9 @@
 #if($celCalendar.getNrOfEvents() > 0)
   #set($startHumanReadable = $util.add($start, 1))
 #end
-#if(($celementsweb.getPageType($doc.fullName).hasPageTitle()) && ("$!tdoc.getTitle()" != ''))
-<h1 class="pageTitle">$tdoc.getTitle()<!--iE6.0--></h1>
+#set($theCalDocTrans = $theCalDoc.getTranslatedDocument())
+#if(($celementsweb.getPageType($theCalDoc.fullName).hasPageTitle()) && ("$!theCalDocTrans.getTitle()" != ''))
+<h1 class="pageTitle">$theCalDocTrans.getTitle()<!--iE6.0--></h1>
 #end
 <div class="cel_cal_overview">
 <span class="cel_cal_eventcount">$msg.get('cel_cal_count', ["${startHumanReadable}", "${end}", "${celCalendar.getNrOfEvents()}"])</span>

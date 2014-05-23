@@ -48,7 +48,7 @@ public class EventApi extends Api {
   }
 
   public CalendarApi getCalendar() {
-    ICalendar calendar = event.getCalendar(context);
+    ICalendar calendar = event.getCalendar();
     if (calendar != null) {
       return new CalendarApi(calendar, context);
     }
@@ -73,6 +73,10 @@ public class EventApi extends Api {
 
   public Date getEventDate() {
     return event.getEventDate();
+  }
+
+  public boolean hasTime() {
+    return event.hasTime();
   }
 
   public Boolean isSubscribable() {
@@ -140,27 +144,27 @@ public class EventApi extends Api {
   }
 
   public Element[] getProperties() {
-    return event.getProperties(context.getLanguage(), context);
+    return event.getProperties(context.getLanguage());
   }
 
   public String displayOverviewField(String name, String link) {
-    return event.displayOverviewField(name, link, context);
+    return event.displayOverviewField(name, link);
   }
 
   public String displayField(String name) {
-    return event.displayField(name, context);
+    return event.displayField(name);
   }
 
   public List<List<String>> getEditableProperties() throws XWikiException{
-    return event.getEditableProperties(context.getLanguage(), context);
+    return event.getEditableProperties(context.getLanguage());
   }
 
   public List<String> getNonEmptyFields(List<String> fieldList) {
-    return event.getNonEmptyFields(fieldList, context);
+    return event.getNonEmptyFields(fieldList);
   }
 
   public boolean needsMoreLink(){
-    return event.needsMoreLink(context);
+    return event.needsMoreLink();
   }
 
   public String getLanguage() {

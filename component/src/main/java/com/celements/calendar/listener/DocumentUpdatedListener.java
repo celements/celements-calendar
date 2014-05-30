@@ -10,26 +10,23 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.observation.EventListener;
 import org.xwiki.observation.event.Event;
 
 import com.celements.calendar.event.CalendarUpdatedEvent;
 import com.celements.calendar.event.EventUpdatedEvent;
-import com.celements.calendar.plugin.CelementsCalendarPlugin;
 import com.xpn.xwiki.doc.XWikiDocument;
 
 @Component("calendar.docUpdated")
-public class DocumentUpdatedListener extends AbstractDocumentListener
-  implements EventListener {
+public class DocumentUpdatedListener extends AbstractDocumentListener {
 
-  private static Log mLogger = LogFactory.getFactory().getInstance(
+  private static Log LOGGER = LogFactory.getFactory().getInstance(
       DocumentUpdatedListener.class);
 
   @Requirement
   private ComponentManager componentManager;
 
   public List<Event> getEvents() {
-    mLogger.info("getEvents: registering for update, save and delete events.");
+    LOGGER.info("getEvents: registering for update, save and delete events.");
     return Arrays.<Event> asList(new DocumentUpdatedEvent());
   }
 
@@ -39,31 +36,33 @@ public class DocumentUpdatedListener extends AbstractDocumentListener
 
   public void onEvent(Event event, Object source, Object data) {
     XWikiDocument document = (XWikiDocument) source;
-    mLogger.debug("onEvent: got event for [" + event.getClass() + "] on document ["
-        + document.getDocumentReference() + "].");
-    String wikiName = document.getDocumentReference().getWikiReference().getName();
-    DocumentReference calClass = new DocumentReference(wikiName,
-        CelementsCalendarPlugin.CLASS_CALENDAR_SPACE,
-        CelementsCalendarPlugin.CLASS_CALENDAR_DOC);
-    DocumentReference eventClass = new DocumentReference(wikiName,
-        CelementsCalendarPlugin.CLASS_EVENT_SPACE,
-        CelementsCalendarPlugin.CLASS_EVENT_DOC);
-
-    if (document.getXObject(calClass) != null) {
-      // Fire the user created event
-      CalendarUpdatedEvent newEvent = new CalendarUpdatedEvent();
-      getObservationManager().notify(newEvent, source, getCalDataMap(document));
-    } else {
-      mLogger.trace("onEvent: no calendar class object found. skipping for calendar. ["
+    if ((document != null) && !remoteObservationManagerContext.isRemoteState()) {
+      LOGGER.debug("onEvent: got event for [" + event.getClass() + "] on document ["
           + document.getDocumentReference() + "].");
-    }
-    if (document.getXObject(eventClass) != null) {
-      // Fire the user created event
-      EventUpdatedEvent newEvent = new EventUpdatedEvent();
-      getObservationManager().notify(newEvent, source, getEventDataMap(document));
+      String wikiName = document.getDocumentReference().getWikiReference().getName();
+      DocumentReference calClass = getCalendarClasses().getCalendarClassRef(wikiName);
+      DocumentReference eventClass = getCalendarClasses().getCalendarEventClassRef(
+          wikiName);
+      if (document.getXObject(calClass) != null) {
+        // Fire the user created event
+        CalendarUpdatedEvent newEvent = new CalendarUpdatedEvent();
+        getObservationManager().notify(newEvent, source, getCalDataMap(document));
+      } else {
+        LOGGER.trace("onEvent: no calendar class object found. skipping for calendar. ["
+            + document.getDocumentReference() + "].");
+      }
+      if (document.getXObject(eventClass) != null) {
+        // Fire the user created event
+        EventUpdatedEvent newEvent = new EventUpdatedEvent();
+        getObservationManager().notify(newEvent, source, getEventDataMap(document));
+      } else {
+        LOGGER.trace("onEvent: no event class object found. skipping for events. ["
+            + document.getDocumentReference() + "].");
+      }
     } else {
-      mLogger.trace("onEvent: no event class object found. skipping for events. ["
-          + document.getDocumentReference() + "].");
+      LOGGER.trace("onEvent: got event for [" + event.getClass() + "] on source ["
+          + source + "] and data [" + data + "], isLocalEvent ["
+          + !remoteObservationManagerContext.isRemoteState() + "] -> skip.");
     }
   }
 
@@ -74,7 +73,7 @@ public class DocumentUpdatedListener extends AbstractDocumentListener
 
   @Override
   protected Log getLogger() {
-    return mLogger;
+    return LOGGER;
   }
 
 }

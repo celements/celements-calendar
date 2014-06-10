@@ -11,6 +11,7 @@ import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.observation.EventListener;
 import org.xwiki.observation.ObservationManager;
+import org.xwiki.observation.event.Event;
 import org.xwiki.observation.remote.RemoteObservationManagerContext;
 
 import com.celements.calendar.classes.CalendarClasses;
@@ -27,6 +28,9 @@ public abstract class AbstractDocumentListener implements EventListener {
   @Requirement
   RemoteObservationManagerContext remoteObservationManagerContext;
 
+  @Requirement
+  private ComponentManager componentManager;
+
   /**
    * The observation manager that will be use to fire user creation events.
    * Note: We can't have the OM as a requirement, since it would create an
@@ -35,8 +39,19 @@ public abstract class AbstractDocumentListener implements EventListener {
    * initialized event listeners)
    */
   private ObservationManager observationManager;
+  
+  protected void notifyIfEvent(XWikiDocument doc, Class<? extends Event> eventClass) {
+    DocumentReference eventClassRef = getCalendarClasses().getCalendarEventClassRef(
+        doc.getDocumentReference().getWikiReference().getName());
+    if (doc.getXObject(eventClassRef) != null) {
+      notifyEvent(eventClass, doc, getEventDataMap(doc));
+    } else {
+      getLogger().trace("onEvent: no event class object found. skipping for events. ["
+          + doc.getDocumentReference() + "].");
+    }
+  }
 
-  protected Map<String, Map<String, String>> getEventDataMap(XWikiDocument document) {
+  private Map<String, Map<String, String>> getEventDataMap(XWikiDocument document) {
     String wikiName = document.getDocumentReference().getWikiReference().getName();
     DocumentReference eventClass = getCalendarClasses().getCalendarEventClassRef(
         wikiName);
@@ -66,8 +81,19 @@ public abstract class AbstractDocumentListener implements EventListener {
     }
     return multiLangEventData;
   }
+  
+  protected void notifyIfCalendar(XWikiDocument doc, Class<? extends Event> eventClass) {
+    DocumentReference calClassRef = getCalendarClasses().getCalendarClassRef(
+        doc.getDocumentReference().getWikiReference().getName());
+    if (doc.getXObject(calClassRef) != null) {
+      notifyEvent(eventClass, doc, getCalDataMap(doc));
+    } else {
+      getLogger().trace("onEvent: no calendar class object found. skipping for calendar. ["
+          + doc.getDocumentReference() + "].");
+    }
+  }
 
-  protected Map<String, String> getCalDataMap(XWikiDocument document) {
+  private Map<String, String> getCalDataMap(XWikiDocument document) {
     String wikiName = document.getDocumentReference().getWikiReference().getName();
     DocumentReference calClass = getCalendarClasses().getCalendarClassRef(wikiName);
     Map<String, String> calData = new HashMap<String, String>();
@@ -87,15 +113,19 @@ public abstract class AbstractDocumentListener implements EventListener {
         CalendarClasses.PROPERTY_CALENDAR_SPACE));
     return calData;
   }
-  
-  protected CalendarClasses getCalendarClasses() {
-    return ((CalendarClasses) calendarClasses);
+
+  private void notifyEvent(Class<? extends Event> eventClass, Object source, Object data) {
+    try {
+      getObservationManager().notify(eventClass.newInstance(), source, data);
+    } catch (ReflectiveOperationException exc) {
+      getLogger().error("Error getting new instance", exc);
+    }
   }
 
-  protected ObservationManager getObservationManager() {
+  private ObservationManager getObservationManager() {
     if (this.observationManager == null) {
       try {
-        this.observationManager = getComponentManager().lookup(ObservationManager.class);  
+        this.observationManager = componentManager.lookup(ObservationManager.class);  
       } catch (ComponentLookupException e) {
         throw new RuntimeException(
             "Cound not retrieve an Observation Manager against the component manager");
@@ -103,8 +133,10 @@ public abstract class AbstractDocumentListener implements EventListener {
     }
     return this.observationManager;
   }
-
-  abstract protected ComponentManager getComponentManager();
+  
+  private CalendarClasses getCalendarClasses() {
+    return ((CalendarClasses) calendarClasses);
+  }
   
   abstract protected Log getLogger();
 

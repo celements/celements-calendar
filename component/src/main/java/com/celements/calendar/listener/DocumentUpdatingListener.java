@@ -5,47 +5,38 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xwiki.bridge.event.DocumentDeletedEvent;
+import org.xwiki.bridge.event.DocumentUpdatingEvent;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.observation.event.Event;
 
-import com.celements.calendar.event.CalendarDeletedEvent;
-import com.celements.calendar.event.EventDeletedEvent;
+import com.celements.calendar.event.EventUpdatingEvent;
 import com.xpn.xwiki.doc.XWikiDocument;
 
-@Component("calendar.docDeleted")
-public class DocumentDeletedListener extends AbstractDocumentListener {
+@Component("calendar.docUpdating")
+public class DocumentUpdatingListener extends AbstractDocumentListener {
 
   private static Log LOGGER = LogFactory.getFactory().getInstance(
-      DocumentDeletedListener.class);
+      DocumentUpdatingListener.class);
 
   public List<Event> getEvents() {
-    return Arrays.<Event> asList(new DocumentDeletedEvent());
+    return Arrays.<Event> asList(new DocumentUpdatingEvent());
   }
 
   public String getName() {
-    return "calendar.docDeleted";
+    return "calendar.docUpdating";
   }
 
   public void onEvent(Event event, Object source, Object data) {
-    XWikiDocument document = getOrginialDocument(source);
-    if (document != null && !remoteObservationManagerContext.isRemoteState()) {
+    XWikiDocument document = (XWikiDocument) source;
+    if ((document != null) && !remoteObservationManagerContext.isRemoteState()) {
       LOGGER.debug("onEvent: got event for [" + event.getClass() + "] on document ["
           + document.getDocumentReference() + "].");
-      notifyIfCalendar(document, CalendarDeletedEvent.class);
-      notifyIfEvent(document, EventDeletedEvent.class);
+      notifyIfEvent(document, EventUpdatingEvent.class);
     } else {
       LOGGER.trace("onEvent: got event for [" + event.getClass() + "] on source ["
           + source + "] and data [" + data + "], isLocalEvent ["
           + !remoteObservationManagerContext.isRemoteState() + "] -> skip.");
     }
-  }
-  
-  private XWikiDocument getOrginialDocument(Object source) {
-    if (source != null) {
-      return ((XWikiDocument) source).getOriginalDocument();
-    }
-    return null;
   }
 
   @Override

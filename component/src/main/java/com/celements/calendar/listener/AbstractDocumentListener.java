@@ -117,7 +117,9 @@ public abstract class AbstractDocumentListener implements EventListener {
   private void notifyEvent(Class<? extends Event> eventClass, Object source, Object data) {
     try {
       getObservationManager().notify(eventClass.newInstance(), source, data);
-    } catch (ReflectiveOperationException exc) {
+    } catch (IllegalAccessException exc) {
+      getLogger().error("Error getting new instance", exc);
+    } catch (InstantiationException exc) {
       getLogger().error("Error getting new instance", exc);
     }
   }

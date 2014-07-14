@@ -5,7 +5,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xwiki.component.annotation.Component;
@@ -27,6 +29,8 @@ import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
+import com.xpn.xwiki.objects.BaseProperty;
+import com.xpn.xwiki.objects.PropertyInterface;
 
 @Component("default")
 public class EventsManager implements IEventManager {
@@ -265,6 +269,55 @@ public class EventsManager implements IEventManager {
           + "'", exc);
     }
     return null;
+  }
+  
+  public boolean updateEventObject(XWikiDocument srcDoc, XWikiDocument trgDoc, 
+      boolean save) throws XWikiException {
+    BaseObject srcObj = getEventObject(srcDoc, false);
+    if (srcObj != null) {
+      BaseObject trgObj = getEventObject(trgDoc, true);
+      boolean hasChanged = copyBaseObject(srcObj, trgObj);
+      if (save && hasChanged) {
+        getContext().getWiki().saveDocument(trgDoc, "CalendarEvent updated", true, 
+            getContext());
+      }
+      LOGGER.info("updateEventObject: for source '" + srcDoc + "', target '" + trgDoc 
+          + "' returned '" + hasChanged + "'");
+      return hasChanged;
+    } else {
+      throw new IllegalArgumentException("No CalendarEvent object found on source '" 
+          + srcDoc + "'");
+    }
+  }
+  
+  private BaseObject getEventObject(XWikiDocument doc, boolean create) {
+    DocumentReference classRef = getCalClasses().getCalendarEventClassRef(
+        doc.getDocumentReference().getWikiReference().getName());
+    return doc.getXObject(classRef, create, getContext());
+  }
+  
+  boolean copyBaseObject(BaseObject srcObj, BaseObject trgObj
+      ) throws XWikiException {  
+    boolean hasChanged = false;
+    Set<String> properties = srcObj.getXClass(getContext()).getPropertyList();
+    for (String name : properties) {
+      Object srcVal = getValue(srcObj, name);
+      Object trgVal = getValue(trgObj, name);
+      if (!ObjectUtils.equals(srcVal, trgVal)) {
+        trgObj.set(name, srcVal, getContext());
+        hasChanged = true;
+      }
+    }
+    return hasChanged;
+  }
+
+  private Object getValue(BaseObject bObj, String name) throws XWikiException {
+    Object value = null;
+    PropertyInterface prop = bObj.get(name);
+    if (prop != null && prop instanceof BaseProperty) {
+        value = ((BaseProperty) prop).getValue();
+    }
+    return value;
   }
 
   private CalendarClasses getCalClasses() {

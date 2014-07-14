@@ -11,6 +11,7 @@ import com.celements.calendar.IEvent;
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearchQuery;
+import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 
 @ComponentRole
@@ -86,5 +87,18 @@ public interface IEventManager {
   public IEvent getFirstEvent(ICalendar cal);
 
   public IEvent getLastEvent(ICalendar cal);
+  
+  /**
+   * updated CalendarEventObject on target doc from source doc
+   * 
+   * @param srcDoc source doc, may not be null
+   * @param trgDoc target doc, may not be null
+   * @param save saves target doc if true and doc has changed
+   * @return whether target doc has changed or not
+   * @throws XWikiException if error occurs while updating/saving doc
+   * @throws IllegalArgumentException if a doc is null
+   */
+  public boolean updateEventObject(XWikiDocument srcDoc, XWikiDocument trgDoc, 
+      boolean save) throws XWikiException, IllegalArgumentException;
 
 }

@@ -9,6 +9,7 @@ import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.Calendar;
 import com.celements.calendar.ICalendar;
+import com.celements.calendar.ICalendarClassConfig;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.search.DateEventSearchQuery;
@@ -22,9 +23,6 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
   private static final Log LOGGER = LogFactory.getFactory().getInstance(
       CalendarNavigationFactory.class);
-
-  public static final Date DATE_LOW = new Date(-62135773200000L);
-  public static final Date DATE_HIGH = new Date(253402297140000L);
 
   private XWikiContext context;
   private IEventManager eventMgr;
@@ -70,17 +68,17 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   private boolean isInvalidNavDetails(NavigationDetails navDetails, ICalendar cal) {
     return (getEventMgr().getEventsInternal(cal, navDetails.getOffset(), 1).size() == 0)
         && (getEventMgr().countEvents(getCalendar(cal.getDocumentReference(), false,
-            DATE_LOW)) > 0);
+            ICalendarClassConfig.DATE_LOW)) > 0);
   }
 
   NavigationDetails getStartNavDetails(DocumentReference calDocRef
       ) throws EmptyCalendarListException {
     LOGGER.debug("getStartNavDetails for calDocRef [" + calDocRef + "].");
-    ICalendar calAll = getCalendar(calDocRef, false, DATE_LOW);
+    ICalendar calAll = getCalendar(calDocRef, false, ICalendarClassConfig.DATE_LOW);
     if (getEventMgr().countEvents(calAll) > 0) {
       Date startDate = getEventMgr().getFirstEvent(calAll).getEventDate();
       if (startDate == null) {
-        startDate = DATE_LOW;
+        startDate = ICalendarClassConfig.DATE_LOW;
       }
       return new NavigationDetails(startDate, 0);
     }
@@ -92,7 +90,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
       ) throws EmptyCalendarListException {
     LOGGER.debug("getEndNavDetails for calDocRef [" + calDocRef + "] and nb [" + nb
         + "].");
-    ICalendar calAll = getCalendar(calDocRef, false, DATE_LOW);
+    ICalendar calAll = getCalendar(calDocRef, false, ICalendarClassConfig.DATE_LOW);
     int countAll = (int) getEventMgr().countEvents(calAll);
     if (countAll > 0) {
       int endOffset = countAll - nb;
@@ -164,8 +162,8 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
       NavigationDetails navDetails, int nb, DateEventSearchQuery query) {
-    EventSearchResult calAllResult = getCalendar(calDocRef, false, DATE_LOW).searchEvents(
-        query);
+    EventSearchResult calAllResult = getCalendar(calDocRef, false, 
+        ICalendarClassConfig.DATE_LOW).searchEvents(query);
     EventSearchResult calResult = getCalendar(calDocRef, false, navDetails.getStartDate()
         ).searchEvents(query);
     NavigationDetails startNavDetails = null;
@@ -219,7 +217,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
     if (calAllResult.getSize() > 0) {
       Date startDate = getFirstElement(calAllResult.getEventList(0, 1)).getEventDate();
       if (startDate == null) {
-        startDate = DATE_LOW;
+        startDate = ICalendarClassConfig.DATE_LOW;
       }
       return new NavigationDetails(startDate, 0);
     } else {
@@ -231,8 +229,8 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
   NavigationDetails getEndNavDetails(DocumentReference calDocRef, int nb,
       IEventSearchQuery query) throws EmptyCalendarListException {
-    EventSearchResult calAllArchiveResult = getCalendar(calDocRef, true, DATE_HIGH
-        ).searchEvents(query);
+    EventSearchResult calAllArchiveResult = getCalendar(calDocRef, true, 
+        ICalendarClassConfig.DATE_HIGH).searchEvents(query);
     if ((calAllArchiveResult.getSize() > 0)) {
       return getLastNavDetails(calDocRef, nb, query, calAllArchiveResult);
     } else {

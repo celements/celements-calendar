@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.ICalendar;
+import com.celements.calendar.ICalendarClassConfig;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.search.DefaultEventSearchQuery;
@@ -80,7 +81,7 @@ public class CalendarNavigationFactoryTest extends AbstractBridgedComponentTestC
     replayDefault();
     NavigationDetails startNavDetails = calNavFactory.getStartNavDetails(calDocRef);
     assertNotNull(startNavDetails);
-    assertEquals(CalendarNavigationFactory.DATE_LOW, startNavDetails.getStartDate());
+    assertEquals(ICalendarClassConfig.DATE_LOW, startNavDetails.getStartDate());
     assertEquals(0, startNavDetails.getOffset());
     assertSame(calCapture.getValue(), calCapture2.getValue());
     verifyDefault();
@@ -105,7 +106,7 @@ public class CalendarNavigationFactoryTest extends AbstractBridgedComponentTestC
     NavigationDetails startNavDetails = calNavFactory.getStartNavDetails(
         mockSearchResult);
     assertNotNull(startNavDetails);
-    assertEquals(CalendarNavigationFactory.DATE_LOW, startNavDetails.getStartDate());
+    assertEquals(ICalendarClassConfig.DATE_LOW, startNavDetails.getStartDate());
     assertEquals(0, startNavDetails.getOffset());
     verifyDefault();
   }

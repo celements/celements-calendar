@@ -13,6 +13,8 @@ import com.xpn.xwiki.objects.classes.BaseClass;
 @Component("celements.CalendarClasses")
 public class CalendarClasses extends AbstractClassCollection {
 
+  
+  // TODO mark deprecated and delegate to config
   public static final String CALENDAR_CONFIG_CLASS_SPACE = "Classes";
   public static final String CALENDAR_CONFIG_CLASS_DOC = "CalendarConfigClass";
   public static final String CALENDAR_CONFIG_CLASS = CALENDAR_CONFIG_CLASS_SPACE + "."
@@ -108,6 +110,7 @@ public class CalendarClasses extends AbstractClassCollection {
     return bclass;
   }
 
+  // TODO mark deprecated and delegate to config
   public DocumentReference getCalendarClassRef(String wikiName) {
     return new DocumentReference(wikiName, CALENDAR_CONFIG_CLASS_SPACE,
         CALENDAR_CONFIG_CLASS_DOC);
@@ -155,6 +158,7 @@ public class CalendarClasses extends AbstractClassCollection {
     return bclass;
   }
 
+  // TODO mark deprecated and delegate to config
   public DocumentReference getCalendarEventClassRef(String wikiName) {
     return new DocumentReference(wikiName, CALENDAR_EVENT_CLASS_SPACE,
         CALENDAR_EVENT_CLASS_DOC);
@@ -184,6 +188,7 @@ public class CalendarClasses extends AbstractClassCollection {
     return bclass;
   }
 
+  // TODO mark deprecated and delegate to config
   public DocumentReference getSubscriptionClassRef(String wikiName) {
     return new DocumentReference(wikiName, SUBSCRIPTION_CLASS_SPACE,
         SUBSCRIPTION_CLASS_DOC);

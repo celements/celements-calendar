@@ -278,15 +278,26 @@ public class EventsManager implements IEventManager {
       BaseObject trgObj = getEventObject(trgDoc, true);
       boolean hasChanged = copyBaseObject(srcObj, trgObj);
       if (save && hasChanged) {
-        getContext().getWiki().saveDocument(trgDoc, "CalendarEvent updated", true, 
-            getContext());
+        saveDocWithExtendedLogging(trgDoc, "CalendarEvent updated");
       }
-      LOGGER.info("updateEventObject: for source '" + srcDoc + "', target '" + trgDoc 
-          + "' returned '" + hasChanged + "'");
+      LOGGER.info("updateEventObject: for source '" + serialize(srcDoc) + "', target '" 
+          + serialize(trgDoc) + "' returned '" + hasChanged + "'");
       return hasChanged;
     } else {
       throw new IllegalArgumentException("No CalendarEvent object found on source '" 
-          + srcDoc + "'");
+          + serialize(srcDoc) + "'");
+    }
+  }
+  
+  private void saveDocWithExtendedLogging(XWikiDocument doc, String comment
+      ) throws XWikiException {
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("before save of '" + serialize(doc) + "': " + doc.getXObjects());
+    }
+    getContext().getWiki().saveDocument(doc, comment, true, getContext());
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("after save of '" + serialize(doc) + "': " + getContext().getWiki(
+          ).getDocument(doc.getDocumentReference(), getContext()));
     }
   }
   
@@ -318,6 +329,15 @@ public class EventsManager implements IEventManager {
         value = ((BaseProperty) prop).getValue();
     }
     return value;
+  }
+  
+  private String serialize(XWikiDocument doc) {
+    if (doc != null) {
+      return webUtilsService.getRefDefaultSerializer().serialize(
+          doc.getDocumentReference());
+    } else {
+      return "";
+    }
   }
 
   private CalendarClasses getCalClasses() {

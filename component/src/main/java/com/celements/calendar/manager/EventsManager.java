@@ -296,8 +296,8 @@ public class EventsManager implements IEventManager {
     }
     getContext().getWiki().saveDocument(doc, comment, true, getContext());
     if (LOGGER.isTraceEnabled()) {
-      LOGGER.trace("after save of '" + serialize(doc) + "': " + getContext().getWiki(
-          ).getDocument(doc.getDocumentReference(), getContext()));
+      doc = getContext().getWiki().getDocument(doc.getDocumentReference(), getContext());
+      LOGGER.trace("after save of '" + serialize(doc) + "': " + doc.getXObjects());
     }
   }
   

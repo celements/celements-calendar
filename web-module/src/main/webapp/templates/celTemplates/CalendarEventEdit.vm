@@ -1,3 +1,10 @@
+
+<link rel="stylesheet" media="all" type="text/css" href="$celementsweb.getSkinFile(':celJS/jquery-datetimepicker/jquery.datetimepicker.css', 'file')" />
+$celementsweb.addExtJSfileOnce(':celJS/jquery-datetimepicker/jquery.datetimepicker.js')
+<span class='cel_lazyloadJS' style='display: none;'>{"action": "file", "url" : "celJS/jquery-datetimepicker/jquery.datetimepicker.js" }</span>
+<span class='cel_lazyloadJS' style='display: none;'>{"action": "file", "url" : "celJS/celTabMenu/stickDateTimePicker.js" }</span>
+<span class='cel_lazyloadCSS' style='display: none;'>{"action": "file", "url" : "celJS/jquery-datetimepicker/jquery.datetimepicker.css" }</span>
+
 #if("$!request.get('eventDoc')" != '')
   $xwiki.celcalendar.saveEvent();
   #set($xredirect = "$request.get('xredirect')")
@@ -43,7 +50,7 @@
 #set($rte_supress_cancel = true)
 #set($rte_supress_save = true)
 #set($linkPickerSpaces = "")
-$xwiki.includeForm('celements2web:Macros.includeCelementsRTE', false)
+#parse("celMacros/includeCelementsRTE.vm")
 #set($hasWysiwigEditor = 'mceEditor')
 <!-- start visible content -->
 $celementsweb.addExtJSfileOnce("${xwiki.getSkinFile('celJS/editResize.js', true)}")
@@ -108,7 +115,7 @@ $xwiki.includeForm('celements2web:Macros.includeRTELanguageSelect', false)
     #set($isRTE = ($!prop.endsWith('_rte') || ($!prop.equals('description')) || $!prop.endsWith('_description')))
     <!-- isRTE : $isRTE -->
     #if($isRTE && $dispProp.trim().startsWith('<textarea '))
-      #set($dispProp = ${dispProp.replaceAll('<textarea ','<textarea class="mceEditor"')})
+      #set($dispProp = ${dispProp.replaceAll('<textarea ','<textarea class="mceEditor" ')})
     #end
     <div class="editblock cel_cal_ev_$!prop">$adminMsg.get("cel_cal_ev_$!prop")
       ${dispProp.replaceAll('\{/?pre\}','')}
@@ -116,3 +123,4 @@ $xwiki.includeForm('celements2web:Macros.includeRTELanguageSelect', false)
   #end
   </div>
 </form>
+$celementsweb.addExtJSfileOnce(':celJS/celTabMenu/stickCalDateTimePicker.js')

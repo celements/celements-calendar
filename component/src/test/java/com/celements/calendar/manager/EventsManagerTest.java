@@ -116,7 +116,9 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
     expect(calMock.isArchive()).andReturn(false).anyTimes();
     expect(calMock.getStartDate()).andReturn(startDate).anyTimes();
     expect(calMock.getEngine()).andReturn(engineMock).anyTimes();
-
+    
+    expect(context.getWiki().exists(eq(calDocRef), same(context))).andReturn(true).anyTimes();
+    
     expect(xwiki.getSpacePreference(eq("default_language"), same(context))
         ).andReturn(lang);
     expect(calServiceMock.getAllowedSpaces(eq(calDocRef))).andReturn(spaces).once();
@@ -129,6 +131,26 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
 
     assertEquals(2L, countEvent);
   }
+  
+  @Test
+  public void testCountEvents_noEventExist() throws XWikiException {
+    Date startDate = new Date();
+    DocumentReference calDocRef = null;
+    ICalendar calMock = createMockAndAddToDefault(Calendar.class);
+
+    expect(calMock.getDocumentReference()).andReturn(calDocRef).anyTimes();
+    expect(calMock.isArchive()).andReturn(false).anyTimes();
+    expect(calMock.getStartDate()).andReturn(startDate).anyTimes();
+    expect(calMock.getEngine()).andReturn(engineMock).anyTimes();
+
+    replayDefault();
+    long countEvent = eventsMgr.countEvents(calMock);
+    verifyDefault();
+
+    assertEquals(0, countEvent);
+  }
+  
+  
 
   @Test
   public void testCountEvents_checkCache() throws XWikiException {

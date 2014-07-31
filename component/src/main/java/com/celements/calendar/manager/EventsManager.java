@@ -236,10 +236,13 @@ public class EventsManager implements IEventManager {
     DocumentReference calDocRef = cal.getDocumentReference();
     boolean isArchive = cal.isArchive();
     Date startDate = cal.getStartDate();
-    long count = cal.getEngine().countEvents(startDate, isArchive,
-        webUtilsService.getDefaultLanguage(), calService.getAllowedSpaces(calDocRef));
-    LOGGER.debug("Event count for calendar '" + calDocRef + "' with startDate + '"
-        + startDate + "' and isArchive '" + isArchive + "': " + count);
+    long count = 0;
+    if ((calDocRef != null) && getContext().getWiki().exists(calDocRef, getContext())) {
+      count = cal.getEngine().countEvents(startDate, isArchive,
+          webUtilsService.getDefaultLanguage(), calService.getAllowedSpaces(calDocRef));
+      LOGGER.debug("Event count for calendar '" + calDocRef + "' with startDate + '"
+          + startDate + "' and isArchive '" + isArchive + "': " + count);
+    }
     return count;
   }
 

@@ -2,8 +2,6 @@ jQuery("input").each(function( index, value ) {
 	var regexp = /^((.*?)_\d+_)(.*)$/;
 	var prefix = value.id.replace(regexp, "$2");
 	var suffix = value.id.replace(regexp, "$3");
-	console.log("prefix : " + prefix);
-	console.log("suffix : " + suffix);
 	if(prefix == "Classes.CalendarEventClass" && (suffix == "eventDate" || suffix == "eventDate_end")) {
 		var replaceId = value.id.replace(".", "\\.");
 		jQuery("#"+value.id.replace(".", "\\.")).datetimepicker({	     

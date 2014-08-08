@@ -7,7 +7,7 @@ jQuery("input").each(function( index, value ) {
 		jQuery("#"+value.id.replace(".", "\\.")).datetimepicker({	     
 			lang:Validation.messages.get("admin-language"),
 			dayOfWeekStart: 1,
-			format:'d.m.Y H:i:s'});
+			format:'d.m.Y H:i'});
 		var siblingSuffix = 'eventDate_end';
 		if (suffix == 'eventDate_end') {
 			siblingSuffix = "eventDate";

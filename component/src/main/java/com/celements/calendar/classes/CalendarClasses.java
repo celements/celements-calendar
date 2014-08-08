@@ -141,10 +141,10 @@ public class CalendarClasses extends AbstractClassCollection {
     needsUpdate |= bclass.addTextAreaField(PROPERTY_LOCATION_RTE, PROPERTY_LOCATION_RTE,
         80, 15);
     needsUpdate |= addDateField(bclass, PROPERTY_EVENT_DATE, PROPERTY_EVENT_DATE,
-        "dd.MM.yyyy HH:mm:ss", 20, 0, getRegexDate(false, true), 
+        "dd.MM.yyyy HH:mm", 20, 0, getRegexDate(false, true), 
         "cel_calendar_validation_event_date");
     needsUpdate |= addDateField(bclass, PROPERTY_EVENT_DATE_END, PROPERTY_EVENT_DATE_END,
-        "dd.MM.yyyy HH:mm:ss", 20, 0, getRegexDate(true, true), 
+        "dd.MM.yyyy HH:mm", 20, 0, getRegexDate(true, true), 
         "cel_calendar_validation_event_end_date");
     needsUpdate |= bclass.addBooleanField(PROPERTY_EVENT_IS_SUBSCRIBABLE,
         PROPERTY_EVENT_IS_SUBSCRIBABLE, "yesno");
@@ -197,7 +197,7 @@ public class CalendarClasses extends AbstractClassCollection {
   private String getRegexDate(boolean allowEmpty, boolean withTime) {
     String regex = "(0[1-9]|[12][0-9]|3[01])\\.(0[1-9]|1[012])\\.([0-9]{4})";
     if (withTime) {
-      regex += " ([01][0-9]|2[0-4])(\\:[0-5][0-9]){1,2}";
+      regex += " ([01][0-9]|2[0-4])(\\:[0-5][0-9])";
     }
     return "/" + (allowEmpty ? "(^$)|" : "") + "^(" + regex + ")$" + "/";
   }

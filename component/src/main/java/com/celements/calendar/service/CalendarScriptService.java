@@ -128,8 +128,8 @@ public class CalendarScriptService implements ScriptService {
 
   public IEventSearchQuery getEventSearchQuery(LuceneQueryApi luceneQuery, 
       List<String> sortFields) {
-    return new DefaultEventSearchQuery(getContext().getDatabase(), luceneQuery, 
-        sortFields, false);
+    return new DefaultEventSearchQuery(getContext().getDatabase(),
+        new LuceneQueryApi(luceneQuery), sortFields, false);
   }
 
   public SearchTermEventSearchQuery getSearchTermEventSearchQuery(Date fromDate, 

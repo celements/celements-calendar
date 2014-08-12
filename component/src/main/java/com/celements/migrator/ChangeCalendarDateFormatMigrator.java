@@ -19,7 +19,7 @@ import com.xpn.xwiki.store.migration.XWikiDBVersion;
 
 @Component("ChangeCalendarDateFormatMigrator")
 public class ChangeCalendarDateFormatMigrator extends AbstractCelementsHibernateMigrator {
-  
+
   private static final Log LOGGER = LogFactory.getFactory().getInstance(
       ChangeCalendarDateFormatMigrator.class);
   
@@ -42,11 +42,11 @@ public class ChangeCalendarDateFormatMigrator extends AbstractCelementsHibernate
 
   /**
    * getVersion is using days since 1.1.2010 until the day of committing this
-   * migration 06.08.2014 -> 1678
-   * http://www.convertunits.com/dates/from/Jan+1,+2010/to/Aug+7,+2014
+   * migration 06.08.2014 -> 1684
+   * http://www.convertunits.com/dates/from/Jan+1,+2010/to/Aug+12,+2014
    */
   public XWikiDBVersion getVersion() {
-    return new XWikiDBVersion(1668);
+    return new XWikiDBVersion(1684);
   }
 
   @Override
@@ -55,18 +55,28 @@ public class ChangeCalendarDateFormatMigrator extends AbstractCelementsHibernate
     XWikiDocument doc = context.getWiki().getDocument(((CalendarClasses) calendarClasses
         ).getCalendarEventClassRef(context.getDatabase()), context);
     BaseClass bClass = doc.getXClass();
-    DateClass eventDateElement = (DateClass) bClass.get("eventDate");
-    DateClass eventEndDateElement = (DateClass) bClass.get("eventDate_end");
-    eventDateElement.setDateFormat("dd.MM.yyyy HH:mm");
-    eventDateElement.setValidationRegExp(
-        "/^((0[1-9]|[12][0-9]|3[01])\\.(0[1-9]|1[012])\\.([0-9]{4}) " +
-        "([01][0-9]|2[0-4])(\\:[0-5][0-9]))$/");
-    eventEndDateElement.setValidationMessage("cel_blog_validation_archivedate");
-    eventEndDateElement.setDateFormat("dd.MM.yyyy HH:mm");
-    eventDateElement.setValidationRegExp(
-        "/(^$)|^((0[1-9]|[12][0-9]|3[01])\\.(0[1-9]|1[012])\\.([0-9]{4}) " +
-        "([01][0-9]|2[0-4])(\\:[0-5][0-9]))$/");
+    addRegexToEventDateField(bClass);
+    addRegexToEventEndDateField(bClass);
     context.getWiki().saveDocument(doc, context);
   }
+
+  private void addRegexToEventDateField(BaseClass bClass) {
+    DateClass eventDateElement = (DateClass) bClass.get(
+        CalendarClasses.PROPERTY_EVENT_DATE);
+    eventDateElement.setValidationMessage(CalendarClasses.PROPERTY_EVENT_DATE_VALIDATION);
+    eventDateElement.setDateFormat(CalendarClasses.PROPERTY_EVENT_DATE_FORMAT);
+    eventDateElement.setValidationRegExp(((CalendarClasses) calendarClasses
+        ).getRegexDate(false, true));
+  }
   
+  private void addRegexToEventEndDateField(BaseClass bClass) {
+    DateClass eventEndDateElement = (DateClass) bClass.get(
+        CalendarClasses.PROPERTY_EVENT_DATE_END);
+    eventEndDateElement.setValidationMessage(
+        CalendarClasses.PROPERTY_EVENT_DATE_END_VALIDATION);
+    eventEndDateElement.setDateFormat(CalendarClasses.PROPERTY_EVENT_DATE_FORMAT);
+    eventEndDateElement.setValidationRegExp(((CalendarClasses) calendarClasses
+        ).getRegexDate(true, true));
+  }
+
 }

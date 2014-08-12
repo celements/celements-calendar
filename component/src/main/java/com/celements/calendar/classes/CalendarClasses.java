@@ -13,7 +13,6 @@ import com.xpn.xwiki.objects.classes.BaseClass;
 @Component("celements.CalendarClasses")
 public class CalendarClasses extends AbstractClassCollection {
 
-  
   // TODO mark deprecated and delegate to config
   public static final String CALENDAR_CONFIG_CLASS_SPACE = "Classes";
   public static final String CALENDAR_CONFIG_CLASS_DOC = "CalendarConfigClass";
@@ -39,6 +38,11 @@ public class CalendarClasses extends AbstractClassCollection {
   public static final String PROPERTY_LOCATION_RTE = "location_rte";
   public static final String PROPERTY_EVENT_DATE = "eventDate";
   public static final String PROPERTY_EVENT_DATE_END = "eventDate_end";
+  public static final String PROPERTY_EVENT_DATE_VALIDATION = 
+      "cel_calendar_validation_event_date";
+  public static final String PROPERTY_EVENT_DATE_END_VALIDATION = 
+      "cel_calendar_validation_event_end_date";
+  public static final String PROPERTY_EVENT_DATE_FORMAT = "dd.MM.yyyy HH:mm";
   public static final String PROPERTY_EVENT_IS_SUBSCRIBABLE = "isSubscribable";
 
   public static final String SUBSCRIPTION_CLASS_SPACE = "Classes";
@@ -141,11 +145,11 @@ public class CalendarClasses extends AbstractClassCollection {
     needsUpdate |= bclass.addTextAreaField(PROPERTY_LOCATION_RTE, PROPERTY_LOCATION_RTE,
         80, 15);
     needsUpdate |= addDateField(bclass, PROPERTY_EVENT_DATE, PROPERTY_EVENT_DATE,
-        "dd.MM.yyyy HH:mm", 20, 0, getRegexDate(false, true), 
-        "cel_calendar_validation_event_date");
+        PROPERTY_EVENT_DATE_FORMAT, 20, 0, getRegexDate(false, true), 
+        PROPERTY_EVENT_DATE_VALIDATION);
     needsUpdate |= addDateField(bclass, PROPERTY_EVENT_DATE_END, PROPERTY_EVENT_DATE_END,
-        "dd.MM.yyyy HH:mm", 20, 0, getRegexDate(true, true), 
-        "cel_calendar_validation_event_end_date");
+        PROPERTY_EVENT_DATE_FORMAT, 20, 0, getRegexDate(true, true), 
+        PROPERTY_EVENT_DATE_END_VALIDATION);
     needsUpdate |= bclass.addBooleanField(PROPERTY_EVENT_IS_SUBSCRIBABLE,
         PROPERTY_EVENT_IS_SUBSCRIBABLE, "yesno");
 
@@ -194,7 +198,7 @@ public class CalendarClasses extends AbstractClassCollection {
         SUBSCRIPTION_CLASS_DOC);
   }
   
-  private String getRegexDate(boolean allowEmpty, boolean withTime) {
+  public String getRegexDate(boolean allowEmpty, boolean withTime) {
     String regex = "(0[1-9]|[12][0-9]|3[01])\\.(0[1-9]|1[012])\\.([0-9]{4})";
     if (withTime) {
       regex += " ([01][0-9]|2[0-4])(\\:[0-5][0-9])";

@@ -30,7 +30,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>celements-calendar</artifactId>
-  <version>1.36-SNAPSHOT</version>
+  <version>1.37-SNAPSHOT</version>
   <description>Celements Calendar</description> 
   <dependencies>    
     <!-- Add here all your dependencies -->

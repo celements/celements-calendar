@@ -117,7 +117,7 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
     expect(calMock.getStartDate()).andReturn(startDate).anyTimes();
     expect(calMock.getEngine()).andReturn(engineMock).anyTimes();
     
-    expect(context.getWiki().exists(eq(calDocRef), same(context))).andReturn(true).anyTimes();
+    expect(xwiki.exists(eq(calDocRef), same(context))).andReturn(true).anyTimes();
     
     expect(xwiki.getSpacePreference(eq("default_language"), same(context))
         ).andReturn(lang);

@@ -34,8 +34,8 @@ extends AbstractBridgedComponentTestCase {
     context = getContext();
     xwiki = getWikiMock();
     context.setWiki(xwiki);
-    migrator = (ChangeCalendarDateFormatMigrator) Utils.getComponent(ICelementsMigrator.class,
-        "ChangeCalendarDateFormatMigrator");
+    migrator = (ChangeCalendarDateFormatMigrator) Utils.getComponent(
+        ICelementsMigrator.class, "ChangeCalendarDateFormatMigrator");
   }
   
   @Test
@@ -62,9 +62,9 @@ extends AbstractBridgedComponentTestCase {
         ).getValidationRegExp().length() > 0);
     assertTrue(((DateClass) bClass.get(CalendarClasses.PROPERTY_EVENT_DATE_END)
         ).getValidationRegExp().length() > 0);
-    assertEquals("cel_calendar_validation_eventDate", ((DateClass) bClass.get(
+    assertEquals("cel_calendar_validation_event_date", ((DateClass) bClass.get(
         CalendarClasses.PROPERTY_EVENT_DATE)).getValidationMessage());
-    assertEquals("cel_calendar_validation_eventDate_end", ((DateClass) bClass.get(
+    assertEquals("cel_calendar_validation_event_end_date", ((DateClass) bClass.get(
         CalendarClasses.PROPERTY_EVENT_DATE_END)).getValidationMessage());
     assertEquals("dd.MM.yyyy HH:mm", ((DateClass) bClass.get(
         CalendarClasses.PROPERTY_EVENT_DATE)).getDateFormat());

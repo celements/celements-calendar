@@ -1,6 +1,6 @@
 
 <link rel="stylesheet" media="all" type="text/css" href="$celementsweb.getSkinFile(':celJS/jquery-datetimepicker/jquery.datetimepicker.css', 'file')" />
-$celementsweb.addExtJSfileOnce(':celJS/jquery-datetimepicker/jquery.datetimepicker.js')
+$celementsweb.addExtJSfileOnce(':celJS/jquery-datetimepicker/jquery.datetimepicker.js', 'file')
 <span class='cel_lazyloadJS' style='display: none;'>{"action": "file", "url" : "celJS/jquery-datetimepicker/jquery.datetimepicker.js" }</span>
 <span class='cel_lazyloadJS' style='display: none;'>{"action": "file", "url" : "celJS/celTabMenu/stickDateTimePicker.js" }</span>
 <span class='cel_lazyloadCSS' style='display: none;'>{"action": "file", "url" : "celJS/jquery-datetimepicker/jquery.datetimepicker.css" }</span>
@@ -123,4 +123,4 @@ $xwiki.includeForm('celements2web:Macros.includeRTELanguageSelect', false)
   #end
   </div>
 </form>
-$celementsweb.addExtJSfileOnce(':celJS/celTabMenu/stickCalDateTimePicker.js')
+$celementsweb.addExtJSfileOnce(':celJS/celTabMenu/stickCalDateTimePicker.js', 'file')

@@ -3,130 +3,111 @@ package com.celements.calendar.search;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.easymock.Capture;
 import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.IEvent;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
-import com.xpn.xwiki.XWikiContext;
-import com.xpn.xwiki.plugin.lucene.LucenePlugin;
-import com.xpn.xwiki.plugin.lucene.SearchResult;
-import com.xpn.xwiki.plugin.lucene.SearchResults;
+import com.celements.search.lucene.ILuceneSearchService;
+import com.celements.search.lucene.LuceneSearchResult;
+import com.celements.search.lucene.query.LuceneQuery;
 
 public class EventSearchResultTest extends AbstractBridgedComponentTestCase {
 
-  private XWikiContext context;
-  private LucenePlugin lucenePluginMock;
-  private SearchResults searchResultsMock;
+  private ILuceneSearchService searchServiceMock;
 
   @Before
   public void setUp_EventSearchResultTest() throws Exception {
-    context = getContext();
-    lucenePluginMock = createMockAndAddToDefault(LucenePlugin.class);
-    searchResultsMock = createMockAndAddToDefault(SearchResults.class);
+    searchServiceMock = createMockAndAddToDefault(ILuceneSearchService.class);
   }
   
   @Test
-  public void testLuceneSearch() throws Exception {
-    String queryString = "theQuery";
-    String[] sortFields = new String[] {"field1", "field2"};
-    EventSearchResult searchResult = getEventSearchResult(queryString, sortFields, false);
-
-    Capture<String[]> sortFieldsCapture = new Capture<String[]>();
-    expect(lucenePluginMock.getSearchResults(eq(queryString), capture(sortFieldsCapture), 
-        isNull(String.class), eq("default,de"), same(context))).andReturn(
-        searchResultsMock).once();
+  public void testGetSearchResult() throws Exception {
+    LuceneQuery query = new LuceneQuery("db");
+    List<String> sortFields = Arrays.asList("field1", "field2");
+    List<String> languages = null;
+    LuceneSearchResult resultMock = createMockAndAddToDefault(LuceneSearchResult.class);
+    
+    expect(searchServiceMock.search(same(query), eq(sortFields), eq(languages))
+        ).andReturn(resultMock).once();
     
     replayDefault();
-    SearchResults ret = searchResult.luceneSearch();
+    LuceneSearchResult ret = getEventSearchResult(query, sortFields, false
+        ).getSearchResult();
     verifyDefault();
-    assertSame(searchResultsMock, ret);
-    assertEquals(Arrays.asList(sortFields), Arrays.asList(sortFieldsCapture.getValue()));
+    
+    assertSame(resultMock, ret);
   }
   
   @Test
-  public void testLuceneSearch_skipChecks() throws Exception {
-    String queryString = "theQuery";
-    String[] sortFields = new String[] {"field1", "field2"};
-    EventSearchResult searchResult = getEventSearchResult(queryString, sortFields, true);
-
-    Capture<String[]> sortFieldsCapture = new Capture<String[]>();
-    expect(lucenePluginMock.getSearchResultsWithoutChecks(eq(queryString), 
-        capture(sortFieldsCapture), isNull(String.class), eq("default,de"), same(context))
-        ).andReturn(searchResultsMock).once();
+  public void testGetSearchResult_skipChecks() throws Exception {
+    LuceneQuery query = new LuceneQuery("db");
+    List<String> sortFields = Arrays.asList("field1", "field2");
+    List<String> languages = null;
+    LuceneSearchResult resultMock = createMockAndAddToDefault(LuceneSearchResult.class);
+    
+    expect(searchServiceMock.searchWithoutChecks(same(query), eq(sortFields), 
+        eq(languages))).andReturn(resultMock).once();
     
     replayDefault();
-    assertSame(searchResultsMock, searchResult.luceneSearch());
+    LuceneSearchResult ret = getEventSearchResult(query, sortFields, true
+        ).getSearchResult();
     verifyDefault();
-    assertEquals(Arrays.asList(sortFields), Arrays.asList(sortFieldsCapture.getValue()));
+    
+    assertSame(resultMock, ret);
   }
   
   @Test
   public void testGetEventList() throws Exception {
-    String queryString = "theQuery";
-    String[] sortFields = new String[] {"field1", "field2"};
-    EventSearchResult searchResult = getEventSearchResult(queryString, sortFields, false);
+    LuceneQuery query = new LuceneQuery("db");
+    List<String> sortFields = Arrays.asList("field1", "field2");
+    List<String> languages = null;
     int offset = 5;
     int limit = 10;
+    LuceneSearchResult resultMock = createMockAndAddToDefault(LuceneSearchResult.class);
+    List<DocumentReference> docRefList = Arrays.asList(new DocumentReference("xwikidb", 
+        "TestSpace", "Event1"), new DocumentReference("xwikidb", "TestSpace", "Event2"));
     
-    SearchResult mockSearchResult1 = createMockAndAddToDefault(SearchResult.class);
-    SearchResult mockSearchResult2 = createMockAndAddToDefault(SearchResult.class);
-    List<SearchResult> searchResultList = new ArrayList<SearchResult>();
-    searchResultList.add(mockSearchResult1);
-    searchResultList.add(mockSearchResult2);
-
-    Capture<String[]> sortFieldsCapture = new Capture<String[]>();
-    expect(lucenePluginMock.getSearchResults(eq(queryString), capture(sortFieldsCapture), 
-        isNull(String.class), eq("default,de"), same(context))).andReturn(
-        searchResultsMock).once();
-    expect(searchResultsMock.getResults(eq(offset + 1), eq(limit))).andReturn(
-        searchResultList).once();
-    expect(mockSearchResult1.getFullName()).andReturn("TestSpace.Event1").once();
-    expect(mockSearchResult2.getFullName()).andReturn("TestSpace.Event2").once();
+    expect(searchServiceMock.search(same(query), eq(sortFields), eq(languages))
+        ).andReturn(resultMock).once();
+    expect(resultMock.getResults(eq(offset), eq(limit))).andReturn(docRefList).once();
     
     replayDefault();
-    List<IEvent> eventApiList = searchResult.getEventList(offset, limit);
+    List<IEvent> ret = getEventSearchResult(query, sortFields, false).getEventList(
+        offset, limit);
     verifyDefault();
     
-    assertEquals(2, eventApiList.size());
-    assertEquals(new DocumentReference("xwikidb", "TestSpace", "Event1"), 
-        eventApiList.get(0).getDocumentReference());
-    assertEquals(new DocumentReference("xwikidb", "TestSpace", "Event2"), 
-        eventApiList.get(1).getDocumentReference());
-    assertEquals(Arrays.asList(sortFields), Arrays.asList(sortFieldsCapture.getValue()));
+    assertEquals(2, ret.size());
+    assertEquals(docRefList.get(0), ret.get(0).getDocumentReference());
+    assertEquals(docRefList.get(1), ret.get(1).getDocumentReference());
   }
   
   @Test
-  public void testGetSize() throws Exception {    
-    String queryString = "theQuery";
-    String[] sortFields = new String[] {"field1", "field2"};
-    EventSearchResult searchResult = getEventSearchResult(queryString, sortFields, false);
-
-    Capture<String[]> sortFieldsCapture = new Capture<String[]>();
-    expect(lucenePluginMock.getSearchResults(eq(queryString), capture(sortFieldsCapture), 
-        isNull(String.class), eq("default,de"), same(context))).andReturn(
-        searchResultsMock).once();
-    expect(searchResultsMock.getHitcount()).andReturn(2).once();
+  public void testGetSize() throws Exception {
+    LuceneQuery query = new LuceneQuery("db");
+    List<String> sortFields = Arrays.asList("field1", "field2");
+    List<String> languages = null;
+    LuceneSearchResult resultMock = createMockAndAddToDefault(LuceneSearchResult.class);
+    
+    expect(searchServiceMock.search(same(query), eq(sortFields), eq(languages))
+        ).andReturn(resultMock).once();
+    expect(resultMock.getSize()).andReturn(2).once();
     
     replayDefault();
-    int size = searchResult.getSize();
+    int ret = getEventSearchResult(query, sortFields, false).getSize();
     verifyDefault();
     
-    assertEquals(2, size);
-    assertEquals(Arrays.asList(sortFields), Arrays.asList(sortFieldsCapture.getValue()));
+    assertEquals(2, ret);
   }
 
-  private EventSearchResult getEventSearchResult(String queryString,
-      String[] sortFields, boolean skipChecks) {
-    EventSearchResult searchResult = new EventSearchResult(queryString, Arrays.asList(
-        sortFields), skipChecks, context);
-    searchResult.injectLucenePlugin(lucenePluginMock);
+  private EventSearchResult getEventSearchResult(LuceneQuery query, 
+      List<String> sortFields, boolean skipChecks) {
+    EventSearchResult searchResult = new EventSearchResult(query, sortFields, skipChecks);
+    searchResult.injectSearchService(searchServiceMock);
     return searchResult;
   }
 

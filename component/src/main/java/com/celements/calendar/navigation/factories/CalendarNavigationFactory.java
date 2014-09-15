@@ -15,8 +15,7 @@ import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.search.DateEventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearchQuery;
-import com.xpn.xwiki.XWikiContext;
-import com.xpn.xwiki.plugin.lucene.LucenePlugin;
+import com.celements.search.lucene.ILuceneSearchService;
 import com.xpn.xwiki.web.Utils;
 
 public class CalendarNavigationFactory implements ICalendarNavigationFactory {
@@ -24,13 +23,9 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   private static final Log LOGGER = LogFactory.getFactory().getInstance(
       CalendarNavigationFactory.class);
 
-  private XWikiContext context;
   private IEventManager eventMgr;
   private INavigationDetailsFactory navDetailsFactory;
-  
-  public CalendarNavigationFactory(XWikiContext context) {
-    this.context = context;
-  }
+  private ILuceneSearchService searchService;
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
       NavigationDetails navDetails, int nb) {
@@ -303,8 +298,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
         + "], offset [" + offset + "], nb [" + nb + "], query [" + query + "].");
     boolean[] uncertain = new boolean[3];
     if (query != null) {
-      int resultLimit = ((LucenePlugin) context.getWiki().getPlugin("lucene", context)
-          ).getResultLimit(query.skipChecks(), context);
+      int resultLimit = getSearchService().getResultLimit(query.skipChecks());
       uncertain[0] = calArchiveSize >= resultLimit;
       uncertain[1] = calSize >= resultLimit;
       uncertain[2] = uncertain[0] || uncertain[1];
@@ -372,6 +366,17 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
   void injectNavDetailsFactory(INavigationDetailsFactory navDetailsFactory) {
     this.navDetailsFactory = navDetailsFactory;
+  }
+
+  private ILuceneSearchService getSearchService() {
+    if (searchService == null) {
+      searchService = Utils.getComponent(ILuceneSearchService.class);
+    }
+    return searchService;
+  }
+
+  void injectSearchService(ILuceneSearchService searchService) {
+    this.searchService = searchService;
   }
 
 }

@@ -23,7 +23,7 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     String lang = "de";
-    List<String> spaces = Arrays.asList("myCalSpace1, myCalSpace2");
+    List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
     List<String> sortFields = Arrays.asList("field1", "field2");
     boolean skipChecks = true;
     IEventSearchQuery query = new CalendarEventSearchQuery(database, startDate, isArchive, 
@@ -39,7 +39,7 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     String lang = "de";
-    List<String> spaces = Arrays.asList("myCalSpace1, myCalSpace2");
+    List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
     boolean skipChecks = false;
     IEventSearchQuery query = new CalendarEventSearchQuery(database, startDate, isArchive, 
         lang, spaces, null, skipChecks);
@@ -58,7 +58,7 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     String lang = "de";
-    List<String> spaces = Arrays.asList("myCalSpace1, myCalSpace2");
+    List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
     CalendarEventSearchQuery query = new CalendarEventSearchQuery(fromQuery, startDate, 
         isArchive, lang, spaces);
     assertEquals(database, query.getDatabase());
@@ -76,7 +76,7 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     String lang = "de";
-    List<String> spaces = Arrays.asList("myCalSpace1, myCalSpace2");
+    List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
     CalendarEventSearchQuery query = new CalendarEventSearchQuery(fromQuery, startDate, 
         isArchive, lang, spaces);
     assertEquals(database, query.getDatabase());
@@ -90,15 +90,16 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     String lang = "de";
-    List<String> spaces = Arrays.asList("myCalSpace1, myCalSpace2");
+    List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
     IEventSearchQuery query = new CalendarEventSearchQuery(database, startDate, isArchive, 
         lang, spaces, null, false);
 
     assertEquals(database, query.getDatabase());
-    String expQueryString = "object:(+\"Classes.CalendarEventClass\") "
+    String expQueryString = "(wiki:(+\"theDB\") "
+        + "AND object:(+\"Classes.CalendarEventClass\") "
+        + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
         + "AND Classes.CalendarEventClass.lang:(+\"de\") "
-        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]) "
-        + "AND (space:(+\"myCalSpace1, myCalSpace2\")) AND wiki:theDB";
+        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     assertDefaultSortFields(query.getSortFields(), isArchive);
     assertFalse(query.skipChecks());
@@ -110,15 +111,16 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = true;
     String lang = "de";
-    List<String> spaces = Arrays.asList("myCalSpace1, myCalSpace2");
+    List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
     IEventSearchQuery query = new CalendarEventSearchQuery(database, startDate, isArchive, 
         lang, spaces, null, false);
 
     assertEquals(database, query.getDatabase());
-    String expQueryString = "object:(+\"Classes.CalendarEventClass\") "
+    String expQueryString = "(wiki:(+\"theDB\") "
+        + "AND object:(+\"Classes.CalendarEventClass\") "
+        + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
         + "AND Classes.CalendarEventClass.lang:(+\"de\") "
-        + "AND Classes.CalendarEventClass.eventDate:({000101010000 TO 201405090125}) "
-        + "AND (space:(+\"myCalSpace1, myCalSpace2\")) AND wiki:theDB";
+        + "AND Classes.CalendarEventClass.eventDate:({000101010000 TO 201405090125}))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     assertDefaultSortFields(query.getSortFields(), isArchive);
     assertFalse(query.skipChecks());
@@ -130,17 +132,18 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     String lang = "de";
-    List<String> spaces = Arrays.asList("myCalSpace1, myCalSpace2");
+    List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
     List<String> sortFields = Arrays.asList("field1", "field2");
     boolean skipChecks = true;
     IEventSearchQuery query = new CalendarEventSearchQuery(database, startDate, isArchive, 
         lang, spaces, sortFields, skipChecks);
 
     assertEquals(database, query.getDatabase());
-    String expQueryString = "object:(+\"Classes.CalendarEventClass\") "
+    String expQueryString = "(wiki:(+\"theDB\") "
+        + "AND object:(+\"Classes.CalendarEventClass\") "
+        + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
         + "AND Classes.CalendarEventClass.lang:(+\"de\") "
-        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]) "
-        + "AND (space:(+\"myCalSpace1, myCalSpace2\")) AND wiki:theDB";
+        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     assertEquals(sortFields, query.getSortFields());
     assertTrue(query.skipChecks());
@@ -157,10 +160,11 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
         lang, spaces, null, false);
 
     assertEquals(database, query.getDatabase());
-    String expQueryString = "object:(+\"Classes.CalendarEventClass\") "
+    String expQueryString = "(wiki:(+\"theDB\") "
+        + "AND object:(+\"Classes.CalendarEventClass\") "
+        + "AND space:(+\"NullSpace\") "
         + "AND Classes.CalendarEventClass.lang:(+\"de\") "
-        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]) "
-        + "AND (space:(+\"NullSpace\")) AND wiki:theDB";
+        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     assertDefaultSortFields(query.getSortFields(), isArchive);
     assertFalse(query.skipChecks());

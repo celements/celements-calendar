@@ -2,7 +2,7 @@ package com.celements.calendar.search;
 
 import java.util.List;
 
-import com.celements.search.lucene.query.LuceneQueryApi;
+import com.celements.search.lucene.query.LuceneQuery;
 
 public interface IEventSearchQuery {
   
@@ -12,6 +12,6 @@ public interface IEventSearchQuery {
   
   public boolean skipChecks();
 
-  public LuceneQueryApi getAsLuceneQuery();
+  public LuceneQuery getAsLuceneQuery();
 
 }

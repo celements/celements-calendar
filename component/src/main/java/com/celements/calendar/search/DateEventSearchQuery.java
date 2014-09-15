@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.celements.calendar.classes.CalendarClasses;
-import com.celements.search.lucene.query.LuceneQueryApi;
+import com.celements.search.lucene.query.LuceneQuery;
 
 public class DateEventSearchQuery extends DefaultEventSearchQuery {
 
@@ -16,7 +16,7 @@ public class DateEventSearchQuery extends DefaultEventSearchQuery {
     this(database, null, fromDate, toDate, sortFields, skipChecks);
   }
 
-  public DateEventSearchQuery(String database, LuceneQueryApi luceneQuery, Date fromDate, 
+  public DateEventSearchQuery(String database, LuceneQuery luceneQuery, Date fromDate, 
       Date toDate, List<String> sortFields, boolean skipChecks) {
     super(database, luceneQuery, sortFields, skipChecks);
     this.fromDate = fromDate;
@@ -37,9 +37,9 @@ public class DateEventSearchQuery extends DefaultEventSearchQuery {
     return null;
   }
 
-  public LuceneQueryApi getAsLuceneQueryInternal(LuceneQueryApi query) {
+  public LuceneQuery getAsLuceneQueryInternal(LuceneQuery query) {
     query = super.getAsLuceneQueryInternal(query);
-    query.addRestriction(getQueryService().createFromToDateRestriction(
+    query.add(getSearchService().createFromToDateRestriction(
         CalendarClasses.CALENDAR_EVENT_CLASS + "." + CalendarClasses.PROPERTY_EVENT_DATE, 
         fromDate, toDate, true));
     return query;

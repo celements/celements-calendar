@@ -35,11 +35,10 @@ public class SearchTermEventSearchQueryTest extends AbstractBridgedComponentTest
     assertEquals(searchTerm, query.getSearchTerm());
     assertFalse(query.isFuzzy());
     String compareQueryString = 
-        "object:(+\"Classes.CalendarEventClass\") "
+        "(wiki:(+\"myDB\") AND object:(+\"Classes.CalendarEventClass\") "
         + "AND Classes.CalendarEventClass.eventDate:([200001010000 TO 201405090125]) "
         + "AND (Classes.CalendarEventClass.l_title:(+some* +search* +term*) "
-        + "OR Classes.CalendarEventClass.l_description:(+some* +search* +term*)) "
-        + "AND wiki:myDB";
+        + "OR Classes.CalendarEventClass.l_description:(+some* +search* +term*)))";
     assertEquals(compareQueryString, query.getAsLuceneQuery().getQueryString());
   }
 
@@ -61,12 +60,12 @@ public class SearchTermEventSearchQueryTest extends AbstractBridgedComponentTest
     assertEquals(searchTerm, query.getSearchTerm());
     assertTrue(query.isFuzzy());
     String compareQueryString = 
-        "object:(+\"Classes.CalendarEventClass\") "
+        "(wiki:(+\"myDB\") AND object:(+\"Classes.CalendarEventClass\") "
         + "AND Classes.CalendarEventClass.eventDate:([200001010000 TO 201405090125]) "
         + "AND (Classes.CalendarEventClass.l_title:((some* OR some~) "
         + "AND (search* OR search~) AND (term* OR term~)) "
         + "OR Classes.CalendarEventClass.l_description:((some* OR some~) "
-        + "AND (search* OR search~) AND (term* OR term~))) AND wiki:myDB";
+        + "AND (search* OR search~) AND (term* OR term~))))";
     assertEquals(compareQueryString, query.getAsLuceneQuery().getQueryString());
   }
 
@@ -90,11 +89,10 @@ public class SearchTermEventSearchQueryTest extends AbstractBridgedComponentTest
     assertEquals(searchTerm, query.getSearchTerm());
     assertFalse(query.isFuzzy());
     String compareQueryString = 
-        "object:(+\"Classes.CalendarEventClass\") "
+        "(wiki:(+\"myDB\") AND object:(+\"Classes.CalendarEventClass\") "
         + "AND Classes.CalendarEventClass.eventDate:([200001010000 TO 201405090125]) "
         + "AND (Classes.CalendarEventClass.l_title:(+some* +search* +term*) "
-        + "OR Classes.CalendarEventClass.l_description:(+some* +search* +term*)) "
-        + "AND wiki:myDB";
+        + "OR Classes.CalendarEventClass.l_description:(+some* +search* +term*)))";
     assertEquals(compareQueryString, query.getAsLuceneQuery().getQueryString());
   }
 

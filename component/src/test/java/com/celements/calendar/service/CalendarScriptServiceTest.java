@@ -8,8 +8,8 @@ import org.xwiki.script.service.ScriptService;
 
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
-import com.celements.search.lucene.query.LuceneQueryApi;
-import com.celements.search.lucene.query.LuceneQueryRestrictionApi;
+import com.celements.search.lucene.query.LuceneQuery;
+import com.celements.search.lucene.query.QueryRestriction;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.web.Utils;
 
@@ -17,7 +17,7 @@ public class CalendarScriptServiceTest extends AbstractBridgedComponentTestCase{
 
   private CalendarScriptService calScriptService;
   private XWikiContext context;
-  private LuceneQueryApi luceneQueryAfter;
+  private LuceneQuery luceneQueryAfter;
 
   @Before
   public void setUp_CalendarScriptServiceTest() throws Exception {
@@ -28,10 +28,10 @@ public class CalendarScriptServiceTest extends AbstractBridgedComponentTestCase{
 
   @Test
   public void testGetEventSearchQuery() {
-    LuceneQueryApi luceneQuery = new LuceneQueryApi(context.getDatabase());
-    LuceneQueryRestrictionApi restriction = new LuceneQueryRestrictionApi(
-        "Classes.CalendarEventClass.org_id", "\"4051\"");
-    luceneQuery.addRestriction(restriction);
+    LuceneQuery luceneQuery = new LuceneQuery(context.getDatabase());
+    QueryRestriction restriction = new QueryRestriction("Classes.CalendarEventClass.org_id", 
+        "\"4051\"");
+    luceneQuery.add(restriction);
     String expectedQueryString = luceneQuery.getQueryString();
     replayDefault();
     IEventSearchQuery eventSearchQuery = calScriptService.getEventSearchQuery(luceneQuery,

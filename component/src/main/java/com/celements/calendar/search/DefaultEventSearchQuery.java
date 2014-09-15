@@ -4,18 +4,21 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.xwiki.model.reference.DocumentReference;
+
 import com.celements.calendar.classes.CalendarClasses;
-import com.celements.search.lucene.IQueryService;
-import com.celements.search.lucene.query.LuceneQueryApi;
-import com.celements.search.lucene.query.LuceneQueryRestrictionApi;
+import com.celements.common.classes.IClassCollectionRole;
+import com.celements.search.lucene.ILuceneSearchService;
+import com.celements.search.lucene.query.LuceneQuery;
+import com.celements.search.lucene.query.QueryRestriction;
 import com.xpn.xwiki.web.Utils;
 
 public class DefaultEventSearchQuery implements IEventSearchQuery {
 
-  private IQueryService queryService;
+  private ILuceneSearchService searchService;
   
   private final String database;
-  private final LuceneQueryApi luceneQuery;
+  private final LuceneQuery luceneQuery;
   private final List<String> sortFields;
   private final boolean skipChecks;
   
@@ -33,7 +36,7 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
     this(database, null, sortFields, skipChecks);
   }
   
-  public DefaultEventSearchQuery(String database, LuceneQueryApi luceneQuery, 
+  public DefaultEventSearchQuery(String database, LuceneQuery luceneQuery, 
       List<String> sortFields, boolean skipChecks) {
     this.database = database;
     this.luceneQuery = luceneQuery;
@@ -57,28 +60,33 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
     return skipChecks;
   }
 
-  public final LuceneQueryApi getAsLuceneQuery() {
-    LuceneQueryApi query = luceneQuery;
+  public final LuceneQuery getAsLuceneQuery() {
+    LuceneQuery query = luceneQuery;
     if (query == null) {
-      query = getQueryService().createQuery(database);
+      query = getSearchService().createQuery(database);
     }
     return getAsLuceneQueryInternal(query);
   }
   
-  protected LuceneQueryApi getAsLuceneQueryInternal(LuceneQueryApi query) {
-    LuceneQueryRestrictionApi eventObjRestr = getQueryService().createRestriction(
-        "object", "\"" + CalendarClasses.CALENDAR_EVENT_CLASS + "\"");
-    if (!query.getQueryString().contains(eventObjRestr.getRestriction())) {
-      query.addRestriction(eventObjRestr);
+  protected LuceneQuery getAsLuceneQueryInternal(LuceneQuery query) {    
+    QueryRestriction eventObjRestr = getSearchService().createObjectRestriction(
+        getCalEventClassRef());
+    if (!query.contains(eventObjRestr)) {
+      query.add(eventObjRestr);
     }
     return query;
   }
+  
+  protected final DocumentReference getCalEventClassRef() {
+    return ((CalendarClasses) Utils.getComponent(IClassCollectionRole.class, 
+        "celements.CalendarClasses")).getCalendarEventClassRef(getDatabase());
+  }
 
-  protected final IQueryService getQueryService() {
-    if (queryService == null) {
-      queryService = Utils.getComponent(IQueryService.class);
+  protected final ILuceneSearchService getSearchService() {
+    if (searchService == null) {
+      searchService = Utils.getComponent(ILuceneSearchService.class);
     }
-    return queryService;
+    return searchService;
   }
   
   @Override
@@ -87,8 +95,8 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
         + luceneQuery + ", sortFields=" + sortFields + ", skipChecks=" + skipChecks + "]";
   }
 
-  void injectQueryService(IQueryService queryService) {
-    this.queryService = queryService;
+  void injectQueryService(ILuceneSearchService searchService) {
+    this.searchService = searchService;
   }
   
   private static List<String> getSortFields(IEventSearchQuery query,

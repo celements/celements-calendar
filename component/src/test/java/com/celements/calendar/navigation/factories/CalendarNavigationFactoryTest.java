@@ -34,7 +34,7 @@ public class CalendarNavigationFactoryTest extends AbstractBridgedComponentTestC
   public void setUp_CalendarNavigationFactoryTest() throws Exception {
     context = getContext();
     xwiki = getWikiMock();
-    calNavFactory = new CalendarNavigationFactory(context);
+    calNavFactory = new CalendarNavigationFactory();
     eventMgrMock = createMockAndAddToDefault(IEventManager.class);
     calNavFactory.injectEventMgr(eventMgrMock);
   }

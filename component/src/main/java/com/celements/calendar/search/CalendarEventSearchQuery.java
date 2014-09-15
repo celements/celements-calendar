@@ -9,7 +9,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.celements.calendar.classes.CalendarClasses;
-import com.celements.search.lucene.query.LuceneQueryApi;
+import com.celements.search.lucene.query.LuceneQuery;
+import com.celements.search.lucene.query.QueryRestrictionGroup.Type;
 
 public class CalendarEventSearchQuery extends DefaultEventSearchQuery {
 
@@ -41,19 +42,18 @@ public class CalendarEventSearchQuery extends DefaultEventSearchQuery {
   }
 
   @Override
-  protected LuceneQueryApi getAsLuceneQueryInternal(LuceneQueryApi query) {
+  protected LuceneQuery getAsLuceneQueryInternal(LuceneQuery query) {
     query = super.getAsLuceneQueryInternal(query);
-    query.addRestriction(getQueryService().createRestriction(
-        CalendarClasses.CALENDAR_EVENT_CLASS + "." + CalendarClasses.PROPERTY_LANG, 
-        "\"" + lang + "\""));
-    query.addOrRestrictionList(getQueryService().createRestrictionList("space", 
+    query.add(getSearchService().createRestrictionGroup(Type.OR, Arrays.asList("space"), 
         getAllowedSpaces()));
+    query.add(getSearchService().createFieldRestriction(getCalEventClassRef(), 
+        CalendarClasses.PROPERTY_LANG, "\"" + lang + "\""));
     if (!isArchive) {
-      query.addRestriction(getQueryService().createFromDateRestriction(
+      query.add(getSearchService().createFromDateRestriction(
           CalendarClasses.CALENDAR_EVENT_CLASS + "." + CalendarClasses.PROPERTY_EVENT_DATE,
           startDate, true));
     } else {
-      query.addRestriction(getQueryService().createToDateRestriction(
+      query.add(getSearchService().createToDateRestriction(
           CalendarClasses.CALENDAR_EVENT_CLASS + "." + CalendarClasses.PROPERTY_EVENT_DATE,
           startDate, false));
     }

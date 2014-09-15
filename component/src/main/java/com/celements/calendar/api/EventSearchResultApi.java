@@ -25,11 +25,11 @@ public class EventSearchResultApi extends Api {
   }
 
   public String getLuceneQuery() {
-    return searchResult.getLuceneQuery();
+    return searchResult.getSearchResult().getQueryString();
   }
 
   public List<String> getSortFields() {
-    return searchResult.getSortFields();
+    return searchResult.getSearchResult().getSortFields();
   }
 
   public List<EventApi> getEventList() {

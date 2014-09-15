@@ -14,9 +14,8 @@ import com.celements.calendar.search.CalendarEventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearch;
 import com.celements.calendar.search.IEventSearchQuery;
-import com.celements.search.lucene.IQueryService;
+import com.celements.search.lucene.ILuceneSearchService;
 import com.xpn.xwiki.XWikiContext;
-import com.xpn.xwiki.plugin.lucene.LucenePlugin;
 
 @Component("lucene")
 public class CalendarEngineLucene implements ICalendarEngineRole {
@@ -24,10 +23,8 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
   private static final Log LOGGER = LogFactory.getFactory().getInstance(
       CalendarEngineLucene.class);
 
-  private LucenePlugin lucenePlugin;
-
   @Requirement
-  private IQueryService queryService;
+  private ILuceneSearchService searchService;
 
   @Requirement
   private IEventSearch eventSearch;
@@ -51,7 +48,7 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
 
   public List<IEvent> getEvents(Date startDate, boolean isArchive, String lang,
       List<String> allowedSpaces, int offset, int limit) {
-    int resultLimit = getLucenePlugin().getResultLimit(false, getContext());
+    int resultLimit = searchService.getResultLimit(false);
     if ((offset + limit) <= resultLimit) {
       return searchEvents(null, startDate, isArchive, lang, allowedSpaces).getEventList(
           offset, limit);
@@ -95,14 +92,6 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
     return searchResult;
   }
 
-  private LucenePlugin getLucenePlugin() {
-    if (lucenePlugin == null) {
-      lucenePlugin = (LucenePlugin) getContext().getWiki().getPlugin("lucene", 
-          getContext());
-    }
-    return lucenePlugin;
-  }
-
   void injectEventSearch(IEventSearch eventSearch) {
     this.eventSearch = eventSearch;
   }
@@ -110,9 +99,9 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
   void injectHQLEngine(ICalendarEngineRole hqlEngine) {
     this.hqlEngine = hqlEngine;
   }
-  
-  void injectLucenePlugin(LucenePlugin lucenePlugin) {
-    this.lucenePlugin = lucenePlugin;
+
+  void injectSearchService(ILuceneSearchService searchService) {
+    this.searchService = searchService;
   }
 
 }

@@ -31,10 +31,10 @@ public class EventSearchTest extends AbstractBridgedComponentTestCase {
     verifyDefault();
 
     assertNotNull(searchResult);
-    String expQueryString = "object:(+\"Classes.CalendarEventClass\") AND wiki:theDB";
-    assertEquals(expQueryString, searchResult.getLuceneQuery());
-    assertEquals(skipChecks, searchResult.getSkipChecks());
-    assertEquals(sortFields, searchResult.getSortFields());
+    String expQueryString = "(wiki:(+\"theDB\") "
+        + "AND object:(+\"Classes.CalendarEventClass\"))";
+    assertEquals(expQueryString, searchResult.getSearchResult().getQueryString());
+    assertEquals(sortFields, searchResult.getSearchResult().getSortFields());
   }
 
   @Test
@@ -44,10 +44,10 @@ public class EventSearchTest extends AbstractBridgedComponentTestCase {
     verifyDefault();
 
     assertNotNull(searchResult);
-    String expQueryString = "object:(+\"Classes.CalendarEventClass\") AND wiki:xwikidb";
-    assertEquals(expQueryString, searchResult.getLuceneQuery());
-    assertFalse(searchResult.getSkipChecks());
-    assertEquals(0, searchResult.getSortFields().size());
+    String expQueryString = "(wiki:(+\"xwikidb\") "
+        + "AND object:(+\"Classes.CalendarEventClass\"))";
+    assertEquals(expQueryString, searchResult.getSearchResult().getQueryString());
+    assertEquals(0, searchResult.getSearchResult().getSortFields().size());
   }
 
 }

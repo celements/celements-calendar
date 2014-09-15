@@ -22,7 +22,7 @@ import com.celements.calendar.search.DefaultEventSearchQuery;
 import com.celements.calendar.search.IEventSearch;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.search.SearchTermEventSearchQuery;
-import com.celements.search.lucene.query.LuceneQueryApi;
+import com.celements.search.lucene.query.LuceneQuery;
 import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -126,10 +126,10 @@ public class CalendarScriptService implements ScriptService {
     return calService.getCalendarDocRefByCalendarSpace(calSpace);
   }
 
-  public IEventSearchQuery getEventSearchQuery(LuceneQueryApi luceneQuery, 
+  public IEventSearchQuery getEventSearchQuery(LuceneQuery luceneQuery, 
       List<String> sortFields) {
-    return new DefaultEventSearchQuery(getContext().getDatabase(),
-        new LuceneQueryApi(luceneQuery), sortFields, false);
+    return new DefaultEventSearchQuery(getContext().getDatabase(), luceneQuery.copy(), 
+        sortFields, false);
   }
 
   public SearchTermEventSearchQuery getSearchTermEventSearchQuery(Date fromDate, 

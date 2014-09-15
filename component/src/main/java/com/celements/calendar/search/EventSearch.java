@@ -8,8 +8,8 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
 
-import com.celements.search.lucene.IQueryService;
-import com.celements.search.lucene.query.LuceneQueryApi;
+import com.celements.search.lucene.ILuceneSearchService;
+import com.celements.search.lucene.query.LuceneQuery;
 import com.xpn.xwiki.XWikiContext;
 
 @Component
@@ -19,7 +19,7 @@ public class EventSearch implements IEventSearch {
       EventSearch.class);
 
   @Requirement
-  private IQueryService queryService;
+  private ILuceneSearchService searchService;
 
   @Requirement
   private Execution execution;
@@ -32,13 +32,11 @@ public class EventSearch implements IEventSearch {
     if (query == null) {
       query = new DefaultEventSearchQuery(getContext().getDatabase());
     }
-    LuceneQueryApi luceneQuery = query.getAsLuceneQuery();
+    LuceneQuery luceneQuery = query.getAsLuceneQuery();
     List<String> sortFields = query.getSortFields();
     boolean skipChecks = query.skipChecks();
-    String queryString = luceneQuery.getQueryString();
-    EventSearchResult result = new EventSearchResult(queryString, sortFields, skipChecks,
-        getContext());
-    LOGGER.info("getSearchResult: for luceneQuery '" + queryString + "' got result '"
+    EventSearchResult result = new EventSearchResult(luceneQuery, sortFields, skipChecks);
+    LOGGER.info("getSearchResult: for luceneQuery '" + luceneQuery + "' got result '"
         + result + "'");
     return result;
   }

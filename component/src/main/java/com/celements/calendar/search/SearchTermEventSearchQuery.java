@@ -4,10 +4,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.celements.calendar.classes.CalendarClasses;
-import com.celements.search.lucene.query.LuceneQueryApi;
+import com.celements.search.lucene.query.LuceneQuery;
+import com.celements.search.lucene.query.QueryRestrictionGroup.Type;
 
 public class SearchTermEventSearchQuery extends DateEventSearchQuery {
   
@@ -29,13 +30,13 @@ public class SearchTermEventSearchQuery extends DateEventSearchQuery {
     return fuzzy;
   }
 
-  public LuceneQueryApi getAsLuceneQueryInternal(LuceneQueryApi query) {
+  public LuceneQuery getAsLuceneQueryInternal(LuceneQuery query) {
     query = super.getAsLuceneQueryInternal(query);
     if (StringUtils.isNotBlank(searchTerm)) {
       List<String> fields = getSearchTermFields();
       for (String s : searchTerm.split(",")) {
-        query.addOrRestrictionList(getQueryService().createRestrictionList(fields, s, 
-            true, fuzzy));
+        query.add(getSearchService().createRestrictionGroup(Type.OR, fields, 
+            Arrays.asList(s), true, fuzzy));
       }
     }
     return query;

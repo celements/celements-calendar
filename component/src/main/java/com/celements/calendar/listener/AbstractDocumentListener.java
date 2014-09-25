@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
-import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.component.manager.ComponentManager;
@@ -19,7 +18,6 @@ import com.celements.common.classes.IClassCollectionRole;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 
-@Component
 public abstract class AbstractDocumentListener implements EventListener {
 
   @Requirement("celements.CalendarClasses")

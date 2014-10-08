@@ -30,7 +30,8 @@ public class SearchTermEventSearchQuery extends DateEventSearchQuery {
     return fuzzy;
   }
 
-  public LuceneQuery getAsLuceneQueryInternal(LuceneQuery query) {
+  @Override
+  protected LuceneQuery getAsLuceneQueryInternal(LuceneQuery query) {
     query = super.getAsLuceneQueryInternal(query);
     if (StringUtils.isNotBlank(searchTerm)) {
       List<String> fields = getSearchTermFields();

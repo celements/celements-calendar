@@ -42,6 +42,8 @@ public interface IEvent {
 
   public Date getEventDate();
   
+  public Date getEventEndDate();
+  
   public boolean hasTime();
 
   public Boolean isSubscribable();

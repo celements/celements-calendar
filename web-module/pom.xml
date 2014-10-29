@@ -56,7 +56,7 @@
     <dependency>
       <groupId>com.celements</groupId>
       <artifactId>celements-calendar</artifactId>
-      <version>1.38</version>
+      <version>1.39-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>

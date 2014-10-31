@@ -37,7 +37,8 @@ public class DateEventSearchQuery extends DefaultEventSearchQuery {
     return null;
   }
 
-  public LuceneQuery getAsLuceneQueryInternal(LuceneQuery query) {
+  @Override
+  protected LuceneQuery getAsLuceneQueryInternal(LuceneQuery query) {
     query = super.getAsLuceneQueryInternal(query);
     query.add(getSearchService().createFromToDateRestriction(
         CalendarClasses.CALENDAR_EVENT_CLASS + "." + CalendarClasses.PROPERTY_EVENT_DATE, 

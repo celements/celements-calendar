@@ -150,5 +150,17 @@ public class CalendarScriptService implements ScriptService {
     LOGGER.debug("hasViewRights for docRef [" + docRef + "] returned [" + ret + "]");
     return ret;
   }
+  
+  public boolean isMidnightDate(Date date) {
+    return calService.isMidnightDate(date);
+  }
+  
+  public Date getMidnightDate(Date date) {
+    return calService.getMidnightDate(date);
+  }
+  
+  public Date getEndOfDayDate(Date date) {
+    return calService.getEndOfDayDate(date);
+  }
 
 }

@@ -74,6 +74,10 @@ public class EventApi extends Api {
   public Date getEventDate() {
     return event.getEventDate();
   }
+  
+  public Date getEventEndDate() {
+    return event.getEventEndDate();
+  }
 
   public boolean hasTime() {
     return event.hasTime();

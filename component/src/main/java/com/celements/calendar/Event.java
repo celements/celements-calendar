@@ -195,6 +195,10 @@ public class Event implements IEvent {
   public Date getEventDate(){
     return getDateProperty(getObj(), CalendarClasses.PROPERTY_EVENT_DATE);
   }
+  
+  public Date getEventEndDate(){
+    return getDateProperty(getObj(), CalendarClasses.PROPERTY_EVENT_DATE_END);
+  }
 
   public boolean hasTime() {
     Date timestamp = getEventDate();

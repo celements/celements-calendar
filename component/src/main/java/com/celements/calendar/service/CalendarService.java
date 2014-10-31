@@ -66,18 +66,22 @@ public class CalendarService implements ICalendarService {
     return (XWikiContext) execution.getContext().getProperty("xwikicontext");
   }
 
+  @Override
   public List<DocumentReference> getAllCalendars() {
     return getAllCalendars(null, new HashSet<DocumentReference>());
   }
 
+  @Override
   public List<DocumentReference> getAllCalendars(WikiReference wikiRef) {
     return getAllCalendars(wikiRef, new HashSet<DocumentReference>());
   }
 
+  @Override
   public List<DocumentReference> getAllCalendars(Collection<DocumentReference> excludes) {
     return getAllCalendars(null, excludes);
   }
 
+  @Override
   public List<DocumentReference> getAllCalendars(WikiReference wikiRef, 
       Collection<DocumentReference> excludes) {
     if (wikiRef == null) {
@@ -137,6 +141,7 @@ public class CalendarService implements ICalendarService {
         + ") as cal where doc.translation = 0";
   }
 
+  @Override
   public String getEventSpaceForCalendar(DocumentReference calDocRef
       ) throws XWikiException {
     XWikiDocument doc = getContext().getWiki().getDocument(calDocRef, getContext());
@@ -148,6 +153,7 @@ public class CalendarService implements ICalendarService {
     return space;
   }
 
+  @Override
   public List<String> getAllowedSpaces(DocumentReference calDocRef) throws XWikiException {
     List<String> spaces = new ArrayList<String>();
     WikiReference wikiRef = calDocRef.getWikiReference();
@@ -189,6 +195,7 @@ public class CalendarService implements ICalendarService {
   }
 
   @Deprecated
+  @Override
   public String getAllowedSpacesHQL(XWikiDocument calDoc) throws XWikiException {
     String spaceHQL = "";
     List<String> spaces = getAllowedSpaces(calDoc.getDocumentReference());
@@ -206,16 +213,19 @@ public class CalendarService implements ICalendarService {
     return spaceHQL;
   }
 
+  @Override
   public ICalendar getCalendarByCalRef(DocumentReference calDocRef, boolean isArchive) {
     LOGGER.trace("getCalendarByCalRef: create Calendar reference for [" + calDocRef
         + "], isArchive [" + isArchive + "].");
     return new Calendar(calDocRef, isArchive);
   }
 
+  @Override
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace) {
     return getCalendarDocRefByCalendarSpace(calSpace, null);
   }
 
+  @Override
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace, 
       String inSpace) {
     List<DocumentReference> calConfigs = getCalendarDocRefsByCalendarSpace(calSpace, 
@@ -227,10 +237,12 @@ public class CalendarService implements ICalendarService {
     }
   }
 
+  @Override
   public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace) {
     return getCalendarDocRefsByCalendarSpace(calSpace, (SpaceReference) null);
   }
 
+  @Override
   public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace, 
       String inSpace) {
     SpaceReference inSpaceRef = null;
@@ -241,6 +253,7 @@ public class CalendarService implements ICalendarService {
     return getCalendarDocRefsByCalendarSpace(calSpace, inSpaceRef);
   }
 
+  @Override
   public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace, 
       EntityReference inRef) {
     WikiReference inWikiRef;
@@ -318,7 +331,23 @@ public class CalendarService implements ICalendarService {
     }
     return filtered;
   }
+  
+  @Override
+  public boolean isMidnightDate(Date date) {
+    boolean isMidnight = true;
+    if (date != null) {
+      java.util.Calendar cal = java.util.Calendar.getInstance();
+      cal.setTime(date);
+      for (int field : TIMESTAMP_FIELDS) {
+        isMidnight &= (cal.get(field) == 0);
+      }
+    } else {
+      isMidnight = false;
+    }
+    return isMidnight;
+  }
 
+  @Override
   public Date getMidnightDate(Date date) {
     Date dateMidnight = null;
     if (date != null) {
@@ -333,6 +362,7 @@ public class CalendarService implements ICalendarService {
     return dateMidnight;
   }
   
+  @Override
   public Date getEndOfDayDate(Date date) {
     Date dateEndOfDay = null;
     if (date != null) {

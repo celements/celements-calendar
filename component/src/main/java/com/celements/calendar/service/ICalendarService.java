@@ -101,6 +101,8 @@ public interface ICalendarService {
    */
   public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace,
       EntityReference inRef);
+  
+  public boolean isMidnightDate(Date date);
 
   public Date getMidnightDate(Date date);
   

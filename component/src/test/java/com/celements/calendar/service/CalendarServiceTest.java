@@ -744,6 +744,19 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
   }
   
   @Test
+  public void testIsMidnightDate_true() throws Exception {
+    Date date = SDF.parse("20140513000000");
+    assertTrue(calService.isMidnightDate(date));
+  }
+  
+  @Test
+  public void testIsMidnightDate_false() throws Exception {
+    Date date = SDF.parse("20140513163132");
+    assertFalse(calService.isMidnightDate(date));
+    assertTrue(calService.isMidnightDate(calService.getMidnightDate(date)));
+  }
+  
+  @Test
   public void testGetMidnightDate() throws Exception {
     Date date = SDF.parse("20140513163132");
     Date midnightDate = calService.getMidnightDate(date);

@@ -201,9 +201,7 @@ public class Event implements IEvent {
   }
 
   public boolean hasTime() {
-    Date timestamp = getEventDate();
-    return (timestamp != null) && !timestamp.equals(getCalService().getMidnightDate(
-        timestamp));
+    return !getCalService().isMidnightDate(getEventDate());
   }
 
   /* (non-Javadoc)

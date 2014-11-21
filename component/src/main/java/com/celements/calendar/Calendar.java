@@ -106,59 +106,48 @@ public class Calendar implements ICalendar {
     this.calConfigDocRef = calConfigDocRef;
   }
 
-  /* (non-Javadoc)
-   * @see com.celements.calendar.ICalendar#getAllEvents()
-   */
   @Deprecated
+  @Override
   public List<EventApi> getAllEvents(){
     return getEventMgr().getEvents(this, 0, 0);
   }
 
-  /* (non-Javadoc)
-   * @see com.celements.calendar.ICalendar#getAllEvents()
-   */
+  @Override
   public List<IEvent> getAllEventsInternal() {
     return getEventMgr().getAllEventsInternal(this);
   }
 
-  /* (non-Javadoc)
-   * @see com.celements.calendar.ICalendar#getEvents(int, int)
-   */
   @Deprecated
   public List<EventApi> getEvents(int start, int nb) {
     return getEventMgr().getEvents(this, start < 0 ? 0 : start, nb < 0 ? 0 : nb);
   }
 
-  /* (non-Javadoc)
-   * @see com.celements.calendar.ICalendar#getEvents(int, int)
-   */
+  @Override
   public List<IEvent> getEventsInternal(int start, int nb) {
     return getEventMgr().getEventsInternal(this, start < 0 ? 0 : start, nb < 0 ? 0 : nb);
   }
 
+  @Override
   public EventSearchResult searchEvents(IEventSearchQuery query) {
     return getEventMgr().searchEvents(this, query);
   }
 
-  /* (non-Javadoc)
-   * @see com.celements.calendar.ICalendar#getNrOfEvents()
-   */
+  @Override
   public long getNrOfEvents(){
     return getEventMgr().countEvents(this);
   }
 
-  /* (non-Javadoc)
-   * @see com.celements.calendar.ICalendar#isArchive()
-   */
+  @Override
   public boolean isArchive(){
     return isArchive;
   }
 
+  @Override
   public List<String> getOverviewFields() {
     return Arrays.asList(getOverviewConfig().split(","));
   }
 
-  public String getOverviewConfig() {
+  private String getOverviewConfig() {
     String overviewConfig = _OVERVIEW_DEFAULT_CONFIG;
     BaseObject calConfigObj = getConfigObject();
     if ((calConfigObj != null)
@@ -175,11 +164,12 @@ public class Calendar implements ICalendar {
         CalendarClasses.PROPERTY_OVERVIEW_COLUMN_CONFIG);
   }
 
+  @Override
   public List<String> getDetailviewFields() {
     return Arrays.asList(getDetailviewConfig().split(","));
   }
 
-  public String getDetailviewConfig() {
+  private String getDetailviewConfig() {
     String detailviewConfig = _DETAILVIEW_DEFAULT_CONFIG;
     BaseObject calConfigObj = getConfigObject();
     if ((calConfigObj != null)
@@ -197,6 +187,7 @@ public class Calendar implements ICalendar {
         CalendarClasses.CALENDAR_CONFIG_CLASS_DOC));
   }
 
+  @Override
   public List<String> getCalOverviewPropertyNames() {
     return getCalOverviewPropertyNames_internal(getContext());
   }
@@ -205,6 +196,7 @@ public class Calendar implements ICalendar {
    * @deprecated use getCalOverviewPropertyNames() instead
    */
   @Deprecated
+  @Override
   public List<String> getCalOverviewPropertyNames(XWikiContext context) {
     return getCalOverviewPropertyNames_internal(context);
   }
@@ -217,6 +209,7 @@ public class Calendar implements ICalendar {
     return propNames;
   }
 
+  @Override
   public List<String> getEventPropertyNames() {
     return getEventPropertyNames_internal(getContext());
   }
@@ -225,6 +218,7 @@ public class Calendar implements ICalendar {
    * @deprecated use getEventPropertyNames() instead
    */
   @Deprecated
+  @Override
   public List<String> getEventPropertyNames(XWikiContext context) {
     return getEventPropertyNames_internal(context);
   }
@@ -253,17 +247,20 @@ public class Calendar implements ICalendar {
     return propNames;
   }
 
+  @Override
   public boolean hasDetailLink() {
     BaseObject configObj = getConfigObject();
     return ((configObj != null) && (configObj.getIntValue("hasMoreLink") == 1));
   }
 
+  @Override
   public boolean isSubscribable() {
     BaseObject configObj = getConfigObject();
     return (configObj.getIntValue(
         CalendarClasses.PROPERTY_IS_SUBSCRIBABLE) == 1);
   }
 
+  @Override
   public XWikiDocument getCalDoc() {
     try {
       return getContext().getWiki().getDocument(this.calConfigDocRef, getContext());
@@ -273,24 +270,29 @@ public class Calendar implements ICalendar {
     return null;
   }
 
+  @Override
   public void setStartTimestamp(Date newStartDate) {
     if (newStartDate != null) {
       this.startDate = newStartDate;
     }
   }
 
+  @Override
   public void setStartDate(Date newStartDate) {
     setStartTimestamp(getCalService().getMidnightDate(newStartDate));
   }
 
+  @Override
   public Date getStartDate() {
     return this.startDate;
   }
 
+  @Override
   public DocumentReference getDocumentReference() {
     return calConfigDocRef;
   }
 
+  @Override
   public String getLanguage() {
     if (this.language != null) {
       return this.language;
@@ -298,6 +300,7 @@ public class Calendar implements ICalendar {
     return getDefaultLang();
   }
 
+  @Override
   public void setLanguage(String language) {
     this.language = language;
   }
@@ -314,17 +317,19 @@ public class Calendar implements ICalendar {
     }
     return defaultLang;
   }
-  
+
+  @Override
   public List<String> getAllowedSpaces() {
     try {
       return getCalService().getAllowedSpaces(getDocumentReference());
     } catch (XWikiException exp) {
-      LOGGER.error("Failed to get allowed spaces for [" + getDocumentReference() + "].", 
+      LOGGER.error("Failed to get allowed spaces for '" + getDocumentReference() + "'", 
           exp);
     }
     return new ArrayList<String>();
   }
 
+  @Override
   public ICalendarEngineRole getEngine() {
     if (engine == null) {
       String engineHint = getContext().getWiki().getXWikiPreference("calendar_engine",
@@ -336,10 +341,12 @@ public class Calendar implements ICalendar {
     return engine;
   }
 
+  @Override
   public IEvent getFirstEvent() {
     return getEventMgr().getFirstEvent(this);
   }
 
+  @Override
   public IEvent getLastEvent() {
     return getEventMgr().getLastEvent(this);
   }
@@ -349,7 +356,7 @@ public class Calendar implements ICalendar {
     return (XWikiContext)execution.getContext().getProperty("xwikicontext");
   }
 
-  public void inject_getEventCmd(IEventManager getEventCmdMock) {
+  void inject_getEventCmd(IEventManager getEventCmdMock) {
     eventMgr = getEventCmdMock;
   }
 

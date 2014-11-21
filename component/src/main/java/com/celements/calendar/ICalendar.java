@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.SpaceReference;
 
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.engine.ICalendarEngineRole;
@@ -115,6 +116,8 @@ public interface ICalendar {
   public Date getStartDate();
 
   public DocumentReference getDocumentReference();
+  
+  public SpaceReference getEventSpaceRef();
 
   public String getLanguage();
 

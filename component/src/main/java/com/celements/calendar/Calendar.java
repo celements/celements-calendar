@@ -28,6 +28,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.EntityReference;
+import org.xwiki.model.reference.SpaceReference;
 
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.classes.CalendarClasses;
@@ -36,6 +38,7 @@ import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.service.ICalendarService;
+import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -293,6 +296,19 @@ public class Calendar implements ICalendar {
   }
 
   @Override
+  public SpaceReference getEventSpaceRef() {
+    SpaceReference ret = null;
+    try {
+      ret = new SpaceReference(getCalService().getEventSpaceForCalendar(calConfigDocRef), 
+        getWebUtilsService().getWikiRef((EntityReference) calConfigDocRef));
+    } catch (XWikiException exc) {
+      LOGGER.error("getEventSpaceRef: failed to get event space for '" 
+          + this.calConfigDocRef + "'", exc);
+    }
+    return ret;
+  }
+
+  @Override
   public String getLanguage() {
     if (this.language != null) {
       return this.language;
@@ -307,12 +323,9 @@ public class Calendar implements ICalendar {
 
   private final String getDefaultLang() {
     if (defaultLang == null) {
-      try {
-        defaultLang = getContext().getWiki().getSpacePreference("default_language",
-            getCalService().getEventSpaceForCalendar(getDocumentReference()), "",
-            getContext());
-      } catch (XWikiException exp) {
-        LOGGER.error("getDefaultLang: failed to get SpacePreferences.", exp);
+      SpaceReference spaceRef = getEventSpaceRef();
+      if (spaceRef != null) {
+        defaultLang = getWebUtilsService().getDefaultLanguage(spaceRef.getName());
       }
     }
     return defaultLang;
@@ -376,6 +389,10 @@ public class Calendar implements ICalendar {
   
   void injectCalService(ICalendarService calService) {
     this.calService = calService;
+  }
+
+  private IWebUtilsService getWebUtilsService() {
+    return Utils.getComponent(IWebUtilsService.class);
   }
 
   @Override

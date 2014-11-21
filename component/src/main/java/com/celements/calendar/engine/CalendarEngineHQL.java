@@ -6,8 +6,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
@@ -26,8 +26,9 @@ import com.xpn.xwiki.XWikiContext;
 @Component("hql")
 public class CalendarEngineHQL implements ICalendarEngineRole {
 
-  private static final Log LOGGER = LogFactory.getFactory().getInstance(
-      CalendarEngineHQL.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CalendarEngineHQL.class);
+
+  private static final String PROGON_ENGINE_HQL_TOTALTIME = "progonEngineHQLTotalTime";
 
   @Requirement
   private QueryManager queryManager;
@@ -36,62 +37,61 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
   private IWebUtilsService webUtilsService;
   
   @Requirement
-  Execution execution;
+  private Execution execution;
+  
+  private XWikiContext getContext() {
+    return (XWikiContext) execution.getContext().getProperty(
+        XWikiContext.EXECUTIONCONTEXT_KEY);
+  }
 
   public long countEvents(Date startDate, boolean isArchive, String lang,
       List<String> allowedSpaces) {
+    long startTime = System.currentTimeMillis();
+    long count = 0;
     try {
       String query = getQuery(startDate, isArchive, lang,	allowedSpaces, true);
       List<Object> eventCount = queryManager.createQuery(query, Query.HQL).execute();
       if((eventCount != null) && (eventCount.size() > 0)) {
-        return (Long) eventCount.get(0);
+        count = (Long) eventCount.get(0);
       }
     } catch (QueryException queryException) {
       LOGGER.error("getEvents: " + queryException);
     }
-    return 0;
+    addToTotalTime(startTime, "countEvents");
+    return count;
   }
 
   public List<IEvent> getEvents(Date startDate, boolean isArchive, String lang,
       List<String> allowedSpaces) {
+    long startTime = System.currentTimeMillis();
+    List<IEvent> eventList;
     try {
       String query = getQuery(startDate, isArchive, lang,	allowedSpaces, false);
       List<String> eventDocs = queryManager.createQuery(query, Query.HQL).execute();
-      List<IEvent> eventList = convertToEventList(eventDocs);
-      if (eventList == null) {
-        LOGGER.error("prevent returning null in getEvents of CalendarEngineHQL for"
-            + " startDate [" + startDate + "], isArchive [" + isArchive + "], lang ["
-            + lang + "], allowedSpaces [" + allowedSpaces + "], eventDocs [" + eventDocs
-            + "], query [" + query + "].");
-        eventList = Collections.emptyList();
-      }
-      return eventList;
+      eventList = convertToEventList(eventDocs);
     } catch (QueryException queryException) {
       LOGGER.error("getEvents: " + queryException);
+      eventList = Collections.emptyList();
     }
-    return Collections.emptyList();
+    addToTotalTime(startTime, "getEvents");
+    return eventList;
   }
 
   public List<IEvent> getEvents(Date startDate, boolean isArchive, String lang,
       List<String> allowedSpaces, int offset, int limit) {
+    long startTime = System.currentTimeMillis();
+    List<IEvent> eventList;
     try {
       String query = getQuery(startDate, isArchive, lang,	allowedSpaces, false);
       List<String> eventDocs = queryManager.createQuery(query, Query.HQL).setOffset(offset
           ).setLimit(limit).execute();
-      List<IEvent> eventList = convertToEventList(eventDocs);
-      if (eventList == null) {
-        LOGGER.error("prevent returning null in getEvents of CalendarEngineHQL for"
-            + " startDate [" + startDate + "], isArchive [" + isArchive + "], lang ["
-            + lang + "], allowedSpaces [" + allowedSpaces + "], offset [" + offset
-            + "], limit [" + limit + "], eventDocs [" + eventDocs + "], query [" + query
-            + "].");
-        eventList = Collections.emptyList();
-      }
-      return eventList;
+      eventList = convertToEventList(eventDocs);
     } catch (QueryException queryException) {
       LOGGER.error("getEvents: " + queryException);
+      eventList = Collections.emptyList();
     }
-    return Collections.emptyList();
+    addToTotalTime(startTime, "getEvents");
+    return eventList;
   }
 
   private List<IEvent> convertToEventList(List<String> eventDocs) {
@@ -203,13 +203,20 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
     throw new UnsupportedOperationException("searchEvents not supported for " +
         "CalendarEngineHQL");
   }
+  
+  private void addToTotalTime(long startTime, String methodName) {
+    long time = System.currentTimeMillis() - startTime;
+    Long totalTime = 0L;
+    if (execution.getContext().getProperty(PROGON_ENGINE_HQL_TOTALTIME) != null) {
+      totalTime = (Long) execution.getContext().getProperty(PROGON_ENGINE_HQL_TOTALTIME);
+    }
+    totalTime += time;
+    execution.getContext().setProperty(PROGON_ENGINE_HQL_TOTALTIME, totalTime);
+    LOGGER.debug("{}: finished in {}ms, total time {}ms", methodName, time, totalTime);
+  }
 
   void injectQueryManager(QueryManager queryManagerMock) {
     this.queryManager = queryManagerMock;
-  }
-  
-  private XWikiContext getContext() {
-    return (XWikiContext)execution.getContext().getProperty("xwikicontext");
   }
 
 }

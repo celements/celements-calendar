@@ -3,8 +3,8 @@ package com.celements.calendar.engine;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
@@ -20,8 +20,10 @@ import com.xpn.xwiki.XWikiContext;
 @Component("lucene")
 public class CalendarEngineLucene implements ICalendarEngineRole {
 
-  private static final Log LOGGER = LogFactory.getFactory().getInstance(
-      CalendarEngineLucene.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CalendarEngineLucene.class);
+
+  private static final String PROGON_ENGINE_LUCENE_TOTALTIME = 
+      "progonEngineLuceneTotalTime";
 
   @Requirement
   private ILuceneSearchService searchService;
@@ -79,6 +81,7 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
 
   public EventSearchResult searchEvents(IEventSearchQuery query, Date startDate,
       boolean isArchive, String lang, List<String> allowedSpaces) {
+    long startTime = System.currentTimeMillis();
     CalendarEventSearchQuery calSearchQuery;
     if (query == null) {
       calSearchQuery = new CalendarEventSearchQuery(getContext().getDatabase(), 
@@ -88,8 +91,20 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
           allowedSpaces);
     }
     EventSearchResult searchResult = eventSearch.getSearchResult(calSearchQuery);
+    addToTotalTime(startTime, "searchEvents");
     LOGGER.debug("searchEvents: " + searchResult);
     return searchResult;
+  }
+  
+  private void addToTotalTime(long startTime, String methodName) {
+    long time = System.currentTimeMillis() - startTime;
+    Long totalTime = 0L;
+    if (execution.getContext().getProperty(PROGON_ENGINE_LUCENE_TOTALTIME) != null) {
+      totalTime = (Long) execution.getContext().getProperty(PROGON_ENGINE_LUCENE_TOTALTIME);
+    }
+    totalTime += time;
+    execution.getContext().setProperty(PROGON_ENGINE_LUCENE_TOTALTIME, totalTime);
+    LOGGER.debug("{}: finished in {}ms, total time {}ms", methodName, time, totalTime);
   }
 
   void injectEventSearch(IEventSearch eventSearch) {

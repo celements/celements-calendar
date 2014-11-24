@@ -30,14 +30,18 @@ import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.SpaceReference;
+import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.classes.CalendarClasses;
+import com.celements.calendar.engine.CalendarEngineHQL;
+import com.celements.calendar.engine.CalendarEngineLucene;
 import com.celements.calendar.engine.ICalendarEngineRole;
 import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.service.ICalendarService;
+import com.celements.search.lucene.ILuceneSearchService;
 import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -63,6 +67,7 @@ public class Calendar implements ICalendar {
   private IEventManager eventMgr;
   private ICalendarEngineRole engine;
   private ICalendarService calService;
+  private ILuceneSearchService searchService;
 
   private Date startDate = new Date();
 
@@ -107,6 +112,29 @@ public class Calendar implements ICalendar {
   public Calendar(DocumentReference calConfigDocRef, boolean isArchive) {
     this.isArchive = isArchive;
     this.calConfigDocRef = calConfigDocRef;
+  }
+
+  @Override
+  public DocumentReference getDocumentReference() {
+    return calConfigDocRef;
+  }
+
+  @Override
+  public WikiReference getWikiRef() {
+    return getWebUtilsService().getWikiRef((EntityReference) getDocumentReference());
+  }
+
+  @Override
+  public SpaceReference getEventSpaceRef() {
+    SpaceReference ret = null;
+    try {
+      ret = new SpaceReference(getCalService().getEventSpaceForCalendar(calConfigDocRef), 
+        getWebUtilsService().getWikiRef((EntityReference) calConfigDocRef));
+    } catch (XWikiException exc) {
+      LOGGER.error("getEventSpaceRef: failed to get event space for '" 
+          + this.calConfigDocRef + "'", exc);
+    }
+    return ret;
   }
 
   @Deprecated
@@ -291,24 +319,6 @@ public class Calendar implements ICalendar {
   }
 
   @Override
-  public DocumentReference getDocumentReference() {
-    return calConfigDocRef;
-  }
-
-  @Override
-  public SpaceReference getEventSpaceRef() {
-    SpaceReference ret = null;
-    try {
-      ret = new SpaceReference(getCalService().getEventSpaceForCalendar(calConfigDocRef), 
-        getWebUtilsService().getWikiRef((EntityReference) calConfigDocRef));
-    } catch (XWikiException exc) {
-      LOGGER.error("getEventSpaceRef: failed to get event space for '" 
-          + this.calConfigDocRef + "'", exc);
-    }
-    return ret;
-  }
-
-  @Override
   public String getLanguage() {
     if (this.language != null) {
       return this.language;
@@ -369,15 +379,15 @@ public class Calendar implements ICalendar {
     return (XWikiContext)execution.getContext().getProperty("xwikicontext");
   }
 
-  void inject_getEventCmd(IEventManager getEventCmdMock) {
-    eventMgr = getEventCmdMock;
-  }
-
   private IEventManager getEventMgr() {
     if (eventMgr == null) {
       eventMgr = Utils.getComponent(IEventManager.class, "default");
     }
     return eventMgr;
+  }
+
+  void injectEventManager(IEventManager eventMgr) {
+    this.eventMgr = eventMgr;
   }
 
   private ICalendarService getCalService() {
@@ -391,6 +401,17 @@ public class Calendar implements ICalendar {
     this.calService = calService;
   }
 
+  private ILuceneSearchService getSearchService() {
+    if (searchService == null) {
+      searchService = Utils.getComponent(ILuceneSearchService.class);
+    }
+    return searchService;
+  }
+
+  public void injectSearchService(ILuceneSearchService searchService) {
+    this.searchService = searchService;
+  }
+
   private IWebUtilsService getWebUtilsService() {
     return Utils.getComponent(IWebUtilsService.class);
   }
@@ -398,8 +419,8 @@ public class Calendar implements ICalendar {
   @Override
   public String toString() {
     return "Calendar [calConfigDocRef=" + calConfigDocRef + ", startDate=" + startDate
-        + ", isArchive=" + isArchive + ", engine=" + getEngine() + ", language="
-        + getLanguage() + ", defaultLang=" + getDefaultLang() + "]";
+        + ", isArchive=" + isArchive + ", language=" + getLanguage() + ", allowedSpaces=" 
+        + getAllowedSpaces() + ", engine=" + getEngine() + "]";
   }
 
 }

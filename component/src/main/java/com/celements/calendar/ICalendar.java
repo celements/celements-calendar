@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.SpaceReference;
+import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.engine.ICalendarEngineRole;
@@ -33,6 +34,12 @@ import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.doc.XWikiDocument;
 
 public interface ICalendar {
+
+  public DocumentReference getDocumentReference();
+  
+  public WikiReference getWikiRef();
+  
+  public SpaceReference getEventSpaceRef();
 
   /**
    * getAllEvents
@@ -114,10 +121,6 @@ public interface ICalendar {
   public void setStartDate(Date newStartDate);
 
   public Date getStartDate();
-
-  public DocumentReference getDocumentReference();
-  
-  public SpaceReference getEventSpaceRef();
 
   public String getLanguage();
 

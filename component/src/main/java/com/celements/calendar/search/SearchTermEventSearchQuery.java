@@ -16,8 +16,8 @@ public class SearchTermEventSearchQuery extends DateEventSearchQuery {
   private boolean fuzzy;
 
   public SearchTermEventSearchQuery(String database, Date fromDate, Date toDate, 
-      String searchTerm, boolean fuzzy, List<String> sortFields, boolean skipChecks) {
-    super(database, fromDate, toDate, sortFields, skipChecks);
+      String searchTerm, boolean fuzzy, List<String> sortFields) {
+    super(database, fromDate, toDate, sortFields);
     this.searchTerm = searchTerm;
     this.fuzzy = fuzzy;
   }

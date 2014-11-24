@@ -22,12 +22,10 @@ public class DateEventSearchQueryTest extends AbstractBridgedComponentTestCase {
     String db = "myDB";
     Date fromDate = SDF.parse("200001010000");
     Date toDate = SDF.parse("201405090125");
-    DateEventSearchQuery query = new DateEventSearchQuery(db, fromDate, toDate, null, 
-        false);
+    DateEventSearchQuery query = new DateEventSearchQuery(db, fromDate, toDate, null);
 
     assertEquals(db, query.getDatabase());
     assertEquals(0, query.getSortFields().size());
-    assertFalse(query.skipChecks());
     assertEquals(fromDate, query.getFromDate());
     assertEquals(toDate, query.getToDate());
     String compareQueryString = 
@@ -42,13 +40,11 @@ public class DateEventSearchQueryTest extends AbstractBridgedComponentTestCase {
     Date fromDate = SDF.parse("200001010000");
     Date toDate = SDF.parse("201405090125");
     List<String> sortFields = Arrays.asList("field1", "field2");
-    boolean skipChecks = true;
     DateEventSearchQuery query = new DateEventSearchQuery(db, fromDate, toDate, 
-        sortFields, skipChecks);
+        sortFields);
 
     assertEquals(db, query.getDatabase());
     assertEquals(sortFields, query.getSortFields());
-    assertEquals(skipChecks, query.skipChecks());
     assertEquals(fromDate, query.getFromDate());
     assertEquals(toDate, query.getToDate());
     String compareQueryString = 

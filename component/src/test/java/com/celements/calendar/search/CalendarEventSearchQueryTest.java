@@ -1,5 +1,6 @@
 package com.celements.calendar.search;
 
+import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
 import java.text.DateFormat;
@@ -9,90 +10,111 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.xwiki.model.reference.DocumentReference;
 
+import com.celements.calendar.ICalendar;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 
 public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCase {
   
   private static final DateFormat SDF = new SimpleDateFormat("yyyyMMddHHmm");
   
+  private ICalendar calMock;
+  private String database;
+  
+  @Before
+  public void setUp_CalendarEventSearchQueryTest() {
+    calMock = createMockAndAddToDefault(ICalendar.class);
+    database = "theDB";
+    DocumentReference docRef = new DocumentReference(database, "someSpace", "someCal");
+    expect(calMock.getDocumentReference()).andReturn(docRef).anyTimes();
+  }
+  
   @Test
   public void testNewCalendarEventSearchQuery() throws Exception {
-    String database = "theDB";
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     String lang = "de";
     List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
+    expectForCalMock(startDate, isArchive, lang, spaces);
     List<String> sortFields = Arrays.asList("field1", "field2");
-    boolean skipChecks = true;
-    IEventSearchQuery query = new CalendarEventSearchQuery(database, startDate, isArchive, 
-        lang, spaces, sortFields, skipChecks);
+    
+    replayDefault();
+    IEventSearchQuery query = new CalendarEventSearchQuery(calMock, sortFields);
+    verifyDefault();
+    
     assertEquals(database, query.getDatabase());
     assertEquals(sortFields, query.getSortFields());
-    assertEquals(skipChecks, query.skipChecks());
   }
   
   @Test
   public void testNewCalendarEventSearchQuery_defaultSortFields() throws Exception {
-    String database = "theDB";
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     String lang = "de";
     List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
-    boolean skipChecks = false;
-    IEventSearchQuery query = new CalendarEventSearchQuery(database, startDate, isArchive, 
-        lang, spaces, null, skipChecks);
+    expectForCalMock(startDate, isArchive, lang, spaces);
+    List<String> sortFields = Collections.emptyList();
+    
+    replayDefault();
+    IEventSearchQuery query = new CalendarEventSearchQuery(calMock, sortFields);
+    verifyDefault();
+    
     assertEquals(database, query.getDatabase());
     assertDefaultSortFields(query.getSortFields(), isArchive);
-    assertEquals(skipChecks, query.skipChecks());
   }
   
   @Test
   public void testNewCalendarEventSearchQuery_fromQuery() throws Exception {
-    String database = "theDB";
-    List<String> sortFields = Arrays.asList("field1", "field2");
-    boolean skipChecks = true;
-    IEventSearchQuery fromQuery = new DefaultEventSearchQuery(database, null, sortFields, 
-        skipChecks);
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     String lang = "de";
     List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
-    CalendarEventSearchQuery query = new CalendarEventSearchQuery(fromQuery, startDate, 
-        isArchive, lang, spaces);
+    expectForCalMock(startDate, isArchive, lang, spaces);
+    List<String> sortFields = Arrays.asList("field1", "field2");
+    
+    replayDefault();
+    IEventSearchQuery fromQuery = new DefaultEventSearchQuery(database, null, sortFields);
+    CalendarEventSearchQuery query = new CalendarEventSearchQuery(calMock, fromQuery);
+    verifyDefault();
+
     assertEquals(database, query.getDatabase());
     assertEquals(sortFields, query.getSortFields());
-    assertEquals(skipChecks, query.skipChecks());
   }
   
   @Test
   public void testNewCalendarEventSearchQuery_fromQuery_defaultSortFields(
       ) throws Exception {
-    String database = "theDB";
-    boolean skipChecks = false;
-    IEventSearchQuery fromQuery = new DefaultEventSearchQuery(database, null, null, 
-        skipChecks);
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     String lang = "de";
     List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
-    CalendarEventSearchQuery query = new CalendarEventSearchQuery(fromQuery, startDate, 
-        isArchive, lang, spaces);
+    expectForCalMock(startDate, isArchive, lang, spaces);
+    List<String> sortFields = Collections.emptyList();
+    
+    replayDefault();
+    IEventSearchQuery fromQuery = new DefaultEventSearchQuery(database, null, sortFields);
+    CalendarEventSearchQuery query = new CalendarEventSearchQuery(calMock, fromQuery);
+    verifyDefault();
+    
     assertEquals(database, query.getDatabase());
     assertDefaultSortFields(query.getSortFields(), isArchive);
-    assertEquals(skipChecks, query.skipChecks());
   }
   
   @Test
   public void testGetAsLuceneQuery() throws Exception {
-    String database = "theDB";
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     String lang = "de";
     List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
-    IEventSearchQuery query = new CalendarEventSearchQuery(database, startDate, isArchive, 
-        lang, spaces, null, false);
+    expectForCalMock(startDate, isArchive, lang, spaces);
+    List<String> sortFields = Collections.emptyList();
+    
+    replayDefault();
+    CalendarEventSearchQuery query = new CalendarEventSearchQuery(calMock, sortFields);
+    verifyDefault();
 
     assertEquals(database, query.getDatabase());
     String expQueryString = "(wiki:(+\"theDB\") "
@@ -102,18 +124,20 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
         + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     assertDefaultSortFields(query.getSortFields(), isArchive);
-    assertFalse(query.skipChecks());
   }
   
   @Test
   public void testGetAsLuceneQuery_isArchive() throws Exception {
-    String database = "theDB";
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = true;
     String lang = "de";
     List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
-    IEventSearchQuery query = new CalendarEventSearchQuery(database, startDate, isArchive, 
-        lang, spaces, null, false);
+    expectForCalMock(startDate, isArchive, lang, spaces);
+    List<String> sortFields = Collections.emptyList();
+    
+    replayDefault();
+    CalendarEventSearchQuery query = new CalendarEventSearchQuery(calMock, sortFields);
+    verifyDefault();
 
     assertEquals(database, query.getDatabase());
     String expQueryString = "(wiki:(+\"theDB\") "
@@ -123,20 +147,20 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
         + "AND Classes.CalendarEventClass.eventDate:({000101010000 TO 201405090125}))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     assertDefaultSortFields(query.getSortFields(), isArchive);
-    assertFalse(query.skipChecks());
   }
   
   @Test
   public void testGetAsLuceneQuery_sortFields() throws Exception {
-    String database = "theDB";
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     String lang = "de";
     List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
+    expectForCalMock(startDate, isArchive, lang, spaces);
     List<String> sortFields = Arrays.asList("field1", "field2");
-    boolean skipChecks = true;
-    IEventSearchQuery query = new CalendarEventSearchQuery(database, startDate, isArchive, 
-        lang, spaces, sortFields, skipChecks);
+    
+    replayDefault();
+    CalendarEventSearchQuery query = new CalendarEventSearchQuery(calMock, sortFields);
+    verifyDefault();
 
     assertEquals(database, query.getDatabase());
     String expQueryString = "(wiki:(+\"theDB\") "
@@ -146,7 +170,6 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
         + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     assertEquals(sortFields, query.getSortFields());
-    assertTrue(query.skipChecks());
   }
   
   @Test
@@ -156,18 +179,21 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     boolean isArchive = false;
     String lang = "de";
     List<String> spaces = Collections.emptyList();
-    IEventSearchQuery query = new CalendarEventSearchQuery(database, startDate, isArchive, 
-        lang, spaces, null, false);
+    expectForCalMock(startDate, isArchive, lang, spaces);
+    List<String> sortFields = Collections.emptyList();
+    
+    replayDefault();
+    CalendarEventSearchQuery query = new CalendarEventSearchQuery(calMock, sortFields);
+    verifyDefault();
 
     assertEquals(database, query.getDatabase());
     String expQueryString = "(wiki:(+\"theDB\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
-        + "AND space:(+\"NullSpace\") "
+        + "AND space:(+\".\") "
         + "AND Classes.CalendarEventClass.lang:(+\"de\") "
         + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     assertDefaultSortFields(query.getSortFields(), isArchive);
-    assertFalse(query.skipChecks());
   }
   
   @Test
@@ -192,6 +218,14 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     List<String> sortFields = CalendarEventSearchQuery.getDefaultSortFields(inSortFields, 
         inverted);
     assertDefaultSortFields(sortFields, inverted);
+  }
+  
+  private void expectForCalMock(Date startDate, boolean isArchive, String lang, 
+      List<String> spaces) {
+    expect(calMock.getStartDate()).andReturn(startDate).once();
+    expect(calMock.isArchive()).andReturn(isArchive).times(2);
+    expect(calMock.getLanguage()).andReturn(lang).once();
+    expect(calMock.getAllowedSpaces()).andReturn(spaces).once();
   }
   
   private void assertDefaultSortFields(List<String> sortFields, boolean inverted) {

@@ -25,11 +25,10 @@ public class SearchTermEventSearchQueryTest extends AbstractBridgedComponentTest
     Date toDate = SDF.parse("201405090125");
     boolean fuzzy = false;
     SearchTermEventSearchQuery query = new SearchTermEventSearchQuery(db, fromDate, 
-        toDate, searchTerm, fuzzy, null, false);
+        toDate, searchTerm, fuzzy, null);
 
     assertEquals(db, query.getDatabase());
     assertEquals(0, query.getSortFields().size());
-    assertFalse(query.skipChecks());
     assertEquals(fromDate, query.getFromDate());
     assertEquals(toDate, query.getToDate());
     assertEquals(searchTerm, query.getSearchTerm());
@@ -50,11 +49,10 @@ public class SearchTermEventSearchQueryTest extends AbstractBridgedComponentTest
     Date toDate = SDF.parse("201405090125");
     boolean fuzzy = true;
     SearchTermEventSearchQuery query = new SearchTermEventSearchQuery(db, fromDate, 
-        toDate, searchTerm, fuzzy, null, false);
+        toDate, searchTerm, fuzzy, null);
 
     assertEquals(db, query.getDatabase());
     assertEquals(0, query.getSortFields().size());
-    assertFalse(query.skipChecks());
     assertEquals(fromDate, query.getFromDate());
     assertEquals(toDate, query.getToDate());
     assertEquals(searchTerm, query.getSearchTerm());
@@ -77,13 +75,11 @@ public class SearchTermEventSearchQueryTest extends AbstractBridgedComponentTest
     Date toDate = SDF.parse("201405090125");
     boolean fuzzy = false;
     List<String> sortFields = Arrays.asList("field1", "field2");
-    boolean skipChecks = true;
     SearchTermEventSearchQuery query = new SearchTermEventSearchQuery(db, fromDate, 
-        toDate, searchTerm, fuzzy, sortFields, skipChecks);
+        toDate, searchTerm, fuzzy, sortFields);
 
     assertEquals(db, query.getDatabase());
     assertEquals(sortFields, query.getSortFields());
-    assertEquals(skipChecks, query.skipChecks());
     assertEquals(fromDate, query.getFromDate());
     assertEquals(toDate, query.getToDate());
     assertEquals(searchTerm, query.getSearchTerm());

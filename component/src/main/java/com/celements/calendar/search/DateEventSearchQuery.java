@@ -12,13 +12,13 @@ public class DateEventSearchQuery extends DefaultEventSearchQuery {
   private final Date toDate;
 
   public DateEventSearchQuery(String database, Date fromDate, Date toDate, 
-      List<String> sortFields, boolean skipChecks) {
-    this(database, null, fromDate, toDate, sortFields, skipChecks);
+      List<String> sortFields) {
+    this(database, null, fromDate, toDate, sortFields);
   }
 
   public DateEventSearchQuery(String database, LuceneQuery luceneQuery, Date fromDate, 
-      Date toDate, List<String> sortFields, boolean skipChecks) {
-    super(database, luceneQuery, sortFields, skipChecks);
+      Date toDate, List<String> sortFields) {
+    super(database, luceneQuery, sortFields);
     this.fromDate = fromDate;
     this.toDate = toDate;
   }

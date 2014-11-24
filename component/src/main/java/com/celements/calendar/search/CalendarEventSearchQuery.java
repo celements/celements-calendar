@@ -7,14 +7,11 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xwiki.model.reference.EntityReference;
 
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.classes.CalendarClasses;
 import com.celements.search.lucene.query.LuceneQuery;
 import com.celements.search.lucene.query.QueryRestrictionGroup.Type;
-import com.celements.web.service.IWebUtilsService;
-import com.xpn.xwiki.web.Utils;
 
 public class CalendarEventSearchQuery extends DefaultEventSearchQuery {
 
@@ -27,7 +24,7 @@ public class CalendarEventSearchQuery extends DefaultEventSearchQuery {
   private final List<String> allowedSpaces;
   
   public CalendarEventSearchQuery(ICalendar cal, List<String> sortFields) {
-    super(extractDatabase(cal), getDefaultSortFields(sortFields, cal.isArchive()));
+    super(cal.getWikiRef().getName(), getDefaultSortFields(sortFields, cal.isArchive()));
     this.startDate = cal.getStartDate();
     this.isArchive = cal.isArchive();
     this.lang = cal.getLanguage();
@@ -40,11 +37,6 @@ public class CalendarEventSearchQuery extends DefaultEventSearchQuery {
     this.isArchive = cal.isArchive();
     this.lang = cal.getLanguage();
     this.allowedSpaces = cal.getAllowedSpaces();
-  }
-  
-  private static String extractDatabase(ICalendar cal) {
-    return Utils.getComponent(IWebUtilsService.class).getWikiRef(
-        (EntityReference) cal.getDocumentReference()).getName();
   }
 
   @Override

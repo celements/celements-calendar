@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.Event;
@@ -17,8 +15,6 @@ import com.celements.search.lucene.query.LuceneQuery;
 import com.xpn.xwiki.web.Utils;
 
 public class EventSearchResult {
-  
-  private static Log LOGGER = LogFactory.getFactory().getInstance(EventSearchResult.class);
   
   private ILuceneSearchService searchService;
   
@@ -48,7 +44,7 @@ public class EventSearchResult {
    * @return all events
    * @throws LuceneSearchException 
    */
-  public List<IEvent> getEventList() {
+  public List<IEvent> getEventList() throws LuceneSearchException {
     return getEventList(0, 0);
   }
 
@@ -59,28 +55,16 @@ public class EventSearchResult {
    * @return selected events
    * @throws LuceneSearchException 
    */
-  public List<IEvent> getEventList(int offset, int limit) {
+  public List<IEvent> getEventList(int offset, int limit) throws LuceneSearchException {
     List<IEvent> eventList = new ArrayList<IEvent>();
-    try {
-      for (DocumentReference docRef : getSearchResult().getResults(offset, limit)) {
-        eventList.add(new Event(docRef));
-      }
-    } catch (LuceneSearchException lse) {
-      // XXX do not catch here
-      LOGGER.error("Error while executing lucene query", lse);
+    for (DocumentReference docRef : getSearchResult().getResults(offset, limit)) {
+      eventList.add(new Event(docRef));
     }
     return Collections.unmodifiableList(eventList);
   }
 
-  public int getSize() {
-    int ret = 0;
-    try {
-      ret = getSearchResult().getSize();
-    } catch (LuceneSearchException lse) {
-      // XXX do not catch here
-      LOGGER.error("Error while executing lucene query", lse);
-    }
-    return ret;
+  public int getSize() throws LuceneSearchException {
+    return getSearchResult().getSize();
   }
 
   @Override

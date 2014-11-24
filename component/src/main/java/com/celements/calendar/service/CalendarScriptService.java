@@ -129,13 +129,13 @@ public class CalendarScriptService implements ScriptService {
   public IEventSearchQuery getEventSearchQuery(LuceneQuery luceneQuery, 
       List<String> sortFields) {
     return new DefaultEventSearchQuery(getContext().getDatabase(), luceneQuery.copy(), 
-        sortFields, false);
+        sortFields);
   }
 
   public SearchTermEventSearchQuery getSearchTermEventSearchQuery(Date fromDate, 
       Date toDate, String searchTerm, List<String> sortFields) {
     return new SearchTermEventSearchQuery(getContext().getDatabase(), fromDate, toDate, 
-        searchTerm, false, sortFields, false);
+        searchTerm, false, sortFields);
   }
   
   private boolean hasViewRights(DocumentReference docRef) {

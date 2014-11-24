@@ -73,9 +73,8 @@ public class CalendarEventSearchQuery extends DefaultEventSearchQuery {
         ret.add("\"" + space + "\"");
       }
     } else {
-      // is there a nicer way to avoid returning events if there are no allowed spaces?
-      // if an empty list is returned here instead, then all events will be listed!
-      ret.add("\"NullSpace\"");
+      // inexistent space
+      ret.add("\".\"");
     }
     return ret;
   }

@@ -18,10 +18,13 @@ import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.classes.CalendarClasses;
+import com.celements.calendar.engine.CalendarEngineLucene;
+import com.celements.calendar.engine.ICalendarEngineRole;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.service.ICalendarService;
 import com.celements.common.classes.IClassCollectionRole;
+import com.celements.search.lucene.LuceneSearchException;
 import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -68,16 +71,7 @@ public class EventsManager implements IEventManager {
     List<IEvent> eventList = Collections.emptyList();
     DocumentReference calDocRef = cal.getDocumentReference();
     try {
-      String lang = webUtilsService.getDefaultLanguage();
-      List<String> allowedSpaces = calService.getAllowedSpaces(calDocRef);
-      if (nb == 0) {
-        //FIXME eventList==null causes NPE in filterEventListForSubscription
-        eventList = cal.getEngine().getEvents(cal.getStartDate(), cal.isArchive(), lang,
-            allowedSpaces);
-      } else {
-        eventList = cal.getEngine().getEvents(cal.getStartDate(), cal.isArchive(), lang,
-            allowedSpaces, start, nb);
-      }
+      eventList = cal.getEngine().getEvents(cal, start, nb);
       filterEventListForSubscription(cal.getDocumentReference(), eventList);
     } catch (XWikiException exc) {
       LOGGER.error("Error while getting events from calendar '" + calDocRef + "'", exc);
@@ -88,6 +82,7 @@ public class EventsManager implements IEventManager {
     return eventList;
   }
 
+  // TODO it should be possible to include this in lucene query
   private List<IEvent> filterEventListForSubscription(DocumentReference calDocRef,
       List<IEvent> eventList) throws XWikiException {
     Iterator<IEvent> iter = eventList.iterator();
@@ -150,27 +145,28 @@ public class EventsManager implements IEventManager {
   }
 
   public EventSearchResult searchEvents(ICalendar cal, IEventSearchQuery query) {
-    long time = System.currentTimeMillis();
-    EventSearchResult eventsResult = null;
-    int size = 0;
-    DocumentReference calDocRef = cal.getDocumentReference();
+    EventSearchResult eventsResult = getLuceneEngine(cal).searchEvents(cal, query);
     try {
-      eventsResult = cal.getEngine().searchEvents(query, cal.getStartDate(), 
-          cal.isArchive(), webUtilsService.getDefaultLanguage(), 
-          calService.getAllowedSpaces(calDocRef));
-      LOGGER.debug("EventsManager searchEvents: isArchive [" + cal.isArchive()
-          + "], startDate [" + cal.getStartDate() + "] query [" + query + "].");
       //XXX calling getSize() imediatelly is a dirty Workaround!!!
       //XXX accessing results directly prevents lucene inconsistancies
       //XXX if multiple results are created (e.g. in Navigation).
-      size = eventsResult.getSize();
-    } catch (XWikiException exc) {
-      LOGGER.error("Error while searching events in calendar '" + calDocRef + "'", exc);
+      int size = eventsResult.getSize();
+      LOGGER.debug("searchEvents: " + size + " events found for cal '" + cal 
+          + "'and  query '" + query + "'");
+    } catch (LuceneSearchException lse) {
+      LOGGER.error("Unable to search for cal '" + cal + "'", lse);
     }
-    time = System.currentTimeMillis() - time;
-    LOGGER.debug("searchEvents: " + size + " events found for cal '" + calDocRef 
-        + "', query '" + query + "' and took " + time + "ms");
     return eventsResult;
+  }
+
+  private CalendarEngineLucene getLuceneEngine(ICalendar cal) {
+    ICalendarEngineRole engine = cal.getEngine();
+    if (engine instanceof CalendarEngineLucene) {
+      return (CalendarEngineLucene) engine;
+    } else {
+      throw new IllegalStateException("searching events only possible if lucene engine "
+          + "is activated");
+    }
   }
 
   /**
@@ -216,23 +212,18 @@ public class EventsManager implements IEventManager {
     long time = System.currentTimeMillis();
     long count = 0;
     DocumentReference calDocRef = cal.getDocumentReference();
-    try {
-      String cacheKey = "EventsManager.countEvents|" 
-          + webUtilsService.getRefDefaultSerializer().serialize(calDocRef) + "|"
-          + cal.isArchive() + "|" + cal.getStartDate().getTime();
-      Object cachedCount = execution.getContext().getProperty(cacheKey);
-      if (cachedCount != null) {
-        LOGGER.debug("Cached event count: " + cachedCount);
-        count = (Long) cachedCount;
-      } else {
-        count = countEvents_internal(cal);
-        if (count > 0) {
-          execution.getContext().setProperty(cacheKey, count);
-        }
+    String cacheKey = "EventsManager.countEvents|" 
+        + webUtilsService.getRefDefaultSerializer().serialize(calDocRef) + "|"
+        + cal.isArchive() + "|" + cal.getStartDate().getTime();
+    Object cachedCount = execution.getContext().getProperty(cacheKey);
+    if (cachedCount != null) {
+      LOGGER.debug("Cached event count: " + cachedCount);
+      count = (Long) cachedCount;
+    } else {
+      count = countEvents_internal(cal);
+      if (count > 0) {
+        execution.getContext().setProperty(cacheKey, count);
       }
-    } catch (XWikiException exc) {
-      LOGGER.error("Exception while counting events for calendar '" + calDocRef + "'",
-          exc);
     }
     time = System.currentTimeMillis() - time;
     LOGGER.debug("countEvents: got " + count + " for cal '" + calDocRef + "' and took " 
@@ -240,14 +231,13 @@ public class EventsManager implements IEventManager {
     return count;
   }
 
-  private long countEvents_internal(ICalendar cal) throws XWikiException {
+  private long countEvents_internal(ICalendar cal) {
     DocumentReference calDocRef = cal.getDocumentReference();
     boolean isArchive = cal.isArchive();
     Date startDate = cal.getStartDate();
     long count = 0;
     if ((calDocRef != null) && getContext().getWiki().exists(calDocRef, getContext())) {
-      count = cal.getEngine().countEvents(startDate, isArchive,
-          webUtilsService.getDefaultLanguage(), calService.getAllowedSpaces(calDocRef));
+      count = cal.getEngine().countEvents(cal);
       LOGGER.debug("Event count for calendar '" + calDocRef + "' with startDate + '"
           + startDate + "' and isArchive '" + isArchive + "': " + count);
     }
@@ -259,37 +249,11 @@ public class EventsManager implements IEventManager {
   }
 
   public IEvent getFirstEvent(ICalendar cal) {
-    long time = System.currentTimeMillis();
-    IEvent event = null;
-    DocumentReference calDocRef = cal.getDocumentReference();
-    try {
-      event = cal.getEngine().getFirstEvent(cal.getStartDate(), cal.isArchive(),
-          webUtilsService.getDefaultLanguage(), calService.getAllowedSpaces(calDocRef));
-    } catch (XWikiException exc) {
-      LOGGER.error("Exception while getting first event date for calendar '" + calDocRef
-          + "'", exc);
-    }
-    time = System.currentTimeMillis() - time;
-    LOGGER.debug("getFirstEvent: got " + event + " for cal '" + calDocRef + "' and took " 
-        + time + "ms");
-    return event;
+    return cal.getEngine().getFirstEvent(cal);
   }
 
   public IEvent getLastEvent(ICalendar cal) {
-    long time = System.currentTimeMillis();
-    IEvent event = null;
-    DocumentReference calDocRef = cal.getDocumentReference();
-    try {
-      event = cal.getEngine().getLastEvent(cal.getStartDate(), cal.isArchive(),
-          webUtilsService.getDefaultLanguage(), calService.getAllowedSpaces(calDocRef));
-    } catch (XWikiException exc) {
-      LOGGER.error("Exception while getting last event date for calendar '" + calDocRef
-          + "'", exc);
-    }
-    time = System.currentTimeMillis() - time;
-    LOGGER.debug("getLastEvent: got " + event + " for cal '" + calDocRef + "' and took " 
-        + time + "ms");
-    return event;
+    return cal.getEngine().getLastEvent(cal);
   }
 
   private CalendarClasses getCalClasses() {

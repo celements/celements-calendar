@@ -356,10 +356,16 @@ public class Calendar implements ICalendar {
   public ICalendarEngineRole getEngine() {
     if (engine == null) {
       String engineHint = getContext().getWiki().getXWikiPreference("calendar_engine",
-          "calendar.engine", "hql", getContext());
-      LOGGER.debug("Using engine '" + engineHint + "' for  calendar '"
-          + getDocumentReference() + "'");
+          "calendar.engine", CalendarEngineHQL.NAME, getContext());
       engine = Utils.getComponent(ICalendarEngineRole.class, engineHint);
+      if (engineHint.equals(CalendarEngineLucene.NAME)) {
+        int limit = getSearchService().getResultLimit();
+        if (engine.countEvents(this) >= limit) {
+          engine = Utils.getComponent(ICalendarEngineRole.class, CalendarEngineHQL.NAME);
+        }
+      }
+      LOGGER.debug("Using engine '" + engine.getName() + "' for  calendar '" 
+          + getDocumentReference() + "'");
     }
     return engine;
   }

@@ -7,10 +7,14 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.xwiki.model.reference.EntityReference;
 
+import com.celements.calendar.ICalendar;
 import com.celements.calendar.classes.CalendarClasses;
 import com.celements.search.lucene.query.LuceneQuery;
 import com.celements.search.lucene.query.QueryRestrictionGroup.Type;
+import com.celements.web.service.IWebUtilsService;
+import com.xpn.xwiki.web.Utils;
 
 public class CalendarEventSearchQuery extends DefaultEventSearchQuery {
 
@@ -22,23 +26,25 @@ public class CalendarEventSearchQuery extends DefaultEventSearchQuery {
   private final String lang;
   private final List<String> allowedSpaces;
   
-  public CalendarEventSearchQuery(String database, Date startDate, boolean isArchive, 
-      String lang, List<String> allowedSpaces, List<String> sortFields, 
-      boolean skipChecks) {
-    super(database, getDefaultSortFields(sortFields, isArchive), skipChecks);
-    this.startDate = startDate;
-    this.isArchive = isArchive;
-    this.lang = lang;
-    this.allowedSpaces = allowedSpaces;
+  public CalendarEventSearchQuery(ICalendar cal, List<String> sortFields) {
+    super(extractDatabase(cal), getDefaultSortFields(sortFields, cal.isArchive()));
+    this.startDate = cal.getStartDate();
+    this.isArchive = cal.isArchive();
+    this.lang = cal.getLanguage();
+    this.allowedSpaces = cal.getAllowedSpaces();
+  }
+
+  public CalendarEventSearchQuery(ICalendar cal, IEventSearchQuery query) {
+    super(query, getDefaultSortFields(null, cal.isArchive()));
+    this.startDate = cal.getStartDate();
+    this.isArchive = cal.isArchive();
+    this.lang = cal.getLanguage();
+    this.allowedSpaces = cal.getAllowedSpaces();
   }
   
-  public CalendarEventSearchQuery(IEventSearchQuery query, Date startDate,
-      boolean isArchive, String lang, List<String> allowedSpaces) {
-    super(query, getDefaultSortFields(null, isArchive));
-    this.startDate = startDate;
-    this.isArchive = isArchive;
-    this.lang = lang;
-    this.allowedSpaces = allowedSpaces;
+  private static String extractDatabase(ICalendar cal) {
+    return Utils.getComponent(IWebUtilsService.class).getWikiRef(
+        (EntityReference) cal.getDocumentReference()).getName();
   }
 
   @Override

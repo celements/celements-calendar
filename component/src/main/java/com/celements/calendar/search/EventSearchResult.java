@@ -24,19 +24,17 @@ public class EventSearchResult {
   
   private final LuceneQuery query;
   private final List<String> sortFields;
-  private final boolean skipChecks;
   
   private LuceneSearchResult searchResult;
 
-  EventSearchResult(LuceneQuery query, List<String> sortFields, boolean skipChecks) {
+  EventSearchResult(LuceneQuery query, List<String> sortFields) {
     this.query = query;
     this.sortFields = sortFields;
-    this.skipChecks = skipChecks;
   }
 
   public LuceneSearchResult getSearchResult() {
     if (searchResult == null) {
-      if (skipChecks) {
+      if (getSearchService().skipChecks()) {
         searchResult = getSearchService().searchWithoutChecks(query, sortFields, null);
       } else {
         searchResult = getSearchService().search(query, sortFields, null);

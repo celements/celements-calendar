@@ -13,6 +13,7 @@ import org.xwiki.model.reference.DocumentReference;
 import com.celements.calendar.IEvent;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 import com.celements.search.lucene.ILuceneSearchService;
+import com.celements.search.lucene.LuceneSearchException;
 import com.celements.search.lucene.LuceneSearchResult;
 import com.celements.search.lucene.query.LuceneQuery;
 
@@ -84,6 +85,30 @@ public class EventSearchResultTest extends AbstractBridgedComponentTestCase {
   }
   
   @Test
+  public void testGetEventList_LSE() throws Exception {
+    LuceneQuery query = new LuceneQuery("db");
+    List<String> sortFields = Arrays.asList("field1", "field2");
+    List<String> languages = null;
+    int offset = 5;
+    int limit = 10;
+    Throwable cause = new LuceneSearchException();
+    LuceneSearchResult resultMock = createMockAndAddToDefault(LuceneSearchResult.class);
+    EventSearchResult result = getEventSearchResult(query, sortFields, false);
+    expect(searchServiceMock.search(same(query), eq(sortFields), eq(languages))
+        ).andReturn(resultMock).once();
+    expect(resultMock.getResults(eq(offset), eq(limit))).andThrow(cause).once();
+    
+    replayDefault();
+    try {
+      result.getEventList(offset, limit);
+      fail("should throw LuceneSearchException");
+    } catch (LuceneSearchException lse) {
+      assertSame(cause, lse);
+    }
+    verifyDefault();
+  }
+  
+  @Test
   public void testGetSize() throws Exception {
     LuceneQuery query = new LuceneQuery("db");
     List<String> sortFields = Arrays.asList("field1", "field2");
@@ -100,6 +125,29 @@ public class EventSearchResultTest extends AbstractBridgedComponentTestCase {
     verifyDefault();
     
     assertEquals(2, ret);
+  }
+  
+  @Test
+  public void testGetSize_LSE() throws Exception {
+    LuceneQuery query = new LuceneQuery("db");
+    List<String> sortFields = Arrays.asList("field1", "field2");
+    List<String> languages = null;
+    LuceneSearchResult resultMock = createMockAndAddToDefault(LuceneSearchResult.class);
+    Throwable cause = new LuceneSearchException();
+ 
+    EventSearchResult result = getEventSearchResult(query, sortFields, false);
+    expect(searchServiceMock.search(same(query), eq(sortFields), eq(languages))
+        ).andReturn(resultMock).once();
+    expect(resultMock.getSize()).andThrow(cause).once();
+
+    replayDefault();
+    try {
+      result.getSize();
+      fail("should throw LuceneSearchException");
+    } catch (LuceneSearchException lse) {
+      assertSame(cause, lse);
+    }
+    verifyDefault();
   }
 
   private EventSearchResult getEventSearchResult(LuceneQuery query, 

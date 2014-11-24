@@ -1,6 +1,6 @@
 package com.celements.calendar.engine;
 
-import java.util.Date;
+import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -9,15 +9,15 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
 
+import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.search.CalendarEventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearch;
 import com.celements.calendar.search.IEventSearchQuery;
-import com.celements.search.lucene.ILuceneSearchService;
-import com.xpn.xwiki.XWikiContext;
+import com.celements.search.lucene.LuceneSearchException;
 
-@Component("lucene")
+@Component(CalendarEngineLucene.NAME)
 public class CalendarEngineLucene implements ICalendarEngineRole {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CalendarEngineLucene.class);
@@ -25,73 +25,94 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
   private static final String PROGON_ENGINE_LUCENE_TOTALTIME = 
       "progonEngineLuceneTotalTime";
 
-  @Requirement
-  private ILuceneSearchService searchService;
+  public static final String NAME = "lucene";
 
   @Requirement
   private IEventSearch eventSearch;
 
-  @Requirement("hql")
-  private ICalendarEngineRole hqlEngine;
-
   @Requirement
   private Execution execution;
 
-  private XWikiContext getContext() {
-    return (XWikiContext) execution.getContext().getProperty(
-        XWikiContext.EXECUTIONCONTEXT_KEY);
+  @Override
+  public String getName() {
+    return NAME;
   }
 
-  public List<IEvent> getEvents(Date startDate, boolean isArchive, String lang,
-      List<String> allowedSpaces) {
-    LOGGER.debug("getEvents: Delegating to CalendarEngineHQL");
-    return hqlEngine.getEvents(startDate, isArchive, lang, allowedSpaces);
-  }
-
-  public List<IEvent> getEvents(Date startDate, boolean isArchive, String lang,
-      List<String> allowedSpaces, int offset, int limit) {
-    int resultLimit = searchService.getResultLimit(false);
-    if ((offset + limit) <= resultLimit) {
-      return searchEvents(null, startDate, isArchive, lang, allowedSpaces).getEventList(
-          offset, limit);
-    } else {
-      LOGGER.debug("getEvents: Delegating to CalendarEngineHQL for offset '" + offset
-          + "' and limit '" + limit + "'");
-      return hqlEngine.getEvents(startDate, isArchive, lang, allowedSpaces, offset, limit);
-    }
-  }
-
-  public long countEvents(Date startDate, boolean isArchive, String lang,
-      List<String> allowedSpaces) {
-    LOGGER.debug("countEvents: Delegating to CalendarEngineHQL");
-    return hqlEngine.countEvents(startDate, isArchive, lang, allowedSpaces);
-  }
-
-  public IEvent getFirstEvent(Date startDate, boolean isArchive, String lang,
-      List<String> allowedSpaces) {
-    LOGGER.debug("getFirstEvent: Delegating to CalendarEngineHQL");
-    return hqlEngine.getFirstEvent(startDate, isArchive, lang, allowedSpaces);
-  }
-
-  public IEvent getLastEvent(Date startDate, boolean isArchive, String lang,
-      List<String> allowedSpaces) {
-    LOGGER.debug("getLastEvent: Delegating to CalendarEngineHQL");
-    return hqlEngine.getLastEvent(startDate, isArchive, lang, allowedSpaces);
-  }
-
-  public EventSearchResult searchEvents(IEventSearchQuery query, Date startDate,
-      boolean isArchive, String lang, List<String> allowedSpaces) {
+  @Override
+  public List<IEvent> getEvents(ICalendar cal, int offset, int limit) {
     long startTime = System.currentTimeMillis();
+    List<IEvent> eventList = Collections.emptyList();
+    try {
+      eventList = searchEvents(cal, null).getEventList(offset, limit);
+    } catch (LuceneSearchException lse) {
+      LOGGER.error("Unable to search for cal '" + cal + "'", lse);
+    }
+    addToTotalTime(startTime, "getEvents");
+    return eventList;
+  }
+
+  @Override
+  public long countEvents(ICalendar cal) {
+    long startTime = System.currentTimeMillis();
+    long count = 0;
+    try {
+      count = searchEvents(cal, null).getSize();
+    } catch (LuceneSearchException lse) {
+      LOGGER.error("Unable to search for cal '" + cal + "'", lse);
+    }
+    addToTotalTime(startTime, "countEvents");
+    return count;
+  }
+
+  @Override
+  public IEvent getFirstEvent(ICalendar cal) {
+    IEvent event = null;
+    try {
+      event = getBorderEvent(cal, true);
+    } catch (LuceneSearchException lse) {
+      LOGGER.error("Unable to search for cal '" + cal + "'", lse);
+    }
+    return event;
+  }
+
+  @Override
+  public IEvent getLastEvent(ICalendar cal) {
+    IEvent event = null;
+    try {
+      event = getBorderEvent(cal, false);
+    } catch (LuceneSearchException lse) {
+      LOGGER.error("Unable to search for cal '" + cal + "'", lse);
+    }
+    return event;
+  }
+
+  private IEvent getBorderEvent(ICalendar cal, boolean first) throws LuceneSearchException {
+    long startTime = System.currentTimeMillis();
+    IEvent ret = null;
+    EventSearchResult result = searchEvents(cal, null);
+    int offset = 0;
+    if ((first && cal.isArchive()) || (!first && !cal.isArchive())) {
+      offset = (int) (result.getSize() - 1);
+    }
+    List<IEvent> events = result.getEventList(offset, 1);
+    if (events.size() > 0) {
+      ret = events.get(0);
+    } else {
+      LOGGER.debug("getFirst/LastEvent: no Event for cal '" + cal + "', first '" + first 
+          + "'");
+    }
+    addToTotalTime(startTime, "getBorderEvent");
+    return ret;
+  }
+
+  public EventSearchResult searchEvents(ICalendar cal, IEventSearchQuery query) {
     CalendarEventSearchQuery calSearchQuery;
     if (query == null) {
-      calSearchQuery = new CalendarEventSearchQuery(getContext().getDatabase(), 
-          startDate, isArchive, lang, allowedSpaces, null, false);
+      calSearchQuery = new CalendarEventSearchQuery(cal, Collections.<String>emptyList());
     } else {
-      calSearchQuery = new CalendarEventSearchQuery(query, startDate, isArchive, lang, 
-          allowedSpaces);
+      calSearchQuery = new CalendarEventSearchQuery(cal, query);
     }
     EventSearchResult searchResult = eventSearch.getSearchResult(calSearchQuery);
-    addToTotalTime(startTime, "searchEvents");
     LOGGER.debug("searchEvents: " + searchResult);
     return searchResult;
   }
@@ -109,14 +130,6 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
 
   void injectEventSearch(IEventSearch eventSearch) {
     this.eventSearch = eventSearch;
-  }
-
-  void injectHQLEngine(ICalendarEngineRole hqlEngine) {
-    this.hqlEngine = hqlEngine;
-  }
-
-  void injectSearchService(ILuceneSearchService searchService) {
-    this.searchService = searchService;
   }
 
 }

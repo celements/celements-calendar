@@ -19,17 +19,23 @@
  */
 package com.celements.calendar.api;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.api.Api;
 
 public class CalendarApi extends Api {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(CalendarApi.class);
 
   private final ICalendar calendar;
 
@@ -43,14 +49,44 @@ public class CalendarApi extends Api {
     this.calendar.setLanguage(language);
   }
 
+  public DocumentReference getDocumentReference() {
+    return calendar.getDocumentReference();
+  }
+
+  public Date getStartDate() {
+    return calendar.getStartDate();
+  }
+
+  public void setStartTimestamp(Date newStartDate) {
+    calendar.setStartTimestamp(newStartDate);
+  }
+
+  public void setStartDate(Date newStartDate) {
+    calendar.setStartDate(newStartDate);
+  }
+
+  public boolean isArchive() {
+    return calendar.isArchive();
+  }
+
   public List<EventApi> getAllEvents() {
-    return EventConverter.getEventApiList(calendar.getAllEventsInternal(),
-        calendar.getLanguage(), context);
+    try {
+      return EventApi.createList(calendar.getAllEventsInternal(), calendar.getLanguage(), 
+          context);
+    } catch (XWikiException xwe) {
+      LOGGER.error("Error getting all events", xwe);
+    }
+    return Collections.emptyList();
   }
 
   public List<EventApi> getEvents(int start, int nb) {
-    return EventConverter.getEventApiList(calendar.getEventsInternal(start, nb),
-        calendar.getLanguage(), context);
+    try {
+      return EventApi.createList(calendar.getEventsInternal(start, nb), 
+          calendar.getLanguage(), context);
+    } catch (XWikiException xwe) {
+      LOGGER.error("Error getting {} events starting at {}", nb, start, xwe);
+    }
+    return Collections.emptyList();
   }
 
   public EventSearchResultApi searchEvents(IEventSearchQuery query) {
@@ -62,8 +98,22 @@ public class CalendarApi extends Api {
     return calendar.getNrOfEvents();
   }
 
-  public boolean isArchive() {
-    return calendar.isArchive();
+  public EventApi getFirstEvent() {
+    try {
+      return EventApi.create(calendar.getFirstEvent(), calendar.getLanguage(), context);
+    } catch (XWikiException xwe) {
+      LOGGER.error("Error getting first event", xwe);
+    }
+    return null;
+  }
+
+  public EventApi getLastEvent() {
+    try {
+      return EventApi.create(calendar.getLastEvent(), calendar.getLanguage(), context);
+    } catch (XWikiException xwe) {
+      LOGGER.error("Error getting last event", xwe);
+    }
+    return null;
   }
 
   public List<String> getOverviewFields() {
@@ -88,32 +138,6 @@ public class CalendarApi extends Api {
 
   public boolean isSubscribable() {
     return calendar.isSubscribable();
-  }
-
-  public DocumentReference getDocumentReference() {
-    return calendar.getDocumentReference();
-  }
-
-  public void setStartTimestamp(Date newStartDate) {
-    calendar.setStartTimestamp(newStartDate);
-  }
-
-  public void setStartDate(Date newStartDate) {
-    calendar.setStartDate(newStartDate);
-  }
-
-  public Date getStartDate() {
-    return calendar.getStartDate();
-  }
-
-  public EventApi getFirstEvent() {
-    return EventConverter.getEventApi(calendar.getFirstEvent(), calendar.getLanguage(),
-        context);
-  }
-
-  public EventApi getLastEvent() {
-    return EventConverter.getEventApi(calendar.getLastEvent(), calendar.getLanguage(),
-        context);
   }
 
 }

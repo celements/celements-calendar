@@ -30,8 +30,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
 
@@ -50,8 +50,8 @@ import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.web.Utils;
 
 public class Event implements IEvent {
-  
-  private static Log LOGGER = LogFactory.getFactory().getInstance(Event.class);
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(Event.class);
 
   private Map<String, BaseObject> eventObj;
   private DocumentReference eventDocRef;

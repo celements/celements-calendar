@@ -24,8 +24,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
@@ -52,14 +52,14 @@ import com.xpn.xwiki.web.Utils;
 
 public class Calendar implements ICalendar {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(Calendar.class);
+
   private static final String _OVERVIEW_DEFAULT_CONFIG =
       "date,time,l_title,location";
   private static final String _DETAILVIEW_DEFAULT_CONFIG =
       "date,time,l_title,location,l_description";
   private static final List<String> _NON_EVENT_PROPERTYS = Arrays.asList("lang", 
       "isSubscribable", "eventDate", "eventDate_end");
-
-  private static Log LOGGER = LogFactory.getFactory().getInstance(Calendar.class);
 
   private DocumentReference calConfigDocRef;
   private Date startDate = new Date();

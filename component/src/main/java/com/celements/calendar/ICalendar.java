@@ -38,8 +38,34 @@ public interface ICalendar {
   public DocumentReference getDocumentReference();
   
   public WikiReference getWikiRef();
+
+  public XWikiDocument getCalDoc();
+
+  public boolean isArchive();
+
+  public Date getStartDate();
+
+  /**
+   * Sets date and time of Calendar
+   * 
+   * @param newStartDate
+   */
+  public void setStartTimestamp(Date newStartDate);
+
+  /**
+   * Sets only date of Calendar (time to midnight)
+   * 
+   * @param newStartDate
+   */
+  public void setStartDate(Date newStartDate);
+
+  public String getLanguage();
+
+  public void setLanguage(String language);
   
   public SpaceReference getEventSpaceRef();
+  
+  public List<String> getAllowedSpaces();
 
   /**
    * getAllEvents
@@ -78,7 +104,9 @@ public interface ICalendar {
 
   public long getNrOfEvents();
 
-  public boolean isArchive();
+  public IEvent getFirstEvent();
+
+  public IEvent getLastEvent();
 
   public List<String> getOverviewFields();
 
@@ -104,34 +132,6 @@ public interface ICalendar {
 
   public boolean isSubscribable();
 
-  public XWikiDocument getCalDoc();
-
-  /**
-   * Sets date and time of Calendar
-   * 
-   * @param newStartDate
-   */
-  public void setStartTimestamp(Date newStartDate);
-
-  /**
-   * Sets only date of Calendar (time to midnight)
-   * 
-   * @param newStartDate
-   */
-  public void setStartDate(Date newStartDate);
-
-  public Date getStartDate();
-
-  public String getLanguage();
-
-  public void setLanguage(String language);
-  
-  public List<String> getAllowedSpaces();
-
   public ICalendarEngineRole getEngine();
-
-  public IEvent getFirstEvent();
-
-  public IEvent getLastEvent();
 
 }

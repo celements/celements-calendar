@@ -54,33 +54,23 @@ public class Calendar implements ICalendar {
 
   private static final String _OVERVIEW_DEFAULT_CONFIG =
       "date,time,l_title,location";
-
   private static final String _DETAILVIEW_DEFAULT_CONFIG =
       "date,time,l_title,location,l_description";
+  private static final List<String> _NON_EVENT_PROPERTYS = Arrays.asList("lang", 
+      "isSubscribable", "eventDate", "eventDate_end");
 
   private static Log LOGGER = LogFactory.getFactory().getInstance(Calendar.class);
 
-  private boolean isArchive;
   private DocumentReference calConfigDocRef;
-  private static final List<String> _NON_EVENT_PROPERTYS;
-
-  private IEventManager eventMgr;
-  private ICalendarEngineRole engine;
-  private ICalendarService calService;
-  private ILuceneSearchService searchService;
-
   private Date startDate = new Date();
-
+  private boolean isArchive;
   private String defaultLang;
   private String language;
+  private ICalendarEngineRole engine;
 
-  static {
-    _NON_EVENT_PROPERTYS = new ArrayList<String>();
-    _NON_EVENT_PROPERTYS.add("lang");
-    _NON_EVENT_PROPERTYS.add("isSubscribable");
-    _NON_EVENT_PROPERTYS.add("eventDate");
-    _NON_EVENT_PROPERTYS.add("eventDate_end");
-  }
+  private IEventManager eventMgr;
+  private ICalendarService calService;
+  private ILuceneSearchService searchService;
 
   /**
    * 
@@ -110,8 +100,16 @@ public class Calendar implements ICalendar {
   }
 
   public Calendar(DocumentReference calConfigDocRef, boolean isArchive) {
-    this.isArchive = isArchive;
     this.calConfigDocRef = calConfigDocRef;
+    this.isArchive = isArchive;
+  }
+
+  public Calendar(DocumentReference calConfigDocRef, boolean isArchive, Date startDate) {
+    this.calConfigDocRef = calConfigDocRef;
+    this.isArchive = isArchive;
+    if (startDate != null) {
+      this.startDate = startDate;
+    }
   }
 
   @Override
@@ -125,16 +123,81 @@ public class Calendar implements ICalendar {
   }
 
   @Override
+  public XWikiDocument getCalDoc() {
+    try {
+      return getContext().getWiki().getDocument(this.calConfigDocRef, getContext());
+    } catch (XWikiException exp) {
+      LOGGER.error("Failed to get cal doc for [" + this.calConfigDocRef + "].", exp);
+    }
+    return null;
+  }
+
+  @Override
+  public boolean isArchive(){
+    return isArchive;
+  }
+
+  @Override
+  public Date getStartDate() {
+    return this.startDate;
+  }
+
+  @Override
+  public void setStartTimestamp(Date newStartDate) {
+    if (newStartDate != null) {
+      this.startDate = newStartDate;
+    }
+  }
+
+  @Override
+  public void setStartDate(Date newStartDate) {
+    setStartTimestamp(getCalService().getMidnightDate(newStartDate));
+  }
+
+  @Override
+  public String getLanguage() {
+    if (this.language != null) {
+      return this.language;
+    }
+    return getDefaultLang();
+  }
+
+  @Override
+  public void setLanguage(String language) {
+    this.language = language;
+  }
+
+  private final String getDefaultLang() {
+    if (defaultLang == null) {
+      SpaceReference spaceRef = getEventSpaceRef();
+      if (spaceRef != null) {
+        defaultLang = getWebUtilsService().getDefaultLanguage(spaceRef.getName());
+      }
+    }
+    return defaultLang;
+  }
+
+  @Override
   public SpaceReference getEventSpaceRef() {
     SpaceReference ret = null;
     try {
-      ret = new SpaceReference(getCalService().getEventSpaceForCalendar(calConfigDocRef), 
-        getWebUtilsService().getWikiRef((EntityReference) calConfigDocRef));
+      ret = getCalService().getEventSpaceRefForCalendar(getDocumentReference());
     } catch (XWikiException exc) {
       LOGGER.error("getEventSpaceRef: failed to get event space for '" 
-          + this.calConfigDocRef + "'", exc);
+          + getDocumentReference() + "'", exc);
     }
     return ret;
+  }
+
+  @Override
+  public List<String> getAllowedSpaces() {
+    try {
+      return getCalService().getAllowedSpaces(getDocumentReference());
+    } catch (XWikiException exp) {
+      LOGGER.error("Failed to get allowed spaces for '" + getDocumentReference() + "'", 
+          exp);
+    }
+    return new ArrayList<String>();
   }
 
   @Deprecated
@@ -169,8 +232,13 @@ public class Calendar implements ICalendar {
   }
 
   @Override
-  public boolean isArchive(){
-    return isArchive;
+  public IEvent getFirstEvent() {
+    return getEventMgr().getFirstEvent(this);
+  }
+
+  @Override
+  public IEvent getLastEvent() {
+    return getEventMgr().getLastEvent(this);
   }
 
   @Override
@@ -292,67 +360,6 @@ public class Calendar implements ICalendar {
   }
 
   @Override
-  public XWikiDocument getCalDoc() {
-    try {
-      return getContext().getWiki().getDocument(this.calConfigDocRef, getContext());
-    } catch (XWikiException exp) {
-      LOGGER.error("Failed to get cal doc for [" + this.calConfigDocRef + "].", exp);
-    }
-    return null;
-  }
-
-  @Override
-  public void setStartTimestamp(Date newStartDate) {
-    if (newStartDate != null) {
-      this.startDate = newStartDate;
-    }
-  }
-
-  @Override
-  public void setStartDate(Date newStartDate) {
-    setStartTimestamp(getCalService().getMidnightDate(newStartDate));
-  }
-
-  @Override
-  public Date getStartDate() {
-    return this.startDate;
-  }
-
-  @Override
-  public String getLanguage() {
-    if (this.language != null) {
-      return this.language;
-    }
-    return getDefaultLang();
-  }
-
-  @Override
-  public void setLanguage(String language) {
-    this.language = language;
-  }
-
-  private final String getDefaultLang() {
-    if (defaultLang == null) {
-      SpaceReference spaceRef = getEventSpaceRef();
-      if (spaceRef != null) {
-        defaultLang = getWebUtilsService().getDefaultLanguage(spaceRef.getName());
-      }
-    }
-    return defaultLang;
-  }
-
-  @Override
-  public List<String> getAllowedSpaces() {
-    try {
-      return getCalService().getAllowedSpaces(getDocumentReference());
-    } catch (XWikiException exp) {
-      LOGGER.error("Failed to get allowed spaces for '" + getDocumentReference() + "'", 
-          exp);
-    }
-    return new ArrayList<String>();
-  }
-
-  @Override
   public ICalendarEngineRole getEngine() {
     if (engine == null) {
       String engineHint = getContext().getWiki().getXWikiPreference("calendar_engine",
@@ -368,16 +375,6 @@ public class Calendar implements ICalendar {
           + getDocumentReference() + "'");
     }
     return engine;
-  }
-
-  @Override
-  public IEvent getFirstEvent() {
-    return getEventMgr().getFirstEvent(this);
-  }
-
-  @Override
-  public IEvent getLastEvent() {
-    return getEventMgr().getLastEvent(this);
   }
 
   private XWikiContext getContext() {

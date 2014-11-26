@@ -54,6 +54,13 @@ public interface ICalendarService {
   public List<DocumentReference> getAllCalendars(WikiReference wikiRef, 
       Collection<DocumentReference> excludes);
 
+  public SpaceReference getEventSpaceRefForCalendar(DocumentReference calDocRef
+      ) throws XWikiException;
+
+  /**
+   * @deprecated instead use {@link #getEventSpaceRefForCalendar}
+   */
+  @Deprecated
   public String getEventSpaceForCalendar(DocumentReference calDocRef
       ) throws XWikiException;
 

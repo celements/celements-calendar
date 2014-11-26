@@ -9,6 +9,7 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.script.service.ScriptService;
 
 import com.celements.calendar.ICalendar;
@@ -56,13 +57,21 @@ public class CalendarScriptService implements ScriptService {
         XWikiContext.EXECUTIONCONTEXT_KEY);
   }
 
-  public String getEventSpaceForCalendar(DocumentReference calDocRef) {
+  public SpaceReference getEventSpaceRefForCalendar(DocumentReference calDocRef) {
     try {
-      return calService.getEventSpaceForCalendar(calDocRef);
+      return calService.getEventSpaceRefForCalendar(calDocRef);
     } catch (XWikiException exp) {
-      LOGGER.error("failed to getEventSpaceForCalendar [" + calDocRef + "].", exp);
+      LOGGER.error("failed to getEventSpaceRefForCalendar [" + calDocRef + "].", exp);
     }
     return null;
+  }
+
+  /**
+   * @deprecated instead use {@link #getEventSpaceRefForCalendar}
+   */
+  @Deprecated
+  public String getEventSpaceForCalendar(DocumentReference calDocRef) {
+    return getEventSpaceRefForCalendar(calDocRef).getName();
   }
 
   public NavigationDetails getNavigationDetails(CalendarApi cal, EventApi event) {

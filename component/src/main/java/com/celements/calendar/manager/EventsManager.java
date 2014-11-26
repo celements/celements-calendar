@@ -12,6 +12,7 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.SpaceReference;
 
 import com.celements.calendar.Event;
 import com.celements.calendar.ICalendar;
@@ -104,11 +105,10 @@ public class EventsManager implements IEventManager {
 
   boolean isHomeCalendar(DocumentReference calDocRef, DocumentReference eventDocRef
       ) throws XWikiException {
-    String eventSpaceForCal = calService.getEventSpaceForCalendar(calDocRef);
-    boolean isHomeCal = eventDocRef.getLastSpaceReference().getName(
-        ).equals(eventSpaceForCal);
+    SpaceReference eventSpaceRef = calService.getEventSpaceRefForCalendar(calDocRef);
+    boolean isHomeCal = eventDocRef.getLastSpaceReference().equals(eventSpaceRef);
     LOGGER.trace("isHomeCalendar: for [" + eventDocRef + "] check on calDocRef ["
-        + calDocRef + "] with space [" + eventSpaceForCal + "] returning " + isHomeCal);
+        + calDocRef + "] with spaceRef [" + eventSpaceRef + "] returning " + isHomeCal);
     return isHomeCal;
   }
 

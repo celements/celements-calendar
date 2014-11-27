@@ -6,8 +6,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
@@ -32,11 +32,10 @@ import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 
-@Component("default")
+@Component
 public class EventsManager implements IEventManager {
 
-  private static final Log LOGGER = LogFactory.getFactory().getInstance(
-      EventsManager.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(EventsManager.class);
 
   @Requirement
   private ICalendarService calService;
@@ -68,18 +67,15 @@ public class EventsManager implements IEventManager {
   }
 
   public List<IEvent> getEventsInternal(ICalendar cal, int start, int nb) {
-    long time = System.currentTimeMillis();
     List<IEvent> eventList = Collections.emptyList();
-    DocumentReference calDocRef = cal.getDocumentReference();
     try {
       eventList = cal.getEngine().getEvents(cal, start, nb);
       filterEventListForSubscription(cal.getDocumentReference(), eventList);
     } catch (XWikiException exc) {
-      LOGGER.error("Error while getting events from calendar '" + calDocRef + "'", exc);
+      LOGGER.error("Error while getting events for '{}'", cal, exc);
     }
-    time = System.currentTimeMillis() - time;
-    LOGGER.debug("getEventsInternal: " + eventList.size() + " events found for cal '" 
-        + calDocRef + "', start '" + start + "', nb '" + nb + "' and took " + time + "ms");
+    LOGGER.debug("getEventsInternal: {} events found for cal '{}', start '{}' and nb '{}'", 
+        eventList.size(), cal, start, nb);
     return eventList;
   }
 
@@ -107,8 +103,8 @@ public class EventsManager implements IEventManager {
       ) throws XWikiException {
     SpaceReference eventSpaceRef = calService.getEventSpaceRefForCalendar(calDocRef);
     boolean isHomeCal = eventDocRef.getLastSpaceReference().equals(eventSpaceRef);
-    LOGGER.trace("isHomeCalendar: for [" + eventDocRef + "] check on calDocRef ["
-        + calDocRef + "] with spaceRef [" + eventSpaceRef + "] returning " + isHomeCal);
+    LOGGER.trace("isHomeCalendar: for '{}' check on cal '{}' with space '{}' returning {}", 
+        eventDocRef, calDocRef, eventSpaceRef, isHomeCal);
     return isHomeCal;
   }
 
@@ -151,10 +147,10 @@ public class EventsManager implements IEventManager {
       //XXX accessing results directly prevents lucene inconsistancies
       //XXX if multiple results are created (e.g. in Navigation).
       int size = eventsResult.getSize();
-      LOGGER.debug("searchEvents: " + size + " events found for cal '" + cal 
-          + "'and  query '" + query + "'");
+      LOGGER.debug("searchEvents: {} events found for cal '{}' and query '{}'", size, 
+          cal, query);
     } catch (LuceneSearchException lse) {
-      LOGGER.error("Unable to search for cal '" + cal + "'", lse);
+      LOGGER.error("Unable to search for cal '{}'", cal, lse);
     }
     return eventsResult;
   }
@@ -209,15 +205,11 @@ public class EventsManager implements IEventManager {
   }
 
   public long countEvents(ICalendar cal) {
-    long time = System.currentTimeMillis();
     long count = 0;
-    DocumentReference calDocRef = cal.getDocumentReference();
-    String cacheKey = "EventsManager.countEvents|" 
-        + webUtilsService.getRefDefaultSerializer().serialize(calDocRef) + "|"
-        + cal.isArchive() + "|" + cal.getStartDate().getTime();
+    String cacheKey = getCalCountCacheKey(cal);
     Object cachedCount = execution.getContext().getProperty(cacheKey);
     if (cachedCount != null) {
-      LOGGER.debug("Cached event count: " + cachedCount);
+      LOGGER.debug("countEvents: Cached event count: " + cachedCount);
       count = (Long) cachedCount;
     } else {
       count = countEvents_internal(cal);
@@ -225,10 +217,14 @@ public class EventsManager implements IEventManager {
         execution.getContext().setProperty(cacheKey, count);
       }
     }
-    time = System.currentTimeMillis() - time;
-    LOGGER.debug("countEvents: got " + count + " for cal '" + calDocRef + "' and took " 
-        + time + "ms");
+    LOGGER.debug("countEvents: got {} for cal '{}'", count, cal);
     return count;
+  }
+  
+  private String getCalCountCacheKey(ICalendar cal) {
+    return "EventsManager.countEvents|" + webUtilsService.getRefDefaultSerializer(
+        ).serialize(cal.getDocumentReference()) + "|" + cal.getStartDate().getTime() 
+        + "|" + cal.isArchive();
   }
 
   private long countEvents_internal(ICalendar cal) {
@@ -258,10 +254,6 @@ public class EventsManager implements IEventManager {
 
   private CalendarClasses getCalClasses() {
     return (CalendarClasses) calClasses;
-  }
-
-  void injectExecution(Execution execution) {
-    this.execution = execution;
   }
 
   void injectCalService(ICalendarService calService) {

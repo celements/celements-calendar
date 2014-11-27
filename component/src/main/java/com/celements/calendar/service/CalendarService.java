@@ -268,14 +268,30 @@ public class CalendarService implements ICalendarService {
 
   @Override
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace) {
-    return getCalendarDocRefByCalendarSpace(calSpace, null);
+    return getCalendarDocRefByCalendarSpace(calSpace, (EntityReference) null);
+  }
+
+  /**
+   * 
+   * @Deprecated instead use {@link #getCalendarDocRefByCalendarSpace(String, 
+   * EntityReference)} 
+   */
+  @Deprecated
+  @Override
+  public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace, 
+      String inSpace) {
+    SpaceReference inSpaceRef = null;
+    if (inSpace != null) {
+      inSpaceRef = new SpaceReference(inSpace, new WikiReference(getContext(
+          ).getDatabase()));
+    }
+    return getCalendarDocRefByCalendarSpace(calSpace, inSpaceRef);
   }
 
   @Override
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace, 
-      String inSpace) {
-    List<DocumentReference> calConfigs = getCalendarDocRefsByCalendarSpace(calSpace, 
-        inSpace);
+      EntityReference inRef) {
+    List<DocumentReference> calConfigs = getCalendarDocRefsByCalendarSpace(calSpace, inRef);
     if (calConfigs.size() > 0) {
       return calConfigs.get(0);
     } else {

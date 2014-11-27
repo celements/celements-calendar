@@ -89,8 +89,17 @@ public interface ICalendarService {
 
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace);
 
+  /**
+   * 
+   * @Deprecated instead use {@link #getCalendarDocRefByCalendarSpace(String, 
+   * EntityReference)} 
+   */
+  @Deprecated
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace,
       String inSpace);
+
+  public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace,
+      EntityReference inRef);
 
   /**
    * 

@@ -17,6 +17,20 @@ import com.xpn.xwiki.doc.XWikiDocument;
 @ComponentRole
 public interface ICalendarService {
 
+  public ICalendar getCalendar(DocumentReference calDocRef);
+
+  public ICalendar getCalendar(DocumentReference calDocRef, Date startDate);
+
+  public ICalendar getCalendarArchive(DocumentReference calDocRef);
+
+  public ICalendar getCalendarArchive(DocumentReference calDocRef, Date startDate);
+
+  /**
+   * @deprecated instead use {@link #getCalendar}
+   */
+  @Deprecated
+  public ICalendar getCalendarByCalRef(DocumentReference calDocRef, boolean isArchive);
+
   /**
    * gets all calendars in current database
    * 
@@ -73,8 +87,6 @@ public interface ICalendarService {
   @Deprecated
   public String getAllowedSpacesHQL(XWikiDocument calDoc) throws XWikiException;
 
-  public ICalendar getCalendarByCalRef(DocumentReference calDocRef, boolean isArchive);
-
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace);
 
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace,
@@ -89,12 +101,10 @@ public interface ICalendarService {
   public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace);
 
   /**
-   * @param calSpace
-   *          space name which to get calendars for
-   * @param inSpace
-   *          only returns calendars within this space
-   * @return all calendar config docs with given space name and within given space
+   * @deprecated instead use {@link #getCalendarDocRefsByCalendarSpace(String, 
+   * EntityReference)}
    */
+  @Deprecated
   public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace,
       String inSpace);
 

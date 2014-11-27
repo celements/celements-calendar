@@ -70,6 +70,37 @@ public class CalendarService implements ICalendarService {
   private XWikiContext getContext() {
     return (XWikiContext) execution.getContext().getProperty("xwikicontext");
   }
+  
+  @Override
+  public ICalendar getCalendar(DocumentReference calDocRef) {
+    return new Calendar(calDocRef, false);
+  }
+  
+  @Override
+  public ICalendar getCalendar(DocumentReference calDocRef, Date startDate) {
+    return getCalendar(calDocRef).setStartDate(startDate);
+  }
+  
+  @Override
+  public ICalendar getCalendarArchive(DocumentReference calDocRef) {
+    return new Calendar(calDocRef, true);
+  }
+  
+  @Override
+  public ICalendar getCalendarArchive(DocumentReference calDocRef, Date startDate) {
+    return getCalendarArchive(calDocRef).setStartDate(startDate);
+  }
+
+  /**
+   * @deprecated instead use {@link #getCalendar}
+   */
+  @Deprecated
+  @Override
+  public ICalendar getCalendarByCalRef(DocumentReference calDocRef, boolean isArchive) {
+    LOGGER.trace("getCalendarByCalRef: create Calendar reference for [" + calDocRef
+        + "], isArchive [" + isArchive + "].");
+    return new Calendar(calDocRef, isArchive);
+  }
 
   @Override
   public List<DocumentReference> getAllCalendars() {
@@ -236,13 +267,6 @@ public class CalendarService implements ICalendarService {
   }
 
   @Override
-  public ICalendar getCalendarByCalRef(DocumentReference calDocRef, boolean isArchive) {
-    LOGGER.trace("getCalendarByCalRef: create Calendar reference for [" + calDocRef
-        + "], isArchive [" + isArchive + "].");
-    return new Calendar(calDocRef, isArchive);
-  }
-
-  @Override
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace) {
     return getCalendarDocRefByCalendarSpace(calSpace, null);
   }
@@ -264,6 +288,11 @@ public class CalendarService implements ICalendarService {
     return getCalendarDocRefsByCalendarSpace(calSpace, (SpaceReference) null);
   }
 
+  /**
+   * @deprecated instead use {@link #getCalendarDocRefsByCalendarSpace(String, 
+   * EntityReference)}
+   */
+  @Deprecated
   @Override
   public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace, 
       String inSpace) {

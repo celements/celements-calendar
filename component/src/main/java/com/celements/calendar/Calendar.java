@@ -143,15 +143,16 @@ public class Calendar implements ICalendar {
   }
 
   @Override
-  public void setStartTimestamp(Date newStartDate) {
+  public ICalendar setStartTimestamp(Date newStartDate) {
     if (newStartDate != null) {
       this.startDate = newStartDate;
     }
+    return this;
   }
 
   @Override
-  public void setStartDate(Date newStartDate) {
-    setStartTimestamp(getCalService().getMidnightDate(newStartDate));
+  public ICalendar setStartDate(Date newStartDate) {
+    return setStartTimestamp(getCalService().getMidnightDate(newStartDate));
   }
 
   @Override
@@ -163,8 +164,9 @@ public class Calendar implements ICalendar {
   }
 
   @Override
-  public void setLanguage(String language) {
+  public ICalendar setLanguage(String language) {
     this.language = language;
+    return this;
   }
 
   private final String getDefaultLang() {

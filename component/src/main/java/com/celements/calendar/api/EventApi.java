@@ -200,6 +200,7 @@ public class EventApi extends Api {
 
   public static List<EventApi> createList(List<IEvent> eventList, String language,
       XWikiContext context) throws XWikiException {
+    long time = System.currentTimeMillis();
     List<EventApi> eventApiList = new ArrayList<EventApi>();
     for (IEvent event : eventList) {
       EventApi eventApi = create(event, language, context);
@@ -207,6 +208,8 @@ public class EventApi extends Api {
         eventApiList.add(create(event, language, context));
       }
     }
+    time = System.currentTimeMillis() - time;
+    LOGGER.debug("createList: for {} elements took {}ms", eventList.size(), time);
     return eventApiList;
   }
 

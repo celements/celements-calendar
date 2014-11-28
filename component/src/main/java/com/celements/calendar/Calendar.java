@@ -24,6 +24,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xwiki.context.Execution;
@@ -34,14 +37,11 @@ import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.classes.CalendarClasses;
-import com.celements.calendar.engine.CalendarEngineHQL;
-import com.celements.calendar.engine.CalendarEngineLucene;
 import com.celements.calendar.engine.ICalendarEngineRole;
 import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.service.ICalendarService;
-import com.celements.search.lucene.ILuceneSearchService;
 import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -70,7 +70,6 @@ public class Calendar implements ICalendar {
 
   private IEventManager eventMgr;
   private ICalendarService calService;
-  private ILuceneSearchService searchService;
 
   /**
    * 
@@ -369,19 +368,39 @@ public class Calendar implements ICalendar {
   @Override
   public ICalendarEngineRole getEngine() {
     if (engine == null) {
+      ICalendarEngineRole defaultEngine = Utils.getComponent(ICalendarEngineRole.class);
       String engineHint = getContext().getWiki().getXWikiPreference("calendar_engine",
-          "calendar.engine", CalendarEngineHQL.NAME, getContext());
+          "calendar.engine", "default", getContext());
       engine = Utils.getComponent(ICalendarEngineRole.class, engineHint);
-      if (engineHint.equals(CalendarEngineLucene.NAME)) {
-        int limit = getSearchService().getResultLimit();
-        if (engine.countEvents(this) >= limit) {
-          engine = Utils.getComponent(ICalendarEngineRole.class, CalendarEngineHQL.NAME);
+      if (!StringUtils.equals(engine.getName(), defaultEngine.getName())) {
+        long limit = engine.getEngineLimit();
+        long size = engine.countEvents(this);
+        if ((limit != 0) && (size >= limit)) {
+          engine = defaultEngine;
         }
+        LOGGER.debug("getEngine: size {}, limit {}", size, limit);
       }
-      LOGGER.debug("Using engine '" + engine.getName() + "' for  calendar '" 
-          + getDocumentReference() + "'");
+      LOGGER.debug("getEngine: returning '{}' for  cal '{}'", engine.getName(), 
+          getDocumentReference());
     }
     return engine;
+  }
+
+  @Override
+  public int hashCode() {
+    return new HashCodeBuilder().append(calConfigDocRef).append(startDate).append(
+        isArchive).toHashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof Calendar) {
+      Calendar other = (Calendar) obj;
+      return new EqualsBuilder().append(this.calConfigDocRef, other.calConfigDocRef
+          ).append(this.startDate, other.startDate).append(this.isArchive, other.isArchive
+          ).isEquals();
+    }
+    return false;
   }
 
   private XWikiContext getContext() {
@@ -411,26 +430,16 @@ public class Calendar implements ICalendar {
     this.calService = calService;
   }
 
-  private ILuceneSearchService getSearchService() {
-    if (searchService == null) {
-      searchService = Utils.getComponent(ILuceneSearchService.class);
-    }
-    return searchService;
-  }
-
-  protected void injectSearchService(ILuceneSearchService searchService) {
-    this.searchService = searchService;
-  }
-
   private IWebUtilsService getWebUtilsService() {
     return Utils.getComponent(IWebUtilsService.class);
   }
 
   @Override
   public String toString() {
-    return "Calendar [calConfigDocRef=" + calConfigDocRef + ", startDate=" + startDate
-        + ", isArchive=" + isArchive + ", language=" + getLanguage() + ", allowedSpaces=" 
-        + getAllowedSpaces() + ", engine=" + getEngine() + "]";
+    return "Calendar [calConfigDocRef=" + getWebUtilsService().getRefDefaultSerializer(
+        ).serialize(calConfigDocRef) + ", startDate=" + startDate + ", isArchive=" 
+        + isArchive + ", language=" + getLanguage() + ", allowedSpaces=" 
+        + getAllowedSpaces() + ", engine=" + getEngine().getName() + "]";
   }
 
 }

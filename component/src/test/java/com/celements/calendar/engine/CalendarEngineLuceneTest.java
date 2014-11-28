@@ -24,6 +24,7 @@ import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearch;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
+import com.celements.search.lucene.ILuceneSearchService;
 import com.xpn.xwiki.web.Utils;
 
 public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
@@ -32,15 +33,19 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
 
   private CalendarEngineLucene engine;
   private IEventSearch eventSearchMock;
+  private ILuceneSearchService searchServiceMock;
   private EventSearchResult eventSearchResultMock;
   private ICalendar calMock;
   private String database;
 
   @Before
-  public void setUp_EventsManagerTest() {
-    engine = (CalendarEngineLucene) Utils.getComponent(ICalendarEngineRole.class, "lucene");
+  public void setUp_CalendarEngineLuceneTest() {
+    engine = (CalendarEngineLucene) Utils.getComponent(ICalendarEngineRole.class, 
+        "lucene");
     eventSearchMock = createMockAndAddToDefault(IEventSearch.class);
     engine.injectEventSearch(eventSearchMock);
+    searchServiceMock = createMockAndAddToDefault(ILuceneSearchService.class);
+    engine.injectSearchService(searchServiceMock);
     eventSearchResultMock = createMockAndAddToDefault(EventSearchResult.class);
     calMock = createMockAndAddToDefault(ICalendar.class);
     database = "xwikidb";
@@ -52,6 +57,15 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
   @Test
   public void testGetName() {
     assertEquals("lucene", engine.getName());
+  }
+
+  @Test
+  public void testGetEngineLimit() {
+    int limit = 5;
+    expect(searchServiceMock.getResultLimit()).andReturn(limit).once();
+    replayDefault();
+    assertEquals(limit, engine.getEngineLimit());
+    verifyDefault();
   }
 
   @Test
@@ -90,7 +104,7 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
   }
 
   @Test
-  public void testCountEvents() throws Exception {
+  public void testCountEventsInternal() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     String lang = "de";
@@ -103,7 +117,7 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
     expect(eventSearchResultMock.getSize()).andReturn(5).once();
 
     replayDefault();
-    long ret = engine.countEvents(calMock);
+    long ret = engine.countEventsInternal(calMock);
     verifyDefault();
  
     assertEquals(5, ret);

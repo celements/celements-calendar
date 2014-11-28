@@ -33,8 +33,8 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
   private String database;
 
   @Before
-  public void setUp_EventsManagerTest() {
-    engine = (CalendarEngineHQL) Utils.getComponent(ICalendarEngineRole.class, "hql");
+  public void setUp_CalendarEngineHQLTest() {
+    engine = (CalendarEngineHQL) Utils.getComponent(ICalendarEngineRole.class);
     queryManagerMock = createMockAndAddToDefault(QueryManager.class);
     engine.injectQueryManager(queryManagerMock);
     xwiki = createMockAndAddToDefault(XWiki.class);
@@ -55,7 +55,12 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
   }
 
   @Test
-  public void testCountEvents() throws QueryException {
+  public void testGetEngineLimit() {
+    assertEquals(0, engine.getEngineLimit());
+  }
+
+  @Test
+  public void testCountEventsInternal() throws QueryException {
     String lang = "de";
     List<String> spaces = Arrays.asList("myCalSpace");
     Date startDate = new Date(0);
@@ -70,7 +75,7 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     expectForCalMock(startDate, isArchive, lang, spaces);
 
     replayDefault();
-    long ret = engine.countEvents(calMock);
+    long ret = engine.countEventsInternal(calMock);
     verifyDefault();
 
     assertEquals(count, ret);

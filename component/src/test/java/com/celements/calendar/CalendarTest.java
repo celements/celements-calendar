@@ -45,7 +45,6 @@ import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.service.ICalendarService;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
-import com.celements.search.lucene.ILuceneSearchService;
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -60,7 +59,6 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
   private XWikiContext context;
   private IEventManager eventMgrMock;
   private ICalendarService calServiceMock;
-  private ILuceneSearchService searchServiceMock;
   private DocumentReference calDocRef;
   private XWiki xwiki;
 
@@ -73,7 +71,6 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     calDocRef = new DocumentReference("myWiki", "MyCalSpace", "MyCalDoc");
     eventMgrMock = createMockAndAddToDefault(IEventManager.class);
     calServiceMock = createMockAndAddToDefault(ICalendarService.class);
-    searchServiceMock = createMockAndAddToDefault(ILuceneSearchService.class);
     cal = getInjectedCal(calDocRef, isArchiv);
   }
 
@@ -344,11 +341,10 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
   }
 
   @Test
-  public void testGetEgine_HQL() throws Exception {
-    String hint = CalendarEngineHQL.NAME;
+  public void testGetEngine_HQL() throws Exception {
     expect(getContext().getWiki().getXWikiPreference(eq("calendar_engine"), 
-        eq("calendar.engine"), eq(CalendarEngineHQL.NAME), same(getContext()))
-        ).andReturn(hint).once();
+        eq("calendar.engine"), eq("default"), same(getContext()))).andReturn("default"
+        ).once();
     replayDefault();
     ICalendarEngineRole ret = cal.getEngine();
     verifyDefault();
@@ -356,12 +352,10 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
   }
   
   @Test
-  public void testGetEgine_Lucene() throws Exception {
+  public void testGetEngine_Lucene() throws Exception {
     String hint = CalendarEngineLucene.NAME;
     expect(getContext().getWiki().getXWikiPreference(eq("calendar_engine"), 
-        eq("calendar.engine"), eq(CalendarEngineHQL.NAME), same(getContext()))
-        ).andReturn(hint).once();
-    expect(searchServiceMock.getResultLimit()).andReturn(10).once();
+        eq("calendar.engine"), eq("default"), same(getContext()))).andReturn(hint).once();
     
     ICalendarEngineRole engineMock = createMockAndAddToDefault(ICalendarEngineRole.class);
     DefaultComponentDescriptor<ICalendarEngineRole> descriptor = 
@@ -369,7 +363,8 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     descriptor.setRole(ICalendarEngineRole.class);
     descriptor.setRoleHint(hint);
     Utils.getComponentManager().registerComponent(descriptor, engineMock);
-    expect(engineMock.getName()).andReturn(hint).once();
+    expect(engineMock.getName()).andReturn(hint).anyTimes();
+    expect(engineMock.getEngineLimit()).andReturn(10L).once();
     expect(engineMock.countEvents(same(cal))).andReturn(5L).once();
     
     replayDefault();
@@ -379,12 +374,10 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
   }
   
   @Test
-  public void testGetEgine_Lucene_overLimit() throws Exception {
+  public void testGetEngine_Lucene_overLimit() throws Exception {
     String hint = CalendarEngineLucene.NAME;
     expect(getContext().getWiki().getXWikiPreference(eq("calendar_engine"), 
-        eq("calendar.engine"), eq(CalendarEngineHQL.NAME), same(getContext()))
-        ).andReturn(hint).once();
-    expect(searchServiceMock.getResultLimit()).andReturn(10).once();
+        eq("calendar.engine"), eq("default"), same(getContext()))).andReturn(hint).once();
     
     ICalendarEngineRole engineMock = createMockAndAddToDefault(ICalendarEngineRole.class);
     DefaultComponentDescriptor<ICalendarEngineRole> descriptor = 
@@ -392,6 +385,8 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     descriptor.setRole(ICalendarEngineRole.class);
     descriptor.setRoleHint(hint);
     Utils.getComponentManager().registerComponent(descriptor, engineMock);
+    expect(engineMock.getName()).andReturn(hint).anyTimes();
+    expect(engineMock.getEngineLimit()).andReturn(10L).once();
     expect(engineMock.countEvents(same(cal))).andReturn(11L).once();
     
     replayDefault();
@@ -404,7 +399,6 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     Calendar cal = new Calendar(calDocRef, isArchiv);
     cal.injectEventManager(eventMgrMock);
     cal.injectCalService(calServiceMock);
-    cal.injectSearchService(searchServiceMock);
     return cal;
   }
 

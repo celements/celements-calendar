@@ -4,12 +4,10 @@ import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.model.reference.WikiReference;
@@ -24,8 +22,6 @@ import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.service.ICalendarService;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
-import com.celements.web.service.IWebUtilsService;
-import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.web.Utils;
@@ -34,7 +30,6 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
 
   private XWikiContext context;
   private EventsManager eventsMgr;
-  private XWiki xwiki;
   private ICalendarService calServiceMock;
   private ICalendarEngineRole engineMock;
   private ICalendar calMock;
@@ -44,7 +39,6 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
 
   @Before
   public void setUp_EventsManagerTest() {
-    xwiki = getWikiMock();
     context = getContext();
     eventsMgr = (EventsManager) Utils.getComponent(IEventManager.class);
     calServiceMock = createMockAndAddToDefault(ICalendarService.class);
@@ -81,61 +75,6 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
     assertEquals(2, events.size());
     assertEquals(event1, events.get(0));
     assertEquals(event2, events.get(1));
-  }
-
-  @Test
-  public void testCountEvents() throws XWikiException {
-    long count = 12345L;
-    Date startDate = new Date();
-    boolean isArchive = false;
-
-    expect(calMock.isArchive()).andReturn(isArchive).anyTimes();
-    expect(calMock.getStartDate()).andReturn(startDate).anyTimes();
-    expect(xwiki.exists(eq(calDocRef), same(context))).andReturn(true).once();
-    expect(engineMock.countEvents(same(calMock))).andReturn(count).once();
-
-    replayDefault();
-    long ret = eventsMgr.countEvents(calMock);
-    verifyDefault();
-
-    assertEquals(count, ret);
-  }
-  
-  @Test
-  public void testCountEvents_noEventExist() throws XWikiException {
-    Date startDate = new Date();
-    boolean isArchive = false;
-    
-    expect(calMock.isArchive()).andReturn(isArchive).anyTimes();
-    expect(calMock.getStartDate()).andReturn(startDate).anyTimes();
-    expect(xwiki.exists(eq(calDocRef), same(context))).andReturn(false).once();
-
-    replayDefault();
-    long countEvent = eventsMgr.countEvents(calMock);
-    verifyDefault();
-
-    assertEquals(0, countEvent);
-  }
-  
-  
-
-  @Test
-  public void testCountEvents_checkCache() throws XWikiException {
-    long count = 12345L;
-    Date startDate = new Date();
-    boolean isArchive = false;
-    Utils.getComponent(Execution.class).getContext().setProperty("EventsManager.countEvents|"
-        + getWebUtilsService().getRefDefaultSerializer().serialize(calDocRef) + "|" 
-        + startDate.getTime() + "|" + isArchive, count);
-    
-    expect(calMock.isArchive()).andReturn(isArchive).anyTimes();
-    expect(calMock.getStartDate()).andReturn(startDate).anyTimes();
-
-    replayDefault();
-    long countEvent = eventsMgr.countEvents(calMock);
-    verifyDefault();
-
-    assertEquals(12345L, countEvent);
   }
 
   @Test
@@ -190,10 +129,6 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
     replayDefault();
     assertSame(mockEventSearchResults, eventsMgr.searchEvents(calMock, query));
     verifyDefault();
-  }
-
-  private IWebUtilsService getWebUtilsService() {
-    return Utils.getComponent(IWebUtilsService.class);
   }
 
 }

@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
-import org.xwiki.context.Execution;
 import org.xwiki.model.reference.WikiReference;
 import org.xwiki.query.Query;
 import org.xwiki.query.QueryException;
@@ -20,11 +19,10 @@ import com.celements.calendar.Event;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.classes.CalendarClasses;
-import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiContext;
 
-@Component(CalendarEngineHQL.NAME)
-public class CalendarEngineHQL implements ICalendarEngineRole {
+@Component
+public class CalendarEngineHQL extends AbstractCalendarEngine {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CalendarEngineHQL.class);
 
@@ -36,12 +34,6 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
   @Requirement
   private QueryManager queryManager;
 
-  @Requirement
-  private IWebUtilsService webUtilsService;
-
-  @Requirement
-  private Execution execution;
-
   private XWikiContext getContext() {
     return (XWikiContext) execution.getContext().getProperty(
         XWikiContext.EXECUTIONCONTEXT_KEY);
@@ -51,9 +43,14 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
   public String getName() {
     return NAME;
   }
+  
+  @Override
+  public long getEngineLimit() {
+    return 0L;
+  }
 
   @Override
-  public long countEvents(ICalendar cal) {
+  protected long countEventsInternal(ICalendar cal) {
     long startTime = System.currentTimeMillis();
     long count = 0;
     try {
@@ -183,7 +180,7 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
     }
     return ret;
   }
-  
+
   private void addToTotalTime(long startTime, String methodName) {
     long time = System.currentTimeMillis() - startTime;
     Long totalTime = 0L;
@@ -193,6 +190,11 @@ public class CalendarEngineHQL implements ICalendarEngineRole {
     totalTime += time;
     execution.getContext().setProperty(PROGON_ENGINE_HQL_TOTALTIME, totalTime);
     LOGGER.debug("{}: finished in {}ms, total time {}ms", methodName, time, totalTime);
+  }
+
+  @Override
+  protected Logger getLogger() {
+    return LOGGER;
   }
 
   void injectQueryManager(QueryManager queryManagerMock) {

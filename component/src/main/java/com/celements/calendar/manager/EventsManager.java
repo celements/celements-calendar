@@ -205,39 +205,7 @@ public class EventsManager implements IEventManager {
   }
 
   public long countEvents(ICalendar cal) {
-    long count = 0;
-    String cacheKey = getCalCountCacheKey(cal);
-    Object cachedCount = execution.getContext().getProperty(cacheKey);
-    if (cachedCount != null) {
-      LOGGER.debug("countEvents: Cached event count: " + cachedCount);
-      count = (Long) cachedCount;
-    } else {
-      count = countEvents_internal(cal);
-      if (count > 0) {
-        execution.getContext().setProperty(cacheKey, count);
-      }
-    }
-    LOGGER.debug("countEvents: got {} for cal '{}'", count, cal);
-    return count;
-  }
-  
-  private String getCalCountCacheKey(ICalendar cal) {
-    return "EventsManager.countEvents|" + webUtilsService.getRefDefaultSerializer(
-        ).serialize(cal.getDocumentReference()) + "|" + cal.getStartDate().getTime() 
-        + "|" + cal.isArchive();
-  }
-
-  private long countEvents_internal(ICalendar cal) {
-    DocumentReference calDocRef = cal.getDocumentReference();
-    boolean isArchive = cal.isArchive();
-    Date startDate = cal.getStartDate();
-    long count = 0;
-    if ((calDocRef != null) && getContext().getWiki().exists(calDocRef, getContext())) {
-      count = cal.getEngine().countEvents(cal);
-      LOGGER.debug("Event count for calendar '" + calDocRef + "' with startDate + '"
-          + startDate + "' and isArchive '" + isArchive + "': " + count);
-    }
-    return count;
+    return cal.getEngine().countEvents(cal);
   }
 
   public IEvent getEvent(DocumentReference eventDocRef) {

@@ -9,9 +9,11 @@ import com.celements.calendar.IEvent;
 
 @ComponentRole
 public interface ICalendarEngineRole {
-  
+
   public String getName();
-  
+
+  public long getEngineLimit();
+
   public long countEvents(ICalendar cal);
 
   public List<IEvent> getEvents(ICalendar cal, int offset, int limit);

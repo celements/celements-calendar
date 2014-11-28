@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
-import org.xwiki.context.Execution;
 
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
@@ -15,10 +14,11 @@ import com.celements.calendar.search.CalendarEventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearch;
 import com.celements.calendar.search.IEventSearchQuery;
+import com.celements.search.lucene.ILuceneSearchService;
 import com.celements.search.lucene.LuceneSearchException;
 
 @Component(CalendarEngineLucene.NAME)
-public class CalendarEngineLucene implements ICalendarEngineRole {
+public class CalendarEngineLucene extends AbstractCalendarEngine {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CalendarEngineLucene.class);
 
@@ -31,11 +31,16 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
   private IEventSearch eventSearch;
 
   @Requirement
-  private Execution execution;
+  private ILuceneSearchService searchService;
 
   @Override
   public String getName() {
     return NAME;
+  }
+  
+  @Override
+  public long getEngineLimit() {
+    return searchService.getResultLimit();
   }
 
   @Override
@@ -52,7 +57,7 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
   }
 
   @Override
-  public long countEvents(ICalendar cal) {
+  protected long countEventsInternal(ICalendar cal) {
     long startTime = System.currentTimeMillis();
     long count = 0;
     try {
@@ -128,8 +133,17 @@ public class CalendarEngineLucene implements ICalendarEngineRole {
     LOGGER.debug("{}: finished in {}ms, total time {}ms", methodName, time, totalTime);
   }
 
+  @Override
+  protected Logger getLogger() {
+    return LOGGER;
+  }
+
   void injectEventSearch(IEventSearch eventSearch) {
     this.eventSearch = eventSearch;
+  }
+
+  void injectSearchService(ILuceneSearchService searchService) {
+    this.searchService = searchService;
   }
 
 }

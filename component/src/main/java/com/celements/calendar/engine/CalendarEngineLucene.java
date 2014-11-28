@@ -92,21 +92,18 @@ public class CalendarEngineLucene extends AbstractCalendarEngine {
   }
 
   private IEvent getBorderEvent(ICalendar cal, boolean first) throws LuceneSearchException {
-    long startTime = System.currentTimeMillis();
     IEvent ret = null;
-    EventSearchResult result = searchEvents(cal, null);
     int offset = 0;
     if ((first && cal.isArchive()) || (!first && !cal.isArchive())) {
-      offset = (int) (result.getSize() - 1);
+      offset = (int) (countEvents(cal) - 1); ;
     }
-    List<IEvent> events = result.getEventList(offset, 1);
+    List<IEvent> events = getEvents(cal, offset, 1);
     if (events.size() > 0) {
       ret = events.get(0);
     } else {
       LOGGER.debug("getFirst/LastEvent: no Event for cal '" + cal + "', first '" + first 
           + "'");
     }
-    addToTotalTime(startTime, "getBorderEvent");
     return ret;
   }
 

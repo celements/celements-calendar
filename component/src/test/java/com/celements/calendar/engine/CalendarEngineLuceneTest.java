@@ -177,7 +177,7 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
     expectForCalMock(startDate, isArchive, lang, spaces);
     Capture<IEventSearchQuery> queryCapture = new Capture<IEventSearchQuery>();
     expect(eventSearchMock.getSearchResult(capture(queryCapture))).andReturn(
-        eventSearchResultMock).once();
+        eventSearchResultMock).times(2);
     expect(eventSearchResultMock.getSize()).andReturn(5).once();
     expect(eventSearchResultMock.getEventList(eq(4), eq(1))).andReturn(eventList).once();
 
@@ -210,7 +210,7 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
     expectForCalMock(startDate, isArchive, lang, spaces);
     Capture<IEventSearchQuery> queryCapture = new Capture<IEventSearchQuery>();
     expect(eventSearchMock.getSearchResult(capture(queryCapture))).andReturn(
-        eventSearchResultMock).once();
+        eventSearchResultMock).times(2);
     expect(eventSearchResultMock.getSize()).andReturn(5).once();
     expect(eventSearchResultMock.getEventList(eq(4), eq(1))).andReturn(eventList).once();
 

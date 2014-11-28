@@ -1,10 +1,10 @@
 package com.celements.calendar.navigation.factories;
 
-public class EmptyCalendarListException extends Exception {
+public class NavigationDetailException extends Exception {
 
   private static final long serialVersionUID = 1L;
 
-  public EmptyCalendarListException(String message) {
+  public NavigationDetailException(String message) {
     super(message);
   }
 

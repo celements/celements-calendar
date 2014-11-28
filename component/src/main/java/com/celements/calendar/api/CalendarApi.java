@@ -26,6 +26,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.SpaceReference;
+import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.search.IEventSearchQuery;
@@ -53,6 +55,10 @@ public class CalendarApi extends Api {
     return calendar.getDocumentReference();
   }
 
+  public WikiReference getWikiRef() {
+    return calendar.getWikiRef();
+  }
+
   public Date getStartDate() {
     return calendar.getStartDate();
   }
@@ -67,6 +73,10 @@ public class CalendarApi extends Api {
 
   public boolean isArchive() {
     return calendar.isArchive();
+  }
+  
+  public SpaceReference getEventSpaceRef() {
+    return calendar.getEventSpaceRef();
   }
 
   public List<EventApi> getAllEvents() {

@@ -30,11 +30,7 @@ public class EventSearchResult {
 
   public LuceneSearchResult getSearchResult() {
     if (searchResult == null) {
-      if (getSearchService().skipChecks()) {
-        searchResult = getSearchService().searchWithoutChecks(query, sortFields, null);
-      } else {
-        searchResult = getSearchService().search(query, sortFields, null);
-      }
+      searchResult = getSearchService().search(query, sortFields, null);
     }
     return searchResult;
   }

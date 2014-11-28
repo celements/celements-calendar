@@ -2,17 +2,26 @@ package com.celements.calendar.navigation.factories;
 
 import java.util.Date;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 public class NavigationDetails {
 
   private final Date startDate;
   private final int offset;
 
-  NavigationDetails(Date startDate, int offset){
-    if ((startDate == null) || (offset < 0)) {
-      throw new IllegalArgumentException();
-    }
-    this.offset = offset;
+  private NavigationDetails(Date startDate, int offset) {
     this.startDate = startDate;
+    this.offset = offset;
+  }
+  
+  static NavigationDetails create(Date startDate, int offset
+      ) throws NavigationDetailException {
+    if ((startDate != null) && (offset >= 0)) {
+      return new NavigationDetails(startDate, offset);
+    }
+    throw new NavigationDetailException("Unable to create nav for startDate '" 
+        + startDate + "' and offset '" + offset + "'");
   }
 
   public Date getStartDate() {
@@ -25,30 +34,17 @@ public class NavigationDetails {
 
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof NavigationDetails)) {
-      return false;
+    if (obj instanceof NavigationDetails) {
+      NavigationDetails other = (NavigationDetails) obj;
+      return new EqualsBuilder().append(this.startDate, other.startDate).append(
+          this.offset, other.offset).isEquals();
     }
-    NavigationDetails theObj = (NavigationDetails) obj;
-    boolean equalDate = (theObj.startDate == this.startDate)
-        || ((theObj.startDate != null) && (this.startDate != null)
-            && theObj.startDate.equals(this.startDate));
-    return (equalDate && (theObj.offset == this.offset));
+    return false;
   }
 
   @Override
   public int hashCode() {
-    int result = 17;
-    result = (37*result) + offset;
-    result = (37*result) + computeStartDateHash();
-    return result;
-  }
-
-  private int computeStartDateHash() {
-    if (startDate ==  null) {
-      return 0;
-    } else {
-      return startDate.hashCode();
-    }
+    return new HashCodeBuilder().append(startDate).append(offset).toHashCode();
   }
 
   @Override

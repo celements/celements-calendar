@@ -3,6 +3,7 @@ package com.celements.calendar.navigation.factories;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.search.DateEventSearchQuery;
+import com.celements.search.lucene.LuceneSearchException;
 
 public interface ICalendarNavigationFactory {
 
@@ -10,6 +11,7 @@ public interface ICalendarNavigationFactory {
       NavigationDetails navDetails, int nb);
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
-      NavigationDetails navDetails, int nb, DateEventSearchQuery query);
+      NavigationDetails navDetails, int nb, DateEventSearchQuery query
+      ) throws LuceneSearchException;
 
 }

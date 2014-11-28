@@ -50,8 +50,8 @@ public class EventSearchResultTest extends AbstractBridgedComponentTestCase {
     List<String> languages = null;
     LuceneSearchResult resultMock = createMockAndAddToDefault(LuceneSearchResult.class);
     EventSearchResult result = getEventSearchResult(query, sortFields, true);
-    expect(searchServiceMock.searchWithoutChecks(same(query), eq(sortFields), 
-        eq(languages))).andReturn(resultMock).once();
+    expect(searchServiceMock.search(same(query), eq(sortFields), eq(languages))
+        ).andReturn(resultMock).once();
     
     replayDefault();
     LuceneSearchResult ret = result.getSearchResult();
@@ -154,7 +154,6 @@ public class EventSearchResultTest extends AbstractBridgedComponentTestCase {
       List<String> sortFields, boolean skipChecks) {
     EventSearchResult searchResult = new EventSearchResult(query, sortFields);
     searchResult.injectSearchService(searchServiceMock);
-    expect(searchServiceMock.skipChecks()).andReturn(skipChecks).once();
     return searchResult;
   }
 

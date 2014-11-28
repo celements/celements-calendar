@@ -3,50 +3,57 @@ package com.celements.calendar.navigation.factories;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xwiki.model.reference.DocumentReference;
 
-import com.celements.calendar.Calendar;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
-import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.search.IEventSearchQuery;
+import com.celements.calendar.service.ICalendarService;
+import com.celements.search.lucene.LuceneSearchException;
 import com.xpn.xwiki.web.Utils;
 
 public class NavigationDetailsFactory implements INavigationDetailsFactory {
 
-  private static final Log LOGGER = LogFactory.getFactory().getInstance(
+  private static final Logger LOGGER = LoggerFactory.getLogger(
       NavigationDetailsFactory.class);
 
-  private IEventManager eventMgr;
+  private ICalendarService calService;
 
-  public NavigationDetails getNavigationDetails(Date startDate, int offset) {
-    return new NavigationDetails(startDate, offset);
+  public NavigationDetails getNavigationDetails(Date startDate, int offset
+      ) throws NavigationDetailException {
+    return NavigationDetails.create(startDate, offset);
   }
 
-  public NavigationDetails getNavigationDetails(DocumentReference calConfigDocRef,
-      IEvent event) {
-    return getNavigationDetails(calConfigDocRef, event, null);
+  public NavigationDetails getNavigationDetails(DocumentReference calDocRef, IEvent event
+      ) throws NavigationDetailException {
+    try {
+      return getNavigationDetails(calDocRef, event, null);
+    } catch (LuceneSearchException lse) {
+      // should never happen
+      LOGGER.error("search failed for cal '{}', event '{}'", calDocRef, event, lse);
+    }
+    return null;
   }
 
-  public NavigationDetails getNavigationDetails(DocumentReference calConfigDocRef,
-      IEvent event, IEventSearchQuery query) {
-    LOGGER.debug("getNavigationDetails for '" + event + "'");
+  public NavigationDetails getNavigationDetails(DocumentReference calDocRef, IEvent event, 
+      IEventSearchQuery query) throws NavigationDetailException, LuceneSearchException {
+    NavigationDetails navDetail = null;
+    LOGGER.debug("getNavigationDetails: for cal '{}', event '{}'", calDocRef, event);
     Date eventDate = event.getEventDate();
     if (eventDate != null) {
-      ICalendar cal = new Calendar(calConfigDocRef, false);
-      cal.setStartDate(eventDate);
+      ICalendar cal = getCalService().getCalendar(calDocRef, eventDate);
       int offset = 0;
       int nb = 10;
       int eventIndex, start = 0;
       List<IEvent> events;
       boolean hasMore, notFound;
       do {
-        if (query == null) {
-          events = getEventMgr().getEventsInternal(cal, start, nb);
+        if (query == null) {          
+          events = cal.getEventsInternal(start, nb);
         } else {
-          events = getEventMgr().searchEvents(cal, query).getEventList(start, nb);
+          events = cal.searchEvents(query).getEventList(start, nb);
         }
         hasMore = events.size() == nb;
         eventIndex = events.indexOf(event);
@@ -54,34 +61,35 @@ public class NavigationDetailsFactory implements INavigationDetailsFactory {
         offset = start + eventIndex;
         start = start + nb;
         nb = nb * 2;
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("getNavigationDetails: events '" + events + "'");
-          LOGGER.debug("getNavigationDetails: index for event '" + eventIndex);
-        }
+        LOGGER.trace("getNavigationDetails: index {} for events '{}'", eventIndex, events);
       } while (notFound && hasMore);
       if (!notFound) {
-        NavigationDetails navDetail = new NavigationDetails(cal.getStartDate(), offset);
-        LOGGER.debug("getNavigationDetails: found '" + navDetail + "'");
-        return navDetail;
+        navDetail = NavigationDetails.create(cal.getStartDate(), offset);
       } else {
         LOGGER.warn("getNavigationDetails: not found for query [" + query
             + "] and event [" + event + "].");
       }
     } else {
-      LOGGER.error("getNavigationDetails: eventDate is null for '" + event + "'");
+      LOGGER.warn("getNavigationDetails: eventDate is null for '" + event + "'");
     }
-    return null;
+    if (navDetail != null) {
+      LOGGER.debug("getNavigationDetails: found '{}'", navDetail);
+      return navDetail;
+    } else {
+      throw new NavigationDetailException("Unable to create NavigationDetails for cal '" 
+          + calDocRef + "', event '" + event + "'");
+    }
   }
 
-  private IEventManager getEventMgr() {
-    if (eventMgr == null) {
-      eventMgr = Utils.getComponent(IEventManager.class);
+  private ICalendarService getCalService() {
+    if (calService == null) {
+      calService = Utils.getComponent(ICalendarService.class);
     }
-    return eventMgr;
+    return calService;
   }
-
-  void injectEventMgr(IEventManager eventMgr) {
-    this.eventMgr = eventMgr;
+  
+  void injectCalService(ICalendarService calService) {
+    this.calService = calService;
   }
 
 }

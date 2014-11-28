@@ -208,25 +208,33 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
   }
 
   @Test
-  public void testGetNrOfEvents_emptyList() {
-    expect(eventMgrMock.countEvents(eq(cal))).andReturn(0L);
+  public void testGetNrOfEvents() throws XWikiException {
+    long count = 123L;
+    expect(eventMgrMock.countEvents(eq(cal))).andReturn(count).once();
     replayDefault();
-    assertEquals("must be zero for empty list.", 0, cal.getNrOfEvents());
+    long ret = cal.getNrOfEvents();
     verifyDefault();
+    assertEquals(count, ret);
   }
 
   @Test
-  public void testGetNrOfEvents_nonEmptyList() throws XWikiException {
-    ArrayList<Long> eventList = new ArrayList<Long>();
-    eventList.add(123l);
-    DocumentReference cal2DocRef = new DocumentReference(context.getDatabase(),
-        "MyCalDoc2Space", "MyCal2Doc");
-    Calendar cal2 = getInjectedCal(cal2DocRef, isArchiv);
-    expect(eventMgrMock.countEvents(eq(cal2))).andReturn(123l);
+  public void testIsEmpty_true() throws XWikiException {
+    long count = 0L;
+    expect(eventMgrMock.countEvents(eq(cal))).andReturn(count).once();
     replayDefault();
-    long numEvents = cal2.getNrOfEvents();
+    boolean ret = cal.isEmpty();
     verifyDefault();
-    assertEquals("Expecting size of eventList.", 123l, numEvents);
+    assertTrue(ret);
+  }
+
+  @Test
+  public void testIsEmpty_false() throws XWikiException {
+    long count = 123L;
+    expect(eventMgrMock.countEvents(eq(cal))).andReturn(count).once();
+    replayDefault();
+    boolean ret = cal.isEmpty();
+    verifyDefault();
+    assertFalse(ret);
   }
 
   @Test

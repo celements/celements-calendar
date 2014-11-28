@@ -104,6 +104,8 @@ public interface ICalendar {
 
   public long getNrOfEvents();
 
+  public boolean isEmpty();
+
   public IEvent getFirstEvent();
 
   public IEvent getLastEvent();

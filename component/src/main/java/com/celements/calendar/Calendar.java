@@ -229,8 +229,13 @@ public class Calendar implements ICalendar {
   }
 
   @Override
-  public long getNrOfEvents(){
+  public long getNrOfEvents() {
     return getEventMgr().countEvents(this);
+  }
+
+  @Override
+  public boolean isEmpty() {
+    return getNrOfEvents() == 0;
   }
 
   @Override

@@ -396,7 +396,7 @@ public class Calendar implements ICalendar {
     return eventMgr;
   }
 
-  void injectEventManager(IEventManager eventMgr) {
+  protected void injectEventManager(IEventManager eventMgr) {
     this.eventMgr = eventMgr;
   }
 
@@ -407,7 +407,7 @@ public class Calendar implements ICalendar {
     return calService;
   }
   
-  void injectCalService(ICalendarService calService) {
+  protected void injectCalService(ICalendarService calService) {
     this.calService = calService;
   }
 
@@ -418,7 +418,7 @@ public class Calendar implements ICalendar {
     return searchService;
   }
 
-  public void injectSearchService(ILuceneSearchService searchService) {
+  protected void injectSearchService(ILuceneSearchService searchService) {
     this.searchService = searchService;
   }
 

@@ -3,8 +3,8 @@ package com.celements.calendar.service;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
@@ -18,11 +18,13 @@ import com.celements.calendar.api.EventApi;
 import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.navigation.ICalendarNavigationService;
 import com.celements.calendar.navigation.factories.CalendarNavigation;
+import com.celements.calendar.navigation.factories.NavigationDetailException;
 import com.celements.calendar.navigation.factories.NavigationDetails;
 import com.celements.calendar.search.DefaultEventSearchQuery;
 import com.celements.calendar.search.IEventSearch;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.search.SearchTermEventSearchQuery;
+import com.celements.search.lucene.LuceneSearchException;
 import com.celements.search.lucene.query.LuceneQuery;
 import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiContext;
@@ -31,8 +33,7 @@ import com.xpn.xwiki.XWikiException;
 @Component("celcalendar")
 public class CalendarScriptService implements ScriptService {
 
-  private static Log LOGGER = LogFactory.getFactory().getInstance(
-      CalendarScriptService.class);
+  private static Logger LOGGER = LoggerFactory.getLogger(CalendarScriptService.class);
   
   @Requirement
   private IEventManager eventManager;
@@ -82,8 +83,13 @@ public class CalendarScriptService implements ScriptService {
       EventApi event) {
     NavigationDetails navDetails = null;
     if (hasViewRights(calConfigDocRef)) {
-      navDetails = calNavService.getNavigationDetails(calConfigDocRef, 
-          eventManager.getEvent(event.getDocumentReference()));
+      try {
+        navDetails = calNavService.getNavigationDetails(calConfigDocRef, 
+            eventManager.getEvent(event.getDocumentReference()));
+      } catch (Exception exc) {
+        LOGGER.error("Exception getting navDetails for cal '{}', event '{}'", 
+            calConfigDocRef, event, exc);
+      }
     }
     return navDetails;
   }
@@ -92,8 +98,13 @@ public class CalendarScriptService implements ScriptService {
       Date eventDate, int offset, int nb) {
     CalendarNavigation calNav = null;
     if (hasViewRights(calConfigDocRef)) {
-      calNav = calNavService.getCalendarNavigation(calConfigDocRef,
-          calNavService.getNavigationDetails(eventDate, offset), nb);
+      try {
+        calNav = calNavService.getCalendarNavigation(calConfigDocRef,
+            calNavService.getNavigationDetails(eventDate, offset), nb);
+      } catch (Exception exc) {
+        LOGGER.error("Exception getting calNav for cal '{}', eventDate '{}', "
+            + "offset '{}', nb '{}'", calConfigDocRef, eventDate, offset, nb, exc);
+      }
     }
     return calNav;
   }
@@ -102,8 +113,14 @@ public class CalendarScriptService implements ScriptService {
       Date eventDate, int offset, int nb, SearchTermEventSearchQuery query) {
     CalendarNavigation calNav = null;
     if (hasViewRights(calConfigDocRef)) {
-      calNav = calNavService.getCalendarNavigation(calConfigDocRef, 
-          calNavService.getNavigationDetails(eventDate, offset), nb, query);
+      try {
+        calNav = calNavService.getCalendarNavigation(calConfigDocRef, 
+            calNavService.getNavigationDetails(eventDate, offset), nb, query);
+      } catch (Exception exc) {
+        LOGGER.error("Exception getting calNav for cal '{}', eventDate '{}', "
+            + "offset '{}', nb '{}', query '{}'", calConfigDocRef, eventDate, offset, nb, 
+            query, exc);
+      }
     }
     return calNav;
   }

@@ -35,7 +35,7 @@ public class CalendarNavigationServiceTest extends AbstractBridgedComponentTestC
   }
 
   @Test
-  public void testGetNavigationDetails_date() {
+  public void testGetNavigationDetails_date() throws Exception {
     Date startDate = new Date();
     int offset = 10;
     expect(navDetailsFactoryMock.getNavigationDetails(eq(startDate), eq(offset))
@@ -46,7 +46,7 @@ public class CalendarNavigationServiceTest extends AbstractBridgedComponentTestC
   }
 
   @Test
-  public void testGetNavigationDetails() {
+  public void testGetNavigationDetails() throws Exception {
     DocumentReference calDocRef = new DocumentReference("myWiki", "mySpace", "myCalDoc");
     DocumentReference eventDocRef = new DocumentReference("myWiki", "mySpace", "myEvent");
     IEvent event = new Event(eventDocRef);
@@ -58,7 +58,7 @@ public class CalendarNavigationServiceTest extends AbstractBridgedComponentTestC
   }
 
   @Test
-  public void testGetNavigationDetails_query() {
+  public void testGetNavigationDetails_query() throws Exception {
     DocumentReference calDocRef = new DocumentReference("myWiki", "mySpace", "myCalDoc");
     DocumentReference eventDocRef = new DocumentReference("myWiki", "mySpace", "myEvent");
     IEvent event = new Event(eventDocRef);

@@ -13,6 +13,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.ICalendar;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
@@ -30,6 +31,7 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     database = "theDB";
     DocumentReference docRef = new DocumentReference(database, "someSpace", "someCal");
     expect(calMock.getDocumentReference()).andReturn(docRef).anyTimes();
+    expect(calMock.getWikiRef()).andReturn(new WikiReference(database)).anyTimes();
   }
   
   @Test

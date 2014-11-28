@@ -29,8 +29,8 @@ public class EventSearchTest extends AbstractBridgedComponentTestCase {
   public void testGetSearchResult() throws Exception {
     List<String> sortFields = Arrays.asList("field1", "field2");
     IEventSearchQuery query = new DefaultEventSearchQuery("theDB", sortFields);
-    expect(xwiki.getXWikiPreference(eq("search_skipChecks"), eq("search.skipChecks"), 
-        eq("0"), same(getContext()))).andReturn("1").once();
+    expect(xwiki.getXWikiPreferenceAsInt(eq("search_skipChecks"), eq("search.skipChecks"), 
+        eq(0), same(getContext()))).andReturn(1).once();
 
     replayDefault();
     EventSearchResult searchResult = eventSearch.getSearchResult(query);
@@ -46,8 +46,8 @@ public class EventSearchTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testGetSearchResult_null() throws Exception {
-    expect(xwiki.getXWikiPreference(eq("search_skipChecks"), eq("search.skipChecks"), 
-        eq("0"), same(getContext()))).andReturn("0").once();
+    expect(xwiki.getXWikiPreferenceAsInt(eq("search_skipChecks"), eq("search.skipChecks"), 
+        eq(0), same(getContext()))).andReturn(0).once();
     
     replayDefault();
     EventSearchResult searchResult = eventSearch.getSearchResult(null);

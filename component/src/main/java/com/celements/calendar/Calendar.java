@@ -369,9 +369,7 @@ public class Calendar implements ICalendar {
   public ICalendarEngineRole getEngine() {
     if (engine == null) {
       ICalendarEngineRole defaultEngine = Utils.getComponent(ICalendarEngineRole.class);
-      String engineHint = getContext().getWiki().getXWikiPreference("calendar_engine",
-          "calendar.engine", "default", getContext());
-      engine = Utils.getComponent(ICalendarEngineRole.class, engineHint);
+      engine = getEngineWithoutLimitCheck();
       if (!StringUtils.equals(engine.getName(), defaultEngine.getName())) {
         long limit = engine.getEngineLimit();
         long size = engine.countEvents(this);
@@ -384,6 +382,13 @@ public class Calendar implements ICalendar {
           getDocumentReference());
     }
     return engine;
+  }
+
+  @Override
+  public ICalendarEngineRole getEngineWithoutLimitCheck() {
+    String engineHint = getContext().getWiki().getXWikiPreference("calendar_engine",
+        "calendar.engine", "default", getContext());
+    return Utils.getComponent(ICalendarEngineRole.class, engineHint);
   }
 
   @Override

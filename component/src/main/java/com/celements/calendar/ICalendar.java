@@ -136,4 +136,6 @@ public interface ICalendar {
 
   public ICalendarEngineRole getEngine();
 
+  public ICalendarEngineRole getEngineWithoutLimitCheck();
+
 }

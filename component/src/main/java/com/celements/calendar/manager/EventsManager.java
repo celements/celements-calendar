@@ -156,12 +156,12 @@ public class EventsManager implements IEventManager {
   }
 
   private CalendarEngineLucene getLuceneEngine(ICalendar cal) {
-    ICalendarEngineRole engine = cal.getEngine();
+    ICalendarEngineRole engine = cal.getEngineWithoutLimitCheck();
     if (engine instanceof CalendarEngineLucene) {
       return (CalendarEngineLucene) engine;
     } else {
-      throw new IllegalStateException("searching events only possible if lucene engine "
-          + "is activated");
+      throw new IllegalStateException("events can only be searched when lucene calendar "
+          + "engine is activated");
     }
   }
 

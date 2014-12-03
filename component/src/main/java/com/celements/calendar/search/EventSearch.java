@@ -34,8 +34,7 @@ public class EventSearch implements IEventSearch {
     }
     LuceneQuery luceneQuery = query.getAsLuceneQuery();
     List<String> sortFields = query.getSortFields();
-    boolean skipChecks = query.skipChecks();
-    EventSearchResult result = new EventSearchResult(luceneQuery, sortFields, skipChecks);
+    EventSearchResult result = new EventSearchResult(luceneQuery, sortFields);
     LOGGER.info("getSearchResult: for luceneQuery '" + luceneQuery + "' got result '"
         + result + "'");
     return result;

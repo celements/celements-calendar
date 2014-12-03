@@ -16,28 +16,26 @@ import com.xpn.xwiki.web.Utils;
 public class DefaultEventSearchQuery implements IEventSearchQuery {
 
   private ILuceneSearchService searchService;
-  
+
   private final String database;
   private final LuceneQuery luceneQuery;
   private final List<String> sortFields;
-  private final boolean skipChecks;
-  
+
   public DefaultEventSearchQuery(String database) {
-    this(database, null, null, false);
+    this(database, null, null);
   }
 
   public DefaultEventSearchQuery(IEventSearchQuery query, List<String> altSortFields) {
     this(query.getDatabase(), query.getAsLuceneQuery(), getSortFields(query, 
-        altSortFields), query.skipChecks());
+        altSortFields));
   }
 
-  public DefaultEventSearchQuery(String database, List<String> sortFields, 
-      boolean skipChecks) {
-    this(database, null, sortFields, skipChecks);
+  public DefaultEventSearchQuery(String database, List<String> sortFields) {
+    this(database, null, sortFields);
   }
-  
+
   public DefaultEventSearchQuery(String database, LuceneQuery luceneQuery, 
-      List<String> sortFields, boolean skipChecks) {
+      List<String> sortFields) {
     this.database = database;
     this.luceneQuery = luceneQuery;
     if (sortFields != null) {
@@ -45,21 +43,19 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
     } else {
       this.sortFields = Collections.emptyList();
     }
-    this.skipChecks = skipChecks;
   }
-  
+
+  @Override
   public String getDatabase() {
     return database;
   }
-  
+
+  @Override
   public List<String> getSortFields() {
     return sortFields;
   }
-  
-  public boolean skipChecks() {
-    return skipChecks;
-  }
 
+  @Override
   public final LuceneQuery getAsLuceneQuery() {
     LuceneQuery query = luceneQuery;
     if (query == null) {
@@ -67,7 +63,7 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
     }
     return getAsLuceneQueryInternal(query);
   }
-  
+
   protected LuceneQuery getAsLuceneQueryInternal(LuceneQuery query) {    
     QueryRestriction eventObjRestr = getSearchService().createObjectRestriction(
         getCalEventClassRef());
@@ -76,7 +72,7 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
     }
     return query;
   }
-  
+
   protected final DocumentReference getCalEventClassRef() {
     return ((CalendarClasses) Utils.getComponent(IClassCollectionRole.class, 
         "celements.CalendarClasses")).getCalendarEventClassRef(getDatabase());
@@ -88,17 +84,17 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
     }
     return searchService;
   }
-  
+
   @Override
   public String toString() {
     return "DefaultEventSearchQuery [database=" + database + ", luceneQuery=" 
-        + luceneQuery + ", sortFields=" + sortFields + ", skipChecks=" + skipChecks + "]";
+        + luceneQuery + ", sortFields=" + sortFields + "]";
   }
 
   void injectQueryService(ILuceneSearchService searchService) {
     this.searchService = searchService;
   }
-  
+
   private static List<String> getSortFields(IEventSearchQuery query,
       List<String> altSortFields) {
     if (query.getSortFields() == null || query.getSortFields().isEmpty()) {

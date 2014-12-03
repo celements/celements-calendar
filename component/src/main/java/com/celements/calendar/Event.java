@@ -30,14 +30,17 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.EntityReference;
+import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.classes.CalendarClasses;
 import com.celements.calendar.service.ICalendarService;
-import com.celements.calendar.util.CalendarUtils;
 import com.celements.common.collections.ListUtils;
 import com.celements.web.plugin.cmd.EmptyCheckCommand;
 import com.celements.web.service.IWebUtilsService;
@@ -50,8 +53,8 @@ import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.web.Utils;
 
 public class Event implements IEvent {
-  
-  private static Log LOGGER = LogFactory.getFactory().getInstance(Event.class);
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(Event.class);
 
   private Map<String, BaseObject> eventObj;
   private DocumentReference eventDocRef;
@@ -512,8 +515,7 @@ public class Event implements IEvent {
     LOGGER.trace("template=" + template);
     if((obj == null) && (template != null) && !"".equals(template.trim()) && (!getContext(
         ).getWiki().exists(getDocumentReference(), getContext()))){
-      IWebUtilsService webUtils = Utils.getComponent(IWebUtilsService.class);
-      DocumentReference templateRef = webUtils.resolveDocumentReference(template);
+      DocumentReference templateRef = getWebUtilsService().resolveDocumentReference(template);
       if(getContext().getWiki().exists(templateRef, getContext())) {
         //FIXME using new BaseObject can cause problems. doc.newXObject is preferable
         //      check if this is really the right solution in this place.
@@ -547,14 +549,15 @@ public class Event implements IEvent {
     return getCalendar();
   }
 
+  @Override
   public ICalendar getCalendar() {
     if (calendar == null) {
-      try {
-        XWikiDocument calDoc = CalendarUtils.getInstance(
-            ).getCalendarPageByCalendarSpace(getEventPrimarySpace(), getContext());
-        calendar = internal_getCalendarByDoc(calDoc);
-      } catch (XWikiException e) {
-        LOGGER.debug("No calendar doc found.", e);
+      WikiReference wikiRef = getWebUtilsService().getWikiRef(
+          (EntityReference) getDocumentReference());
+      DocumentReference calDocRef = getCalService().getCalendarDocRefByCalendarSpace(
+          getEventPrimarySpace(), wikiRef);
+      if (calDocRef != null) {
+        calendar = getCalService().getCalendar(calDocRef);
       }
     }
     return calendar;
@@ -562,14 +565,6 @@ public class Event implements IEvent {
 
   public String getEventPrimarySpace() {
     return getDocumentReference().getLastSpaceReference().getName();
-  }
-
-  private ICalendar internal_getCalendarByDoc(XWikiDocument calDoc) {
-    if(calDoc != null) {
-      return ((CalendarUtils)CalendarUtils.getInstance()).getCalendarByCalDoc(calDoc,
-          false, getContext());
-    }
-    return null;
   }
 
   @Deprecated
@@ -710,47 +705,18 @@ public class Event implements IEvent {
     this.language = language;
   }
 
-  /**
-   * for Tests only!!!
-   * @param xWikiDocument
-   */
-  @Deprecated
-  void internal_setEventDoc(XWikiDocument testEventDoc) {
-    this.eventDocRef = testEventDoc.getDocumentReference();
-  }
-
-  public void internal_setDocumentReference(DocumentReference eventDocRef) {
-    this.eventDocRef = eventDocRef;
-  }
-
-  /**
-   * for Tests only!!!
-   * @param string
-   */
-  void internal_setDefaultLanguage(String defLang) {
-    defaultLang = defLang;
-  }
-
-  /**
-   * for Tests only!!!
-   * @param string
-   */
-  void internal_setCalendar(ICalendar testCalendar) {
-    calendar = testCalendar;
-  }
-
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof Event)) {
-      return false;
+    if (obj instanceof Event) {
+      Event other = (Event) obj;
+      return new EqualsBuilder().append(this.eventDocRef, other.eventDocRef).isEquals();
     }
-    Event theEvent = (Event) obj;
-    return theEvent.getDocumentReference().equals(this.getDocumentReference());
+    return false;
   }
 
   @Override
   public int hashCode() {
-    return this.getDocumentReference().hashCode();
+    return new HashCodeBuilder().append(this.eventDocRef).toHashCode();
   }
 
   @Override
@@ -763,12 +729,51 @@ public class Event implements IEvent {
     Execution execution = Utils.getComponent(Execution.class);
     return (XWikiContext)execution.getContext().getProperty("xwikicontext");
   }
+
+  /**
+   * for Tests only!!!
+   */
+  void injectEventDoc(XWikiDocument testEventDoc) {
+    this.eventDocRef = testEventDoc.getDocumentReference();
+  }
+
+  /**
+   * for Tests only!!!
+   */
+  public void injectDocumentReference(DocumentReference eventDocRef) {
+    this.eventDocRef = eventDocRef;
+  }
+
+  /**
+   * for Tests only!!!
+   */
+  void injectDefaultLanguage(String defLang) {
+    defaultLang = defLang;
+  }
+
+  /**
+   * for Tests only!!!
+   */
+  void injectCalendar(ICalendar testCalendar) {
+    calendar = testCalendar;
+  }
   
   protected ICalendarService getCalService() {
     if (calService == null) {
       calService = Utils.getComponent(ICalendarService.class);
     }
     return calService;
+  }
+
+  /**
+   * for Tests only!!!
+   */
+  protected void injectCalService(ICalendarService calService) {
+    this.calService = calService;
+  }
+
+  protected IWebUtilsService getWebUtilsService() {
+    return Utils.getComponent(IWebUtilsService.class);
   }
 
 }

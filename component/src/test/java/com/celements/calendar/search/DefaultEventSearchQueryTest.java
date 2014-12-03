@@ -19,7 +19,6 @@ public class DefaultEventSearchQueryTest extends AbstractBridgedComponentTestCas
 
     assertEquals(db, query.getDatabase());
     assertEquals(0, query.getSortFields().size());
-    assertFalse(query.skipChecks());
     String compareQueryString = 
         "(wiki:(+\"myDB\") AND object:(+\"Classes.CalendarEventClass\"))";
     assertEquals(compareQueryString, query.getAsLuceneQuery().getQueryString());
@@ -29,12 +28,10 @@ public class DefaultEventSearchQueryTest extends AbstractBridgedComponentTestCas
   public void testGetAsLuceneQuery_withSortField() throws ParseException {
     String db = "myDB";
     List<String> sortFields = Arrays.asList("field1", "field2");
-    boolean skipChecks = true;
-    IEventSearchQuery query = new DefaultEventSearchQuery(db, sortFields, skipChecks);
+    IEventSearchQuery query = new DefaultEventSearchQuery(db, sortFields);
 
     assertEquals(db, query.getDatabase());
     assertEquals(sortFields, query.getSortFields());
-    assertEquals(skipChecks, query.skipChecks());
     String compareQueryString = 
         "(wiki:(+\"myDB\") AND object:(+\"Classes.CalendarEventClass\"))";
     assertEquals(compareQueryString, query.getAsLuceneQuery().getQueryString());

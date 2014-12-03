@@ -19,21 +19,30 @@
  */
 package com.celements.calendar.api;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
+import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.api.Api;
 import com.xpn.xwiki.api.Document;
 import com.xpn.xwiki.api.Element;
 import com.xpn.xwiki.objects.BaseObject;
+import com.xpn.xwiki.web.Utils;
 
 public class EventApi extends Api {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(EventApi.class);
+
+  private static IWebUtilsService webUtilsService;
 
   private final IEvent event;
 
@@ -182,6 +191,53 @@ public class EventApi extends Api {
   @Override
   public String toString() {
     return event.toString();
+  }
+
+  public static List<EventApi> createList(List<IEvent> eventList, XWikiContext context
+      ) throws XWikiException {
+    return createList(eventList, context.getLanguage(), context);
+  }
+
+  public static List<EventApi> createList(List<IEvent> eventList, String language,
+      XWikiContext context) throws XWikiException {
+    long time = System.currentTimeMillis();
+    List<EventApi> eventApiList = new ArrayList<EventApi>();
+    for (IEvent event : eventList) {
+      EventApi eventApi = create(event, language, context);
+      if (eventApi != null) {
+        eventApiList.add(create(event, language, context));
+      }
+    }
+    time = System.currentTimeMillis() - time;
+    LOGGER.debug("createList: for {} elements took {}ms", eventList.size(), time);
+    return eventApiList;
+  }
+
+  public static EventApi create(IEvent event, XWikiContext context) throws XWikiException {
+    return create(event, context.getLanguage(), context);
+  }
+
+  public static EventApi create(IEvent event, String language, XWikiContext context
+      ) throws XWikiException {
+    EventApi eventApi = null;
+    if (event != null) {
+      String fullName = getWebUtilsService().getRefDefaultSerializer().serialize(
+          event.getDocumentReference());
+      if (context.getWiki().getRightService().hasAccessLevel("view", context.getUser(), 
+          fullName, context)) {
+        eventApi = new EventApi(event, language, context);
+      } else {
+        LOGGER.debug("No view rights on '{}' for user '{}'", fullName, context.getUser());
+      }
+    }
+    return eventApi;
+  }
+
+  private static IWebUtilsService getWebUtilsService() {
+    if (webUtilsService == null) {
+      webUtilsService = Utils.getComponent(IWebUtilsService.class);
+    }
+    return webUtilsService;
   }
 
 }

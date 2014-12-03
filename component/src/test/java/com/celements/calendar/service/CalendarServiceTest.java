@@ -228,6 +228,63 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
   }
 
   @Test
+  public void testGetEventSpaceRefForCalendar_noObject() throws XWikiException {
+    WikiReference wikiRef = new WikiReference("theDB");
+    DocumentReference calDocRef = new DocumentReference(wikiRef.getName(), "mySpace",
+        "myCalDoc");
+    XWikiDocument calDoc = new XWikiDocument(calDocRef);
+
+    expect(xwiki.getDocument(same(calDocRef), same(context))).andReturn(calDoc);
+
+    replayDefault();
+    SpaceReference spaceRef = calService.getEventSpaceRefForCalendar(calDocRef);
+    verifyDefault();
+
+    assertEquals(new SpaceReference(calDocRef.getName(), wikiRef), spaceRef);
+  }
+
+  @Test
+  public void testGetEventSpaceRefForCalendar_emptyObject() throws XWikiException {
+    WikiReference wikiRef = new WikiReference("theDB");
+    DocumentReference calDocRef = new DocumentReference(wikiRef.getName(), "mySpace",
+        "myCalDoc");
+    XWikiDocument calDoc = new XWikiDocument(calDocRef);
+    BaseObject calConfObj = new BaseObject();
+    calConfObj.setXClassReference(new DocumentReference(wikiRef.getName(), "Classes", 
+        "CalendarConfigClass"));
+    calDoc.setXObject(0, calConfObj);
+
+    expect(xwiki.getDocument(same(calDocRef), same(context))).andReturn(calDoc);
+
+    replayDefault();
+    SpaceReference spaceRef = calService.getEventSpaceRefForCalendar(calDocRef);
+    verifyDefault();
+
+    assertEquals(new SpaceReference(calDocRef.getName(), wikiRef), spaceRef);
+  }
+
+  @Test
+  public void testGetEventSpaceRefForCalendar() throws XWikiException {
+    WikiReference wikiRef = new WikiReference("theDB");
+    DocumentReference calDocRef = new DocumentReference(wikiRef.getName(), "mySpace",
+        "myCalDoc");
+    XWikiDocument calDoc = new XWikiDocument(calDocRef);
+    BaseObject calConfObj = new BaseObject();
+    calConfObj.setXClassReference(new DocumentReference(wikiRef.getName(), "Classes", 
+        "CalendarConfigClass"));
+    calDoc.setXObject(0, calConfObj);
+    calConfObj.setStringValue("calendarspace", "myCalSpace");
+
+    expect(xwiki.getDocument(same(calDocRef), same(context))).andReturn(calDoc);
+
+    replayDefault();
+    SpaceReference spaceRef = calService.getEventSpaceRefForCalendar(calDocRef);
+    verifyDefault();
+
+    assertEquals(new SpaceReference("myCalSpace", wikiRef), spaceRef);
+  }
+
+  @Test
   public void testGetEventSpaceForCalendar_noObject() throws XWikiException {
     DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "mySpace",
         "myCalDoc");
@@ -239,7 +296,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     String space = calService.getEventSpaceForCalendar(calDocRef);
     verifyDefault();
 
-    assertEquals("myCalDoc", space);
+    assertEquals(calDocRef.getName(), space);
   }
 
   @Test
@@ -259,7 +316,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     String space = calService.getEventSpaceForCalendar(calDocRef);
     verifyDefault();
 
-    assertEquals("", space);
+    assertEquals(calDocRef.getName(), space);
   }
 
   @Test

@@ -5,15 +5,15 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 public class UncertainCount {
 
-  private final int count;
+  private final long count;
   private final boolean uncertain;
 
-  public UncertainCount(int count, boolean uncertain) {
+  public UncertainCount(long count, boolean uncertain) {
     this.count = count >= 0 ? count : 0;
     this.uncertain = uncertain;
   }
 
-  public int getCount() {
+  public long getCount() {
     return count;
   }
 

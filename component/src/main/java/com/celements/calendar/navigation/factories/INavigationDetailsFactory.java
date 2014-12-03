@@ -6,15 +6,17 @@ import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.IEvent;
 import com.celements.calendar.search.IEventSearchQuery;
+import com.celements.search.lucene.LuceneSearchException;
 
 public interface INavigationDetailsFactory {
 
-  public NavigationDetails getNavigationDetails(Date startDate, int offset);
+  public NavigationDetails getNavigationDetails(Date startDate, int offset
+      ) throws NavigationDetailException;
 
-  public NavigationDetails getNavigationDetails(DocumentReference calConfigDocRef,
-      IEvent event);
+  public NavigationDetails getNavigationDetails(DocumentReference calDocRef, IEvent event
+      ) throws NavigationDetailException;
 
-  public NavigationDetails getNavigationDetails(DocumentReference calConfigDocRef,
-      IEvent event, IEventSearchQuery query);
+  public NavigationDetails getNavigationDetails(DocumentReference calDocRef, IEvent event, 
+      IEventSearchQuery query) throws NavigationDetailException, LuceneSearchException;
 
 }

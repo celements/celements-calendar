@@ -9,18 +9,18 @@ import org.junit.Test;
 public class CalendarNavigationTest {
 
   @Test
-  public void test_getters() {
+  public void test_getters() throws Exception {
     long time = new Date().getTime();
     int offset = 20;
     int count = 5;
     UncertainCount countBefore = new UncertainCount(count++, false);
     UncertainCount countAfter = new UncertainCount(count++, false);
     UncertainCount countTotal = new UncertainCount(count++, false);
-    NavigationDetails currNavDetails = new NavigationDetails(new Date(time++), offset++);
-    NavigationDetails startNavDetails = new NavigationDetails(new Date(time++), offset++);
-    NavigationDetails endNavDetails = new NavigationDetails(new Date(time++), offset++);
-    NavigationDetails prevNavDetails = new NavigationDetails(new Date(time++), offset++);
-    NavigationDetails nextNavDetails = new NavigationDetails(new Date(time++), offset++);
+    NavigationDetails currNavDetails = NavigationDetails.create(new Date(time++), offset++);
+    NavigationDetails startNavDetails = NavigationDetails.create(new Date(time++), offset++);
+    NavigationDetails endNavDetails = NavigationDetails.create(new Date(time++), offset++);
+    NavigationDetails prevNavDetails = NavigationDetails.create(new Date(time++), offset++);
+    NavigationDetails nextNavDetails = NavigationDetails.create(new Date(time++), offset++);
     CalendarNavigation calNav =  new CalendarNavigation(countBefore, countAfter, countTotal,
         currNavDetails, startNavDetails, endNavDetails, prevNavDetails, nextNavDetails);
 
@@ -36,7 +36,7 @@ public class CalendarNavigationTest {
 
 
   @Test
-  public void test_equals_hashCode() {
+  public void test_equals_hashCode() throws Exception {
     CalendarNavigation calNav1 =  getCalNav(new Date(1000).getTime(), 20, 5);
     CalendarNavigation calNav2 =  getCalNav(new Date(1000).getTime(), 20, 5);
     assertEquals(calNav1, calNav2);
@@ -55,15 +55,16 @@ public class CalendarNavigationTest {
     assertFalse(calNav1.hashCode() == calNav2.hashCode());
   }
 
-  private CalendarNavigation getCalNav(long time, int offset, int count) {
+  private CalendarNavigation getCalNav(long time, int offset, int count
+      ) throws NavigationDetailException {
     UncertainCount countBefore = new UncertainCount(count++, false);
     UncertainCount countAfter = new UncertainCount(count++, false);
     UncertainCount countTotal = new UncertainCount(count++, false);
-    NavigationDetails currNavDetails = new NavigationDetails(new Date(time++), offset++);
-    NavigationDetails startNavDetails = new NavigationDetails(new Date(time++), offset++);
-    NavigationDetails endNavDetails = new NavigationDetails(new Date(time++), offset++);
-    NavigationDetails prevNavDetails = new NavigationDetails(new Date(time++), offset++);
-    NavigationDetails nextNavDetails = new NavigationDetails(new Date(time++), offset++);
+    NavigationDetails currNavDetails = NavigationDetails.create(new Date(time++), offset++);
+    NavigationDetails startNavDetails = NavigationDetails.create(new Date(time++), offset++);
+    NavigationDetails endNavDetails = NavigationDetails.create(new Date(time++), offset++);
+    NavigationDetails prevNavDetails = NavigationDetails.create(new Date(time++), offset++);
+    NavigationDetails nextNavDetails = NavigationDetails.create(new Date(time++), offset++);
     return new CalendarNavigation(countBefore, countAfter, countTotal, currNavDetails,
         startNavDetails, endNavDetails, prevNavDetails, nextNavDetails);
   }

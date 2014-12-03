@@ -1,12 +1,19 @@
 package com.celements.calendar.api;
 
+import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.celements.calendar.search.EventSearchResult;
+import com.celements.search.lucene.LuceneSearchException;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.api.Api;
 
 public class EventSearchResultApi extends Api {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(EventSearchResultApi.class);
 
   private final EventSearchResult searchResult;
   private final String language;
@@ -33,16 +40,32 @@ public class EventSearchResultApi extends Api {
   }
 
   public List<EventApi> getEventList() {
-    return EventConverter.getEventApiList(searchResult.getEventList(), language, context);
+    try {
+      return EventApi.createList(searchResult.getEventList(), language, 
+          context);
+    } catch (Exception exc) {
+      LOGGER.error("Error getting all events", exc);
+    }
+    return Collections.emptyList();
   }
 
   public List<EventApi> getEventList(int offset, int limit) {
-    return EventConverter.getEventApiList(searchResult.getEventList(offset, limit),
-        language, context);
+    try {
+      return EventApi.createList(searchResult.getEventList(offset, limit),
+          language, context);
+    } catch (Exception exc) {
+      LOGGER.error("Error getting {} events starting at {}", limit, offset, exc);
+    }
+    return Collections.emptyList();
   }
 
   public int getSize() {
-    return searchResult.getSize();
+    try {
+      return searchResult.getSize();
+    } catch (LuceneSearchException exc) {
+      LOGGER.error("Error getting event size", exc);
+    }
+    return 0;
   }
 
   @Override

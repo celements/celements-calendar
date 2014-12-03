@@ -10,149 +10,169 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.model.reference.EntityReference;
-import org.xwiki.model.reference.SpaceReference;
-import org.xwiki.model.reference.WikiReference;
 
-import com.celements.calendar.Event;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
-import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.search.DefaultEventSearchQuery;
-import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
+import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.service.ICalendarService;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
-import com.xpn.xwiki.XWiki;
-import com.xpn.xwiki.XWikiContext;
-import com.xpn.xwiki.XWikiException;
-import com.xpn.xwiki.doc.XWikiDocument;
-import com.xpn.xwiki.web.Utils;
+import com.celements.search.lucene.LuceneSearchException;
 
 public class NavigationDetailsFactoryTest extends AbstractBridgedComponentTestCase {
 
-  private XWikiContext context;
-  private XWiki xwiki;
   private NavigationDetailsFactory navDetailsFactory;
-  private IEventManager eventMgrMock;
+  private ICalendarService calServiceMock;
+  private ICalendar calMock;
   private IEvent eventMock;
 
+  private DocumentReference calDocRef;
+  private DocumentReference evDocRef;
+
   @Before
-  public void setUp_EventsManagerTest() {
-    context = getContext();
-    xwiki = createMock(XWiki.class);
-    context.setWiki(xwiki);
+  public void setUp_NavigationDetailsFactoryTest() throws Exception {
     navDetailsFactory = new NavigationDetailsFactory();
-    eventMgrMock = createMock(IEventManager.class);
-    navDetailsFactory.injectEventMgr(eventMgrMock);
-    eventMock = createMock(IEvent.class);
+    calServiceMock = createMockAndAddToDefault(ICalendarService.class);
+    navDetailsFactory.injectCalService(calServiceMock);
+    calMock = createMockAndAddToDefault(ICalendar.class);
+    calDocRef = new DocumentReference("myWiki", "mySpace", "myCalDoc");
+    expect(calMock.getDocumentReference()).andReturn(calDocRef).anyTimes();
+    eventMock = createMockAndAddToDefault(IEvent.class);
+    evDocRef = new DocumentReference("myWiki", "evSpace", "ev1");
+    expect(eventMock.getDocumentReference()).andReturn(evDocRef).anyTimes();
   }
 
   @Test
-  public void testGetNavigationDetails_startDate_offset() {
+  public void testGetNavigationDetails_startDate_offset() throws Exception {
     Date startDate = new Date();
     int offset = 20;
-    NavigationDetails navDetails = navDetailsFactory.getNavigationDetails(startDate,
-        offset);
-    assertEquals(startDate, navDetails.getStartDate());
-    assertEquals(offset, navDetails.getOffset());
+    NavigationDetails ret = navDetailsFactory.getNavigationDetails(startDate, offset);
+    assertEquals(startDate, ret.getStartDate());
+    assertEquals(offset, ret.getOffset());
   }
 
   @Test
-  public void testGetNavigationDetails_noStartDate() throws XWikiException {
-    DocumentReference cal1Ref = new DocumentReference("myWiki", "mySpace", "cal1");
-    DocumentReference eventRef = new DocumentReference("myWiki", "myEventSpace", "Event1");
-    XWikiDocument cal1Doc = new XWikiDocument(cal1Ref);
-
-    expect(eventMock.getEventDate()).andReturn(null).atLeastOnce();
-    expect(eventMock.getDocumentReference()).andReturn(eventRef).anyTimes();
-    expect(xwiki.getDocument(eq(cal1Ref), same(context))).andReturn(cal1Doc).anyTimes();
-
-    replayAll();
-    assertNull(navDetailsFactory.getNavigationDetails(cal1Ref, eventMock));
-    verifyAll();
-  }
-
-  @Test
-  public void testGetNavigationDetails() throws XWikiException {
-    List<String> spaces = Arrays.asList("asdf");
-    EntityReference calSpace = new SpaceReference(spaces.get(0), new WikiReference(
-        "myWiki"));
+  public void testGetNavigationDetails() throws Exception {
     Date eventDate = new Date();
-    Date eventMidnightDate = getCalService().getMidnightDate(eventDate);
-    DocumentReference eventDocRef = new DocumentReference("myWiki", "mySpace", "myEvent");
-    eventDocRef.setParent(calSpace);
-    IEvent event2 = new Event(new DocumentReference("myWiki", "mySpace", "myEvent2"));
-    IEvent event3 = new Event(new DocumentReference("myWiki", "mySpace", "myEvent3"));
-    IEvent event4 = new Event(new DocumentReference("myWiki", "mySpace", "myEvent4"));
-    List<IEvent> eventList = Arrays.asList(event2, event3, eventMock, event4);
-    DocumentReference calDocRef = new DocumentReference("myWiki", "mySpace", "myCalDoc");
-    String lang = "de";
-
+    List<IEvent> eventList = Arrays.asList(eventMock);
+    
     expect(eventMock.getEventDate()).andReturn(eventDate).once();
+    expect(calServiceMock.getCalendar(eq(calDocRef), eq(eventDate))).andReturn(calMock
+        ).once();
+    expect(calMock.getStartDate()).andReturn(eventDate).once();
+    expect(calMock.getEventsInternal(eq(0), eq(10))).andReturn(eventList).once();
 
-    expect(xwiki.getSpacePreference(eq("default_language"), same(context))
-        ).andReturn(lang);
-    expect(eventMgrMock.getEventsInternal((ICalendar) anyObject(), eq(0), eq(10))
-        ).andReturn(eventList).once();
+    replayDefault();
+    NavigationDetails ret = navDetailsFactory.getNavigationDetails(calDocRef, eventMock);
+    verifyDefault();
 
-    replayAll();
-    NavigationDetails navDetails = navDetailsFactory.getNavigationDetails(calDocRef,
-        eventMock);
-    verifyAll();
-
-    assertNotNull(navDetails);
-    assertEquals(eventMidnightDate, navDetails.getStartDate());
-    assertEquals(2, navDetails.getOffset());
+    assertEquals(eventDate, ret.getStartDate());
+    assertEquals(0, ret.getOffset());
   }
 
   @Test
-  public void testGetNavigationDetails_query() throws XWikiException {
-    List<String> spaces = Arrays.asList("asdf");
-    EntityReference calSpace = new SpaceReference(spaces.get(0), new WikiReference(
-        "myWiki"));
+  public void testGetNavigationDetails_multiple() throws Exception {
     Date eventDate = new Date();
-    Date eventMidnightDate = getCalService().getMidnightDate(eventDate);
-    DocumentReference eventDocRef = new DocumentReference("myWiki", "mySpace", "myEvent");
-    eventDocRef.setParent(calSpace);
-    IEvent event2 = new Event(new DocumentReference("myWiki", "mySpace", "myEvent2"));
-    IEvent event3 = new Event(new DocumentReference("myWiki", "mySpace", "myEvent3"));
-    IEvent event4 = new Event(new DocumentReference("myWiki", "mySpace", "myEvent4"));
-    List<IEvent> eventList = Arrays.asList(event2, event3, eventMock, event4);
-    DocumentReference calDocRef = new DocumentReference("myWiki", "mySpace", "myCalDoc");
-    String lang = "de";
+    List<IEvent> eventList = Arrays.asList(createMockAndAddToDefault(IEvent.class), 
+        createMockAndAddToDefault(IEvent.class), 
+        eventMock, 
+        createMockAndAddToDefault(IEvent.class));
+    
+    expect(eventMock.getEventDate()).andReturn(eventDate).once();
+    expect(calServiceMock.getCalendar(eq(calDocRef), eq(eventDate))).andReturn(calMock
+        ).once();
+    expect(calMock.getStartDate()).andReturn(eventDate).once();
+    expect(calMock.getEventsInternal(eq(0), eq(10))).andReturn(eventList).once();
+
+    replayDefault();
+    NavigationDetails ret = navDetailsFactory.getNavigationDetails(calDocRef, eventMock);
+    verifyDefault();
+
+    assertEquals(eventDate, ret.getStartDate());
+    assertEquals(2, ret.getOffset());
+  }
+
+  @Test
+  public void testGetNavigationDetails_query() throws Exception {
+    Date eventDate = new Date();
+    List<IEvent> eventList = Arrays.asList(eventMock);
     IEventSearchQuery query = new DefaultEventSearchQuery("myWiki");
-    EventSearchResult searchResultMock = createMock(EventSearchResult.class);
+    EventSearchResult searchResultMock = createMockAndAddToDefault(EventSearchResult.class);
 
     expect(eventMock.getEventDate()).andReturn(eventDate).once();
-    expect(xwiki.getSpacePreference(eq("default_language"), same(context))
-        ).andReturn(lang);
-    expect(eventMgrMock.searchEvents((ICalendar) anyObject(), eq(query))).andReturn(
-        searchResultMock).once();
+    expect(calServiceMock.getCalendar(eq(calDocRef), eq(eventDate))).andReturn(calMock
+        ).once();
+    expect(calMock.getStartDate()).andReturn(eventDate).once();
+    expect(calMock.searchEvents(same(query))).andReturn(searchResultMock).once();
     expect(searchResultMock.getEventList(eq(0), eq(10))).andReturn(eventList).once();
 
-    replayAll(searchResultMock);
+    replayDefault();
     NavigationDetails navDetails = navDetailsFactory.getNavigationDetails(calDocRef,
         eventMock, query);
-    verifyAll(searchResultMock);
+    verifyDefault();
 
     assertNotNull(navDetails);
-    assertEquals(eventMidnightDate, navDetails.getStartDate());
-    assertEquals(2, navDetails.getOffset());
+    assertEquals(eventDate, navDetails.getStartDate());
+    assertEquals(0, navDetails.getOffset());
   }
 
-  private ICalendarService getCalService() {
-    return Utils.getComponent(ICalendarService.class);
+  @Test
+  public void testGetNavigationDetails_query_LSE() throws Exception {
+    Date eventDate = new Date();
+    IEventSearchQuery query = new DefaultEventSearchQuery("myWiki");
+    EventSearchResult searchResultMock = createMockAndAddToDefault(EventSearchResult.class);
+    Throwable cause = new LuceneSearchException();
+
+    expect(eventMock.getEventDate()).andReturn(eventDate).once();
+    expect(calServiceMock.getCalendar(eq(calDocRef), eq(eventDate))).andReturn(calMock
+        ).once();
+    expect(calMock.searchEvents(same(query))).andReturn(searchResultMock).once();
+    expect(searchResultMock.getEventList(eq(0), eq(10))).andThrow(cause).once();
+
+    replayDefault();
+    try {
+      navDetailsFactory.getNavigationDetails(calDocRef, eventMock, query);
+      fail("expecting LuceneSearchException");
+    } catch (LuceneSearchException lse) {
+      assertSame(cause, lse);
+    }
+    verifyDefault();
   }
 
-  private void replayAll(Object ... mocks) {
-    replay(eventMgrMock, eventMock);
-    replay(mocks);
+  @Test
+  public void testGetNavigationDetails_NDE_noStartDate() throws Exception {
+    expect(eventMock.getEventDate()).andReturn(null).once();
+
+    replayDefault();
+    try {
+      navDetailsFactory.getNavigationDetails(calDocRef, eventMock);
+      fail("expecting NavigationDetailException");
+    } catch (NavigationDetailException iae) {
+      // expected
+    }
+    verifyDefault();
   }
 
-  private void verifyAll(Object ... mocks) {
-    verify(eventMgrMock, eventMock);
-    verify(mocks);
+  @Test
+  public void testGetNavigationDetails_NDE_notFound() throws Exception {
+    Date eventDate = new Date();
+    List<IEvent> eventList = Arrays.asList(createMockAndAddToDefault(IEvent.class), 
+        createMockAndAddToDefault(IEvent.class));
+    
+    expect(eventMock.getEventDate()).andReturn(eventDate).once();
+    expect(calServiceMock.getCalendar(eq(calDocRef), eq(eventDate))).andReturn(calMock
+        ).once();
+    expect(calMock.getEventsInternal(eq(0), eq(10))).andReturn(eventList).once();
+
+    replayDefault();
+    try {
+      navDetailsFactory.getNavigationDetails(calDocRef, eventMock);
+      fail("expecting NavigationDetailException");
+    } catch (NavigationDetailException iae) {
+      // expected
+    }
+    verifyDefault();
   }
 
 }

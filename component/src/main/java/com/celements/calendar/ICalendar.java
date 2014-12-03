@@ -23,6 +23,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.SpaceReference;
+import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.engine.ICalendarEngineRole;
@@ -32,6 +34,38 @@ import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.doc.XWikiDocument;
 
 public interface ICalendar {
+
+  public DocumentReference getDocumentReference();
+  
+  public WikiReference getWikiRef();
+
+  public XWikiDocument getCalDoc();
+
+  public boolean isArchive();
+
+  public Date getStartDate();
+
+  /**
+   * Sets date and time of Calendar
+   * 
+   * @param newStartDate
+   */
+  public ICalendar setStartTimestamp(Date newStartDate);
+
+  /**
+   * Sets only date of Calendar (time to midnight)
+   * 
+   * @param newStartDate
+   */
+  public ICalendar setStartDate(Date newStartDate);
+
+  public String getLanguage();
+
+  public ICalendar setLanguage(String language);
+  
+  public SpaceReference getEventSpaceRef();
+  
+  public List<String> getAllowedSpaces();
 
   /**
    * getAllEvents
@@ -70,7 +104,11 @@ public interface ICalendar {
 
   public long getNrOfEvents();
 
-  public boolean isArchive();
+  public boolean isEmpty();
+
+  public IEvent getFirstEvent();
+
+  public IEvent getLastEvent();
 
   public List<String> getOverviewFields();
 
@@ -96,36 +134,8 @@ public interface ICalendar {
 
   public boolean isSubscribable();
 
-  public XWikiDocument getCalDoc();
-
-  /**
-   * Sets date and time of Calendar
-   * 
-   * @param newStartDate
-   */
-  public void setStartTimestamp(Date newStartDate);
-
-  /**
-   * Sets only date of Calendar (time to midnight)
-   * 
-   * @param newStartDate
-   */
-  public void setStartDate(Date newStartDate);
-
-  public Date getStartDate();
-
-  public DocumentReference getDocumentReference();
-
-  public String getLanguage();
-
-  public void setLanguage(String language);
-  
-  public List<String> getAllowedSpaces();
-
   public ICalendarEngineRole getEngine();
 
-  public IEvent getFirstEvent();
-
-  public IEvent getLastEvent();
+  public ICalendarEngineRole getEngineWithoutLimitCheck();
 
 }

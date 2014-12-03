@@ -74,10 +74,9 @@ public class CalendarNavigation {
       CalendarNavigation other = (CalendarNavigation) obj;
       return new EqualsBuilder().append(countTotal, other.countTotal).append(countBefore,
           other.countBefore).append(countAfter, other.countAfter).append(currNavDetails,
-              other.currNavDetails).append(startNavDetails, other.startNavDetails).append(
-                  endNavDetails, other.endNavDetails).append(prevNavDetails,
-                      other.prevNavDetails).append(nextNavDetails, other.nextNavDetails
-                          ).isEquals();
+          other.currNavDetails).append(startNavDetails, other.startNavDetails).append(
+          endNavDetails, other.endNavDetails).append(prevNavDetails, other.prevNavDetails
+          ).append(nextNavDetails, other.nextNavDetails).isEquals();
     } else {
       return false;
     }

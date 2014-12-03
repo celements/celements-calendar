@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.xwiki.model.reference.DocumentReference;
 
+import com.celements.calendar.service.ICalendarService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -11,14 +12,7 @@ import com.xpn.xwiki.doc.XWikiDocument;
 public interface ICalendarUtils {
 
   /**
-   * 
-   * @param calSpace
-   * @param context
-   * @return
-   * @throws XWikiException
-   * 
-   * @Deprecated instead use calendar service call for
-   *             DocumentReference getCalendarDocRefByCalendarSpace(String)
+   * @Deprecated instead use {@link ICalendarService#getCalendarDocRefByCalendarSpace}
    */
   @Deprecated
   public XWikiDocument getCalendarPageByCalendarSpace(String calSpace,
@@ -28,31 +22,28 @@ public interface ICalendarUtils {
       ) throws XWikiException;
 
   /**
-   * @Deprecated use calendar service getAllowedSpaces(DocumentReference) instead
+   * @Deprecated instead use {@link ICalendarService#getAllowedSpaces}
    */
   @Deprecated
   public String getAllowedSpacesHQL(XWikiDocument calDoc, XWikiContext context
       ) throws XWikiException;
 
   /**
-   * @Deprecated use calendar service getEventSpaceForCalendar(DocumentReference)
-   *             instead
+   * @Deprecated instead use {@link ICalendarService#getEventSpaceRefForCalendar}
    */
   @Deprecated
   public String getEventSpaceForCalendar(XWikiDocument doc, XWikiContext context
       ) throws XWikiException;
 
   /**
-   * @Deprecated use calendar service getEventSpaceForCalendar(DocumentReference)
-   *             instead
+   * @Deprecated instead use {@link ICalendarService#getEventSpaceRefForCalendar}
    */
   @Deprecated
   public String getEventSpaceForCalendar(String fullName, XWikiContext context
       ) throws XWikiException;
 
   /**
-   * @Deprecated use calendar service getEventSpaceForCalendar(DocumentReference)
-   *             instead
+   * @Deprecated instead use {@link ICalendarService#getEventSpaceRefForCalendar}
    */
   @Deprecated
   public String getEventSpaceForCalendar(DocumentReference calDocRef, XWikiContext context

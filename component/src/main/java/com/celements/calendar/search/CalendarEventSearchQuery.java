@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.celements.calendar.ICalendar;
 import com.celements.calendar.classes.CalendarClasses;
 import com.celements.search.lucene.query.LuceneQuery;
 import com.celements.search.lucene.query.QueryRestrictionGroup.Type;
@@ -22,23 +23,20 @@ public class CalendarEventSearchQuery extends DefaultEventSearchQuery {
   private final String lang;
   private final List<String> allowedSpaces;
   
-  public CalendarEventSearchQuery(String database, Date startDate, boolean isArchive, 
-      String lang, List<String> allowedSpaces, List<String> sortFields, 
-      boolean skipChecks) {
-    super(database, getDefaultSortFields(sortFields, isArchive), skipChecks);
-    this.startDate = startDate;
-    this.isArchive = isArchive;
-    this.lang = lang;
-    this.allowedSpaces = allowedSpaces;
+  public CalendarEventSearchQuery(ICalendar cal, List<String> sortFields) {
+    super(cal.getWikiRef().getName(), getDefaultSortFields(sortFields, cal.isArchive()));
+    this.startDate = cal.getStartDate();
+    this.isArchive = cal.isArchive();
+    this.lang = cal.getLanguage();
+    this.allowedSpaces = cal.getAllowedSpaces();
   }
-  
-  public CalendarEventSearchQuery(IEventSearchQuery query, Date startDate,
-      boolean isArchive, String lang, List<String> allowedSpaces) {
-    super(query, getDefaultSortFields(null, isArchive));
-    this.startDate = startDate;
-    this.isArchive = isArchive;
-    this.lang = lang;
-    this.allowedSpaces = allowedSpaces;
+
+  public CalendarEventSearchQuery(ICalendar cal, IEventSearchQuery query) {
+    super(query, getDefaultSortFields(null, cal.isArchive()));
+    this.startDate = cal.getStartDate();
+    this.isArchive = cal.isArchive();
+    this.lang = cal.getLanguage();
+    this.allowedSpaces = cal.getAllowedSpaces();
   }
 
   @Override
@@ -67,9 +65,8 @@ public class CalendarEventSearchQuery extends DefaultEventSearchQuery {
         ret.add("\"" + space + "\"");
       }
     } else {
-      // is there a nicer way to avoid returning events if there are no allowed spaces?
-      // if an empty list is returned here instead, then all events will be listed!
-      ret.add("\"NullSpace\"");
+      // inexistent space
+      ret.add("\".\"");
     }
     return ret;
   }

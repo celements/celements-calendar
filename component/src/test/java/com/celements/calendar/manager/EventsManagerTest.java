@@ -119,6 +119,7 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testSearchEvents_dirtyLuceneWorkaraound() throws Exception {
+    expect(calMock.getEngineWithoutLimitCheck()).andReturn(engineMock).once();
     IEventSearchQuery query = new DefaultEventSearchQuery(getContext().getDatabase());
     EventSearchResult mockEventSearchResults = createMockAndAddToDefault(
         EventSearchResult.class);

@@ -14,7 +14,7 @@ import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.search.EventSearchResult;
-import com.celements.calendar.search.IEventSearch;
+import com.celements.calendar.search.IEventSearchRole;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 import com.celements.search.lucene.ILuceneSearchService;
@@ -24,7 +24,7 @@ import com.xpn.xwiki.web.Utils;
 public class AbstractCalendarEngineTest extends AbstractBridgedComponentTestCase {
 
   private CalendarEngineLucene engine;
-  private IEventSearch eventSearchMock;
+  private IEventSearchRole eventSearchMock;
   private ILuceneSearchService searchServiceMock;
   private EventSearchResult eventSearchResultMock;
   private ICalendar calMock;
@@ -33,8 +33,8 @@ public class AbstractCalendarEngineTest extends AbstractBridgedComponentTestCase
   @Before
   public void setUp_AbstractCalendarEngineTest() {
     engine = (CalendarEngineLucene) Utils.getComponent(ICalendarEngineRole.class, "lucene");
-    eventSearchMock = createMockAndAddToDefault(IEventSearch.class);
-    engine.injectEventSearch(eventSearchMock);
+    eventSearchMock = createMockAndAddToDefault(IEventSearchRole.class);
+    engine.injectEventSearchService(eventSearchMock);
     searchServiceMock = createMockAndAddToDefault(ILuceneSearchService.class);
     engine.injectSearchService(searchServiceMock);
     eventSearchResultMock = createMockAndAddToDefault(EventSearchResult.class);

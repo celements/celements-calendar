@@ -8,7 +8,7 @@ com.celements.calendar.listener.DocumentUpdatingListener
 com.celements.calendar.service.CalendarScriptService
 com.celements.calendar.service.CalendarService
 com.celements.calendar.manager.EventsManager
-com.celements.calendar.search.EventSearch
+com.celements.calendar.search.EventSearchService
 com.celements.calendar.engine.CalendarEngineHQL
 com.celements.calendar.engine.CalendarEngineLucene
 com.celements.calendar.navigation.CalendarNavigationService

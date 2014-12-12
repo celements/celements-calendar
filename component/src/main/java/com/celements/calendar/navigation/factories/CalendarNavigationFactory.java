@@ -12,6 +12,7 @@ import com.celements.calendar.ICalendarClassConfig;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.search.DateEventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
+import com.celements.calendar.search.IEventSearchRole;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.service.ICalendarService;
 import com.celements.search.lucene.ILuceneSearchService;
@@ -24,6 +25,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
       CalendarNavigationFactory.class);
 
   private ICalendarService calService;
+  private IEventSearchRole eventSearchService;
   private INavigationDetailsFactory navDetailsFactory;
   private ILuceneSearchService searchService;
 
@@ -298,7 +300,8 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
         + "], offset [" + offset + "], nb [" + nb + "], isSearch [" + isSearch + "].");
     boolean[] uncertain = new boolean[3];
     if (isSearch) {
-      int resultLimit = getSearchService().getResultLimit();
+      int resultLimit = getSearchService().getResultLimit(getEventSearchService(
+          ).skipChecks());
       uncertain[0] = calArchiveSize >= resultLimit;
       uncertain[1] = calSize >= resultLimit;
       uncertain[2] = uncertain[0] || uncertain[1];
@@ -370,6 +373,17 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
   void injectNavDetailsFactory(INavigationDetailsFactory navDetailsFactory) {
     this.navDetailsFactory = navDetailsFactory;
+  }
+
+  private IEventSearchRole getEventSearchService() {
+    if (eventSearchService == null) {
+      eventSearchService = Utils.getComponent(IEventSearchRole.class);
+    }
+    return eventSearchService;
+  }
+
+  void injectEventSearchService(IEventSearchRole eventSearch) {
+    this.eventSearchService = eventSearch;
   }
 
   private ILuceneSearchService getSearchService() {

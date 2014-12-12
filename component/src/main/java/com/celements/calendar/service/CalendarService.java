@@ -12,8 +12,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
@@ -43,7 +43,7 @@ public class CalendarService implements ICalendarService {
   @Requirement("celements.CalendarClasses")
   private IClassCollectionRole calClasses;
 
-  private static Log LOGGER = LogFactory.getFactory().getInstance(CalendarService.class);
+  private static Logger LOGGER = LoggerFactory.getLogger(CalendarService.class);
 
   public static final String CALENDAR_SERVICE_START_DATE =
       "com.celements.calendar.service.CalendarService.startDate";

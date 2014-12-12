@@ -20,7 +20,6 @@ import com.celements.calendar.navigation.ICalendarNavigationService;
 import com.celements.calendar.navigation.factories.CalendarNavigation;
 import com.celements.calendar.navigation.factories.NavigationDetails;
 import com.celements.calendar.search.DefaultEventSearchQuery;
-import com.celements.calendar.search.IEventSearch;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.search.SearchTermEventSearchQuery;
 import com.celements.search.lucene.query.LuceneQuery;
@@ -41,9 +40,6 @@ public class CalendarScriptService implements ScriptService {
 
   @Requirement
   private ICalendarNavigationService calNavService;
-
-  @Requirement
-  private IEventSearch eventSearch;
   
   @Requirement
   private IWebUtilsService webUtilsService;

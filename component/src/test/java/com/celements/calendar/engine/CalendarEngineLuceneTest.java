@@ -21,7 +21,7 @@ import com.celements.calendar.IEvent;
 import com.celements.calendar.search.CalendarEventSearchQuery;
 import com.celements.calendar.search.DefaultEventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
-import com.celements.calendar.search.IEventSearch;
+import com.celements.calendar.search.IEventSearchRole;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 import com.celements.search.lucene.ILuceneSearchService;
@@ -32,7 +32,7 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
   private static final DateFormat SDF = new SimpleDateFormat("yyyyMMddHHmm");
 
   private CalendarEngineLucene engine;
-  private IEventSearch eventSearchMock;
+  private IEventSearchRole eventSearchMock;
   private ILuceneSearchService searchServiceMock;
   private EventSearchResult eventSearchResultMock;
   private ICalendar calMock;
@@ -42,8 +42,8 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
   public void setUp_CalendarEngineLuceneTest() {
     engine = (CalendarEngineLucene) Utils.getComponent(ICalendarEngineRole.class, 
         "lucene");
-    eventSearchMock = createMockAndAddToDefault(IEventSearch.class);
-    engine.injectEventSearch(eventSearchMock);
+    eventSearchMock = createMockAndAddToDefault(IEventSearchRole.class);
+    engine.injectEventSearchService(eventSearchMock);
     searchServiceMock = createMockAndAddToDefault(ILuceneSearchService.class);
     engine.injectSearchService(searchServiceMock);
     eventSearchResultMock = createMockAndAddToDefault(EventSearchResult.class);
@@ -62,7 +62,9 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
   @Test
   public void testGetEngineLimit() {
     int limit = 5;
-    expect(searchServiceMock.getResultLimit()).andReturn(limit).once();
+    boolean skipChecks = true;
+    expect(eventSearchMock.skipChecks()).andReturn(skipChecks).once();
+    expect(searchServiceMock.getResultLimit(eq(skipChecks))).andReturn(limit).once();
     replayDefault();
     assertEquals(limit, engine.getEngineLimit());
     verifyDefault();

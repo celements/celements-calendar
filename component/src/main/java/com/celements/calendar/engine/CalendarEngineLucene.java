@@ -12,7 +12,7 @@ import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.search.CalendarEventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
-import com.celements.calendar.search.IEventSearch;
+import com.celements.calendar.search.IEventSearchRole;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.search.lucene.ILuceneSearchService;
 import com.celements.search.lucene.LuceneSearchException;
@@ -28,7 +28,7 @@ public class CalendarEngineLucene extends AbstractCalendarEngine {
   public static final String NAME = "lucene";
 
   @Requirement
-  private IEventSearch eventSearch;
+  private IEventSearchRole eventSearchService;
 
   @Requirement
   private ILuceneSearchService searchService;
@@ -40,7 +40,7 @@ public class CalendarEngineLucene extends AbstractCalendarEngine {
   
   @Override
   public long getEngineLimit() {
-    return searchService.getResultLimit();
+    return searchService.getResultLimit(eventSearchService.skipChecks());
   }
 
   @Override
@@ -114,7 +114,7 @@ public class CalendarEngineLucene extends AbstractCalendarEngine {
     } else {
       calSearchQuery = new CalendarEventSearchQuery(cal, query);
     }
-    EventSearchResult searchResult = eventSearch.getSearchResult(calSearchQuery);
+    EventSearchResult searchResult = eventSearchService.getSearchResult(calSearchQuery);
     LOGGER.debug("searchEvents: " + searchResult);
     return searchResult;
   }
@@ -135,8 +135,8 @@ public class CalendarEngineLucene extends AbstractCalendarEngine {
     return LOGGER;
   }
 
-  void injectEventSearch(IEventSearch eventSearch) {
-    this.eventSearch = eventSearch;
+  void injectEventSearchService(IEventSearchRole eventSearchService) {
+    this.eventSearchService = eventSearchService;
   }
 
   void injectSearchService(ILuceneSearchService searchService) {

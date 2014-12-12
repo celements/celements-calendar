@@ -122,7 +122,7 @@ public class NavigationDetailsFactoryTest extends AbstractBridgedComponentTestCa
     Date eventDate = new Date();
     IEventSearchQuery query = new DefaultEventSearchQuery("myWiki");
     EventSearchResult searchResultMock = createMockAndAddToDefault(EventSearchResult.class);
-    Throwable cause = new LuceneSearchException();
+    Throwable cause = createMockAndAddToDefault(LuceneSearchException.class);
 
     expect(eventMock.getEventDate()).andReturn(eventDate).once();
     expect(calServiceMock.getCalendar(eq(calDocRef), eq(eventDate))).andReturn(calMock

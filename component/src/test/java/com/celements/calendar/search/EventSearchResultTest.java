@@ -50,8 +50,8 @@ public class EventSearchResultTest extends AbstractBridgedComponentTestCase {
     List<String> languages = null;
     LuceneSearchResult resultMock = createMockAndAddToDefault(LuceneSearchResult.class);
     EventSearchResult result = getEventSearchResult(query, sortFields, true);
-    expect(searchServiceMock.search(same(query), eq(sortFields), eq(languages))
-        ).andReturn(resultMock).once();
+    expect(searchServiceMock.searchWithoutChecks(same(query), eq(sortFields), 
+        eq(languages))).andReturn(resultMock).once();
     
     replayDefault();
     LuceneSearchResult ret = result.getSearchResult();
@@ -91,7 +91,7 @@ public class EventSearchResultTest extends AbstractBridgedComponentTestCase {
     List<String> languages = null;
     int offset = 5;
     int limit = 10;
-    Throwable cause = new LuceneSearchException();
+    Throwable cause = createMockAndAddToDefault(LuceneSearchException.class);
     LuceneSearchResult resultMock = createMockAndAddToDefault(LuceneSearchResult.class);
     EventSearchResult result = getEventSearchResult(query, sortFields, false);
     expect(searchServiceMock.search(same(query), eq(sortFields), eq(languages))
@@ -133,7 +133,7 @@ public class EventSearchResultTest extends AbstractBridgedComponentTestCase {
     List<String> sortFields = Arrays.asList("field1", "field2");
     List<String> languages = null;
     LuceneSearchResult resultMock = createMockAndAddToDefault(LuceneSearchResult.class);
-    Throwable cause = new LuceneSearchException();
+    Throwable cause = createMockAndAddToDefault(LuceneSearchException.class);
  
     EventSearchResult result = getEventSearchResult(query, sortFields, false);
     expect(searchServiceMock.search(same(query), eq(sortFields), eq(languages))
@@ -152,7 +152,7 @@ public class EventSearchResultTest extends AbstractBridgedComponentTestCase {
 
   private EventSearchResult getEventSearchResult(LuceneQuery query, 
       List<String> sortFields, boolean skipChecks) {
-    EventSearchResult searchResult = new EventSearchResult(query, sortFields);
+    EventSearchResult searchResult = new EventSearchResult(query, sortFields, skipChecks);
     searchResult.injectSearchService(searchServiceMock);
     return searchResult;
   }

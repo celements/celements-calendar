@@ -1,10 +1,10 @@
-package com.celements.calendar.event;
+package com.celements.calendar.observation.event;
 
 import org.xwiki.bridge.event.AbstractDocumentEvent;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.observation.event.filter.EventFilter;
 
-public class EventCreatingEvent extends AbstractDocumentEvent {
+public class CalendarDeletedEvent extends AbstractDocumentEvent {
 
   private static final long serialVersionUID = 1L;
 
@@ -13,7 +13,7 @@ public class EventCreatingEvent extends AbstractDocumentEvent {
    * {@link org.xwiki.observation.event.filter.AlwaysMatchingEventFilter}, meaning that this event will match any
    * other document delete event.
    */
-  public EventCreatingEvent() {
+  public CalendarDeletedEvent() {
     super();
   }
   
@@ -23,7 +23,7 @@ public class EventCreatingEvent extends AbstractDocumentEvent {
    * 
    * @param documentReference the reference of the document to match
    */
-  public EventCreatingEvent(DocumentReference documentReference) {
+  public CalendarDeletedEvent(DocumentReference documentReference) {
     super(documentReference);
   }
   
@@ -32,7 +32,7 @@ public class EventCreatingEvent extends AbstractDocumentEvent {
    * 
    * @param eventFilter the filter to use for matching events
    */
-  public EventCreatingEvent(EventFilter eventFilter) {
+  public CalendarDeletedEvent(EventFilter eventFilter) {
     super(eventFilter);
   }
 }

@@ -1,30 +1,30 @@
-package com.celements.calendar.listener;
+package com.celements.calendar.observation.listener;
 
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xwiki.bridge.event.DocumentCreatedEvent;
+import org.xwiki.bridge.event.DocumentUpdatedEvent;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.observation.event.Event;
 
-import com.celements.calendar.event.CalendarCreatedEvent;
-import com.celements.calendar.event.EventCreatedEvent;
+import com.celements.calendar.observation.event.CalendarUpdatedEvent;
+import com.celements.calendar.observation.event.EventUpdatedEvent;
 import com.xpn.xwiki.doc.XWikiDocument;
 
-@Component("calendar.docCreated")
-public class DocumentCreatedListener extends AbstractDocumentListener {
+@Component("calendar.docUpdated")
+public class DocumentUpdatedListener extends AbstractDocumentListener {
 
   private static Log LOGGER = LogFactory.getFactory().getInstance(
-      DocumentCreatedListener.class);
+      DocumentUpdatedListener.class);
 
   public List<Event> getEvents() {
-    return Arrays.<Event> asList(new DocumentCreatedEvent());
+    return Arrays.<Event> asList(new DocumentUpdatedEvent());
   }
 
   public String getName() {
-    return "calendar.docCreated";
+    return "calendar.docUpdated";
   }
 
   public void onEvent(Event event, Object source, Object data) {
@@ -32,8 +32,8 @@ public class DocumentCreatedListener extends AbstractDocumentListener {
     if ((document != null) && !remoteObservationManagerContext.isRemoteState()) {
       LOGGER.debug("onEvent: got event for [" + event.getClass() + "] on document ["
           + document.getDocumentReference() + "].");
-      notifyIfCalendar(document, CalendarCreatedEvent.class);
-      notifyIfEvent(document, EventCreatedEvent.class);
+      notifyIfCalendar(document, CalendarUpdatedEvent.class);
+      notifyIfEvent(document, EventUpdatedEvent.class);
     } else {
       LOGGER.trace("onEvent: got event for [" + event.getClass() + "] on source ["
           + source + "] and data [" + data + "], isLocalEvent ["

@@ -1,4 +1,4 @@
-package com.celements.calendar.listener;
+package com.celements.calendar.observation.listener;
 
 import java.util.HashMap;
 import java.util.Map;

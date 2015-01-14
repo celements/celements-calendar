@@ -1,10 +1,4 @@
 com.celements.calendar.classes.CalendarClasses
-com.celements.calendar.listener.DocumentCreatedListener
-com.celements.calendar.listener.DocumentCreatingListener
-com.celements.calendar.listener.DocumentDeletedListener
-com.celements.calendar.listener.DocumentDeletingListener
-com.celements.calendar.listener.DocumentUpdatedListener
-com.celements.calendar.listener.DocumentUpdatingListener
 com.celements.calendar.service.CalendarScriptService
 com.celements.calendar.service.CalendarService
 com.celements.calendar.manager.EventsManager
@@ -13,3 +7,9 @@ com.celements.calendar.engine.CalendarEngineHQL
 com.celements.calendar.engine.CalendarEngineLucene
 com.celements.calendar.navigation.CalendarNavigationService
 com.celements.migrator.ChangeCalendarDateFormatMigrator
+com.celements.calendar.observation.listener.CalendarCreateListener
+com.celements.calendar.observation.listener.CalendarUpdateListener
+com.celements.calendar.observation.listener.CalendarDeleteListener
+com.celements.calendar.observation.listener.EventCreateListener
+com.celements.calendar.observation.listener.EventUpdateListener
+com.celements.calendar.observation.listener.EventDeleteListener

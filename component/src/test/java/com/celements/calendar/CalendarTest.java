@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.junit.Before;
@@ -247,8 +248,10 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
 
   @Test
   public void testGetStartDate() {
+    java.util.Calendar calendar = GregorianCalendar.getInstance();
+    calendar.add(java.util.Calendar.SECOND, -5);
+    Date startDateBefore = calendar.getTime();
     ICalendar cal = new Calendar(calDocRef, isArchiv);
-    Date startDateBefore = new Date();
     Date startDateAfter = new Date();
     assertTrue(startDateBefore.compareTo(cal.getStartDate()) <= 0);
     assertTrue(startDateAfter.compareTo(cal.getStartDate()) >= 0);

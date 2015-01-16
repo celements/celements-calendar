@@ -247,14 +247,16 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
   }
 
   @Test
-  public void testGetStartDate() {
-    java.util.Calendar calendar = GregorianCalendar.getInstance();
-    calendar.add(java.util.Calendar.SECOND, -5);
-    Date startDateBefore = calendar.getTime();
+  public void testGetStartDate_newDate() {
+    java.util.Calendar gregCal = GregorianCalendar.getInstance();
+    gregCal.add(java.util.Calendar.SECOND, -5);
+    Date startDateBefore = gregCal.getTime();
     ICalendar cal = new Calendar(calDocRef, isArchiv);
-    Date startDateAfter = new Date();
-    assertTrue(startDateBefore.compareTo(cal.getStartDate()) <= 0);
-    assertTrue(startDateAfter.compareTo(cal.getStartDate()) >= 0);
+    gregCal = GregorianCalendar.getInstance();
+    gregCal.add(java.util.Calendar.SECOND, 5);
+    Date startDateAfter = gregCal.getTime();
+    assertTrue(startDateBefore.before(cal.getStartDate()));
+    assertTrue(startDateAfter.after(cal.getStartDate()));
   }
 
   @Test

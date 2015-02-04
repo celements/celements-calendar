@@ -94,7 +94,7 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
     assertSame(eventList, ret);
     IEventSearchQuery query = queryCapture.getValue();
     assertTrue(query instanceof CalendarEventSearchQuery);
-    String expQueryString = "(wiki:(+\"xwikidb\") "
+    String expQueryString = "(wiki:(+\"xwikidb\") AND type:(+\"wikipage\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND space:(+\"myCalSpace\") "
         + "AND Classes.CalendarEventClass.lang:(+\"de\") "
@@ -125,7 +125,7 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
     assertEquals(5, ret);
     IEventSearchQuery query = queryCapture.getValue();
     assertTrue(query instanceof CalendarEventSearchQuery);
-    String expQueryString = "(wiki:(+\"xwikidb\") "
+    String expQueryString = "(wiki:(+\"xwikidb\") AND type:(+\"wikipage\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND space:(+\"myCalSpace\") "
         + "AND Classes.CalendarEventClass.lang:(+\"de\") "
@@ -157,7 +157,7 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
     assertSame(eventList.get(0), ret);
     IEventSearchQuery query = queryCapture.getValue();
     assertTrue(query instanceof CalendarEventSearchQuery);
-    String expQueryString = "(wiki:(+\"xwikidb\") "
+    String expQueryString = "(wiki:(+\"xwikidb\") AND type:(+\"wikipage\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND space:(+\"myCalSpace\") "
         + "AND Classes.CalendarEventClass.lang:(+\"de\") "
@@ -190,7 +190,7 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
     assertSame(eventList.get(0), ret);
     IEventSearchQuery query = queryCapture.getValue();
     assertTrue(query instanceof CalendarEventSearchQuery);
-    String expQueryString = "(wiki:(+\"xwikidb\") "
+    String expQueryString = "(wiki:(+\"xwikidb\") AND type:(+\"wikipage\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND space:(+\"myCalSpace\") "
         + "AND Classes.CalendarEventClass.lang:(+\"de\") "
@@ -223,7 +223,7 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
     assertSame(eventList.get(0), ret);
     IEventSearchQuery query = queryCapture.getValue();
     assertTrue(query instanceof CalendarEventSearchQuery);
-    String expQueryString = "(wiki:(+\"xwikidb\") "
+    String expQueryString = "(wiki:(+\"xwikidb\") AND type:(+\"wikipage\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND space:(+\"myCalSpace\") "
         + "AND Classes.CalendarEventClass.lang:(+\"de\") "
@@ -255,7 +255,7 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
     assertSame(eventList.get(0), ret);
     IEventSearchQuery query = queryCapture.getValue();
     assertTrue(query instanceof CalendarEventSearchQuery);
-    String expQueryString = "(wiki:(+\"xwikidb\") "
+    String expQueryString = "(wiki:(+\"xwikidb\") AND type:(+\"wikipage\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND space:(+\"myCalSpace\") "
         + "AND Classes.CalendarEventClass.lang:(+\"de\") "
@@ -285,7 +285,7 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
     assertSame(eventSearchResultMock, ret);
     IEventSearchQuery query = queryCapture.getValue();
     assertTrue(query instanceof CalendarEventSearchQuery);
-    String expQueryString = "(wiki:(+\"xwikidb\") "
+    String expQueryString = "(wiki:(+\"xwikidb\") AND type:(+\"wikipage\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
         + "AND Classes.CalendarEventClass.lang:(+\"de\") "
@@ -315,7 +315,7 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
     assertSame(eventSearchResultMock, ret);
     IEventSearchQuery query = queryCapture.getValue();
     assertTrue(query instanceof CalendarEventSearchQuery);
-    String expQueryString = "(wiki:(+\"xwikidb\") "
+    String expQueryString = "(wiki:(+\"xwikidb\") AND type:(+\"wikipage\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
         + "AND Classes.CalendarEventClass.lang:(+\"de\") "
@@ -348,7 +348,7 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
     assertSame(eventSearchResultMock, ret);
     IEventSearchQuery query = queryCapture.getValue();
     assertTrue(query instanceof CalendarEventSearchQuery);
-    String expQueryString = "(wiki:(+\"theDB\") "
+    String expQueryString = "(wiki:(+\"theDB\") AND type:(+\"wikipage\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
         + "AND Classes.CalendarEventClass.lang:(+\"de\") "

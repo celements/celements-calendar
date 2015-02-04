@@ -28,8 +28,8 @@ public class DateEventSearchQueryTest extends AbstractBridgedComponentTestCase {
     assertEquals(0, query.getSortFields().size());
     assertEquals(fromDate, query.getFromDate());
     assertEquals(toDate, query.getToDate());
-    String compareQueryString = 
-        "(wiki:(+\"myDB\") AND object:(+\"Classes.CalendarEventClass\") "
+    String compareQueryString = "(wiki:(+\"myDB\") AND type:(+\"wikipage\") "
+        + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND Classes.CalendarEventClass.eventDate:([200001010000 TO 201405090125]))";
     assertEquals(compareQueryString, query.getAsLuceneQuery().getQueryString());
   }
@@ -47,8 +47,8 @@ public class DateEventSearchQueryTest extends AbstractBridgedComponentTestCase {
     assertEquals(sortFields, query.getSortFields());
     assertEquals(fromDate, query.getFromDate());
     assertEquals(toDate, query.getToDate());
-    String compareQueryString = 
-        "(wiki:(+\"myDB\") AND object:(+\"Classes.CalendarEventClass\") "
+    String compareQueryString = "(wiki:(+\"myDB\") AND type:(+\"wikipage\") "
+        + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND Classes.CalendarEventClass.eventDate:([200001010000 TO 201405090125]))";
     assertEquals(compareQueryString, query.getAsLuceneQuery().getQueryString());
   }

@@ -10,7 +10,6 @@ import com.celements.calendar.classes.CalendarClasses;
 import com.celements.common.classes.IClassCollectionRole;
 import com.celements.search.lucene.ILuceneSearchService;
 import com.celements.search.lucene.query.LuceneQuery;
-import com.celements.search.lucene.query.QueryRestriction;
 import com.xpn.xwiki.web.Utils;
 
 public class DefaultEventSearchQuery implements IEventSearchQuery {
@@ -64,12 +63,9 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
     return getAsLuceneQueryInternal(query);
   }
 
-  protected LuceneQuery getAsLuceneQueryInternal(LuceneQuery query) {    
-    QueryRestriction eventObjRestr = getSearchService().createObjectRestriction(
-        getCalEventClassRef());
-    if (!query.contains(eventObjRestr)) {
-      query.add(eventObjRestr);
-    }
+  protected LuceneQuery getAsLuceneQueryInternal(LuceneQuery query) {
+    query.add(getSearchService().createWikiPageTypeRestriction());
+    query.add(getSearchService().createObjectRestriction(getCalEventClassRef()));
     return query;
   }
 

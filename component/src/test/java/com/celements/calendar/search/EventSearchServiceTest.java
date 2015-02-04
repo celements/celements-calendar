@@ -63,7 +63,7 @@ public class EventSearchServiceTest extends AbstractBridgedComponentTestCase {
     verifyDefault();
 
     assertNotNull(searchResult);
-    String expQueryString = "(wiki:(+\"theDB\") "
+    String expQueryString = "(wiki:(+\"theDB\") AND type:(+\"wikipage\") "
         + "AND object:(+\"Classes.CalendarEventClass\"))";
     assertEquals(expQueryString, lSearchResult.getQueryString());
     assertEquals(sortFields, lSearchResult.getSortFields());
@@ -80,7 +80,7 @@ public class EventSearchServiceTest extends AbstractBridgedComponentTestCase {
     verifyDefault();
 
     assertNotNull(searchResult);
-    String expQueryString = "(wiki:(+\"xwikidb\") "
+    String expQueryString = "(wiki:(+\"xwikidb\") AND type:(+\"wikipage\") "
         + "AND object:(+\"Classes.CalendarEventClass\"))";
     assertEquals(expQueryString, lSearchResult.getQueryString());
     assertEquals(0, lSearchResult.getSortFields().size());

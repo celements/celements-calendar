@@ -119,7 +119,7 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     verifyDefault();
 
     assertEquals(database, query.getDatabase());
-    String expQueryString = "(wiki:(+\"theDB\") "
+    String expQueryString = "(wiki:(+\"theDB\") AND type:(+\"wikipage\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
         + "AND Classes.CalendarEventClass.lang:(+\"de\") "
@@ -142,7 +142,7 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     verifyDefault();
 
     assertEquals(database, query.getDatabase());
-    String expQueryString = "(wiki:(+\"theDB\") "
+    String expQueryString = "(wiki:(+\"theDB\") AND type:(+\"wikipage\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
         + "AND Classes.CalendarEventClass.lang:(+\"de\") "
@@ -165,7 +165,7 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     verifyDefault();
 
     assertEquals(database, query.getDatabase());
-    String expQueryString = "(wiki:(+\"theDB\") "
+    String expQueryString = "(wiki:(+\"theDB\") AND type:(+\"wikipage\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
         + "AND Classes.CalendarEventClass.lang:(+\"de\") "
@@ -189,7 +189,7 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     verifyDefault();
 
     assertEquals(database, query.getDatabase());
-    String expQueryString = "(wiki:(+\"theDB\") "
+    String expQueryString = "(wiki:(+\"theDB\") AND type:(+\"wikipage\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND space:(+\".\") "
         + "AND Classes.CalendarEventClass.lang:(+\"de\") "

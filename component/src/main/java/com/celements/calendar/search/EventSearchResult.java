@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.EntityReference;
 
 import com.celements.calendar.Event;
 import com.celements.calendar.IEvent;
@@ -15,6 +18,8 @@ import com.celements.search.lucene.query.LuceneQuery;
 import com.xpn.xwiki.web.Utils;
 
 public class EventSearchResult {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(EventSearchResult.class);
   
   private ILuceneSearchService searchService;
   
@@ -59,8 +64,13 @@ public class EventSearchResult {
    */
   public List<IEvent> getEventList(int offset, int limit) throws LuceneSearchException {
     List<IEvent> eventList = new ArrayList<IEvent>();
-    for (DocumentReference docRef : getSearchResult().getResults(offset, limit)) {
-      eventList.add(new Event(docRef));
+    for (EntityReference ref : getSearchResult().getResults(offset, limit)) {
+      if (ref instanceof DocumentReference) {
+        eventList.add(new Event((DocumentReference) ref));
+      } else {
+        LOGGER.warn("getEventList: not expecting Attachment as search result '{}' "
+            + "for search '{}'", ref, this);
+      }
     }
     return Collections.unmodifiableList(eventList);
   }

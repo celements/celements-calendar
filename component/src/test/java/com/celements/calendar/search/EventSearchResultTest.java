@@ -8,7 +8,9 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.EntityReference;
 
 import com.celements.calendar.IEvent;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
@@ -68,8 +70,11 @@ public class EventSearchResultTest extends AbstractBridgedComponentTestCase {
     int offset = 5;
     int limit = 10;
     LuceneSearchResult resultMock = createMockAndAddToDefault(LuceneSearchResult.class);
-    List<DocumentReference> docRefList = Arrays.asList(new DocumentReference("xwikidb", 
-        "TestSpace", "Event1"), new DocumentReference("xwikidb", "TestSpace", "Event2"));
+    DocumentReference docRef1 = new DocumentReference("xwikidb", "TestSpace", "Event1");
+    DocumentReference docRef2 = new DocumentReference("xwikidb", "TestSpace", "Event2");
+    AttachmentReference attRef = new AttachmentReference("fileName", docRef1);
+    List<EntityReference> docRefList = Arrays.<EntityReference>asList(docRef1, docRef2, 
+        attRef);
     EventSearchResult result = getEventSearchResult(query, sortFields, false);
     expect(searchServiceMock.search(same(query), eq(sortFields), eq(languages))
         ).andReturn(resultMock).once();

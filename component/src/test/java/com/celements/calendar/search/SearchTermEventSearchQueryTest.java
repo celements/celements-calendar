@@ -33,7 +33,7 @@ public class SearchTermEventSearchQueryTest extends AbstractBridgedComponentTest
     assertEquals(toDate, query.getToDate());
     assertEquals(searchTerm, query.getSearchTerm());
     assertFalse(query.isFuzzy());
-    String compareQueryString = "(wiki:(+\"myDB\") AND type:(+\"wikipage\") "
+    String compareQueryString = "(type:(+\"wikipage\") AND wiki:(+\"myDB\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND Classes.CalendarEventClass.eventDate:([200001010000 TO 201405090125]) "
         + "AND (Classes.CalendarEventClass.l_title:(+some* +search* +term*) "
@@ -57,7 +57,7 @@ public class SearchTermEventSearchQueryTest extends AbstractBridgedComponentTest
     assertEquals(toDate, query.getToDate());
     assertEquals(searchTerm, query.getSearchTerm());
     assertTrue(query.isFuzzy());
-    String compareQueryString = "(wiki:(+\"myDB\") AND type:(+\"wikipage\") "
+    String compareQueryString = "(type:(+\"wikipage\") AND wiki:(+\"myDB\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND Classes.CalendarEventClass.eventDate:([200001010000 TO 201405090125]) "
         + "AND (Classes.CalendarEventClass.l_title:((some* OR some~) "
@@ -84,7 +84,7 @@ public class SearchTermEventSearchQueryTest extends AbstractBridgedComponentTest
     assertEquals(toDate, query.getToDate());
     assertEquals(searchTerm, query.getSearchTerm());
     assertFalse(query.isFuzzy());
-    String compareQueryString = "(wiki:(+\"myDB\") AND type:(+\"wikipage\") "
+    String compareQueryString = "(type:(+\"wikipage\") AND wiki:(+\"myDB\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND Classes.CalendarEventClass.eventDate:([200001010000 TO 201405090125]) "
         + "AND (Classes.CalendarEventClass.l_title:(+some* +search* +term*) "

@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.classes.CalendarClasses;
 import com.celements.common.classes.IClassCollectionRole;
@@ -58,13 +60,15 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
   public final LuceneQuery getAsLuceneQuery() {
     LuceneQuery query = luceneQuery;
     if (query == null) {
-      query = getSearchService().createQuery(database);
+      query = getSearchService().createWikiPageQuery();
+      if (StringUtils.isNotBlank(database)) {
+        query.setWiki(new WikiReference(database));
+      }
     }
     return getAsLuceneQueryInternal(query);
   }
 
   protected LuceneQuery getAsLuceneQueryInternal(LuceneQuery query) {
-    query.add(getSearchService().createWikiPageTypeRestriction());
     query.add(getSearchService().createObjectRestriction(getCalEventClassRef()));
     return query;
   }

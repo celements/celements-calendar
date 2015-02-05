@@ -19,7 +19,7 @@ public class DefaultEventSearchQueryTest extends AbstractBridgedComponentTestCas
 
     assertEquals(db, query.getDatabase());
     assertEquals(0, query.getSortFields().size());
-    String compareQueryString = "(wiki:(+\"myDB\") AND type:(+\"wikipage\") "
+    String compareQueryString = "(type:(+\"wikipage\") AND wiki:(+\"myDB\") "
         + "AND object:(+\"Classes.CalendarEventClass\"))";
     assertEquals(compareQueryString, query.getAsLuceneQuery().getQueryString());
   }
@@ -32,7 +32,7 @@ public class DefaultEventSearchQueryTest extends AbstractBridgedComponentTestCas
 
     assertEquals(db, query.getDatabase());
     assertEquals(sortFields, query.getSortFields());
-    String compareQueryString = "(wiki:(+\"myDB\") AND type:(+\"wikipage\") "
+    String compareQueryString = "(type:(+\"wikipage\") AND wiki:(+\"myDB\") "
         + "AND object:(+\"Classes.CalendarEventClass\"))";
     assertEquals(compareQueryString, query.getAsLuceneQuery().getQueryString());
   }

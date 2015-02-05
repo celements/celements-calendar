@@ -18,6 +18,7 @@ import com.celements.search.lucene.ILuceneSearchService;
 import com.celements.search.lucene.LuceneSearchException;
 import com.celements.search.lucene.LuceneSearchResult;
 import com.celements.search.lucene.query.LuceneQuery;
+import com.xpn.xwiki.plugin.lucene.LucenePlugin;
 
 public class EventSearchResultTest extends AbstractBridgedComponentTestCase {
 
@@ -30,7 +31,7 @@ public class EventSearchResultTest extends AbstractBridgedComponentTestCase {
   
   @Test
   public void testGetSearchResult() throws Exception {
-    LuceneQuery query = new LuceneQuery("db");
+    LuceneQuery query = new LuceneQuery(Arrays.asList(LucenePlugin.DOCTYPE_WIKIPAGE));
     List<String> sortFields = Arrays.asList("field1", "field2");
     List<String> languages = null;
     LuceneSearchResult resultMock = createMockAndAddToDefault(LuceneSearchResult.class);
@@ -47,7 +48,7 @@ public class EventSearchResultTest extends AbstractBridgedComponentTestCase {
   
   @Test
   public void testGetSearchResult_skipChecks() throws Exception {
-    LuceneQuery query = new LuceneQuery("db");
+    LuceneQuery query = new LuceneQuery(Arrays.asList(LucenePlugin.DOCTYPE_WIKIPAGE));
     List<String> sortFields = Arrays.asList("field1", "field2");
     List<String> languages = null;
     LuceneSearchResult resultMock = createMockAndAddToDefault(LuceneSearchResult.class);
@@ -64,7 +65,7 @@ public class EventSearchResultTest extends AbstractBridgedComponentTestCase {
   
   @Test
   public void testGetEventList() throws Exception {
-    LuceneQuery query = new LuceneQuery("db");
+    LuceneQuery query = new LuceneQuery(Arrays.asList(LucenePlugin.DOCTYPE_WIKIPAGE));
     List<String> sortFields = Arrays.asList("field1", "field2");
     List<String> languages = null;
     int offset = 5;
@@ -91,7 +92,7 @@ public class EventSearchResultTest extends AbstractBridgedComponentTestCase {
   
   @Test
   public void testGetEventList_LSE() throws Exception {
-    LuceneQuery query = new LuceneQuery("db");
+    LuceneQuery query = new LuceneQuery(Arrays.asList(LucenePlugin.DOCTYPE_WIKIPAGE));
     List<String> sortFields = Arrays.asList("field1", "field2");
     List<String> languages = null;
     int offset = 5;
@@ -115,7 +116,7 @@ public class EventSearchResultTest extends AbstractBridgedComponentTestCase {
   
   @Test
   public void testGetSize() throws Exception {
-    LuceneQuery query = new LuceneQuery("db");
+    LuceneQuery query = new LuceneQuery(Arrays.asList(LucenePlugin.DOCTYPE_WIKIPAGE));
     List<String> sortFields = Arrays.asList("field1", "field2");
     List<String> languages = null;
     LuceneSearchResult resultMock = createMockAndAddToDefault(LuceneSearchResult.class);
@@ -134,7 +135,7 @@ public class EventSearchResultTest extends AbstractBridgedComponentTestCase {
   
   @Test
   public void testGetSize_LSE() throws Exception {
-    LuceneQuery query = new LuceneQuery("db");
+    LuceneQuery query = new LuceneQuery(Arrays.asList(LucenePlugin.DOCTYPE_WIKIPAGE));
     List<String> sortFields = Arrays.asList("field1", "field2");
     List<String> languages = null;
     LuceneSearchResult resultMock = createMockAndAddToDefault(LuceneSearchResult.class);

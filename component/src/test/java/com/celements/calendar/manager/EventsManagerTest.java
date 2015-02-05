@@ -120,7 +120,7 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
   @Test
   public void testSearchEvents_dirtyLuceneWorkaraound() throws Exception {
     expect(calMock.getEngineWithoutLimitCheck()).andReturn(engineMock).once();
-    IEventSearchQuery query = new DefaultEventSearchQuery(getContext().getDatabase());
+    IEventSearchQuery query = new DefaultEventSearchQuery(new WikiReference("myWiki"));
     EventSearchResult mockEventSearchResults = createMockAndAddToDefault(
         EventSearchResult.class);
     expect(((CalendarEngineLucene) engineMock).searchEvents(same(calMock), same(query))

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.WikiReference;
 
@@ -18,26 +17,26 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
 
   private ILuceneSearchService searchService;
 
-  private final String database;
+  private final WikiReference wikiRef;
   private final LuceneQuery luceneQuery;
   private final List<String> sortFields;
 
-  public DefaultEventSearchQuery(String database) {
-    this(database, null, null);
+  public DefaultEventSearchQuery(WikiReference wikiRef) {
+    this(wikiRef, null, null);
   }
 
   public DefaultEventSearchQuery(IEventSearchQuery query, List<String> altSortFields) {
-    this(query.getDatabase(), query.getAsLuceneQuery(), getSortFields(query, 
+    this(query.getWikiRef(), query.getAsLuceneQuery(), getSortFields(query, 
         altSortFields));
   }
 
-  public DefaultEventSearchQuery(String database, List<String> sortFields) {
-    this(database, null, sortFields);
+  public DefaultEventSearchQuery(WikiReference wikiRef, List<String> sortFields) {
+    this(wikiRef, null, sortFields);
   }
 
-  public DefaultEventSearchQuery(String database, LuceneQuery luceneQuery, 
+  public DefaultEventSearchQuery(WikiReference wikiRef, LuceneQuery luceneQuery, 
       List<String> sortFields) {
-    this.database = database;
+    this.wikiRef = wikiRef;
     this.luceneQuery = luceneQuery;
     if (sortFields != null) {
       this.sortFields = Collections.unmodifiableList(new ArrayList<String>(sortFields));
@@ -46,9 +45,19 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
     }
   }
 
+  @Deprecated
   @Override
   public String getDatabase() {
+    String database = null;
+    if (getWikiRef() != null) {
+      database = getWikiRef().getName();
+    }
     return database;
+  }
+
+  @Override
+  public WikiReference getWikiRef() {
+    return wikiRef;
   }
 
   @Override
@@ -61,9 +70,9 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
     LuceneQuery query = luceneQuery;
     if (query == null) {
       query = getSearchService().createWikiPageQuery();
-      if (StringUtils.isNotBlank(database)) {
-        query.setWiki(new WikiReference(database));
-      }
+    }
+    if (wikiRef != null) {
+      query.setWiki(wikiRef);
     }
     return getAsLuceneQueryInternal(query);
   }
@@ -87,7 +96,7 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
 
   @Override
   public String toString() {
-    return "DefaultEventSearchQuery [database=" + database + ", luceneQuery=" 
+    return "DefaultEventSearchQuery [wikiRef=" + wikiRef + ", luceneQuery=" 
         + luceneQuery + ", sortFields=" + sortFields + "]";
   }
 

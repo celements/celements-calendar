@@ -10,6 +10,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
@@ -97,7 +98,7 @@ public class NavigationDetailsFactoryTest extends AbstractBridgedComponentTestCa
   public void testGetNavigationDetails_query() throws Exception {
     Date eventDate = new Date();
     List<IEvent> eventList = Arrays.asList(eventMock);
-    IEventSearchQuery query = new DefaultEventSearchQuery("myWiki");
+    IEventSearchQuery query = new DefaultEventSearchQuery(new WikiReference("myWiki"));
     EventSearchResult searchResultMock = createMockAndAddToDefault(EventSearchResult.class);
 
     expect(eventMock.getEventDate()).andReturn(eventDate).once();
@@ -120,7 +121,7 @@ public class NavigationDetailsFactoryTest extends AbstractBridgedComponentTestCa
   @Test
   public void testGetNavigationDetails_query_LSE() throws Exception {
     Date eventDate = new Date();
-    IEventSearchQuery query = new DefaultEventSearchQuery("myWiki");
+    IEventSearchQuery query = new DefaultEventSearchQuery(new WikiReference("myWiki"));
     EventSearchResult searchResultMock = createMockAndAddToDefault(EventSearchResult.class);
     Throwable cause = createMockAndAddToDefault(LuceneSearchException.class);
 

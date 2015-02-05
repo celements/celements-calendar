@@ -10,6 +10,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.ICalendarClassConfig;
@@ -123,7 +124,7 @@ public class CalendarNavigationFactoryTest extends AbstractBridgedComponentTestC
     expect(calServiceMock.getCalendarArchive(eq(calDocRef), 
         eq(ICalendarClassConfig.DATE_HIGH))).andReturn(calMock).once();
     EventSearchResult resultMock = createMockAndAddToDefault(EventSearchResult.class);
-    IEventSearchQuery query = new DefaultEventSearchQuery("db");
+    IEventSearchQuery query = new DefaultEventSearchQuery(new WikiReference("db"));
     expect(calMock.searchEvents(same(query))).andReturn(resultMock).atLeastOnce();
     expect(resultMock.getSize()).andReturn(0).anyTimes();
     replayDefault();

@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.junit.Test;
+import org.xwiki.model.reference.WikiReference;
 
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 
@@ -19,15 +20,15 @@ public class SearchTermEventSearchQueryTest extends AbstractBridgedComponentTest
 
   @Test
   public void testGetAsLuceneQuery_noFuzzy() throws ParseException {
-    String db = "myDB";
+    WikiReference wikiRef = new WikiReference("myDB");
     String searchTerm = "some search term";
     Date fromDate = SDF.parse("200001010000");
     Date toDate = SDF.parse("201405090125");
     boolean fuzzy = false;
-    SearchTermEventSearchQuery query = new SearchTermEventSearchQuery(db, fromDate, 
+    SearchTermEventSearchQuery query = new SearchTermEventSearchQuery(wikiRef, fromDate, 
         toDate, searchTerm, fuzzy, null);
 
-    assertEquals(db, query.getDatabase());
+    assertEquals(wikiRef, query.getWikiRef());
     assertEquals(0, query.getSortFields().size());
     assertEquals(fromDate, query.getFromDate());
     assertEquals(toDate, query.getToDate());
@@ -43,15 +44,15 @@ public class SearchTermEventSearchQueryTest extends AbstractBridgedComponentTest
 
   @Test
   public void testGetAsLuceneQuery_fuzzy() throws ParseException {
-    String db = "myDB";
+    WikiReference wikiRef = new WikiReference("myDB");
     String searchTerm = "some search term";
     Date fromDate = SDF.parse("200001010000");
     Date toDate = SDF.parse("201405090125");
     boolean fuzzy = true;
-    SearchTermEventSearchQuery query = new SearchTermEventSearchQuery(db, fromDate, 
+    SearchTermEventSearchQuery query = new SearchTermEventSearchQuery(wikiRef, fromDate, 
         toDate, searchTerm, fuzzy, null);
 
-    assertEquals(db, query.getDatabase());
+    assertEquals(wikiRef, query.getWikiRef());
     assertEquals(0, query.getSortFields().size());
     assertEquals(fromDate, query.getFromDate());
     assertEquals(toDate, query.getToDate());
@@ -69,16 +70,16 @@ public class SearchTermEventSearchQueryTest extends AbstractBridgedComponentTest
 
   @Test
   public void testGetAsLuceneQuery_withSortField() throws ParseException {
-    String db = "myDB";
+    WikiReference wikiRef = new WikiReference("myDB");
     String searchTerm = "some search term";
     Date fromDate = SDF.parse("200001010000");
     Date toDate = SDF.parse("201405090125");
     boolean fuzzy = false;
     List<String> sortFields = Arrays.asList("field1", "field2");
-    SearchTermEventSearchQuery query = new SearchTermEventSearchQuery(db, fromDate, 
+    SearchTermEventSearchQuery query = new SearchTermEventSearchQuery(wikiRef, fromDate, 
         toDate, searchTerm, fuzzy, sortFields);
 
-    assertEquals(db, query.getDatabase());
+    assertEquals(wikiRef, query.getWikiRef());
     assertEquals(sortFields, query.getSortFields());
     assertEquals(fromDate, query.getFromDate());
     assertEquals(toDate, query.getToDate());

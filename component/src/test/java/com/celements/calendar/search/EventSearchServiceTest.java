@@ -9,6 +9,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.configuration.ConfigurationSource;
+import org.xwiki.model.reference.WikiReference;
 
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 import com.celements.search.lucene.LuceneSearchResult;
@@ -53,7 +54,8 @@ public class EventSearchServiceTest extends AbstractBridgedComponentTestCase {
   @Test
   public void testGetSearchResult() throws Exception {
     List<String> sortFields = Arrays.asList("field1", "field2");
-    IEventSearchQuery query = new DefaultEventSearchQuery("theDB", sortFields);
+    IEventSearchQuery query = new DefaultEventSearchQuery(new WikiReference("theDB"), 
+        sortFields);
     expect(configSourceMock.getProperty(eq("calendar.search.skipChecks"), 
         same(Boolean.class))).andReturn(false);
 

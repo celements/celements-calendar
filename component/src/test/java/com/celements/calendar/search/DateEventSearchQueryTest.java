@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.junit.Test;
+import org.xwiki.model.reference.WikiReference;
 
 import com.celements.common.test.AbstractBridgedComponentTestCase;
 
@@ -19,12 +20,12 @@ public class DateEventSearchQueryTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testGetAsLuceneQuery() throws ParseException {
-    String db = "myDB";
+    WikiReference wikiRef = new WikiReference("myDB");
     Date fromDate = SDF.parse("200001010000");
     Date toDate = SDF.parse("201405090125");
-    DateEventSearchQuery query = new DateEventSearchQuery(db, fromDate, toDate, null);
+    DateEventSearchQuery query = new DateEventSearchQuery(wikiRef, fromDate, toDate, null);
 
-    assertEquals(db, query.getDatabase());
+    assertEquals(wikiRef, query.getWikiRef());
     assertEquals(0, query.getSortFields().size());
     assertEquals(fromDate, query.getFromDate());
     assertEquals(toDate, query.getToDate());
@@ -36,14 +37,14 @@ public class DateEventSearchQueryTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testGetAsLuceneQuery_withSortField() throws ParseException {
-    String db = "myDB";
+    WikiReference wikiRef = new WikiReference("myDB");
     Date fromDate = SDF.parse("200001010000");
     Date toDate = SDF.parse("201405090125");
     List<String> sortFields = Arrays.asList("field1", "field2");
-    DateEventSearchQuery query = new DateEventSearchQuery(db, fromDate, toDate, 
+    DateEventSearchQuery query = new DateEventSearchQuery(wikiRef, fromDate, toDate, 
         sortFields);
 
-    assertEquals(db, query.getDatabase());
+    assertEquals(wikiRef, query.getWikiRef());
     assertEquals(sortFields, query.getSortFields());
     assertEquals(fromDate, query.getFromDate());
     assertEquals(toDate, query.getToDate());

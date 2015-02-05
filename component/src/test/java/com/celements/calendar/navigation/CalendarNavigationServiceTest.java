@@ -8,6 +8,7 @@ import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.Event;
 import com.celements.calendar.IEvent;
@@ -62,7 +63,7 @@ public class CalendarNavigationServiceTest extends AbstractBridgedComponentTestC
     DocumentReference calDocRef = new DocumentReference("myWiki", "mySpace", "myCalDoc");
     DocumentReference eventDocRef = new DocumentReference("myWiki", "mySpace", "myEvent");
     IEvent event = new Event(eventDocRef);
-    IEventSearchQuery query = new DefaultEventSearchQuery("myWiki");
+    IEventSearchQuery query = new DefaultEventSearchQuery(new WikiReference("myWiki"));
     expect(navDetailsFactoryMock.getNavigationDetails(eq(calDocRef), same(event), same(
         query))).andReturn(null).once();
     replayAll();

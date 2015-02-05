@@ -193,7 +193,7 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
   
   @Test
   public void testSearchEvents() {
-    IEventSearchQuery query = new DefaultEventSearchQuery(getContext().getDatabase());
+    IEventSearchQuery query = new DefaultEventSearchQuery(new WikiReference("myWiki"));
     EventSearchResult result = createMockAndAddToDefault(EventSearchResult.class);
     
     expect(eventMgrMock.searchEvents(same(cal), same(query))).andReturn(result).once();

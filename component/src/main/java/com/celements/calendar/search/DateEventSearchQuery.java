@@ -3,6 +3,8 @@ package com.celements.calendar.search;
 import java.util.Date;
 import java.util.List;
 
+import org.xwiki.model.reference.WikiReference;
+
 import com.celements.calendar.classes.CalendarClasses;
 import com.celements.search.lucene.query.LuceneQuery;
 
@@ -11,14 +13,14 @@ public class DateEventSearchQuery extends DefaultEventSearchQuery {
   private final Date fromDate;
   private final Date toDate;
 
-  public DateEventSearchQuery(String database, Date fromDate, Date toDate, 
+  public DateEventSearchQuery(WikiReference wikiRef, Date fromDate, Date toDate, 
       List<String> sortFields) {
-    this(database, null, fromDate, toDate, sortFields);
+    this(wikiRef, null, fromDate, toDate, sortFields);
   }
 
-  public DateEventSearchQuery(String database, LuceneQuery luceneQuery, Date fromDate, 
-      Date toDate, List<String> sortFields) {
-    super(database, luceneQuery, sortFields);
+  public DateEventSearchQuery(WikiReference wikiRef, LuceneQuery luceneQuery, 
+      Date fromDate, Date toDate, List<String> sortFields) {
+    super(wikiRef, luceneQuery, sortFields);
     this.fromDate = fromDate;
     this.toDate = toDate;
   }

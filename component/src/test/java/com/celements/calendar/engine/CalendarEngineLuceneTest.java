@@ -328,7 +328,7 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
   
   @Test
   public void testSearchEvent_withQuery() throws Exception {
-    String db = "myDB";
+    WikiReference wikiRef = new WikiReference("myDB");
     List<String> sortFields = Arrays.asList("field");
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
@@ -341,8 +341,8 @@ public class CalendarEngineLuceneTest extends AbstractBridgedComponentTestCase {
         eventSearchResultMock).once();
     
     replayDefault();
-    EventSearchResult ret = engine.searchEvents(calMock, new DefaultEventSearchQuery(db, 
-        sortFields));
+    EventSearchResult ret = engine.searchEvents(calMock, new DefaultEventSearchQuery(
+        wikiRef, sortFields));
     verifyDefault();
     
     assertSame(eventSearchResultMock, ret);

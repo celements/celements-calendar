@@ -23,15 +23,16 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
   private static final DateFormat SDF = new SimpleDateFormat("yyyyMMddHHmm");
   
   private ICalendar calMock;
-  private String database;
+  private WikiReference wikiRef;
   
   @Before
   public void setUp_CalendarEventSearchQueryTest() {
     calMock = createMockAndAddToDefault(ICalendar.class);
-    database = "theDB";
-    DocumentReference docRef = new DocumentReference(database, "someSpace", "someCal");
+    wikiRef = new WikiReference("theDB");
+    DocumentReference docRef = new DocumentReference(wikiRef.getName(), "someSpace", 
+        "someCal");
     expect(calMock.getDocumentReference()).andReturn(docRef).anyTimes();
-    expect(calMock.getWikiRef()).andReturn(new WikiReference(database)).anyTimes();
+    expect(calMock.getWikiRef()).andReturn(wikiRef).anyTimes();
   }
   
   @Test
@@ -47,7 +48,7 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     IEventSearchQuery query = new CalendarEventSearchQuery(calMock, sortFields);
     verifyDefault();
     
-    assertEquals(database, query.getDatabase());
+    assertEquals(wikiRef, query.getWikiRef());
     assertEquals(sortFields, query.getSortFields());
   }
   
@@ -63,8 +64,8 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     replayDefault();
     IEventSearchQuery query = new CalendarEventSearchQuery(calMock, sortFields);
     verifyDefault();
-    
-    assertEquals(database, query.getDatabase());
+
+    assertEquals(wikiRef, query.getWikiRef());
     assertDefaultSortFields(query.getSortFields(), isArchive);
   }
   
@@ -78,11 +79,11 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     List<String> sortFields = Arrays.asList("field1", "field2");
     
     replayDefault();
-    IEventSearchQuery fromQuery = new DefaultEventSearchQuery(database, null, sortFields);
+    IEventSearchQuery fromQuery = new DefaultEventSearchQuery(wikiRef, null, sortFields);
     CalendarEventSearchQuery query = new CalendarEventSearchQuery(calMock, fromQuery);
     verifyDefault();
 
-    assertEquals(database, query.getDatabase());
+    assertEquals(wikiRef, query.getWikiRef());
     assertEquals(sortFields, query.getSortFields());
   }
   
@@ -97,11 +98,11 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     List<String> sortFields = Collections.emptyList();
     
     replayDefault();
-    IEventSearchQuery fromQuery = new DefaultEventSearchQuery(database, null, sortFields);
+    IEventSearchQuery fromQuery = new DefaultEventSearchQuery(wikiRef, null, sortFields);
     CalendarEventSearchQuery query = new CalendarEventSearchQuery(calMock, fromQuery);
     verifyDefault();
-    
-    assertEquals(database, query.getDatabase());
+
+    assertEquals(wikiRef, query.getWikiRef());
     assertDefaultSortFields(query.getSortFields(), isArchive);
   }
   
@@ -118,7 +119,7 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     CalendarEventSearchQuery query = new CalendarEventSearchQuery(calMock, sortFields);
     verifyDefault();
 
-    assertEquals(database, query.getDatabase());
+    assertEquals(wikiRef, query.getWikiRef());
     String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"theDB\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
@@ -141,7 +142,7 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     CalendarEventSearchQuery query = new CalendarEventSearchQuery(calMock, sortFields);
     verifyDefault();
 
-    assertEquals(database, query.getDatabase());
+    assertEquals(wikiRef, query.getWikiRef());
     String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"theDB\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
@@ -164,7 +165,7 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     CalendarEventSearchQuery query = new CalendarEventSearchQuery(calMock, sortFields);
     verifyDefault();
 
-    assertEquals(database, query.getDatabase());
+    assertEquals(wikiRef, query.getWikiRef());
     String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"theDB\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
@@ -176,7 +177,6 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
   
   @Test
   public void testGetAsLuceneQuery_noSpaces() throws Exception {
-    String database = "theDB";
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     String lang = "de";
@@ -188,7 +188,7 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     CalendarEventSearchQuery query = new CalendarEventSearchQuery(calMock, sortFields);
     verifyDefault();
 
-    assertEquals(database, query.getDatabase());
+    assertEquals(wikiRef, query.getWikiRef());
     String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"theDB\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND space:(+\".\") "

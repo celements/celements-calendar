@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.classes.CalendarClasses;
 import com.celements.search.lucene.query.LuceneQuery;
@@ -15,9 +16,9 @@ public class SearchTermEventSearchQuery extends DateEventSearchQuery {
   private final String searchTerm;
   private boolean fuzzy;
 
-  public SearchTermEventSearchQuery(String database, Date fromDate, Date toDate, 
+  public SearchTermEventSearchQuery(WikiReference wikiRef, Date fromDate, Date toDate, 
       String searchTerm, boolean fuzzy, List<String> sortFields) {
-    super(database, fromDate, toDate, sortFields);
+    super(wikiRef, fromDate, toDate, sortFields);
     this.searchTerm = searchTerm;
     this.fuzzy = fuzzy;
   }

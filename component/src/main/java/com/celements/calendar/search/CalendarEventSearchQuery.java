@@ -24,7 +24,7 @@ public class CalendarEventSearchQuery extends DefaultEventSearchQuery {
   private final List<String> allowedSpaces;
   
   public CalendarEventSearchQuery(ICalendar cal, List<String> sortFields) {
-    super(cal.getWikiRef().getName(), getDefaultSortFields(sortFields, cal.isArchive()));
+    super(cal.getWikiRef(), getDefaultSortFields(sortFields, cal.isArchive()));
     this.startDate = cal.getStartDate();
     this.isArchive = cal.isArchive();
     this.lang = cal.getLanguage();

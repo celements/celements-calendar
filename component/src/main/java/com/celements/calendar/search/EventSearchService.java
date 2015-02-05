@@ -7,11 +7,10 @@ import org.slf4j.LoggerFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.configuration.ConfigurationSource;
-import org.xwiki.context.Execution;
 
 import com.celements.search.lucene.ILuceneSearchService;
 import com.celements.search.lucene.query.LuceneQuery;
-import com.xpn.xwiki.XWikiContext;
+import com.celements.web.service.IWebUtilsService;
 
 @Component
 public class EventSearchService implements IEventSearchRole {
@@ -25,11 +24,7 @@ public class EventSearchService implements IEventSearchRole {
   private ConfigurationSource configSource;
 
   @Requirement
-  private Execution execution;
-
-  private XWikiContext getContext() {
-    return (XWikiContext) execution.getContext().getProperty("xwikicontext");
-  }
+  private IWebUtilsService webUtilsService;
 
   @Override
   public boolean skipChecks() {
@@ -47,7 +42,7 @@ public class EventSearchService implements IEventSearchRole {
   @Override
   public EventSearchResult getSearchResult(IEventSearchQuery query, boolean skipChecks) {
     if (query == null) {
-      query = new DefaultEventSearchQuery(getContext().getDatabase());
+      query = new DefaultEventSearchQuery(webUtilsService.getWikiRef());
     }
     LuceneQuery luceneQuery = query.getAsLuceneQuery();
     List<String> sortFields = query.getSortFields();

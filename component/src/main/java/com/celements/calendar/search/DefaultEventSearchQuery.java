@@ -69,7 +69,7 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
   public final LuceneQuery getAsLuceneQuery() {
     LuceneQuery query = luceneQuery;
     if (query == null) {
-      query = getSearchService().createWikiPageQuery();
+      query = getSearchService().createQuery();
     }
     if (wikiRef != null) {
       query.setWiki(wikiRef);

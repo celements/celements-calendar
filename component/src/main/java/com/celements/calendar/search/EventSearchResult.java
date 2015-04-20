@@ -1,7 +1,6 @@
 package com.celements.calendar.search;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -72,7 +71,7 @@ public class EventSearchResult {
             + "for search '{}'", ref, this);
       }
     }
-    return Collections.unmodifiableList(eventList);
+    return eventList;
   }
 
   public int getSize() throws LuceneSearchException {

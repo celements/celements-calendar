@@ -101,6 +101,22 @@ public class EventTest extends AbstractBridgedComponentTestCase {
   }
 
   @Test
+  public void testGetObj_noRequest() throws Exception {
+    //getObjects may return null!!
+    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(
+        ), "MySpace", "MyCal");
+    XWikiDocument eventDoc = new XWikiDocument(myEventDocRef);
+    //getObjects may return null!!
+    expect(xwiki.getDocument(eq(myEventDocRef), same(context))).andReturn(eventDoc
+        ).atLeastOnce();
+    replayDefault();
+    Event myEvent = new Event(myEventDocRef);
+    myEvent.injectDefaultLanguage("de");
+    assertNull(myEvent.getObj("de"));
+    verifyDefault();
+  }
+
+  @Test
   public void testGetEventDocument() throws Exception {
     expect(xwiki.getDocument(eq(eventDocRef), same(context))).andReturn(new XWikiDocument(
         eventDocRef)).atLeastOnce();
@@ -253,7 +269,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
     eventOjb.setDateValue("eventDate", sdf.parse("27/04/2009 12:30:00"));
     eventOjb.setDateValue("eventDate_end", sdf.parse("27/04/2009 15:30:00"));
-    String displayPart = event.displayField("date-date_end.", context);
+    String displayPart = event.displayField("date-date_end.");
     assertEquals("<span class=\"cel_cal_date\">27.04.2009</span>", displayPart);
     verifyDefault();
   }
@@ -270,7 +286,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
     eventOjb.setDateValue("eventDate", sdf.parse("27/04/2009 12:30:00"));
     eventOjb.setDateValue("eventDate_end", sdf.parse("28/04/2009 15:30:00"));
-    String displayPart = event.displayField("date-date_end", context);
+    String displayPart = event.displayField("date-date_end");
     assertEquals("<span class=\"cel_cal_date\">27.04.2009</span>"
         + "<span class=\"cel_cal_date_end\"> - 28.04.2009</span>", displayPart);
     verifyDefault();
@@ -288,7 +304,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
     eventOjb.setDateValue("eventDate", sdf.parse("27/04/2009 12:30:00"));
     eventOjb.setDateValue("eventDate_end", null);
-    String displayPart = event.displayField("date-date_end", context);
+    String displayPart = event.displayField("date-date_end");
     assertEquals("<span class=\"cel_cal_date\">27.04.2009</span>", displayPart);
     verifyDefault();
   }
@@ -325,7 +341,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     BaseObject eventOjb = event.getObj("de");
     eventOjb.setDateValue("eventDate", sdf.parse("27/04/2009 12:30:00"));
     eventOjb.setDateValue("eventDate_end", sdf.parse("28/04/2009 15:30:00"));
-    List<String> resultList = event.getNonEmptyFields(fieldList, context);
+    List<String> resultList = event.getNonEmptyFields(fieldList);
     assertEquals("getNonEmptyFields must support combined fields",
         fieldList, resultList);
     verifyDefault();
@@ -348,7 +364,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     BaseObject eventOjb = event.getObj("de");
     eventOjb.setDateValue("eventDate", sdf.parse("27/04/2009 00:00:00"));
     eventOjb.setDateValue("eventDate_end", sdf.parse("27/04/2009 00:00:00"));
-    List<String> resultList = event.getNonEmptyFields(fieldList, context);
+    List<String> resultList = event.getNonEmptyFields(fieldList);
     assertEquals("getNonEmptyFields must support optional time fields",
         Collections.emptyList(), resultList);
     verifyDefault();
@@ -381,7 +397,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     eventOjb.setLargeStringValue("l_description", "Test Beschreibung");
     eventOjb.setLargeStringValue("location_rte", "Basel");
     eventOjb.setLargeStringValue("contact_rte", "Gerbergasse 30");
-    boolean needsMoreLink = event.needsMoreLink(context);
+    boolean needsMoreLink = event.needsMoreLink();
     verifyDefault();
     assertFalse("needsMoreLink must correctly handle multiple occurences.",
         needsMoreLink);
@@ -411,7 +427,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     eventOjb.setLargeStringValue("l_description", "Test Beschreibung");
     eventOjb.setLargeStringValue("location_rte", "Basel");
     eventOjb.setLargeStringValue("contact_rte", "Gerbergasse 30");
-    boolean needsMoreLink = event.needsMoreLink(context);
+    boolean needsMoreLink = event.needsMoreLink();
     verifyDefault();
     assertTrue("needsMoreLink must support compbined fields.", needsMoreLink);
   }
@@ -442,7 +458,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     eventOjb.setStringValue("l_title", "Test Titel");
     eventOjb.setLargeStringValue("l_description", "Test Beschreibung");
     eventOjb.setLargeStringValue("location_rte", "Basel");
-    boolean needsMoreLink = event.needsMoreLink(context);
+    boolean needsMoreLink = event.needsMoreLink();
     verifyDefault();
     assertFalse("needsMoreLink must look at displayed property names.",
         needsMoreLink);
@@ -473,7 +489,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     eventOjb.setStringValue("l_title", "Test Titel");
     eventOjb.setLargeStringValue("l_description", "Test Beschreibung");
     eventOjb.setLargeStringValue("location_rte", "Basel");
-    boolean needsMoreLink = event.needsMoreLink(context);
+    boolean needsMoreLink = event.needsMoreLink();
     verifyDefault();
     assertFalse("needsMoreLink must handle empty optional time_end field.",
         needsMoreLink);

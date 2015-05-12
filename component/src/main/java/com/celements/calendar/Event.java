@@ -30,6 +30,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
@@ -42,7 +43,7 @@ import org.xwiki.model.reference.WikiReference;
 import com.celements.calendar.classes.CalendarClasses;
 import com.celements.calendar.service.ICalendarService;
 import com.celements.common.collections.ListUtils;
-import com.celements.web.plugin.cmd.EmptyCheckCommand;
+import com.celements.emptycheck.internal.IDefaultEmptyDocStrategyRole;
 import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -511,10 +512,13 @@ public class Event implements IEvent {
     }
     LOGGER.info("Object found: doc " + (obj != null ? "name='"
         + obj.getDocumentReference() + "'" : "no object found! ") + " obj='" + obj + "'");
-    String template = getContext().getRequest().get("template");
+    String template = null;
+    if (getContext().getRequest() != null) {
+      template = getContext().getRequest().get("template");
+    }
     LOGGER.trace("template=" + template);
-    if((obj == null) && (template != null) && !"".equals(template.trim()) && (!getContext(
-        ).getWiki().exists(getDocumentReference(), getContext()))){
+    if((obj == null) && StringUtils.isNotBlank(template) && (!getContext().getWiki(
+        ).exists(getDocumentReference(), getContext()))){
       DocumentReference templateRef = getWebUtilsService().resolveDocumentReference(template);
       if(getContext().getWiki().exists(templateRef, getContext())) {
         //FIXME using new BaseObject can cause problems. doc.newXObject is preferable
@@ -660,12 +664,11 @@ public class Event implements IEvent {
   }
 
   public List<String> getNonEmptyFields(List<String> fieldList) {
-    EmptyCheckCommand emptyCheckCmd = new EmptyCheckCommand();
     List<String> result = new ArrayList<String>();
     for (String fieldName : fieldList) {
       String fieldValue = internalDisplayField( getDetailConfigForField(fieldName),
           false);
-      if((fieldValue != null) && !emptyCheckCmd.isEmptyRTEString(fieldValue)) {
+      if((fieldValue != null) && !getDefaultEmptyDocStrategy().isEmptyRTEString(fieldValue)) {
         result.add(fieldName);
       }
     }
@@ -774,6 +777,10 @@ public class Event implements IEvent {
 
   protected IWebUtilsService getWebUtilsService() {
     return Utils.getComponent(IWebUtilsService.class);
+  }
+
+  private IDefaultEmptyDocStrategyRole getDefaultEmptyDocStrategy() {
+    return Utils.getComponent(IDefaultEmptyDocStrategyRole.class);
   }
 
 }

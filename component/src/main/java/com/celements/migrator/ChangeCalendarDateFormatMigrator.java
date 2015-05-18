@@ -1,7 +1,5 @@
 package com.celements.migrator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.query.QueryManager;
@@ -19,9 +17,6 @@ import com.xpn.xwiki.store.migration.XWikiDBVersion;
 
 @Component("ChangeCalendarDateFormatMigrator")
 public class ChangeCalendarDateFormatMigrator extends AbstractCelementsHibernateMigrator {
-
-  private static final Log LOGGER = LogFactory.getFactory().getInstance(
-      ChangeCalendarDateFormatMigrator.class);
   
   @Requirement
   private QueryManager queryManager;
@@ -47,6 +42,11 @@ public class ChangeCalendarDateFormatMigrator extends AbstractCelementsHibernate
    */
   public XWikiDBVersion getVersion() {
     return new XWikiDBVersion(1684);
+  }
+
+  @Override
+  public boolean shouldExecute(XWikiDBVersion startupVersion) {
+    return calendarClasses.isActivated();
   }
 
   @Override

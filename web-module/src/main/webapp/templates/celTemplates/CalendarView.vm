@@ -17,7 +17,7 @@
   #set($nb = $util.parseInt("$configObj.get('event_per_page')"))
 #end
 #set($isArchive = ("$!request.get('archive')" == "1"))
-#set($celCalendar = $xwiki.celcalendar.getCalendar($theCalDoc.fullName, $isArchive))
+#set($celCalendar = $services.celcalendar.getCalendarByCalRef($theCalDoc.documentReference, $isArchive))
 #set($newStart = $util.add($start, $nb))
 #if(("$!nb" != '') && ($nb > 0))
   #set($backNr = $util.add($start, $util.parseInt("-$nb")))

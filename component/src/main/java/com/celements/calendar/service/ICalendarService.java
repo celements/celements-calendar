@@ -26,7 +26,7 @@ public interface ICalendarService {
   public ICalendar getCalendarArchive(DocumentReference calDocRef, Date startDate);
 
   /**
-   * @deprecated instead use {@link #getCalendar}
+   * @deprecated instead use {@link #getCalendar} or {@link #getCalendarArchive}
    */
   @Deprecated
   public ICalendar getCalendarByCalRef(DocumentReference calDocRef, boolean isArchive);
@@ -90,9 +90,8 @@ public interface ICalendarService {
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace);
 
   /**
-   * 
-   * @Deprecated instead use {@link #getCalendarDocRefByCalendarSpace(String, 
-   * EntityReference)} 
+   * @deprecated instead use {@link #getCalendarDocRefByCalendarSpace(String, 
+   * EntityReference)}
    */
   @Deprecated
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace,

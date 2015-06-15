@@ -32,6 +32,7 @@ import com.celements.calendar.ICalendar;
 import com.celements.calendar.classes.CalendarClasses;
 import com.celements.common.classes.IClassCollectionRole;
 import com.celements.web.service.IWebUtilsService;
+import com.google.common.collect.Iterables;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -91,9 +92,6 @@ public class CalendarService implements ICalendarService {
     return getCalendarArchive(calDocRef).setStartDate(startDate);
   }
 
-  /**
-   * @deprecated instead use {@link #getCalendar}
-   */
   @Deprecated
   @Override
   public ICalendar getCalendarByCalRef(DocumentReference calDocRef, boolean isArchive) {
@@ -120,9 +118,7 @@ public class CalendarService implements ICalendarService {
   @Override
   public List<DocumentReference> getAllCalendars(WikiReference wikiRef, 
       Collection<DocumentReference> excludes) {
-    if (wikiRef == null) {
-      wikiRef = new WikiReference(getContext().getDatabase());
-    }
+    wikiRef = webUtilsService.getWikiRef(wikiRef);
     List<DocumentReference> allCalendars = new ArrayList<DocumentReference>();
     Set<DocumentReference> excludesSet = new HashSet<DocumentReference>(excludes);
     for (DocumentReference calDocRef : getAllCalendarsInternal(wikiRef)) {
@@ -177,9 +173,6 @@ public class CalendarService implements ICalendarService {
         + ") as cal where doc.translation = 0";
   }
 
-  /**
-   * @deprecated instead use {@link #getEventSpaceRefForCalendar}
-   */
   @Deprecated
   @Override
   public String getEventSpaceForCalendar(DocumentReference calDocRef
@@ -280,23 +273,14 @@ public class CalendarService implements ICalendarService {
   @Override
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace, 
       String inSpace) {
-    SpaceReference inSpaceRef = null;
-    if (inSpace != null) {
-      inSpaceRef = new SpaceReference(inSpace, new WikiReference(getContext(
-          ).getDatabase()));
-    }
-    return getCalendarDocRefByCalendarSpace(calSpace, inSpaceRef);
+    return getCalendarDocRefByCalendarSpace(calSpace, 
+        webUtilsService.resolveSpaceReference(inSpace));
   }
 
   @Override
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace, 
       EntityReference inRef) {
-    List<DocumentReference> calConfigs = getCalendarDocRefsByCalendarSpace(calSpace, inRef);
-    if (calConfigs.size() > 0) {
-      return calConfigs.get(0);
-    } else {
-      return null;
-    }
+    return Iterables.getFirst(getCalendarDocRefsByCalendarSpace(calSpace, inRef), null);
   }
 
   @Override
@@ -304,31 +288,18 @@ public class CalendarService implements ICalendarService {
     return getCalendarDocRefsByCalendarSpace(calSpace, (SpaceReference) null);
   }
 
-  /**
-   * @deprecated instead use {@link #getCalendarDocRefsByCalendarSpace(String, 
-   * EntityReference)}
-   */
   @Deprecated
   @Override
   public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace, 
       String inSpace) {
-    SpaceReference inSpaceRef = null;
-    if (inSpace != null) {
-      inSpaceRef = new SpaceReference(inSpace, new WikiReference(getContext(
-          ).getDatabase()));
-    }
-    return getCalendarDocRefsByCalendarSpace(calSpace, inSpaceRef);
+    return getCalendarDocRefsByCalendarSpace(calSpace, 
+        webUtilsService.resolveSpaceReference(inSpace));
   }
 
   @Override
   public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace, 
       EntityReference inRef) {
-    WikiReference inWikiRef;
-    if (inRef != null) {
-      inWikiRef = (WikiReference) inRef.extractReference(EntityType.WIKI);
-    } else {
-      inWikiRef = new WikiReference(getContext().getDatabase());
-    }
+    WikiReference inWikiRef = webUtilsService.getWikiRef(inRef);
     List<DocumentReference> calDocRefs = getCalSpaceCache(inWikiRef).get(calSpace);
     List<DocumentReference> ret;
     if (calDocRefs == null) {

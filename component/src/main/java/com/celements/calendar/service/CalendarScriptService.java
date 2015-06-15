@@ -10,6 +10,7 @@ import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.SpaceReference;
+import org.xwiki.model.reference.WikiReference;
 import org.xwiki.script.service.ScriptService;
 
 import com.celements.calendar.ICalendar;
@@ -120,7 +121,12 @@ public class CalendarScriptService implements ScriptService {
   }
 
   public CalendarApi getCalendarByCalRef(DocumentReference calDocRef, boolean isArchive) {
-    ICalendar cal = calService.getCalendarByCalRef(calDocRef, isArchive);
+    ICalendar cal;
+    if (!isArchive) {
+      cal = calService.getCalendar(calDocRef);
+    } else {
+      cal = calService.getCalendarArchive(calDocRef);
+    }
     if (cal != null) {
       return new CalendarApi(cal, getContext());
     } else {
@@ -132,7 +138,12 @@ public class CalendarScriptService implements ScriptService {
 
   public CalendarApi getCalendarByCalRef(DocumentReference calDocRef, boolean isArchive,
       String language) {
-    ICalendar cal = calService.getCalendarByCalRef(calDocRef, isArchive);
+    ICalendar cal;
+    if (!isArchive) {
+      cal = calService.getCalendar(calDocRef);
+    } else {
+      cal = calService.getCalendarArchive(calDocRef);
+    }
     if (cal != null) {
       return new CalendarApi(cal, language, getContext());
     } else {
@@ -148,7 +159,12 @@ public class CalendarScriptService implements ScriptService {
 
   public IEventSearchQuery getEventSearchQuery(LuceneQuery luceneQuery, 
       List<String> sortFields) {
-    return new DefaultEventSearchQuery(webUtilsService.getWikiRef(), luceneQuery.copy(), 
+    return getEventSearchQuery(webUtilsService.getWikiRef(), luceneQuery, sortFields);
+  }
+
+  public IEventSearchQuery getEventSearchQuery(WikiReference wikiRef, 
+      LuceneQuery luceneQuery, List<String> sortFields) {
+    return new DefaultEventSearchQuery(wikiRef, luceneQuery.copy(), 
         sortFields);
   }
 

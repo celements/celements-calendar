@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.SpaceReference;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -59,6 +60,8 @@ public interface IEvent {
 
   public DocumentReference getDocumentReference();
 
+  public SpaceReference getEventSpaceRef();
+
   /**
    * Get the value of a String property (String or TextArea). If the value in
    * the desired language is empty, the value of the default language will be
@@ -78,6 +81,8 @@ public interface IEvent {
   public Boolean getBooleanProperty(String name, String lang);
 
   public Integer getIntegerProperty(String name, String lang);
+
+  public BaseObject getObj();
 
   public BaseObject getObj(String lang);
 

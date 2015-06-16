@@ -70,6 +70,7 @@ public class Calendar implements ICalendar {
 
   private IEventManager eventMgr;
   private ICalendarService calService;
+  IWebUtilsService webUtilsService;
 
   /**
    * 
@@ -170,10 +171,7 @@ public class Calendar implements ICalendar {
 
   private final String getDefaultLang() {
     if (defaultLang == null) {
-      SpaceReference spaceRef = getEventSpaceRef();
-      if (spaceRef != null) {
-        defaultLang = getWebUtilsService().getDefaultLanguage(spaceRef.getName());
-      }
+      defaultLang = getWebUtilsService().getDefaultLanguage(getEventSpaceRef());
     }
     return defaultLang;
   }
@@ -436,7 +434,10 @@ public class Calendar implements ICalendar {
   }
 
   private IWebUtilsService getWebUtilsService() {
-    return Utils.getComponent(IWebUtilsService.class);
+    if (webUtilsService == null) {
+      webUtilsService = Utils.getComponent(IWebUtilsService.class);
+    }
+    return webUtilsService;
   }
 
   @Override

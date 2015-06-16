@@ -46,6 +46,7 @@ import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.service.ICalendarService;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
+import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -308,8 +309,8 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     SpaceReference spaceRef = new SpaceReference("evSpace", new WikiReference("db"));
     expect(calServiceMock.getEventSpaceRefForCalendar(eq(calDocRef))).andReturn(
         spaceRef).once();
-    expect(xwiki.getSpacePreference(eq("default_language"), eq(spaceRef.getName()), 
-        eq(""), same(getContext()))).andReturn(lang).once();
+    cal.webUtilsService = createMockAndAddToDefault(IWebUtilsService.class);
+    expect(cal.webUtilsService.getDefaultLanguage(eq(spaceRef))).andReturn(lang).once();
     
     replayDefault();
     String ret = cal.getLanguage();

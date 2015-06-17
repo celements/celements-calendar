@@ -3,9 +3,13 @@ package com.celements.calendar.classes;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xwiki.component.annotation.Component;
+import org.xwiki.component.annotation.Requirement;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.WikiReference;
 
+import com.celements.calendar.ICalendarClassConfig;
 import com.celements.common.classes.AbstractClassCollection;
+import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.classes.BaseClass;
@@ -13,46 +17,81 @@ import com.xpn.xwiki.objects.classes.BaseClass;
 @Component("celements.CalendarClasses")
 public class CalendarClasses extends AbstractClassCollection {
 
-  // TODO mark deprecated and delegate to config
+  @Deprecated
   public static final String CALENDAR_CONFIG_CLASS_SPACE = "Classes";
+  @Deprecated
   public static final String CALENDAR_CONFIG_CLASS_DOC = "CalendarConfigClass";
+  @Deprecated
   public static final String CALENDAR_CONFIG_CLASS = CALENDAR_CONFIG_CLASS_SPACE + "."
       + CALENDAR_CONFIG_CLASS_DOC;
+  @Deprecated
   public static final String PROPERTY_IS_SUBSCRIBABLE = "is_subscribable";
+  @Deprecated
   public static final String PROPERTY_EVENT_PER_PAGE = "event_per_page";
+  @Deprecated
   public static final String PROPERTY_OVERVIEW_COLUMN_CONFIG = "overview_column_config";
+  @Deprecated
   public static final String PROPERTY_EVENT_COLUMN_CONFIG = "event_column_config";
+  @Deprecated
   public static final String PROPERTY_HAS_MORE_LINK = "hasMoreLink";
+  @Deprecated
   public static final String PROPERTY_SUBSCRIBE_TO = "subscribe_to";
+  @Deprecated
   public static final String PROPERTY_CALENDAR_SPACE = "calendarspace";
 
+  @Deprecated
   public static final String CALENDAR_EVENT_CLASS_SPACE = "Classes";
+  @Deprecated
   public static final String CALENDAR_EVENT_CLASS_DOC = "CalendarEventClass";
+  @Deprecated
   public static final String CALENDAR_EVENT_CLASS = CALENDAR_EVENT_CLASS_SPACE + "."
       + CALENDAR_EVENT_CLASS_DOC;
+  @Deprecated
   public static final String PROPERTY_LANG = "lang";
+  @Deprecated
   public static final String PROPERTY_TITLE = "l_title";
+  @Deprecated
   public static final String PROPERTY_TITLE_RTE = "l_title_rte";
+  @Deprecated
   public static final String PROPERTY_DESCRIPTION = "l_description";
+  @Deprecated
   public static final String PROPERTY_LOCATION = "location";
+  @Deprecated
   public static final String PROPERTY_LOCATION_RTE = "location_rte";
+  @Deprecated
   public static final String PROPERTY_EVENT_DATE = "eventDate";
+  @Deprecated
   public static final String PROPERTY_EVENT_DATE_END = "eventDate_end";
+  @Deprecated
   public static final String PROPERTY_EVENT_DATE_VALIDATION = 
       "cel_calendar_validation_event_date";
+  @Deprecated
   public static final String PROPERTY_EVENT_DATE_END_VALIDATION = 
       "cel_calendar_validation_event_end_date";
+  @Deprecated
   public static final String PROPERTY_EVENT_DATE_FORMAT = "dd.MM.yyyy HH:mm";
+  @Deprecated
   public static final String PROPERTY_EVENT_IS_SUBSCRIBABLE = "isSubscribable";
 
+  @Deprecated
   public static final String SUBSCRIPTION_CLASS_SPACE = "Classes";
+  @Deprecated
   public static final String SUBSCRIPTION_CLASS_DOC = "SubscriptionClass";
+  @Deprecated
   public static final String SUBSCRIPTION_CLASS = SUBSCRIPTION_CLASS_SPACE + "."
       + SUBSCRIPTION_CLASS_DOC;
+  @Deprecated
   public static final String PROPERTY_SUBSCRIBER = "subscriber";
+  @Deprecated
   public static final String PROPERTY_DO_SUBSCRIBE = "doSubscribe";
 
   private static Log LOGGER = LogFactory.getFactory().getInstance(CalendarClasses.class);
+
+  @Requirement
+  private ICalendarClassConfig classConf;
+
+  @Requirement
+  private IWebUtilsService webUtilsService;
 
   @Override
   protected Log getLogger() {
@@ -66,6 +105,7 @@ public class CalendarClasses extends AbstractClassCollection {
     getSubscriptionClass();
   }
 
+  @Override
   public String getConfigName() {
     return "celCalendar";
   }
@@ -114,10 +154,12 @@ public class CalendarClasses extends AbstractClassCollection {
     return bclass;
   }
 
-  // TODO mark deprecated and delegate to config
+  /**
+   * @deprecated instead use {@link ICalendarClassConfig}
+   */
+  @Deprecated
   public DocumentReference getCalendarClassRef(String wikiName) {
-    return new DocumentReference(wikiName, CALENDAR_CONFIG_CLASS_SPACE,
-        CALENDAR_CONFIG_CLASS_DOC);
+    return classConf.getCalendarClassRef(new WikiReference(wikiName));
   }
 
   private BaseClass getCalendarEventClass() throws XWikiException {
@@ -162,10 +204,12 @@ public class CalendarClasses extends AbstractClassCollection {
     return bclass;
   }
 
-  // TODO mark deprecated and delegate to config
+  /**
+   * @deprecated instead use {@link ICalendarClassConfig}
+   */
+  @Deprecated
   public DocumentReference getCalendarEventClassRef(String wikiName) {
-    return new DocumentReference(wikiName, CALENDAR_EVENT_CLASS_SPACE,
-        CALENDAR_EVENT_CLASS_DOC);
+    return classConf.getCalendarEventClassRef(new WikiReference(wikiName));
   }
 
   private BaseClass getSubscriptionClass() throws XWikiException {
@@ -192,10 +236,12 @@ public class CalendarClasses extends AbstractClassCollection {
     return bclass;
   }
 
-  // TODO mark deprecated and delegate to config
+  /**
+   * @deprecated instead use {@link ICalendarClassConfig}
+   */
+  @Deprecated
   public DocumentReference getSubscriptionClassRef(String wikiName) {
-    return new DocumentReference(wikiName, SUBSCRIPTION_CLASS_SPACE,
-        SUBSCRIPTION_CLASS_DOC);
+    return classConf.getSubscriptionClassRef(new WikiReference(wikiName));
   }
   
   public String getRegexDate(boolean allowEmpty, boolean withTime) {

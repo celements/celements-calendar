@@ -14,6 +14,7 @@ import org.xwiki.model.reference.WikiReference;
 import org.xwiki.script.service.ScriptService;
 
 import com.celements.calendar.ICalendar;
+import com.celements.calendar.ICalendarClassConfig;
 import com.celements.calendar.api.CalendarApi;
 import com.celements.calendar.api.EventApi;
 import com.celements.calendar.manager.IEventManager;
@@ -197,6 +198,14 @@ public class CalendarScriptService implements ScriptService {
   
   public Date getEndOfDayDate(Date date) {
     return calService.getEndOfDayDate(date);
+  }
+
+  public Date getHighDate() {
+    return ICalendarClassConfig.DATE_HIGH;
+  }
+
+  public Date getLowDate() {
+    return ICalendarClassConfig.DATE_LOW;
   }
 
 }

@@ -8,14 +8,13 @@ import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.WikiReference;
 import org.xwiki.observation.event.Event;
 
-import com.celements.calendar.classes.CalendarClasses;
+import com.celements.calendar.ICalendarClassConfig;
 import com.celements.calendar.observation.event.CalendarCreatedEvent;
 import com.celements.calendar.observation.event.CalendarCreatingEvent;
 import com.celements.calendar.observation.event.CalendarDeletedEvent;
 import com.celements.calendar.observation.event.CalendarDeletingEvent;
 import com.celements.calendar.observation.event.CalendarUpdatedEvent;
 import com.celements.calendar.observation.event.CalendarUpdatingEvent;
-import com.celements.common.classes.IClassCollectionRole;
 import com.celements.common.observation.listener.AbstractDocumentUpdateListener;
 
 @Component(CalendarUpdateListener.NAME)
@@ -26,8 +25,8 @@ public class CalendarUpdateListener extends AbstractDocumentUpdateListener {
 
   public static final String NAME = "CalendarUpdateListener";
 
-  @Requirement("celements.CalendarClasses")
-  private IClassCollectionRole calendarClasses;
+  @Requirement
+  private ICalendarClassConfig classConf;
 
   @Override
   public String getName() {
@@ -36,7 +35,7 @@ public class CalendarUpdateListener extends AbstractDocumentUpdateListener {
 
   @Override
   protected DocumentReference getRequiredObjClassRef(WikiReference wikiRef) {
-    return ((CalendarClasses) calendarClasses).getCalendarClassRef(wikiRef.getName());
+    return classConf.getCalendarClassRef(wikiRef);
   }
 
   @Override

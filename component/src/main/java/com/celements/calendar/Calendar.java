@@ -36,7 +36,6 @@ import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.api.EventApi;
-import com.celements.calendar.classes.CalendarClasses;
 import com.celements.calendar.engine.ICalendarEngineRole;
 import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.search.EventSearchResult;
@@ -264,7 +263,7 @@ public class Calendar implements ICalendar {
 
   private String getPropertyStringValueForOverviewConfig(BaseObject calConfigObj) {
     return calConfigObj.getStringValue(
-        CalendarClasses.PROPERTY_OVERVIEW_COLUMN_CONFIG);
+        ICalendarClassConfig.PROPERTY_OVERVIEW_COLUMN_CONFIG);
   }
 
   @Override
@@ -276,9 +275,9 @@ public class Calendar implements ICalendar {
     String detailviewConfig = _DETAILVIEW_DEFAULT_CONFIG;
     BaseObject calConfigObj = getConfigObject();
     if ((calConfigObj != null)
-        && (calConfigObj.getStringValue(CalendarClasses.PROPERTY_EVENT_COLUMN_CONFIG) != null)
-        && (!"".equals(calConfigObj.getStringValue(CalendarClasses.PROPERTY_EVENT_COLUMN_CONFIG)))) {
-      detailviewConfig = calConfigObj.getStringValue(CalendarClasses.PROPERTY_EVENT_COLUMN_CONFIG);
+        && (calConfigObj.getStringValue(ICalendarClassConfig.PROPERTY_EVENT_COLUMN_CONFIG) != null)
+        && (!"".equals(calConfigObj.getStringValue(ICalendarClassConfig.PROPERTY_EVENT_COLUMN_CONFIG)))) {
+      detailviewConfig = calConfigObj.getStringValue(ICalendarClassConfig.PROPERTY_EVENT_COLUMN_CONFIG);
     }
     LOGGER.debug("detailview config: '" + detailviewConfig + "'");
     return detailviewConfig;
@@ -286,8 +285,8 @@ public class Calendar implements ICalendar {
 
   protected BaseObject getConfigObject() {
     return getCalDoc().getXObject(new DocumentReference(getContext().getDatabase(),
-        CalendarClasses.CALENDAR_CONFIG_CLASS_SPACE,
-        CalendarClasses.CALENDAR_CONFIG_CLASS_DOC));
+        ICalendarClassConfig.CALENDAR_CONFIG_CLASS_SPACE,
+        ICalendarClassConfig.CALENDAR_CONFIG_CLASS_DOC));
   }
 
   @Override
@@ -330,8 +329,8 @@ public class Calendar implements ICalendar {
     List<String> propNames = new ArrayList<String>();
     try {
       XWikiDocument doc = context.getWiki().getDocument(new DocumentReference(
-          context.getDatabase(), CalendarClasses.CALENDAR_EVENT_CLASS_SPACE,
-          CalendarClasses.CALENDAR_EVENT_CLASS_DOC), context);
+          context.getDatabase(), ICalendarClassConfig.CALENDAR_EVENT_CLASS_SPACE,
+          ICalendarClassConfig.CALENDAR_EVENT_CLASS_DOC), context);
       BaseClass bclass = doc.getXClass();
       Object[] props = bclass.getPropertyNames();
       for(int i = 0; i < props.length; i++) {
@@ -360,7 +359,7 @@ public class Calendar implements ICalendar {
   public boolean isSubscribable() {
     BaseObject configObj = getConfigObject();
     return (configObj.getIntValue(
-        CalendarClasses.PROPERTY_IS_SUBSCRIBABLE) == 1);
+        ICalendarClassConfig.PROPERTY_IS_SUBSCRIBABLE) == 1);
   }
 
   @Override

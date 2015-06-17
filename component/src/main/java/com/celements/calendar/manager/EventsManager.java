@@ -13,18 +13,18 @@ import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.SpaceReference;
+import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.Event;
 import com.celements.calendar.ICalendar;
+import com.celements.calendar.ICalendarClassConfig;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.api.EventApi;
-import com.celements.calendar.classes.CalendarClasses;
 import com.celements.calendar.engine.CalendarEngineLucene;
 import com.celements.calendar.engine.ICalendarEngineRole;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.service.ICalendarService;
-import com.celements.common.classes.IClassCollectionRole;
 import com.celements.search.lucene.LuceneSearchException;
 import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiContext;
@@ -43,8 +43,8 @@ public class EventsManager implements IEventManager {
   @Requirement
   private IWebUtilsService webUtilsService;
 
-  @Requirement("celements.CalendarClasses")
-  private IClassCollectionRole calClasses;
+  @Requirement
+  private ICalendarClassConfig calClassConf;
 
   @Requirement
   private Execution execution;
@@ -113,8 +113,8 @@ public class EventsManager implements IEventManager {
     ICalendar calendar = event.getCalendar();
     BaseObject calObj = null;
     if ((calendar != null) && (calendar.getCalDoc() != null)) {
-      calObj = calendar.getCalDoc().getXObject(getCalClasses().getCalendarClassRef(
-          getContext().getDatabase()));
+      calObj = calendar.getCalDoc().getXObject(calClassConf.getCalendarClassRef(
+          calDocRef.getWikiReference()));
     }
     boolean isSubscribed = false;
     if ((obj != null) && (obj.getIntValue("doSubscribe") == 1) && (calObj != null)
@@ -128,14 +128,13 @@ public class EventsManager implements IEventManager {
 
   private BaseObject getSubscriptionObject(DocumentReference calDocRef, IEvent event) {
     XWikiDocument eventDoc = event.getEventDocument();
-    BaseObject subscriptObj = eventDoc.getXObject(getCalClasses(
-        ).getSubscriptionClassRef(getContext().getDatabase()), "subscriber",
-        webUtilsService.getRefDefaultSerializer().serialize(calDocRef), false);
+    WikiReference wikiRef = event.getDocumentReference().getWikiReference();
+    BaseObject subscriptObj = eventDoc.getXObject(calClassConf.getSubscriptionClassRef(
+        wikiRef), "subscriber", webUtilsService.serializeRef(calDocRef), false);
     if (subscriptObj == null) {
       // for backwards compatibility
-      subscriptObj = eventDoc.getXObject(getCalClasses().getSubscriptionClassRef(
-          getContext().getDatabase()), "subscriber",
-          webUtilsService.getRefLocalSerializer().serialize(calDocRef), false);
+      subscriptObj = eventDoc.getXObject(calClassConf.getSubscriptionClassRef(wikiRef), 
+          "subscriber", webUtilsService.serializeRef(calDocRef, true), false);
     }
     return subscriptObj;
   }
@@ -218,10 +217,6 @@ public class EventsManager implements IEventManager {
 
   public IEvent getLastEvent(ICalendar cal) {
     return cal.getEngine().getLastEvent(cal);
-  }
-
-  private CalendarClasses getCalClasses() {
-    return (CalendarClasses) calClasses;
   }
 
   void injectCalService(ICalendarService calService) {

@@ -17,8 +17,8 @@ import org.xwiki.query.QueryManager;
 
 import com.celements.calendar.Event;
 import com.celements.calendar.ICalendar;
+import com.celements.calendar.ICalendarClassConfig;
 import com.celements.calendar.IEvent;
-import com.celements.calendar.classes.CalendarClasses;
 import com.xpn.xwiki.XWikiContext;
 
 @Component
@@ -95,7 +95,7 @@ public class CalendarEngineHQL extends AbstractCalendarEngine {
   }
 
   private Query getQuery(ICalendar cal, boolean asCount) throws QueryException {
-    String evClassName = CalendarClasses.CALENDAR_EVENT_CLASS;
+    String evClassName = ICalendarClassConfig.CALENDAR_EVENT_CLASS;
     String timeComp = ">=";
     String sortOrder = "asc";
     String selectEmptyDates = "or ec.eventDate is null";

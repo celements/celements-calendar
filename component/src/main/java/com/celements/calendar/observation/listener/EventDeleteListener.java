@@ -8,10 +8,9 @@ import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.WikiReference;
 import org.xwiki.observation.event.Event;
 
-import com.celements.calendar.classes.CalendarClasses;
+import com.celements.calendar.ICalendarClassConfig;
 import com.celements.calendar.observation.event.EventDeletedEvent;
 import com.celements.calendar.observation.event.EventDeletingEvent;
-import com.celements.common.classes.IClassCollectionRole;
 import com.celements.common.observation.listener.AbstractDocumentDeleteListener;
 
 @Component(EventDeleteListener.NAME)
@@ -21,8 +20,8 @@ public class EventDeleteListener extends AbstractDocumentDeleteListener {
 
   public static final String NAME = "EventDeleteListener";
 
-  @Requirement("celements.CalendarClasses")
-  private IClassCollectionRole calendarClasses;
+  @Requirement
+  private ICalendarClassConfig classConf;
 
   @Override
   public String getName() {
@@ -31,7 +30,7 @@ public class EventDeleteListener extends AbstractDocumentDeleteListener {
 
   @Override
   protected DocumentReference getRequiredObjClassRef(WikiReference wikiRef) {
-    return ((CalendarClasses) calendarClasses).getCalendarEventClassRef(wikiRef.getName());
+    return classConf.getCalendarEventClassRef(wikiRef);
   }
 
   @Override

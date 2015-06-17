@@ -66,7 +66,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     eventObj.setDocumentReference(eventDocRef);
     eventObj.setStringValue("lang", "de");
     objList.add(eventObj);
-    event = new Event(objList, "TestSpace");
+    event = new Event(objList);
     event.injectDocumentReference(eventDocRef);
     event.injectDefaultLanguage("de");
     calendar = createMockAndAddToDefault(ICalendar.class);

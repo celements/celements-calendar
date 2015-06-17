@@ -30,6 +30,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
@@ -38,7 +39,6 @@ import org.xwiki.context.Execution;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.SpaceReference;
 
-import com.celements.calendar.classes.CalendarClasses;
 import com.celements.calendar.service.ICalendarService;
 import com.celements.common.collections.ListUtils;
 import com.celements.emptycheck.internal.IDefaultEmptyDocStrategyRole;
@@ -55,7 +55,7 @@ public class Event implements IEvent {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Event.class);
 
-  private Map<String, BaseObject> eventObj;
+  private Map<String, BaseObject> eventObjMap;
   private DocumentReference eventDocRef;
   private String defaultLang;
   private String language;
@@ -63,23 +63,23 @@ public class Event implements IEvent {
   private ICalendarService calService;
 
   /**
-   * @deprecated instead use {@link #Event(List, String)}
+   * @deprecated instead use {@link #Event(List)}
    */
   @Deprecated
   public Event(XWikiDocument eventDoc, XWikiContext context) {
     this(eventDoc.getXObjects(new DocumentReference(context.getDatabase(),
-        CalendarClasses.CALENDAR_EVENT_CLASS_SPACE,
-        CalendarClasses.CALENDAR_EVENT_CLASS_DOC)),
+        ICalendarClassConfig.CALENDAR_EVENT_CLASS_SPACE,
+        ICalendarClassConfig.CALENDAR_EVENT_CLASS_DOC)),
         eventDoc.getDocumentReference().getSpaceReferences(
             ).get(0).getName(), context);
     this.eventDocRef = eventDoc.getDocumentReference();
   }
 
   /**
-   * @deprecated instead use {@link #Event(List, String)}
+   * @deprecated instead use {@link #Event(List)}
    */
   @Deprecated
-  public Event(String eventDocName, XWikiContext context) throws XWikiException{
+  public Event(String eventDocName, XWikiContext context) throws XWikiException {
     this(context.getWiki().getDocument(eventDocName, context), context);
   }
 
@@ -87,8 +87,7 @@ public class Event implements IEvent {
    * @deprecated instead use {@link #Event(DocumentReference)}
    */
   @Deprecated
-  public Event(DocumentReference eventDocRef, XWikiContext context
-      ) throws XWikiException {
+  public Event(DocumentReference eventDocRef, XWikiContext context) throws XWikiException {
     this(eventDocRef);
   }
 
@@ -96,40 +95,37 @@ public class Event implements IEvent {
     this.eventDocRef = eventDocRef;
   }
 
-  public Event(List<BaseObject> objList, String space) {
-    initObjectMap(objList, space);
-    if (getEventObjMap().size() > 0) {
-      BaseObject artObj = getEventObjMap().values().iterator().next();
-      this.eventDocRef = artObj.getDocumentReference();
-    }
-  }
-
   /**
-   * @deprecated instead use {@link #Event(List, String)}
+   * @deprecated instead use {@link #Event(List)}
    */
   @Deprecated
   public Event(List<BaseObject> objList, String space, XWikiContext context) {
     this(objList, space);
   }
 
-  private void initObjectMap(List<BaseObject> objList, String space) {
-    if (objList != null) {
-      for (BaseObject artObj : objList) {
-        init(artObj, space);
-      }
+  /**
+   * @deprecated instead use {@link #Event(List)}
+   */
+  @Deprecated
+  public Event(List<BaseObject> objList, String space) {
+    this(objList);
+  }
+
+  public Event(List<BaseObject> objList) {
+    initObjectMap(objList);
+    if (getEventObjMap().size() > 0) {
+      BaseObject obj = getEventObjMap().values().iterator().next();
+      this.eventDocRef = obj.getDocumentReference();
     }
   }
 
   Map<String, BaseObject> getEventObjMap() {
-    Map<String, BaseObject> eventObjMap = getEventObjMap_internal();
-    if (eventObjMap.isEmpty() && (eventDocRef != null)) {
+    if ((eventObjMap == null) && (eventDocRef != null)) {
       try {
-        XWikiDocument eventDoc = getContext().getWiki().getDocument(eventDocRef,
-            getContext());
-        initObjectMap(eventDoc.getXObjects(new DocumentReference(getContext(
-            ).getDatabase(), CalendarClasses.CALENDAR_EVENT_CLASS_SPACE,
-            CalendarClasses.CALENDAR_EVENT_CLASS_DOC)),
-            eventDocRef.getLastSpaceReference().getName());
+        List<BaseObject> objList = getContext().getWiki().getDocument(eventDocRef,
+            getContext()).getXObjects(getCalClassConf().getCalendarEventClassRef(
+            eventDocRef.getWikiReference()));
+        initObjectMap(objList);
       } catch (XWikiException exp) {
         LOGGER.error("getEventObjMap failed to get event document [" + eventDocRef + "].",
             exp);
@@ -138,39 +134,37 @@ public class Event implements IEvent {
     return eventObjMap;
   }
 
-  private Map<String, BaseObject> getEventObjMap_internal() {
-    if (eventObj == null) {
-      eventObj = new HashMap<String, BaseObject>();
-    }
-    return eventObj;
-  }
-
-  final private void init(BaseObject artObj, String space) {
-    if (artObj != null) {
-      String langValue = artObj.getStringValue(CalendarClasses.PROPERTY_LANG);
-      if (langValue != null) {
-        getEventObjMap_internal().put(langValue, artObj);
-      } else {
-        getEventObjMap_internal().put("", artObj);
+  private void initObjectMap(List<BaseObject> objList) {
+    eventObjMap = new HashMap<String, BaseObject>();
+    if (objList != null) {
+      for (BaseObject obj : objList) {
+        if (obj != null) {
+          String lang = obj.getStringValue(ICalendarClassConfig.PROPERTY_LANG);
+          if (StringUtils.isNotBlank(lang)) {
+            eventObjMap.put(lang, obj);
+          } else {
+            eventObjMap.put("", obj);
+          }
+        }
       }
     }
   }
 
   @Override
   public String getTitle(){
-    return getStringPropertyDefaultIfEmpty(CalendarClasses.PROPERTY_TITLE,
+    return getStringPropertyDefaultIfEmpty(ICalendarClassConfig.PROPERTY_TITLE,
         getLanguage());
   }
 
   @Override
   public String getDescription(){
-    return getStringPropertyDefaultIfEmpty(CalendarClasses.PROPERTY_DESCRIPTION,
+    return getStringPropertyDefaultIfEmpty(ICalendarClassConfig.PROPERTY_DESCRIPTION,
         getLanguage());
   }
 
   @Override
   public String getLocation(){
-    return getStringProperty(getObj(), CalendarClasses.PROPERTY_LOCATION);
+    return getStringProperty(getObj(), ICalendarClassConfig.PROPERTY_LOCATION);
   }
 
   @Override
@@ -186,12 +180,12 @@ public class Event implements IEvent {
 
   @Override
   public Date getEventDate(){
-    return getDateProperty(getObj(), CalendarClasses.PROPERTY_EVENT_DATE);
+    return getDateProperty(getObj(), ICalendarClassConfig.PROPERTY_EVENT_DATE);
   }
   
   @Override
   public Date getEventEndDate(){
-    return getDateProperty(getObj(), CalendarClasses.PROPERTY_EVENT_DATE_END);
+    return getDateProperty(getObj(), ICalendarClassConfig.PROPERTY_EVENT_DATE_END);
   }
 
   @Override
@@ -202,7 +196,7 @@ public class Event implements IEvent {
   @Override
   public Boolean isSubscribable(){
     return getBooleanProperty(getObj(),
-        CalendarClasses.PROPERTY_EVENT_IS_SUBSCRIBABLE);
+        ICalendarClassConfig.PROPERTY_EVENT_IS_SUBSCRIBABLE);
   }
 
   @Override
@@ -298,21 +292,21 @@ public class Event implements IEvent {
   String getDisplayPart(String name, boolean notDisplayIfSame) {
     String value = "";
     if(name.equals("date")) {
-      value = getDateString(CalendarClasses.PROPERTY_EVENT_DATE,
+      value = getDateString(ICalendarClassConfig.PROPERTY_EVENT_DATE,
           "dd.MM.yyyy");
     } else if(name.equals("time")) {
-      value = getTimeString(CalendarClasses.PROPERTY_EVENT_DATE,
+      value = getTimeString(ICalendarClassConfig.PROPERTY_EVENT_DATE,
           notDisplayIfSame);
     } else if(name.equals("date_end")) {
       String startDay = getDateString(
-          CalendarClasses.PROPERTY_EVENT_DATE, "dd.MM.yyyy");
+          ICalendarClassConfig.PROPERTY_EVENT_DATE, "dd.MM.yyyy");
       String endDay = getDateString(
-          CalendarClasses.PROPERTY_EVENT_DATE_END, "dd.MM.yyyy");
+          ICalendarClassConfig.PROPERTY_EVENT_DATE_END, "dd.MM.yyyy");
       if (!notDisplayIfSame || !startDay.equals(endDay)) {
         value = endDay;
       }
     } else if(name.equals("time_end")) {
-      value = getTimeString(CalendarClasses.PROPERTY_EVENT_DATE_END,
+      value = getTimeString(ICalendarClassConfig.PROPERTY_EVENT_DATE_END,
           notDisplayIfSame);
     } else if(name.equals("title")) {
       value = getTitle();
@@ -534,7 +528,7 @@ public class Event implements IEvent {
     splitLanguageDependentFields(confIndep, confDep,
         splitIntoPropertyNames(getCalendar().getDetailviewFields()));
     if (getCalendar().isSubscribable()) {
-      confIndep.add(CalendarClasses.PROPERTY_EVENT_IS_SUBSCRIBABLE);
+      confIndep.add(ICalendarClassConfig.PROPERTY_EVENT_IS_SUBSCRIBABLE);
     }
     Element[] allProps = getProperties(lang);
     LOGGER.debug("getEditableProperties: allProps - " + Arrays.deepToString(allProps));
@@ -733,6 +727,10 @@ public class Event implements IEvent {
 
   private IDefaultEmptyDocStrategyRole getDefaultEmptyDocStrategy() {
     return Utils.getComponent(IDefaultEmptyDocStrategyRole.class);
+  }
+
+  private ICalendarClassConfig getCalClassConf() {
+    return Utils.getComponent(ICalendarClassConfig.class);
   }
 
 }

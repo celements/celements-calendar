@@ -5,29 +5,27 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.celements.calendar.ICalendar;
-import com.celements.calendar.classes.CalendarClasses;
+import com.celements.calendar.ICalendarClassConfig;
 import com.celements.search.lucene.query.LuceneQuery;
 import com.celements.search.lucene.query.QueryRestrictionGroup.Type;
 
 public class CalendarEventSearchQuery extends DefaultEventSearchQuery {
 
-  private static final Log LOGGER = LogFactory.getFactory().getInstance(
+  private static final Logger LOGGER = LoggerFactory.getLogger(
       CalendarEventSearchQuery.class);
 
   private final Date startDate;
   private final boolean isArchive;
-  private final String lang;
   private final List<String> allowedSpaces;
   
   public CalendarEventSearchQuery(ICalendar cal, List<String> sortFields) {
     super(cal.getWikiRef(), getDefaultSortFields(sortFields, cal.isArchive()));
     this.startDate = cal.getStartDate();
     this.isArchive = cal.isArchive();
-    this.lang = cal.getLanguage();
     this.allowedSpaces = cal.getAllowedSpaces();
   }
 
@@ -35,7 +33,6 @@ public class CalendarEventSearchQuery extends DefaultEventSearchQuery {
     super(query, getDefaultSortFields(null, cal.isArchive()));
     this.startDate = cal.getStartDate();
     this.isArchive = cal.isArchive();
-    this.lang = cal.getLanguage();
     this.allowedSpaces = cal.getAllowedSpaces();
   }
 
@@ -44,16 +41,14 @@ public class CalendarEventSearchQuery extends DefaultEventSearchQuery {
     query = super.getAsLuceneQueryInternal(query);
     query.add(getSearchService().createRestrictionGroup(Type.OR, Arrays.asList("space"), 
         getAllowedSpaces()));
-    query.add(getSearchService().createFieldRestriction(getCalEventClassRef(), 
-        CalendarClasses.PROPERTY_LANG, "\"" + lang + "\""));
     if (!isArchive) {
       query.add(getSearchService().createFromDateRestriction(
-          CalendarClasses.CALENDAR_EVENT_CLASS + "." + CalendarClasses.PROPERTY_EVENT_DATE,
-          startDate, true));
+          ICalendarClassConfig.CALENDAR_EVENT_CLASS + "." 
+          + ICalendarClassConfig.PROPERTY_EVENT_DATE, startDate, true));
     } else {
       query.add(getSearchService().createToDateRestriction(
-          CalendarClasses.CALENDAR_EVENT_CLASS + "." + CalendarClasses.PROPERTY_EVENT_DATE,
-          startDate, false));
+          ICalendarClassConfig.CALENDAR_EVENT_CLASS + "." 
+          + ICalendarClassConfig.PROPERTY_EVENT_DATE, startDate, false));
     }
     return query;
   }
@@ -74,17 +69,16 @@ public class CalendarEventSearchQuery extends DefaultEventSearchQuery {
   @Override
   public String toString() {
     return "CalendarEventSearchQuery [" + super.toString() + ", startDate=" + startDate 
-        + ", isArchive=" + isArchive + ", lang=" + lang + ", allowedSpaces=" 
-        + allowedSpaces + "]";
+        + ", isArchive=" + isArchive + ", allowedSpaces=" + allowedSpaces + "]";
   }
 
   static List<String> getDefaultSortFields(List<String> sortFields, boolean inverted) {
     if (sortFields == null || sortFields.isEmpty()) {
       LOGGER.info("getDefaultSortFields: got empty sortFields, using default");
-      String pref = (inverted ? "-" : "") + CalendarClasses.CALENDAR_EVENT_CLASS + ".";
-      return Arrays.asList(pref + CalendarClasses.PROPERTY_EVENT_DATE,
-          pref + CalendarClasses.PROPERTY_EVENT_DATE_END,
-          pref + CalendarClasses.PROPERTY_TITLE);
+      String pref = (inverted ? "-" : "") + ICalendarClassConfig.CALENDAR_EVENT_CLASS + ".";
+      return Arrays.asList(pref + ICalendarClassConfig.PROPERTY_EVENT_DATE,
+          pref + ICalendarClassConfig.PROPERTY_EVENT_DATE_END,
+          pref + ICalendarClassConfig.PROPERTY_TITLE);
     } else {
       return sortFields;
     }

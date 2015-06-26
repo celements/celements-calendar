@@ -61,7 +61,6 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testCountEventsInternal() throws QueryException {
-    String lang = "de";
     List<String> spaces = Arrays.asList("myCalSpace");
     Date startDate = new Date(0);
     boolean isArchive = false;
@@ -72,7 +71,7 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
         ).andReturn(queryMock).once();
     expect(queryMock.setWiki(database)).andReturn(queryMock).once();
     expect(queryMock.execute()).andReturn(Arrays.<Object>asList(count)).once();
-    expectForCalMock(startDate, isArchive, lang, spaces);
+    expectForCalMock(startDate, isArchive, spaces);
 
     replayDefault();
     long ret = engine.countEventsInternal(calMock);
@@ -83,7 +82,6 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testGetEvents() throws QueryException, Exception {
-    String lang = "de";
     List<String> spaces = Arrays.asList("myCalSpace");
     Date startDate = new Date(0);
     boolean isArchive = true;
@@ -99,7 +97,7 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
         ).andReturn(queryMock).once();
     expect(queryMock.setWiki(database)).andReturn(queryMock).once();
     expect(queryMock.execute()).andReturn(eventList).once();
-    expectForCalMock(startDate, isArchive, lang, spaces);
+    expectForCalMock(startDate, isArchive, spaces);
 
     replayDefault();
     List<IEvent> ret = engine.getEvents(calMock, 0, 0);
@@ -112,7 +110,6 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testGetEvents_limit_offset() throws QueryException, Exception {
-    String lang = "de";
     List<String> spaces = Arrays.asList("myCalSpace");
     Date startDate = new Date(0);
     boolean isArchive = true;
@@ -132,7 +129,7 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     expect(queryMock.setOffset(offset)).andReturn(queryMock).once();
     expect(queryMock.setLimit(limit)).andReturn(queryMock).once();
     expect(queryMock.execute()).andReturn(eventList).once();
-    expectForCalMock(startDate, isArchive, lang, spaces);
+    expectForCalMock(startDate, isArchive, spaces);
 
     replayDefault();
     List<IEvent> ret = engine.getEvents(calMock, offset, limit);
@@ -145,7 +142,6 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testGetFirstEventDate() throws QueryException, Exception {
-    String lang = "de";
     List<String> spaces = Arrays.asList("myCalSpace");
     Date startDate = new Date(0);
     boolean isArchive = false;
@@ -160,7 +156,7 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     expect(queryMock.setWiki(database)).andReturn(queryMock).once();
     expect(queryMock.setLimit(1)).andReturn(queryMock).once();
     expect(queryMock.execute()).andReturn(eventList).once();
-    expectForCalMock(startDate, isArchive, lang, spaces);
+    expectForCalMock(startDate, isArchive, spaces);
 
     replayDefault();
     IEvent ret = engine.getFirstEvent(calMock);
@@ -171,7 +167,6 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testGetFirstEventDate_isArchive() throws QueryException {
-    String lang = "de";
     List<String> spaces = Arrays.asList("myCalSpace");
     Date startDate = new Date(0);
     boolean isArchive = true;
@@ -196,7 +191,7 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     expect(queryMock2.setOffset(eq((int) count - 1))).andReturn(queryMock2).once();
     expect(queryMock2.setLimit(eq(1))).andReturn(queryMock2).once();
     expect(queryMock2.execute()).andReturn(eventList).once();
-    expectForCalMock(startDate, isArchive, lang, spaces);
+    expectForCalMock(startDate, isArchive, spaces);
 
     replayDefault();
     IEvent ret = engine.getFirstEvent(calMock);
@@ -207,7 +202,6 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testGetLastEventDate() throws QueryException {
-    String lang = "de";
     List<String> spaces = Arrays.asList("myCalSpace");
     Date startDate = new Date(0);
     boolean isArchive = false;
@@ -232,7 +226,7 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     expect(queryMock2.setOffset(eq((int) count - 1))).andReturn(queryMock2).once();
     expect(queryMock2.setLimit(eq(1))).andReturn(queryMock2).once();
     expect(queryMock2.execute()).andReturn(eventList).once();
-    expectForCalMock(startDate, isArchive, lang, spaces);
+    expectForCalMock(startDate, isArchive, spaces);
 
     replayDefault();
     IEvent ret = engine.getLastEvent(calMock);
@@ -243,7 +237,6 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testGetLastEventDate_isArchive() throws QueryException {
-    String lang = "de";
     List<String> spaces = Arrays.asList("myCalSpace");
     Date startDate = new Date(0);
     boolean isArchive = true;
@@ -257,7 +250,7 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     expect(queryMock.setWiki(database)).andReturn(queryMock).once();
     expect(queryMock.setLimit(1)).andReturn(queryMock).once();
     expect(queryMock.execute()).andReturn(evList).once();
-    expectForCalMock(startDate, isArchive, lang, spaces);
+    expectForCalMock(startDate, isArchive, spaces);
 
     replayDefault();
     IEvent ret = engine.getLastEvent(calMock);
@@ -266,11 +259,9 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     assertEquals(new Event(evDocRef), ret);
   }
 
-  private void expectForCalMock(Date startDate, boolean isArchive, String lang, 
-      List<String> spaces) {
+  private void expectForCalMock(Date startDate, boolean isArchive, List<String> spaces) {
     expect(calMock.getStartDate()).andReturn(startDate).atLeastOnce();
     expect(calMock.isArchive()).andReturn(isArchive).atLeastOnce();
-    expect(calMock.getLanguage()).andReturn(lang).atLeastOnce();
     expect(calMock.getAllowedSpaces()).andReturn(spaces).atLeastOnce();
   }
 
@@ -281,9 +272,9 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     String selectEmptyDates = isArchive ? "" : "or ec.eventDate is null";
     return "select " + select + " from BaseObject as obj, Classes.CalendarEventClass as "
     +	"ec where ec.id.id=obj.id and obj.className = 'Classes.CalendarEventClass' and "
-    + "ec.lang='de' and (ec.eventDate " + comp + " '1970-01-01 01:00:00' "
-    + selectEmptyDates + ") and (obj.name like 'myCalSpace.%') order by ec.eventDate "
-    + order + ", ec.eventDate_end " + order + ", ec.l_title " + order;
+    + "(ec.eventDate " + comp + " '1970-01-01 01:00:00' " + selectEmptyDates 
+    + ") and (obj.name like 'myCalSpace.%') order by ec.eventDate " + order 
+    + ", ec.eventDate_end " + order + ", ec.l_title " + order;
   }
 
   private IWebUtilsService getWebUtilsService() {

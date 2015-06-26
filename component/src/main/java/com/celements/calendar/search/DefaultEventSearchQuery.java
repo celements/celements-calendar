@@ -7,8 +7,7 @@ import java.util.List;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.WikiReference;
 
-import com.celements.calendar.classes.CalendarClasses;
-import com.celements.common.classes.IClassCollectionRole;
+import com.celements.calendar.ICalendarClassConfig;
 import com.celements.search.lucene.ILuceneSearchService;
 import com.celements.search.lucene.query.LuceneQuery;
 import com.xpn.xwiki.web.Utils;
@@ -83,8 +82,8 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
   }
 
   protected final DocumentReference getCalEventClassRef() {
-    return ((CalendarClasses) Utils.getComponent(IClassCollectionRole.class, 
-        "celements.CalendarClasses")).getCalendarEventClassRef(getDatabase());
+    return Utils.getComponent(ICalendarClassConfig.class).getCalendarEventClassRef(
+        getWikiRef());
   }
 
   protected final ILuceneSearchService getSearchService() {

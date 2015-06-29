@@ -59,7 +59,7 @@ public class Event implements IEvent {
   private DocumentReference eventDocRef;
   private String defaultLang;
   private String language;
-  private ICalendar calendar;  
+  private ICalendar calendar;
   private ICalendarService calService;
 
   /**
@@ -69,9 +69,8 @@ public class Event implements IEvent {
   public Event(XWikiDocument eventDoc, XWikiContext context) {
     this(eventDoc.getXObjects(new DocumentReference(context.getDatabase(),
         ICalendarClassConfig.CALENDAR_EVENT_CLASS_SPACE,
-        ICalendarClassConfig.CALENDAR_EVENT_CLASS_DOC)),
-        eventDoc.getDocumentReference().getSpaceReferences(
-            ).get(0).getName(), context);
+        ICalendarClassConfig.CALENDAR_EVENT_CLASS_DOC)), eventDoc.getDocumentReference(
+        ).getSpaceReferences().get(0).getName(), context);
     this.eventDocRef = eventDoc.getDocumentReference();
   }
 
@@ -151,19 +150,19 @@ public class Event implements IEvent {
   }
 
   @Override
-  public String getTitle(){
+  public String getTitle() {
     return getStringPropertyDefaultIfEmpty(ICalendarClassConfig.PROPERTY_TITLE,
         getLanguage());
   }
 
   @Override
-  public String getDescription(){
+  public String getDescription() {
     return getStringPropertyDefaultIfEmpty(ICalendarClassConfig.PROPERTY_DESCRIPTION,
         getLanguage());
   }
 
   @Override
-  public String getLocation(){
+  public String getLocation() {
     return getStringProperty(getObj(), ICalendarClassConfig.PROPERTY_LOCATION);
   }
 
@@ -172,19 +171,19 @@ public class Event implements IEvent {
     SimpleDateFormat sdf = new SimpleDateFormat(format, new Locale(getLanguage()));
     Date date = getDateProperty(getObj(), dateField);
     String dateString = "";
-    if(date != null){
+    if (date != null) {
       dateString = sdf.format(date);
     }
     return dateString;
   }
 
   @Override
-  public Date getEventDate(){
+  public Date getEventDate() {
     return getDateProperty(getObj(), ICalendarClassConfig.PROPERTY_EVENT_DATE);
   }
-  
+
   @Override
-  public Date getEventEndDate(){
+  public Date getEventEndDate() {
     return getDateProperty(getObj(), ICalendarClassConfig.PROPERTY_EVENT_DATE_END);
   }
 
@@ -194,7 +193,7 @@ public class Event implements IEvent {
   }
 
   @Override
-  public Boolean isSubscribable(){
+  public Boolean isSubscribable() {
     return getBooleanProperty(getObj(),
         ICalendarClassConfig.PROPERTY_EVENT_IS_SUBSCRIBABLE);
   }
@@ -229,9 +228,13 @@ public class Event implements IEvent {
     LOGGER.debug("hasLink: " + hasLink);
 
     String value = "";
-    if(hasLink) { value += "<a href='" + link + "'>"; }
+    if (hasLink) {
+      value += "<a href='" + link + "'>";
+    }
     value += displayField(name, getContext());
-    if(hasLink) { value += "</a>"; }
+    if (hasLink) {
+      value += "</a>";
+    }
 
     return value;
   }
@@ -252,15 +255,15 @@ public class Event implements IEvent {
     String value = "";
     String[] parts = name.split("-");
     String prevPartName = null;
-    for(String partName : parts) {
+    for (String partName : parts) {
       boolean notDisplayIfSame = partName.endsWith(".");
       partName = partName.replaceAll("\\.", "");
       String displayPart = getDisplayPart(partName, notDisplayIfSame);
       if ((parts.length > 1) && !"".equals(displayPart)) {
         displayPart = addDateTimeDelimiter(prevPartName, partName, displayPart);
         if (addSpans) {
-          displayPart = "<span class=\"cel_cal_" + partName + "\">"
-              + displayPart + "</span>";
+          displayPart = "<span class=\"cel_cal_" + partName + "\">" + displayPart
+              + "</span>";
         }
       }
       value += displayPart;
@@ -291,29 +294,27 @@ public class Event implements IEvent {
 
   String getDisplayPart(String name, boolean notDisplayIfSame) {
     String value = "";
-    if(name.equals("date")) {
-      value = getDateString(ICalendarClassConfig.PROPERTY_EVENT_DATE,
+    if (name.equals("date")) {
+      value = getDateString(ICalendarClassConfig.PROPERTY_EVENT_DATE, "dd.MM.yyyy");
+    } else if (name.equals("time")) {
+      value = getTimeString(ICalendarClassConfig.PROPERTY_EVENT_DATE, notDisplayIfSame);
+    } else if (name.equals("date_end")) {
+      String startDay = getDateString(ICalendarClassConfig.PROPERTY_EVENT_DATE,
           "dd.MM.yyyy");
-    } else if(name.equals("time")) {
-      value = getTimeString(ICalendarClassConfig.PROPERTY_EVENT_DATE,
-          notDisplayIfSame);
-    } else if(name.equals("date_end")) {
-      String startDay = getDateString(
-          ICalendarClassConfig.PROPERTY_EVENT_DATE, "dd.MM.yyyy");
-      String endDay = getDateString(
-          ICalendarClassConfig.PROPERTY_EVENT_DATE_END, "dd.MM.yyyy");
+      String endDay = getDateString(ICalendarClassConfig.PROPERTY_EVENT_DATE_END,
+          "dd.MM.yyyy");
       if (!notDisplayIfSame || !startDay.equals(endDay)) {
         value = endDay;
       }
-    } else if(name.equals("time_end")) {
+    } else if (name.equals("time_end")) {
       value = getTimeString(ICalendarClassConfig.PROPERTY_EVENT_DATE_END,
           notDisplayIfSame);
-    } else if(name.equals("title")) {
+    } else if (name.equals("title")) {
       value = getTitle();
-    } else if(name.equals("location")) {
+    } else if (name.equals("location")) {
       value = getLocation();
-    } else if(name.equals("detaillink")) {
-      if(needsMoreLink(getContext())) {
+    } else if (name.equals("detaillink")) {
+      if (needsMoreLink(getContext())) {
         value = getContext().getMessageTool().get("cel_cal_more_detaillink");
       }
     } else {
@@ -342,7 +343,7 @@ public class Event implements IEvent {
   public boolean needsMoreLink() {
     boolean needsLink = false;
     List<String> additionalFields = getAdditionalPropertyNames();
-    if(additionalFields != null) {
+    if (additionalFields != null) {
       needsLink = (getNonEmptyFields(additionalFields).size() > 0);
     }
     return needsLink;
@@ -358,9 +359,9 @@ public class Event implements IEvent {
   }
 
   @Override
-  public boolean isFromSubscribableCalendar(String calendarSpace){
+  public boolean isFromSubscribableCalendar(String calendarSpace) {
     boolean result = true;
-    if(getDocName().startsWith(calendarSpace + ".")){
+    if (getDocName().startsWith(calendarSpace + ".")) {
       result = false;
     }
     return result;
@@ -368,7 +369,7 @@ public class Event implements IEvent {
 
   @Deprecated
   @Override
-  public String getDocName(){
+  public String getDocName() {
     for (String key : getEventObjMap().keySet()) {
       return getEventObjMap().get(key).getName();
     }
@@ -391,47 +392,47 @@ public class Event implements IEvent {
   }
 
   @Override
-  public String getStringPropertyDefaultIfEmpty(String name, String lang){
+  public String getStringPropertyDefaultIfEmpty(String name, String lang) {
     String result = getStringProperty(getObj(lang), name);
-    if((result.trim().length() <= 0) && !lang.equals(getDefaultLang())){
+    if ((result.trim().length() <= 0) && !lang.equals(getDefaultLang())) {
       result = getStringProperty(getObj(), name);
     }
     return result;
   }
 
   @Override
-  public String getStringProperty(String name, String lang){
+  public String getStringProperty(String name, String lang) {
     return getStringProperty(getObj(lang), name);
   }
 
-  private String getStringProperty(BaseObject obj, String name){
+  private String getStringProperty(BaseObject obj, String name) {
     String result = "";
-    if(obj != null){
+    if (obj != null) {
       result = obj.getStringValue(name);
     }
     return result;
   }
 
   @Override
-  public Date getDateProperty(String name, String lang){
+  public Date getDateProperty(String name, String lang) {
     return getDateProperty(getObj(lang), name);
   }
 
-  private Date getDateProperty(BaseObject obj, String name){
+  private Date getDateProperty(BaseObject obj, String name) {
     Date result = null;
-    if(obj != null){
+    if (obj != null) {
       result = obj.getDateValue(name);
     }
     return result;
   }
 
   @Override
-  public Boolean getBooleanProperty(String name, String lang){
+  public Boolean getBooleanProperty(String name, String lang) {
     return getBooleanProperty(getObj(lang), name);
   }
 
   // not set = null, false = 0, true = 1
-  private Boolean getBooleanProperty(BaseObject obj, String name){
+  private Boolean getBooleanProperty(BaseObject obj, String name) {
     Boolean result = null;
     if (obj != null) {
       int intVal = obj.getIntValue(name, -1);
@@ -447,7 +448,7 @@ public class Event implements IEvent {
     return getIntegerProperty(getObj(lang), name);
   }
 
-  private Integer getIntegerProperty(BaseObject obj, String name){
+  private Integer getIntegerProperty(BaseObject obj, String name) {
     Integer result = null;
     if (obj != null) {
       int intVal = obj.getIntValue(name, -1);
@@ -485,7 +486,7 @@ public class Event implements IEvent {
   @Override
   public Element[] getProperties(String lang) {
     BaseObject obj = getObj(lang);
-    if(obj != null) {
+    if (obj != null) {
       return new com.xpn.xwiki.api.Class(obj.getXClass(getContext()), getContext()
           ).getProperties();
     } else {
@@ -515,18 +516,18 @@ public class Event implements IEvent {
   @Deprecated
   @Override
   public List<List<String>> getEditableProperties(String lang, XWikiContext context
-      ) throws XWikiException{
+      ) throws XWikiException {
     return getEditableProperties(lang);
   }
 
   @Override
-  public List<List<String>> getEditableProperties(String lang) throws XWikiException{
+  public List<List<String>> getEditableProperties(String lang) throws XWikiException {
     Set<String> confIndep = new HashSet<String>();
     Set<String> confDep = new HashSet<String>();
-    splitLanguageDependentFields(confIndep, confDep,
-        splitIntoPropertyNames(getCalendar().getOverviewFields()));
-    splitLanguageDependentFields(confIndep, confDep,
-        splitIntoPropertyNames(getCalendar().getDetailviewFields()));
+    splitLanguageDependentFields(confIndep, confDep, splitIntoPropertyNames(
+        getCalendar().getOverviewFields()));
+    splitLanguageDependentFields(confIndep, confDep, splitIntoPropertyNames(
+        getCalendar().getDetailviewFields()));
     if (getCalendar().isSubscribable()) {
       confIndep.add(ICalendarClassConfig.PROPERTY_EVENT_IS_SUBSCRIBABLE);
     }
@@ -537,7 +538,7 @@ public class Event implements IEvent {
     LOGGER.debug("getEditableProperties: confDep - " + Arrays.deepToString(
         confDep.toArray()));
     List<String> lIndependantProps = getProps(allProps, confIndep);
-    List<String> lDependantProps= getProps(allProps, confDep);
+    List<String> lDependantProps = getProps(allProps, confDep);
     List<List<String>> editProp = new ArrayList<List<String>>();
     editProp.add(lIndependantProps);
     editProp.add(lDependantProps);
@@ -560,13 +561,12 @@ public class Event implements IEvent {
     return propertyNames;
   }
 
-  void splitLanguageDependentFields(Set<String> confIndep,
-      Set<String> confDep, List<String> propertyNames) {
+  void splitLanguageDependentFields(Set<String> confIndep, Set<String> confDep,
+      List<String> propertyNames) {
     ArrayList<String> propNamesCleanList = new ArrayList<String>();
     propNamesCleanList.addAll(propertyNames);
     propNamesCleanList.remove("detaillink");
-    if (propNamesCleanList.contains("date")
-        || propNamesCleanList.contains("time")) {
+    if (propNamesCleanList.contains("date") || propNamesCleanList.contains("time")) {
       propNamesCleanList.remove("date");
       propNamesCleanList.remove("time");
       propNamesCleanList.add("eventDate");
@@ -579,7 +579,7 @@ public class Event implements IEvent {
     }
     LOGGER.debug("splitLanguageDepFields: " + propNamesCleanList.toString());
     for (String propName : propNamesCleanList) {
-      if(propName.startsWith("l_")) {
+      if (propName.startsWith("l_")) {
         confDep.add(propName);
       } else {
         confIndep.add(propName);
@@ -590,8 +590,8 @@ public class Event implements IEvent {
   private List<String> getProps(Element[] allProps, Set<String> conf) {
     List<String> props = new ArrayList<String>();
     for (int i = 0; i < allProps.length; i++) {
-      if((allProps[i] != null) && ((conf.size() == 0)
-          || (conf.contains(allProps[i].getName())))){
+      if ((allProps[i] != null) && ((conf.size() == 0) 
+          || (conf.contains(allProps[i].getName())))) {
         LOGGER.debug("addProp: " + allProps[i].getName());
         props.add(allProps[i].getName());
       } else {
@@ -611,9 +611,9 @@ public class Event implements IEvent {
   public List<String> getNonEmptyFields(List<String> fieldList) {
     List<String> result = new ArrayList<String>();
     for (String fieldName : fieldList) {
-      String fieldValue = internalDisplayField( getDetailConfigForField(fieldName),
-          false);
-      if((fieldValue != null) && !getDefaultEmptyDocStrategy().isEmptyRTEString(fieldValue)) {
+      String fieldValue = internalDisplayField(getDetailConfigForField(fieldName), false);
+      if ((fieldValue != null) && !getDefaultEmptyDocStrategy().isEmptyRTEString(
+          fieldValue)) {
         result.add(fieldName);
       }
     }
@@ -622,7 +622,7 @@ public class Event implements IEvent {
   }
 
   String getDetailConfigForField(String fieldName) {
-    for(String colFields : getCalendar().getDetailviewFields()) {
+    for (String colFields : getCalendar().getDetailviewFields()) {
       if (isIncludingFieldAsOptional(fieldName, colFields)) {
         fieldName = fieldName + ".";
       }
@@ -676,7 +676,7 @@ public class Event implements IEvent {
 
   protected XWikiContext getContext() {
     Execution execution = Utils.getComponent(Execution.class);
-    return (XWikiContext)execution.getContext().getProperty("xwikicontext");
+    return (XWikiContext) execution.getContext().getProperty("xwikicontext");
   }
 
   /**
@@ -706,7 +706,7 @@ public class Event implements IEvent {
   void injectCalendar(ICalendar testCalendar) {
     calendar = testCalendar;
   }
-  
+
   protected ICalendarService getCalService() {
     if (calService == null) {
       calService = Utils.getComponent(ICalendarService.class);

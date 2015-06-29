@@ -111,8 +111,7 @@ public class CalendarEngineHQL extends AbstractCalendarEngine {
       hql += "obj.name ";
     }
     hql += "from BaseObject as obj, " + evClassName + " as ec ";
-    hql += "where ec.id.id=obj.id and obj.className = '" + evClassName + "' ";
-    hql += "and ec.lang='" + cal.getLanguage() + "' and (";
+    hql += "where ec.id.id=obj.id and obj.className = '" + evClassName + "' and (";
     if(toArchiveOnEndDate()) {
       hql += "COALESCE(ec.eventDate_end, ec.eventDate)";
     } else {

@@ -39,9 +39,8 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
   public void testNewCalendarEventSearchQuery() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
-    String lang = "de";
     List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
-    expectForCalMock(startDate, isArchive, lang, spaces);
+    expectForCalMock(startDate, isArchive, spaces);
     List<String> sortFields = Arrays.asList("field1", "field2");
     
     replayDefault();
@@ -56,9 +55,8 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
   public void testNewCalendarEventSearchQuery_defaultSortFields() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
-    String lang = "de";
     List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
-    expectForCalMock(startDate, isArchive, lang, spaces);
+    expectForCalMock(startDate, isArchive, spaces);
     List<String> sortFields = Collections.emptyList();
     
     replayDefault();
@@ -73,9 +71,8 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
   public void testNewCalendarEventSearchQuery_fromQuery() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
-    String lang = "de";
     List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
-    expectForCalMock(startDate, isArchive, lang, spaces);
+    expectForCalMock(startDate, isArchive, spaces);
     List<String> sortFields = Arrays.asList("field1", "field2");
     
     replayDefault();
@@ -92,9 +89,8 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
       ) throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
-    String lang = "de";
     List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
-    expectForCalMock(startDate, isArchive, lang, spaces);
+    expectForCalMock(startDate, isArchive, spaces);
     List<String> sortFields = Collections.emptyList();
     
     replayDefault();
@@ -110,9 +106,8 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
   public void testGetAsLuceneQuery() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
-    String lang = "de";
     List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
-    expectForCalMock(startDate, isArchive, lang, spaces);
+    expectForCalMock(startDate, isArchive, spaces);
     List<String> sortFields = Collections.emptyList();
     
     replayDefault();
@@ -123,7 +118,6 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"theDB\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
-        + "AND Classes.CalendarEventClass.lang:(+\"de\") "
         + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     assertDefaultSortFields(query.getSortFields(), isArchive);
@@ -133,9 +127,8 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
   public void testGetAsLuceneQuery_isArchive() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = true;
-    String lang = "de";
     List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
-    expectForCalMock(startDate, isArchive, lang, spaces);
+    expectForCalMock(startDate, isArchive, spaces);
     List<String> sortFields = Collections.emptyList();
     
     replayDefault();
@@ -146,7 +139,6 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"theDB\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
-        + "AND Classes.CalendarEventClass.lang:(+\"de\") "
         + "AND Classes.CalendarEventClass.eventDate:({000101010000 TO 201405090125}))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     assertDefaultSortFields(query.getSortFields(), isArchive);
@@ -156,9 +148,8 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
   public void testGetAsLuceneQuery_sortFields() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
-    String lang = "de";
     List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
-    expectForCalMock(startDate, isArchive, lang, spaces);
+    expectForCalMock(startDate, isArchive, spaces);
     List<String> sortFields = Arrays.asList("field1", "field2");
     
     replayDefault();
@@ -169,7 +160,6 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"theDB\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
-        + "AND Classes.CalendarEventClass.lang:(+\"de\") "
         + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     assertEquals(sortFields, query.getSortFields());
@@ -179,9 +169,8 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
   public void testGetAsLuceneQuery_noSpaces() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
-    String lang = "de";
     List<String> spaces = Collections.emptyList();
-    expectForCalMock(startDate, isArchive, lang, spaces);
+    expectForCalMock(startDate, isArchive, spaces);
     List<String> sortFields = Collections.emptyList();
     
     replayDefault();
@@ -192,7 +181,6 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"theDB\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND space:(+\".\") "
-        + "AND Classes.CalendarEventClass.lang:(+\"de\") "
         + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     assertDefaultSortFields(query.getSortFields(), isArchive);
@@ -222,11 +210,9 @@ public class CalendarEventSearchQueryTest extends AbstractBridgedComponentTestCa
     assertDefaultSortFields(sortFields, inverted);
   }
   
-  private void expectForCalMock(Date startDate, boolean isArchive, String lang, 
-      List<String> spaces) {
+  private void expectForCalMock(Date startDate, boolean isArchive, List<String> spaces) {
     expect(calMock.getStartDate()).andReturn(startDate).once();
     expect(calMock.isArchive()).andReturn(isArchive).times(2);
-    expect(calMock.getLanguage()).andReturn(lang).once();
     expect(calMock.getAllowedSpaces()).andReturn(spaces).once();
   }
   

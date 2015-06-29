@@ -467,7 +467,7 @@ public class Event implements IEvent {
   public BaseObject getObj(String language) {
     BaseObject obj = null;
     for (String lang : Arrays.asList(language, getDefaultLang(), "")) {
-      if (getEventObjMap().containsKey(lang)) {
+      if ((obj == null) && getEventObjMap().containsKey(lang)) {
         LOGGER.info("getObj: doc '{}', getting object for lang '{}'", getDocumentName(), 
             lang);
         obj = getEventObjMap().get(lang);

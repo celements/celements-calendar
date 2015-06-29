@@ -101,6 +101,34 @@ public class EventTest extends AbstractBridgedComponentTestCase {
   }
 
   @Test
+  public void testGetObj_langPrio() throws Exception {
+    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(
+        ), "MySpace", "MyCal");
+    XWikiDocument eventDoc = new XWikiDocument(myEventDocRef);
+    BaseObject objEn = new BaseObject();
+    objEn.setStringValue(ICalendarClassConfig.PROPERTY_LANG, "en");
+    objEn.setXClassReference(new DocumentReference(getContext().getDatabase(), 
+        ICalendarClassConfig.CALENDAR_EVENT_CLASS_SPACE,
+        ICalendarClassConfig.CALENDAR_EVENT_CLASS_DOC));
+    eventDoc.addXObject(objEn);
+    BaseObject objNonEn = new BaseObject();
+    objNonEn.setXClassReference(new DocumentReference(getContext().getDatabase(), 
+        ICalendarClassConfig.CALENDAR_EVENT_CLASS_SPACE,
+        ICalendarClassConfig.CALENDAR_EVENT_CLASS_DOC));
+    eventDoc.addXObject(objNonEn);
+    expect(xwiki.getDocument(eq(myEventDocRef), same(context))).andReturn(eventDoc
+        ).atLeastOnce();
+    XWikiRequest request = createMockAndAddToDefault(XWikiRequest.class);
+    context.setRequest(request);
+    expect(request.get(eq("template"))).andReturn("").anyTimes();
+    replayDefault();
+    Event myEvent = new Event(myEventDocRef);
+    myEvent.injectDefaultLanguage("de");
+    assertSame("Expecting to get en obj and not default one", objEn, myEvent.getObj("en"));
+    verifyDefault();
+  }
+
+  @Test
   public void testGetObj_noRequest() throws Exception {
     //getObjects may return null!!
     DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(

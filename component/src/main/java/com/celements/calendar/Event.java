@@ -122,8 +122,7 @@ public class Event implements IEvent {
     if ((eventObjMap == null) && (eventDocRef != null)) {
       try {
         List<BaseObject> objList = getContext().getWiki().getDocument(eventDocRef,
-            getContext()).getXObjects(getCalClassConf().getCalendarEventClassRef(
-            eventDocRef.getWikiReference()));
+            getContext()).getXObjects(getCalendarEventClassRef());
         initObjectMap(objList);
       } catch (XWikiException exp) {
         LOGGER.error("getEventObjMap failed to get event document [" + eventDocRef + "].",
@@ -474,7 +473,28 @@ public class Event implements IEvent {
         obj = getEventObjMap().get(lang);
       }
     }
+    DocumentReference templateDocRef = getTemplateDocRefFromRequest();
+    if ((obj == null) && (templateDocRef != null) 
+        && getContext().getWiki().exists(templateDocRef, getContext())
+        && !getContext().getWiki().exists(getDocumentReference(), getContext())) {
+      // new is ok here because the doc doesnt exist and an obj is needed in editor
+      obj = new BaseObject();
+      obj.setXClassReference(getCalendarEventClassRef());
+    }
     return obj;
+  }
+
+  private DocumentReference getTemplateDocRefFromRequest() {
+    DocumentReference templateDocRef = null;
+    if (getContext().getRequest() != null) {
+      String template = getContext().getRequest().get("template");
+      if (StringUtils.isNotBlank(template)) {
+        templateDocRef = getWebUtilsService().resolveDocumentReference(template, 
+            getDocumentReference().getWikiReference());
+      }
+    }
+    LOGGER.trace("getTemplateDocRefFromRequest: '{}'", templateDocRef);
+    return templateDocRef;
   }
 
   @Deprecated
@@ -632,6 +652,11 @@ public class Event implements IEvent {
 
   boolean isIncludingFieldAsOptional(String fieldName, String colFields) {
     return colFields.matches("^([^-]*-)*" + fieldName + "\\.(-[^-]*)*$");
+  }
+
+  private DocumentReference getCalendarEventClassRef() {
+    return getCalClassConf().getCalendarEventClassRef(this.getDocumentReference(
+        ).getWikiReference());
   }
 
   private final String getDefaultLang() {

@@ -98,6 +98,11 @@ public class CalendarUpdateListenerTest extends AbstractBridgedComponentTestCase
   }
 
   @Test
+  public void testIncludeDocFields() {
+    assertFalse(listener.includeDocFields());
+  }
+
+  @Test
   public void testGetLogger() {
     assertNotNull(listener.getLogger());
   }

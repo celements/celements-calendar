@@ -69,6 +69,11 @@ public class CalendarUpdateListener extends AbstractDocumentUpdateListener {
   }
 
   @Override
+  protected boolean includeDocFields() {
+    return false;
+  }
+
+  @Override
   protected Logger getLogger() {
     return LOGGER;
   }

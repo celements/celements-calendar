@@ -68,6 +68,11 @@ public class EventUpdateListener extends AbstractDocumentUpdateListener {
   }
 
   @Override
+  protected boolean includeDocFields() {
+    return true;
+  }
+
+  @Override
   protected Logger getLogger() {
     return LOGGER;
   }

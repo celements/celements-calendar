@@ -38,11 +38,13 @@ import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.service.ICalendarService;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
+import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
+import com.xpn.xwiki.web.Utils;
 import com.xpn.xwiki.web.XWikiRequest;
 
 public class EventTest extends AbstractBridgedComponentTestCase {
@@ -76,18 +78,15 @@ public class EventTest extends AbstractBridgedComponentTestCase {
   @Test
   @Deprecated
   public void testEvent_NPE() {
-    //getObjects may return null!!
     Event myEvent = new Event(null, "tipps", context);
     assertNotNull(myEvent);
   }
 
   @Test
   public void testGetObj_NPE() throws Exception {
-    //getObjects may return null!!
-    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(
-        ), "MySpace", "MyCal");
+    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(), 
+        "MySpace", "MyCal");
     XWikiDocument eventDoc = new XWikiDocument(myEventDocRef);
-    //getObjects may return null!!
     expect(xwiki.getDocument(eq(myEventDocRef), same(context))).andReturn(eventDoc
         ).atLeastOnce();
     XWikiRequest request = createMockAndAddToDefault(XWikiRequest.class);
@@ -102,19 +101,16 @@ public class EventTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testGetObj_langPrio() throws Exception {
-    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(
-        ), "MySpace", "MyCal");
+    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(), 
+        "MySpace", "MyCal");
+    Event myEvent = new Event(myEventDocRef);
     XWikiDocument eventDoc = new XWikiDocument(myEventDocRef);
     BaseObject objEn = new BaseObject();
     objEn.setStringValue(ICalendarClassConfig.PROPERTY_LANG, "en");
-    objEn.setXClassReference(new DocumentReference(getContext().getDatabase(), 
-        ICalendarClassConfig.CALENDAR_EVENT_CLASS_SPACE,
-        ICalendarClassConfig.CALENDAR_EVENT_CLASS_DOC));
+    objEn.setXClassReference(myEvent.getCalendarEventClassRef());
     eventDoc.addXObject(objEn);
     BaseObject objNonEn = new BaseObject();
-    objNonEn.setXClassReference(new DocumentReference(getContext().getDatabase(), 
-        ICalendarClassConfig.CALENDAR_EVENT_CLASS_SPACE,
-        ICalendarClassConfig.CALENDAR_EVENT_CLASS_DOC));
+    objNonEn.setXClassReference(myEvent.getCalendarEventClassRef());
     eventDoc.addXObject(objNonEn);
     expect(xwiki.getDocument(eq(myEventDocRef), same(context))).andReturn(eventDoc
         ).atLeastOnce();
@@ -122,7 +118,6 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     context.setRequest(request);
     expect(request.get(eq("template"))).andReturn("").anyTimes();
     replayDefault();
-    Event myEvent = new Event(myEventDocRef);
     myEvent.injectDefaultLanguage("de");
     assertSame("Expecting to get en obj and not default one", objEn, myEvent.getObj("en"));
     verifyDefault();
@@ -130,15 +125,81 @@ public class EventTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testGetObj_noRequest() throws Exception {
-    //getObjects may return null!!
-    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(
-        ), "MySpace", "MyCal");
+    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(), 
+        "MySpace", "MyCal");
     XWikiDocument eventDoc = new XWikiDocument(myEventDocRef);
-    //getObjects may return null!!
-    expect(xwiki.getDocument(eq(myEventDocRef), same(context))).andReturn(eventDoc
-        ).atLeastOnce();
+    expect(xwiki.getDocument(eq(myEventDocRef), same(context))).andReturn(eventDoc).once();
     replayDefault();
     Event myEvent = new Event(myEventDocRef);
+    myEvent.injectDefaultLanguage("de");
+    assertNull(myEvent.getObj("de"));
+    verifyDefault();
+  }
+
+  @Test
+  public void testGetObj_withRequestTemplate() throws Exception {
+    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(), 
+        "MySpace", "MyCal");
+    Event myEvent = new Event(myEventDocRef);   
+    XWikiDocument eventDoc = new XWikiDocument(myEventDocRef);
+    expect(xwiki.getDocument(eq(myEventDocRef), same(context))).andReturn(eventDoc).once();
+    DocumentReference tmplDocRef = new DocumentReference(context.getDatabase(), 
+        "MySpace", "MyTemplate");
+    getContext().setRequest(createMockAndAddToDefault(XWikiRequest.class));
+    expect(getContext().getRequest().get(eq("template"))).andReturn(Utils.getComponent(
+        IWebUtilsService.class).serializeRef(tmplDocRef)).once();    
+    expect(getWikiMock().exists(eq(tmplDocRef), same(getContext()))).andReturn(true
+        ).once();
+    expect(getWikiMock().exists(eq(myEventDocRef), same(getContext()))).andReturn(false
+        ).once();
+    
+    replayDefault(); 
+    myEvent.injectDefaultLanguage("de");
+    BaseObject obj = myEvent.getObj("de");
+    assertNotNull(obj);
+    assertEquals(myEvent.getCalendarEventClassRef(), obj.getXClassReference());
+    verifyDefault();
+  }
+
+  @Test
+  public void testGetObj_withRequestTemplate_docExists() throws Exception {
+    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(), 
+        "MySpace", "MyCal");
+    Event myEvent = new Event(myEventDocRef);   
+    XWikiDocument eventDoc = new XWikiDocument(myEventDocRef);
+    expect(xwiki.getDocument(eq(myEventDocRef), same(context))).andReturn(eventDoc).once();
+    DocumentReference tmplDocRef = new DocumentReference(context.getDatabase(), 
+        "MySpace", "MyTemplate");
+    getContext().setRequest(createMockAndAddToDefault(XWikiRequest.class));
+    expect(getContext().getRequest().get(eq("template"))).andReturn(Utils.getComponent(
+        IWebUtilsService.class).serializeRef(tmplDocRef)).once();    
+    expect(getWikiMock().exists(eq(tmplDocRef), same(getContext()))).andReturn(true
+        ).once();
+    expect(getWikiMock().exists(eq(myEventDocRef), same(getContext()))).andReturn(true
+        ).once();
+    
+    replayDefault(); 
+    myEvent.injectDefaultLanguage("de");
+    assertNull(myEvent.getObj("de"));
+    verifyDefault();
+  }
+
+  @Test
+  public void testGetObj_withRequestTemplate_notExists() throws Exception {
+    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(), 
+        "MySpace", "MyCal");
+    Event myEvent = new Event(myEventDocRef);   
+    XWikiDocument eventDoc = new XWikiDocument(myEventDocRef);
+    expect(xwiki.getDocument(eq(myEventDocRef), same(context))).andReturn(eventDoc).once();
+    DocumentReference tmplDocRef = new DocumentReference(context.getDatabase(), 
+        "MySpace", "MyTemplate");
+    getContext().setRequest(createMockAndAddToDefault(XWikiRequest.class));
+    expect(getContext().getRequest().get(eq("template"))).andReturn(Utils.getComponent(
+        IWebUtilsService.class).serializeRef(tmplDocRef)).once();    
+    expect(getWikiMock().exists(eq(tmplDocRef), same(getContext()))).andReturn(false
+        ).once();
+    
+    replayDefault(); 
     myEvent.injectDefaultLanguage("de");
     assertNull(myEvent.getObj("de"));
     verifyDefault();

@@ -654,7 +654,7 @@ public class Event implements IEvent {
     return colFields.matches("^([^-]*-)*" + fieldName + "\\.(-[^-]*)*$");
   }
 
-  private DocumentReference getCalendarEventClassRef() {
+  DocumentReference getCalendarEventClassRef() {
     return getCalClassConf().getCalendarEventClassRef(this.getDocumentReference(
         ).getWikiReference());
   }

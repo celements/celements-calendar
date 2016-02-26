@@ -29,6 +29,7 @@ import com.celements.calendar.Event;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.api.CalendarApi;
 import com.celements.calendar.api.EventApi;
+import com.celements.calendar.service.CalendarScriptService;
 import com.celements.calendar.util.CalendarUtils;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -36,6 +37,10 @@ import com.xpn.xwiki.api.Api;
 import com.xpn.xwiki.api.Document;
 import com.xpn.xwiki.doc.XWikiDocument;
 
+/**
+ * @deprecated instead use {@link CalendarScriptService}
+ */
+@Deprecated
 public class CelementsCalendarPluginAPI extends Api {
 
   private static final Log mLogger = LogFactory.getFactory().getInstance(

@@ -28,6 +28,7 @@ import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.Calendar;
 import com.celements.calendar.ICalendar;
+import com.celements.calendar.service.CalendarService;
 import com.celements.calendar.service.ICalendarService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -35,6 +36,10 @@ import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.web.Utils;
 
+/**
+ * @deprecated instead use {@link CalendarService}
+ */
+@Deprecated
 public class CalendarUtils implements ICalendarUtils {
 
   private static final Log LOGGER = LogFactory.getFactory(

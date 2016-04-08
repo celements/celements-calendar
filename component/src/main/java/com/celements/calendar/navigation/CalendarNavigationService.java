@@ -18,6 +18,8 @@ import com.celements.calendar.navigation.factories.NavigationDetailsFactory;
 import com.celements.calendar.search.DateEventSearchQuery;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.search.lucene.LuceneSearchException;
+import com.celements.web.service.EditorSupportScriptService;
+import com.xpn.xwiki.doc.XWikiDocument;
 
 @Component
 public class CalendarNavigationService implements ICalendarNavigationService {
@@ -52,10 +54,25 @@ public class CalendarNavigationService implements ICalendarNavigationService {
     return getCalNavFactory().getCalendarNavigation(calConfigDocRef, navDetails, nb);
   }
 
+  /**
+   * @deprecated instead use {@link #getCalendarNavigation(DocumentReference,
+   *  NavigationDetails, int, DateEventSearchQuery, boolean) and specify if a empty
+   *  return page is needed or not
+   */
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
-      NavigationDetails navDetails, int nb, DateEventSearchQuery query) throws LuceneSearchException {
+      NavigationDetails navDetails, int nb, DateEventSearchQuery query) 
+          throws LuceneSearchException {
     LOGGER.debug("called getCalendarNavigation");
-    return getCalNavFactory().getCalendarNavigation(calDocRef, navDetails, nb, query);
+    return getCalNavFactory().getCalendarNavigation(calDocRef, navDetails, nb, query, 
+        false);
+  }
+  
+  public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
+      NavigationDetails navDetails, int nb, DateEventSearchQuery query,
+      boolean isSendingEmptyPage) throws LuceneSearchException {
+    LOGGER.debug("called getCalendarNavigation");
+    return getCalNavFactory().getCalendarNavigation(calDocRef, navDetails, nb, query, 
+        isSendingEmptyPage);
   }
 
   private INavigationDetailsFactory getNavDetailsFactory() {

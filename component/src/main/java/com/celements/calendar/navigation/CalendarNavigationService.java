@@ -18,8 +18,6 @@ import com.celements.calendar.navigation.factories.NavigationDetailsFactory;
 import com.celements.calendar.search.DateEventSearchQuery;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.search.lucene.LuceneSearchException;
-import com.celements.web.service.EditorSupportScriptService;
-import com.xpn.xwiki.doc.XWikiDocument;
 
 @Component
 public class CalendarNavigationService implements ICalendarNavigationService {
@@ -48,10 +46,22 @@ public class CalendarNavigationService implements ICalendarNavigationService {
     return getNavDetailsFactory().getNavigationDetails(calConfigDocRef, event, query);
   }
 
+  /**
+   * @deprecated instead use {@link #getCalendarNavigation(DocumentReference,
+   *  NavigationDetails, int, boolean) and specify if a empty
+   *  return page is needed or not
+   */
   public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
       NavigationDetails navDetails, int nb) {
     LOGGER.debug("called getCalendarNavigation");
-    return getCalNavFactory().getCalendarNavigation(calConfigDocRef, navDetails, nb);
+    return getCalendarNavigation(calConfigDocRef, navDetails, nb, false);
+  }
+  
+  public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
+      NavigationDetails navDetails, int nb, boolean isSendingEmptyPage) {
+    LOGGER.debug("called getCalendarNavigation");
+    return getCalNavFactory().getCalendarNavigation(calConfigDocRef, navDetails, nb, 
+        isSendingEmptyPage);
   }
 
   /**

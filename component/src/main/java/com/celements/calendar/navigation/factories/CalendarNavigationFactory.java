@@ -29,8 +29,18 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   private INavigationDetailsFactory navDetailsFactory;
   private ILuceneSearchService searchService;
 
+  /**
+   * @deprecated instead use {@link #getCalendarNavigation(DocumentReference,
+   *  NavigationDetails, int, boolean) and specify if a empty
+   *  return page is needed or not
+   */
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
       NavigationDetails navDetails, int nb) {
+    return getCalendarNavigation(calDocRef, navDetails, nb, false);
+  }
+  
+  public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
+      NavigationDetails navDetails, int nb, boolean isSendingEmptyPage) {
     ICalendar cal = getCalService().getCalendar(calDocRef, navDetails.getStartDate());
     NavigationDetails startNavDetails = null;
     NavigationDetails endNavDetails = null;
@@ -58,6 +68,24 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
         counts[0], counts[1], counts[2], navDetails, startNavDetails, endNavDetails,
         getPrevNavDetails(cal, calArchive, navDetails, nb),
         getNextNavDetails(cal, navDetails, nb));
+    if((calendarNavigation.getCountAfter().getCount() <= 0)
+        && (navDetails.getOffset() <= 0) && isSendingEmptyPage) {
+      try {
+        calendarNavigation = new CalendarNavigation(
+            new UncertainCount(0, false),
+            new UncertainCount(0, false),
+            new UncertainCount(0, false), 
+            NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
+            NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
+            NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
+            NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
+            NavigationDetails.create(new Date(Long.MAX_VALUE), 0));
+      } catch (NavigationDetailException exc) {
+        LOGGER.error("Exception getting calNav for cal [" + calDocRef + "], eventDate ["
+            + navDetails.getStartDate() + "], " + "offset [" + navDetails.getOffset()
+            + "], nb ["+ nb +"]", exc);
+      }
+    }
     LOGGER.debug("getCalendarNavigation: return '" + calendarNavigation + "' for cal '"
         + calDocRef + "' and navDetails '" + navDetails + "'");
     return calendarNavigation;

@@ -9,6 +9,9 @@ public interface ICalendarNavigationFactory {
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
       NavigationDetails navDetails, int nb);
+  
+  public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
+      NavigationDetails navDetails, int nb, boolean isSendingEmptyPage);
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
       NavigationDetails navDetails, int nb, DateEventSearchQuery query

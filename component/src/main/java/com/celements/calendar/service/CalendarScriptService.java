@@ -111,7 +111,25 @@ public class CalendarScriptService implements ScriptService {
     if (hasViewRights(calConfigDocRef)) {
       try {
         calNav = calNavService.getCalendarNavigation(calConfigDocRef, 
-            calNavService.getNavigationDetails(eventDate, offset), nb, query);
+            calNavService.getNavigationDetails(eventDate, offset), nb, query, false);
+      } catch (Exception exc) {
+        LOGGER.error("Exception getting calNav for cal '{}', eventDate '{}', "
+            + "offset '{}', nb '{}', query '{}'", calConfigDocRef, eventDate, offset, nb, 
+            query, exc);
+      }
+    }
+    return calNav;
+  }
+  
+  public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
+      Date eventDate, int offset, int nb, SearchTermEventSearchQuery query,
+      boolean isSendingEmptyPage) {
+    CalendarNavigation calNav = null;
+    if (hasViewRights(calConfigDocRef)) {
+      try {
+        calNav = calNavService.getCalendarNavigation(calConfigDocRef, 
+            calNavService.getNavigationDetails(eventDate, offset), nb, query, 
+            isSendingEmptyPage);
       } catch (Exception exc) {
         LOGGER.error("Exception getting calNav for cal '{}', eventDate '{}', "
             + "offset '{}', nb '{}', query '{}'", calConfigDocRef, eventDate, offset, nb, 

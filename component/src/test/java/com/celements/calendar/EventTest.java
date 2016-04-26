@@ -38,6 +38,7 @@ import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.service.ICalendarService;
 import com.celements.common.test.AbstractBridgedComponentTestCase;
+import com.celements.common.test.TestMessageTool;
 import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;

@@ -199,6 +199,9 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
       NavigationDetails navDetails, int nb, DateEventSearchQuery query, 
       boolean isSendingEmptyPage) throws LuceneSearchException {
+    System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<< CalendarNavigationFactory getCalendarNavigation offset: [" 
+      + navDetails.getOffset() + "]");
+    int actualOffset = navDetails.getOffset(); 
     EventSearchResult calAllResult = getAllCalendar(calDocRef).searchEvents(query);
     EventSearchResult calResult = getCalService().getCalendar(calDocRef, 
         navDetails.getStartDate()).searchEvents(query);
@@ -236,8 +239,13 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
     calendarNavigation = new CalendarNavigation(
         counts[0], counts[1], counts[2], navDetails, startNavDetails, endNavDetails,
         prevNavDetails, nextNavDetails);
+    System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<< CalendarNavigationFactory getCalendarNavigation countAfter: ["
+        + calendarNavigation.getCountAfter().getCount()
+        + "] offset: [" + navDetails.getOffset()
+        + "] nb: [" + nb + "] actualOffset: [" + actualOffset + "]");
+    System.out.println();
     if((calendarNavigation.getCountAfter().getCount() <= 0)
-        && (navDetails.getOffset() <= 0) && isSendingEmptyPage) {
+        && (navDetails.getOffset() <= 0) && (actualOffset > 0) && isSendingEmptyPage) {
       try {
         calendarNavigation = new CalendarNavigation(
             new UncertainCount(0, false),

@@ -1,6 +1,6 @@
 package com.celements.calendar;
 
-import org.xwiki.component.annotation.ComponentRole;
+import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.SpaceReference;
@@ -8,7 +8,7 @@ import org.xwiki.model.reference.WikiReference;
 
 import com.celements.web.service.IWebUtilsService;
 
-@ComponentRole
+@Component
 public class CalendarClassConfig implements ICalendarClassConfig {
 
   @Requirement

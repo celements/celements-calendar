@@ -32,5 +32,9 @@ public interface ICalendarNavigationService {
   public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
       NavigationDetails navDetails, int nb, DateEventSearchQuery query
       ) throws LuceneSearchException;
+  
+  public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
+      NavigationDetails navDetails, int nb, DateEventSearchQuery query,
+      boolean isSendingEmptyPage) throws LuceneSearchException;
 
 }

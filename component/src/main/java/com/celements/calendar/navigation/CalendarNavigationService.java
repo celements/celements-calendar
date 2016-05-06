@@ -46,16 +46,43 @@ public class CalendarNavigationService implements ICalendarNavigationService {
     return getNavDetailsFactory().getNavigationDetails(calConfigDocRef, event, query);
   }
 
+  /**
+   * @deprecated instead use {@link #getCalendarNavigation(DocumentReference,
+   *  NavigationDetails, int, boolean) and specify if a empty
+   *  return page is needed or not
+   */
   public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
       NavigationDetails navDetails, int nb) {
     LOGGER.debug("called getCalendarNavigation");
-    return getCalNavFactory().getCalendarNavigation(calConfigDocRef, navDetails, nb);
+    return getCalendarNavigation(calConfigDocRef, navDetails, nb, false);
+  }
+  
+  public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
+      NavigationDetails navDetails, int nb, boolean isSendingEmptyPage) {
+    LOGGER.debug("called getCalendarNavigation");
+    return getCalNavFactory().getCalendarNavigation(calConfigDocRef, navDetails, nb, 
+        isSendingEmptyPage);
   }
 
+  /**
+   * @deprecated instead use {@link #getCalendarNavigation(DocumentReference,
+   *  NavigationDetails, int, DateEventSearchQuery, boolean) and specify if a empty
+   *  return page is needed or not
+   */
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
-      NavigationDetails navDetails, int nb, DateEventSearchQuery query) throws LuceneSearchException {
+      NavigationDetails navDetails, int nb, DateEventSearchQuery query) 
+          throws LuceneSearchException {
     LOGGER.debug("called getCalendarNavigation");
-    return getCalNavFactory().getCalendarNavigation(calDocRef, navDetails, nb, query);
+    return getCalNavFactory().getCalendarNavigation(calDocRef, navDetails, nb, query, 
+        false);
+  }
+  
+  public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
+      NavigationDetails navDetails, int nb, DateEventSearchQuery query,
+      boolean isSendingEmptyPage) throws LuceneSearchException {
+    LOGGER.debug("called getCalendarNavigation");
+    return getCalNavFactory().getCalendarNavigation(calDocRef, navDetails, nb, query, 
+        isSendingEmptyPage);
   }
 
   private INavigationDetailsFactory getNavDetailsFactory() {

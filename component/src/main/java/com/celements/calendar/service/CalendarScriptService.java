@@ -90,8 +90,18 @@ public class CalendarScriptService implements ScriptService {
     return navDetails;
   }
 
+  /**
+   * @deprecated instead use {@link #getCalendarNavigation(DocumentReference,
+   *  NavigationDetails, int, boolean) and specify if a empty
+   *  return page is needed or not
+   */
   public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
       Date eventDate, int offset, int nb) {
+    return getCalendarNavigation(calConfigDocRef, eventDate, offset, nb, false);
+  }
+  
+  public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
+      Date eventDate, int offset, int nb, boolean isSendingEmptyPage) {
     CalendarNavigation calNav = null;
     if (hasViewRights(calConfigDocRef)) {
       try {
@@ -105,13 +115,25 @@ public class CalendarScriptService implements ScriptService {
     return calNav;
   }
 
+  /**
+   * @deprecated instead use {@link #getCalendarNavigation(DocumentReference,
+   *  NavigationDetails, int, SearchTermEventSearchQuery, boolean) and specify if a empty
+   *  return page is needed or not
+   */
   public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
       Date eventDate, int offset, int nb, SearchTermEventSearchQuery query) {
+    return getCalendarNavigation(calConfigDocRef, eventDate, offset, nb, query, false);
+  }
+  
+  public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
+      Date eventDate, int offset, int nb, SearchTermEventSearchQuery query,
+      boolean isSendingEmptyPage) {
     CalendarNavigation calNav = null;
     if (hasViewRights(calConfigDocRef)) {
       try {
         calNav = calNavService.getCalendarNavigation(calConfigDocRef, 
-            calNavService.getNavigationDetails(eventDate, offset), nb, query);
+            calNavService.getNavigationDetails(eventDate, offset), nb, query, 
+            isSendingEmptyPage);
       } catch (Exception exc) {
         LOGGER.error("Exception getting calNav for cal '{}', eventDate '{}', "
             + "offset '{}', nb '{}', query '{}'", calConfigDocRef, eventDate, offset, nb, 

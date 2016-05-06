@@ -29,8 +29,18 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   private INavigationDetailsFactory navDetailsFactory;
   private ILuceneSearchService searchService;
 
+  /**
+   * @deprecated instead use {@link #getCalendarNavigation(DocumentReference,
+   *  NavigationDetails, int, boolean) and specify if a empty
+   *  return page is needed or not
+   */
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
       NavigationDetails navDetails, int nb) {
+    return getCalendarNavigation(calDocRef, navDetails, nb, false);
+  }
+  
+  public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
+      NavigationDetails navDetails, int nb, boolean isSendingEmptyPage) {
     ICalendar cal = getCalService().getCalendar(calDocRef, navDetails.getStartDate());
     NavigationDetails startNavDetails = null;
     NavigationDetails endNavDetails = null;
@@ -58,11 +68,15 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
         counts[0], counts[1], counts[2], navDetails, startNavDetails, endNavDetails,
         getPrevNavDetails(cal, calArchive, navDetails, nb),
         getNextNavDetails(cal, navDetails, nb));
+    if((calendarNavigation.getCountAfter().getCount() <= 0)
+        && (navDetails.getOffset() <= 0) && isSendingEmptyPage) {
+      calendarNavigation = getEmptyCalendarNavigation();
+    }
     LOGGER.debug("getCalendarNavigation: return '" + calendarNavigation + "' for cal '"
         + calDocRef + "' and navDetails '" + navDetails + "'");
     return calendarNavigation;
   }
-
+  
   private boolean isInvalidNavDetails(NavigationDetails navDetails, ICalendar cal) {
     return (cal.getEventsInternal(navDetails.getOffset(), 1).size() == 0) 
         && !getAllCalendar(cal).isEmpty();
@@ -157,9 +171,21 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
         lastEvent);
   }
 
+  /**
+   * @deprecated instead use {@link #getCalendarNavigation(DocumentReference,
+   *  NavigationDetails, int, DateEventSearchQuery, boolean) and specify if a empty
+   *  return page is needed or not
+   */
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
-      NavigationDetails navDetails, int nb, DateEventSearchQuery query
-      ) throws LuceneSearchException {
+      NavigationDetails navDetails, int nb, DateEventSearchQuery query) 
+          throws LuceneSearchException {
+    return getCalendarNavigation(calDocRef, navDetails, nb, query, false);
+  }
+  
+  public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
+      NavigationDetails navDetails, int nb, DateEventSearchQuery query, 
+      boolean isSendingEmptyPage) throws LuceneSearchException {
+    int actualOffset = navDetails.getOffset(); 
     EventSearchResult calAllResult = getAllCalendar(calDocRef).searchEvents(query);
     EventSearchResult calResult = getCalService().getCalendar(calDocRef, 
         navDetails.getStartDate()).searchEvents(query);
@@ -189,13 +215,36 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
     UncertainCount[] counts = getCounts(calResult.getSize(), calArchiveResult.getSize(),
         navDetails.getOffset(), nb, query != null);
 
-    CalendarNavigation calendarNavigation = new CalendarNavigation(
+    NavigationDetails nextNavDetails = getNextNavDetails(calDocRef, navDetails, nb, query,
+        calResult);
+    NavigationDetails prevNavDetails = getPrevNavDetails(calDocRef, navDetails, nb, query,
+        calResult, calArchiveResult);
+    CalendarNavigation calendarNavigation = null;
+    calendarNavigation = new CalendarNavigation(
         counts[0], counts[1], counts[2], navDetails, startNavDetails, endNavDetails,
-        getPrevNavDetails(calDocRef, navDetails, nb, query, calResult, calArchiveResult),
-        getNextNavDetails(calDocRef, navDetails, nb, query, calResult));
-    LOGGER.debug("getCalendarNavigation: return '" + calendarNavigation + "' for cal '"
-        + calDocRef + "', navDetails '" + navDetails + "' and query '" + query + "'");
+        prevNavDetails, nextNavDetails);
+    if((calendarNavigation.getCountAfter().getCount() <= 0)
+        && (navDetails.getOffset() <= 0) && (actualOffset > 0) && isSendingEmptyPage) {
+      calendarNavigation = getEmptyCalendarNavigation(); 
+    }
     return calendarNavigation;
+  }
+  
+  CalendarNavigation getEmptyCalendarNavigation() {
+    try {
+      return new CalendarNavigation(
+          new UncertainCount(0, false),
+          new UncertainCount(0, false),
+          new UncertainCount(0, false), 
+          NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
+          NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
+          NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
+          NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
+          NavigationDetails.create(new Date(Long.MAX_VALUE), 0));
+    } catch (NavigationDetailException exc) {
+      throw new RuntimeException("Error in getEmptyCalendarNavigation: This error should "
+          + "never happen, because its been set with default values", exc);
+    }
   }
 
   private int checkInvalidNavDetails(NavigationDetails navDetails, Date fromDate,
@@ -269,6 +318,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
         nextNavDetails = getFirstNavDetails(calDocRef, nextOffset, query, calSearchResult);
       }
     } catch (NavigationDetailException exc) {
+      nextNavDetails = null;
       LOGGER.warn("getNextNavDetails encountered NavDetailException for calDocRef ["
           + calDocRef + "] and nb [" + nb + "] nextOffset [" + nextOffset
           + "].", exc);

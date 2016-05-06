@@ -71,15 +71,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
     if((calendarNavigation.getCountAfter().getCount() <= 0)
         && (navDetails.getOffset() <= 0) && isSendingEmptyPage) {
       try {
-        calendarNavigation = new CalendarNavigation(
-            new UncertainCount(0, false),
-            new UncertainCount(0, false),
-            new UncertainCount(0, false), 
-            NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
-            NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
-            NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
-            NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
-            NavigationDetails.create(new Date(Long.MAX_VALUE), 0));
+        calendarNavigation = getEmptyCalendarNavigation();
       } catch (NavigationDetailException exc) {
         LOGGER.error("Exception getting calNav for cal [" + calDocRef + "], eventDate ["
             + navDetails.getStartDate() + "], " + "offset [" + navDetails.getOffset()
@@ -90,7 +82,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
         + calDocRef + "' and navDetails '" + navDetails + "'");
     return calendarNavigation;
   }
-
+  
   private boolean isInvalidNavDetails(NavigationDetails navDetails, ICalendar cal) {
     return (cal.getEventsInternal(navDetails.getOffset(), 1).size() == 0) 
         && !getAllCalendar(cal).isEmpty();
@@ -199,8 +191,6 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
       NavigationDetails navDetails, int nb, DateEventSearchQuery query, 
       boolean isSendingEmptyPage) throws LuceneSearchException {
-    System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<< CalendarNavigationFactory getCalendarNavigation offset: [" 
-      + navDetails.getOffset() + "]");
     int actualOffset = navDetails.getOffset(); 
     EventSearchResult calAllResult = getAllCalendar(calDocRef).searchEvents(query);
     EventSearchResult calResult = getCalService().getCalendar(calDocRef, 
@@ -239,23 +229,10 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
     calendarNavigation = new CalendarNavigation(
         counts[0], counts[1], counts[2], navDetails, startNavDetails, endNavDetails,
         prevNavDetails, nextNavDetails);
-    System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<< CalendarNavigationFactory getCalendarNavigation countAfter: ["
-        + calendarNavigation.getCountAfter().getCount()
-        + "] offset: [" + navDetails.getOffset()
-        + "] nb: [" + nb + "] actualOffset: [" + actualOffset + "]");
-    System.out.println();
     if((calendarNavigation.getCountAfter().getCount() <= 0)
         && (navDetails.getOffset() <= 0) && (actualOffset > 0) && isSendingEmptyPage) {
       try {
-        calendarNavigation = new CalendarNavigation(
-            new UncertainCount(0, false),
-            new UncertainCount(0, false),
-            new UncertainCount(0, false), 
-            NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
-            NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
-            NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
-            NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
-            NavigationDetails.create(new Date(Long.MAX_VALUE), 0));
+        calendarNavigation = getEmptyCalendarNavigation(); 
       } catch (NavigationDetailException exc) {
         LOGGER.error("Exception getting calNav for cal [" + calDocRef + "], eventDate ["
             + navDetails.getStartDate() + "], " + "offset [" + navDetails.getOffset()
@@ -265,6 +242,18 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
           + calDocRef + "', navDetails '" + navDetails + "' and query '" + query + "'");
     }
     return calendarNavigation;
+  }
+  
+  CalendarNavigation getEmptyCalendarNavigation() throws NavigationDetailException {
+    return new CalendarNavigation(
+        new UncertainCount(0, false),
+        new UncertainCount(0, false),
+        new UncertainCount(0, false), 
+        NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
+        NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
+        NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
+        NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
+        NavigationDetails.create(new Date(Long.MAX_VALUE), 0));
   }
 
   private int checkInvalidNavDetails(NavigationDetails navDetails, Date fromDate,

@@ -70,13 +70,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
         getNextNavDetails(cal, navDetails, nb));
     if((calendarNavigation.getCountAfter().getCount() <= 0)
         && (navDetails.getOffset() <= 0) && isSendingEmptyPage) {
-      try {
-        calendarNavigation = getEmptyCalendarNavigation();
-      } catch (NavigationDetailException exc) {
-        LOGGER.error("Exception getting calNav for cal [" + calDocRef + "], eventDate ["
-            + navDetails.getStartDate() + "], " + "offset [" + navDetails.getOffset()
-            + "], nb ["+ nb +"]", exc);
-      }
+      calendarNavigation = getEmptyCalendarNavigation();
     }
     LOGGER.debug("getCalendarNavigation: return '" + calendarNavigation + "' for cal '"
         + calDocRef + "' and navDetails '" + navDetails + "'");
@@ -231,29 +225,26 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
         prevNavDetails, nextNavDetails);
     if((calendarNavigation.getCountAfter().getCount() <= 0)
         && (navDetails.getOffset() <= 0) && (actualOffset > 0) && isSendingEmptyPage) {
-      try {
-        calendarNavigation = getEmptyCalendarNavigation(); 
-      } catch (NavigationDetailException exc) {
-        LOGGER.error("Exception getting calNav for cal [" + calDocRef + "], eventDate ["
-            + navDetails.getStartDate() + "], " + "offset [" + navDetails.getOffset()
-            + "], nb ["+ nb +"], query ["+ query +"]", exc);
-      }
-      LOGGER.debug("getCalendarNavigation: return '" + calendarNavigation + "' for cal '"
-          + calDocRef + "', navDetails '" + navDetails + "' and query '" + query + "'");
+      calendarNavigation = getEmptyCalendarNavigation(); 
     }
     return calendarNavigation;
   }
   
-  CalendarNavigation getEmptyCalendarNavigation() throws NavigationDetailException {
-    return new CalendarNavigation(
-        new UncertainCount(0, false),
-        new UncertainCount(0, false),
-        new UncertainCount(0, false), 
-        NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
-        NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
-        NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
-        NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
-        NavigationDetails.create(new Date(Long.MAX_VALUE), 0));
+  CalendarNavigation getEmptyCalendarNavigation() {
+    try {
+      return new CalendarNavigation(
+          new UncertainCount(0, false),
+          new UncertainCount(0, false),
+          new UncertainCount(0, false), 
+          NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
+          NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
+          NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
+          NavigationDetails.create(new Date(Long.MAX_VALUE), 0),
+          NavigationDetails.create(new Date(Long.MAX_VALUE), 0));
+    } catch (NavigationDetailException exc) {
+      throw new RuntimeException("Error in getEmptyCalendarNavigation: This error should "
+          + "never happen, because its been set with default values", exc);
+    }
   }
 
   private int checkInvalidNavDetails(NavigationDetails navDetails, Date fromDate,

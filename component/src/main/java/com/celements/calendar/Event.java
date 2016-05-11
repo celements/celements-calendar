@@ -167,15 +167,11 @@ public class Event implements IEvent {
 
   @Override
   public String getDateString(String dateField, String format) {
-    System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Event getDateString dateField:[" + 
-        dateField + "] format:[" + format + "]");
     return getDateString(dateField, format, null);
   }
   
   @Override
   public String getDateString(String dateField, String format, String language) {
-    System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Event getDateString dateField:[" + 
-        dateField + "] format:[" + format + "] language:[" + language + "]");
     Locale localLanguage = null;
     if((language == null) || (language == "")) {
       localLanguage = new Locale(getLanguage());

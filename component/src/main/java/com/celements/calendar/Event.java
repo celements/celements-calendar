@@ -167,7 +167,18 @@ public class Event implements IEvent {
 
   @Override
   public String getDateString(String dateField, String format) {
-    SimpleDateFormat sdf = new SimpleDateFormat(format, new Locale(getLanguage()));
+    return getDateString(dateField, format, null);
+  }
+  
+  @Override
+  public String getDateString(String dateField, String format, String language) {
+    Locale localLanguage = null;
+    if((language == null) || (language == "")) {
+      localLanguage = Locale.getDefault();
+    } else {
+      localLanguage = new Locale(language);
+    }
+    SimpleDateFormat sdf = new SimpleDateFormat(format, localLanguage);
     Date date = getDateProperty(getObj(), dateField);
     String dateString = "";
     if (date != null) {

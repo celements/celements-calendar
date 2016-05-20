@@ -173,7 +173,7 @@ public class Event implements IEvent {
   @Override
   public String getDateString(String dateField, String format, String language) {
     Locale localLanguage = null;
-    if((language == null) || (language == "")) {
+    if (StringUtils.isBlank(language)) {
       localLanguage = new Locale(getLanguage());
     } else {
       localLanguage = new Locale(language);

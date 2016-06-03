@@ -33,6 +33,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.python.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xwiki.context.Execution;
@@ -69,8 +70,8 @@ public class Event implements IEvent {
   public Event(XWikiDocument eventDoc, XWikiContext context) {
     this(eventDoc.getXObjects(new DocumentReference(context.getDatabase(),
         ICalendarClassConfig.CALENDAR_EVENT_CLASS_SPACE,
-        ICalendarClassConfig.CALENDAR_EVENT_CLASS_DOC)), eventDoc.getDocumentReference(
-        ).getSpaceReferences().get(0).getName(), context);
+        ICalendarClassConfig.CALENDAR_EVENT_CLASS_DOC)),
+        eventDoc.getDocumentReference().getSpaceReferences().get(0).getName(), context);
     this.eventDocRef = eventDoc.getDocumentReference();
   }
 
@@ -125,8 +126,7 @@ public class Event implements IEvent {
             getContext()).getXObjects(getCalendarEventClassRef());
         initObjectMap(objList);
       } catch (XWikiException exp) {
-        LOGGER.error("getEventObjMap failed to get event document [" + eventDocRef + "].",
-            exp);
+        LOGGER.error("getEventObjMap failed to get event document [" + eventDocRef + "].", exp);
       }
     }
     return eventObjMap;
@@ -150,8 +150,7 @@ public class Event implements IEvent {
 
   @Override
   public String getTitle() {
-    return getStringPropertyDefaultIfEmpty(ICalendarClassConfig.PROPERTY_TITLE,
-        getLanguage());
+    return getStringPropertyDefaultIfEmpty(ICalendarClassConfig.PROPERTY_TITLE, getLanguage());
   }
 
   @Override
@@ -169,11 +168,11 @@ public class Event implements IEvent {
   public String getDateString(String dateField, String format) {
     return getDateString(dateField, format, null);
   }
-  
+
   @Override
   public String getDateString(String dateField, String format, String language) {
     Locale localLanguage = null;
-    if (StringUtils.isBlank(language)) {
+    if (Strings.isNullOrEmpty(language)) {
       localLanguage = new Locale(getLanguage());
     } else {
       localLanguage = new Locale(language);
@@ -204,8 +203,7 @@ public class Event implements IEvent {
 
   @Override
   public Boolean isSubscribable() {
-    return getBooleanProperty(getObj(),
-        ICalendarClassConfig.PROPERTY_EVENT_IS_SUBSCRIBABLE);
+    return getBooleanProperty(getObj(), ICalendarClassConfig.PROPERTY_EVENT_IS_SUBSCRIBABLE);
   }
 
   @Override
@@ -228,8 +226,7 @@ public class Event implements IEvent {
   public String displayOverviewField(String name, String link) {
     ICalendar cal = getCalendar(getContext());
     boolean hasLink = cal.hasDetailLink() && needsMoreLink(getContext());
-    hasLink &= (!cal.getOverviewFields().contains("detaillink")
-        || name.equals("detaillink"));
+    hasLink &= (!cal.getOverviewFields().contains("detaillink") || name.equals("detaillink"));
     LOGGER.debug("cal.hasDetailLink(): " + cal.hasDetailLink());
     LOGGER.debug("needsMoreLink(context): " + needsMoreLink(getContext()));
     LOGGER.debug("!cal.getOverviewFields().contains('detaillink'): "
@@ -272,8 +269,7 @@ public class Event implements IEvent {
       if ((parts.length > 1) && !"".equals(displayPart)) {
         displayPart = addDateTimeDelimiter(prevPartName, partName, displayPart);
         if (addSpans) {
-          displayPart = "<span class=\"cel_cal_" + partName + "\">" + displayPart
-              + "</span>";
+          displayPart = "<span class=\"cel_cal_" + partName + "\">" + displayPart + "</span>";
         }
       }
       value += displayPart;
@@ -282,11 +278,9 @@ public class Event implements IEvent {
     return value;
   }
 
-  private String addDateTimeDelimiter(String prevPartName, String partName,
-      String displayPart) {
-    if (("date_end".equals(partName) || "time_end".equals(partName))
-        && ("date".equals(prevPartName) || "time".equals(prevPartName))
-        && !"".equals(displayPart)) {
+  private String addDateTimeDelimiter(String prevPartName, String partName, String displayPart) {
+    if (("date_end".equals(partName) || "time_end".equals(partName)) && ("date".equals(prevPartName)
+        || "time".equals(prevPartName)) && !"".equals(displayPart)) {
       displayPart = getFromDictionary("cel_cal_datetime_delim") + displayPart;
     }
     return displayPart;
@@ -309,16 +303,13 @@ public class Event implements IEvent {
     } else if (name.equals("time")) {
       value = getTimeString(ICalendarClassConfig.PROPERTY_EVENT_DATE, notDisplayIfSame);
     } else if (name.equals("date_end")) {
-      String startDay = getDateString(ICalendarClassConfig.PROPERTY_EVENT_DATE,
-          "dd.MM.yyyy");
-      String endDay = getDateString(ICalendarClassConfig.PROPERTY_EVENT_DATE_END,
-          "dd.MM.yyyy");
+      String startDay = getDateString(ICalendarClassConfig.PROPERTY_EVENT_DATE, "dd.MM.yyyy");
+      String endDay = getDateString(ICalendarClassConfig.PROPERTY_EVENT_DATE_END, "dd.MM.yyyy");
       if (!notDisplayIfSame || !startDay.equals(endDay)) {
         value = endDay;
       }
     } else if (name.equals("time_end")) {
-      value = getTimeString(ICalendarClassConfig.PROPERTY_EVENT_DATE_END,
-          notDisplayIfSame);
+      value = getTimeString(ICalendarClassConfig.PROPERTY_EVENT_DATE_END, notDisplayIfSame);
     } else if (name.equals("title")) {
       value = getTitle();
     } else if (name.equals("location")) {
@@ -362,9 +353,8 @@ public class Event implements IEvent {
   private List<String> getAdditionalPropertyNames() {
     Set<String> detailFieldsSet = new HashSet<String>();
     detailFieldsSet.addAll(splitIntoPropertyNames(getCalendar().getDetailviewFields()));
-    List<String> additionalFields = ListUtils.subtract(
-        Arrays.asList(detailFieldsSet.toArray(new String[0])),
-        splitIntoPropertyNames(getCalendar().getOverviewFields()));
+    List<String> additionalFields = ListUtils.subtract(Arrays.asList(detailFieldsSet.toArray(
+        new String[0])), splitIntoPropertyNames(getCalendar().getOverviewFields()));
     return additionalFields;
   }
 
@@ -479,15 +469,13 @@ public class Event implements IEvent {
     BaseObject obj = null;
     for (String lang : Arrays.asList(language, getDefaultLang(), "")) {
       if ((obj == null) && getEventObjMap().containsKey(lang)) {
-        LOGGER.info("getObj: doc '{}', getting object for lang '{}'", getDocumentName(), 
-            lang);
+        LOGGER.info("getObj: doc '{}', getting object for lang '{}'", getDocumentName(), lang);
         obj = getEventObjMap().get(lang);
       }
     }
     DocumentReference templateDocRef = getTemplateDocRefFromRequest();
-    if ((obj == null) && (templateDocRef != null) 
-        && getContext().getWiki().exists(templateDocRef, getContext())
-        && !getContext().getWiki().exists(getDocumentReference(), getContext())) {
+    if ((obj == null) && (templateDocRef != null) && getContext().getWiki().exists(templateDocRef,
+        getContext()) && !getContext().getWiki().exists(getDocumentReference(), getContext())) {
       // new is ok here because the doc doesnt exist and an obj is needed in editor
       obj = new BaseObject();
       obj.setXClassReference(getCalendarEventClassRef());
@@ -500,7 +488,7 @@ public class Event implements IEvent {
     if (getContext().getRequest() != null) {
       String template = getContext().getRequest().get("template");
       if (StringUtils.isNotBlank(template)) {
-        templateDocRef = getWebUtilsService().resolveDocumentReference(template, 
+        templateDocRef = getWebUtilsService().resolveDocumentReference(template,
             getDocumentReference().getWikiReference());
       }
     }
@@ -518,12 +506,11 @@ public class Event implements IEvent {
   public Element[] getProperties(String lang) {
     BaseObject obj = getObj(lang);
     if (obj != null) {
-      return new com.xpn.xwiki.api.Class(obj.getXClass(getContext()), getContext()
-          ).getProperties();
+      return new com.xpn.xwiki.api.Class(obj.getXClass(getContext()), getContext()).getProperties();
     } else {
       LOGGER.error("getProperties failed. No object found.");
     }
-    return new Property[]{};
+    return new Property[] {};
   }
 
   @Deprecated
@@ -546,8 +533,8 @@ public class Event implements IEvent {
 
   @Deprecated
   @Override
-  public List<List<String>> getEditableProperties(String lang, XWikiContext context
-      ) throws XWikiException {
+  public List<List<String>> getEditableProperties(String lang, XWikiContext context)
+      throws XWikiException {
     return getEditableProperties(lang);
   }
 
@@ -564,17 +551,15 @@ public class Event implements IEvent {
     }
     Element[] allProps = getProperties(lang);
     LOGGER.debug("getEditableProperties: allProps - " + Arrays.deepToString(allProps));
-    LOGGER.debug("getEditableProperties: confIndep - " + Arrays.deepToString(
-        confIndep.toArray()));
-    LOGGER.debug("getEditableProperties: confDep - " + Arrays.deepToString(
-        confDep.toArray()));
+    LOGGER.debug("getEditableProperties: confIndep - " + Arrays.deepToString(confIndep.toArray()));
+    LOGGER.debug("getEditableProperties: confDep - " + Arrays.deepToString(confDep.toArray()));
     List<String> lIndependantProps = getProps(allProps, confIndep);
     List<String> lDependantProps = getProps(allProps, confDep);
     List<List<String>> editProp = new ArrayList<List<String>>();
     editProp.add(lIndependantProps);
     editProp.add(lDependantProps);
-    LOGGER.debug("getEditableProperties: return editProp - "
-        + Arrays.deepToString(editProp.toArray()));
+    LOGGER.debug("getEditableProperties: return editProp - " + Arrays.deepToString(
+        editProp.toArray()));
     return editProp;
   }
 
@@ -602,8 +587,7 @@ public class Event implements IEvent {
       propNamesCleanList.remove("time");
       propNamesCleanList.add("eventDate");
     }
-    if (propNamesCleanList.contains("date_end")
-        || propNamesCleanList.contains("time_end")) {
+    if (propNamesCleanList.contains("date_end") || propNamesCleanList.contains("time_end")) {
       propNamesCleanList.remove("date_end");
       propNamesCleanList.remove("time_end");
       propNamesCleanList.add("eventDate_end");
@@ -620,13 +604,12 @@ public class Event implements IEvent {
 
   private List<String> getProps(Element[] allProps, Set<String> conf) {
     List<String> props = new ArrayList<String>();
-    for (int i = 0; i < allProps.length; i++) {
-      if ((allProps[i] != null) && ((conf.size() == 0) 
-          || (conf.contains(allProps[i].getName())))) {
-        LOGGER.debug("addProp: " + allProps[i].getName());
-        props.add(allProps[i].getName());
+    for (Element allProp : allProps) {
+      if ((allProp != null) && ((conf.size() == 0) || (conf.contains(allProp.getName())))) {
+        LOGGER.debug("addProp: " + allProp.getName());
+        props.add(allProp.getName());
       } else {
-        LOGGER.debug("NOT addProp: " + allProps[i].getName());
+        LOGGER.debug("NOT addProp: " + allProp.getName());
       }
     }
     return props;
@@ -643,8 +626,7 @@ public class Event implements IEvent {
     List<String> result = new ArrayList<String>();
     for (String fieldName : fieldList) {
       String fieldValue = internalDisplayField(getDetailConfigForField(fieldName), false);
-      if ((fieldValue != null) && !getDefaultEmptyDocStrategy().isEmptyRTEString(
-          fieldValue)) {
+      if ((fieldValue != null) && !getDefaultEmptyDocStrategy().isEmptyRTEString(fieldValue)) {
         result.add(fieldName);
       }
     }
@@ -666,8 +648,8 @@ public class Event implements IEvent {
   }
 
   DocumentReference getCalendarEventClassRef() {
-    return getCalClassConf().getCalendarEventClassRef(this.getDocumentReference(
-        ).getWikiReference());
+    return getCalClassConf().getCalendarEventClassRef(
+        this.getDocumentReference().getWikiReference());
   }
 
   private final String getDefaultLang() {
@@ -706,8 +688,8 @@ public class Event implements IEvent {
 
   @Override
   public String toString() {
-    return "Event [eventDocRef=" + eventDocRef + ", language=" + language + ", calendar="
-        + calendar + ", eventDate=" + getEventDate() + "]";
+    return "Event [eventDocRef=" + eventDocRef + ", language=" + language + ", calendar=" + calendar
+        + ", eventDate=" + getEventDate() + "]";
   }
 
   protected XWikiContext getContext() {

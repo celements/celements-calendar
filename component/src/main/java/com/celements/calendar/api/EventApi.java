@@ -79,6 +79,10 @@ public class EventApi extends Api {
   public String getDateString(String dateField, String format) {
     return event.getDateString(dateField, format);
   }
+  
+  public String getDateString(String dateField, String format, String language) {
+    return event.getDateString(dateField, format, language);
+  }
 
   public Date getEventDate() {
     return event.getEventDate();

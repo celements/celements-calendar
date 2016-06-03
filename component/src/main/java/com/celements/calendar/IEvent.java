@@ -40,6 +40,8 @@ public interface IEvent {
   public String getLocation();
 
   public String getDateString(String dateField, String format);
+  
+  public String getDateString(String dateField, String format, String language);
 
   public Date getEventDate();
   

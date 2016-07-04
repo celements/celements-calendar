@@ -70,7 +70,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
             nb), getNextNavDetails(cal, navDetails, nb));
     if ((calendarNavigation.getCountAfter().getCount() <= 0) && (navDetails.getOffset() <= 0)
         && isSendingEmptyPage) {
-      calendarNavigation = getEmptyCalendarNavigation();
+      calendarNavigation = getEmptyCalendarNavigation(navDetails.getOffset());
     }
     LOGGER.debug("getCalendarNavigation: return '" + calendarNavigation + "' for cal '" + calDocRef
         + "' and navDetails '" + navDetails + "'");
@@ -218,19 +218,22 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
         startNavDetails, endNavDetails, prevNavDetails, nextNavDetails);
     if ((calendarNavigation.getCountAfter().getCount() <= 0) && (navDetails.getOffset() <= 0)
         && (actualOffset > 0) && isSendingEmptyPage) {
-      calendarNavigation = getEmptyCalendarNavigation();
+      calendarNavigation = getEmptyCalendarNavigation(actualOffset);
     }
     return calendarNavigation;
   }
 
-  CalendarNavigation getEmptyCalendarNavigation() {
+  CalendarNavigation getEmptyCalendarNavigation(int actualOffset) {
     try {
-      return new CalendarNavigation(new UncertainCount(0, false), new UncertainCount(0, false),
-          new UncertainCount(0, false), NavigationDetails.create(ICalendarClassConfig.DATE_HIGH, 0),
-          NavigationDetails.create(ICalendarClassConfig.DATE_HIGH, 0), NavigationDetails.create(
-              ICalendarClassConfig.DATE_HIGH, 0), NavigationDetails.create(
-                  ICalendarClassConfig.DATE_HIGH, 0), NavigationDetails.create(
-                      ICalendarClassConfig.DATE_HIGH, 0));
+      return new CalendarNavigation(
+          new UncertainCount(0, false), 
+          new UncertainCount(0, false),
+          new UncertainCount(0, false), 
+          NavigationDetails.create(ICalendarClassConfig.DATE_HIGH, actualOffset),
+          NavigationDetails.create(ICalendarClassConfig.DATE_HIGH, actualOffset),
+          NavigationDetails.create(ICalendarClassConfig.DATE_HIGH, actualOffset),
+          NavigationDetails.create(ICalendarClassConfig.DATE_HIGH, actualOffset),
+          NavigationDetails.create(ICalendarClassConfig.DATE_HIGH, actualOffset));
     } catch (NavigationDetailException exc) {
       throw new RuntimeException("Error in getEmptyCalendarNavigation: This error should "
           + "never happen, because its been set with default values", exc);

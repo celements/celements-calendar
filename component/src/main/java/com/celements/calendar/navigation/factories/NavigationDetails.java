@@ -14,14 +14,13 @@ public class NavigationDetails {
     this.startDate = startDate;
     this.offset = offset;
   }
-  
-  static NavigationDetails create(Date startDate, int offset
-      ) throws NavigationDetailException {
+
+  static NavigationDetails create(Date startDate, int offset) throws NavigationDetailException {
     if ((startDate != null) && (offset >= 0)) {
       return new NavigationDetails(startDate, offset);
     }
-    throw new NavigationDetailException("Unable to create nav for startDate '" 
-        + startDate + "' and offset '" + offset + "'");
+    throw new NavigationDetailException("Unable to create nav for startDate '" + startDate
+        + "' and offset '" + offset + "'");
   }
 
   public Date getStartDate() {
@@ -36,8 +35,8 @@ public class NavigationDetails {
   public boolean equals(Object obj) {
     if (obj instanceof NavigationDetails) {
       NavigationDetails other = (NavigationDetails) obj;
-      return new EqualsBuilder().append(this.startDate, other.startDate).append(
-          this.offset, other.offset).isEquals();
+      return new EqualsBuilder().append(this.startDate, other.startDate).append(this.offset,
+          other.offset).isEquals();
     }
     return false;
   }

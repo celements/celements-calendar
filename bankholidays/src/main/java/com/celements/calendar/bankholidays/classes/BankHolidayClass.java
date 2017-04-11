@@ -21,7 +21,7 @@ public class BankHolidayClass extends AbstractClassDefinition implements BankHol
   public static final String CLASS_SPACE = "Classes";
   public static final String CLASS_DEF_HINT = CLASS_SPACE + "." + CLASS_NAME;
 
-  public static final ClassField<String> FIELD_HOLIDAY_NAME = new StringField.Builder(
+  public static final ClassField<String> FIELD_HOLIDAY_DATE = new StringField.Builder(
       CLASS_DEF_HINT, "holiday_name").prettyName("Holiday name").validationRegExp(
           VALIDATION_REGEXP).validationMessage(VALIDATION_MESSAGE).size(30).build();
 

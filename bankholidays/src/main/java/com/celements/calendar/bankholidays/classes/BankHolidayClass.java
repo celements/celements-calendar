@@ -18,7 +18,7 @@ import com.celements.model.classes.fields.StringField;
 public class BankHolidayClass extends AbstractClassDefinition implements BankHolidayClassesRole {
 
   public static final String CLASS_NAME = "BankHolidayClass";
-  public static final String CLASS_SPACE = "Classes";
+  public static final String CLASS_SPACE = "CalendarClasses";
   public static final String CLASS_DEF_HINT = CLASS_SPACE + "." + CLASS_NAME;
 
   public static final ClassField<String> FIELD_HOLIDAY_NAME = new StringField.Builder(

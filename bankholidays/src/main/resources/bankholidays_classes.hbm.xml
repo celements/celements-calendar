@@ -2,7 +2,7 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD//EN"
         "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-  <class entity-name="Classes.BankHolidayClass" table="cel_bankholidays_bank_holiday">
+  <class entity-name="CalendarClasses.BankHolidayClass" table="cel_bankholidays_bank_holiday">
     <id name="id" type="integer" unsaved-value="undefined">
       <column name="CBH_ID" not-null="true" />
       <generator class="assigned" />

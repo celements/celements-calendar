@@ -4,17 +4,17 @@
 <hibernate-mapping>
   <class entity-name="Classes.BankHolidayClass" table="cel_bankholidays_bank_holiday">
     <id name="id" type="integer" unsaved-value="undefined">
-      <column name="CEC_ID" not-null="true" />
+      <column name="CBH_ID" not-null="true" />
       <generator class="assigned" />
     </id>
     <property name="holiday_name" type="string">
-      <column name="CEC_HOLIDAY_NAME" length="64" />
+      <column name="CBH_HOLIDAY_NAME" length="64" />
     </property>
     <property name="holiday_from" type="timestamp">
-      <column name="CEC_HOLIDAY_FROM" />
+      <column name="CBH_HOLIDAY_FROM" />
     </property>
     <property name="holiday_to" type="timestamp">
-      <column name="CEC_HOLIDAY_TO" />
+      <column name="CBH_HOLIDAY_TO" />
     </property>
   </class>
 </hibernate-mapping>

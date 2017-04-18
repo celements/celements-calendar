@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+  <class entity-name="CalendarClasses.BankHolidayClass" table="cel_bankholidays">
+    <id name="id" type="integer" unsaved-value="undefined">
+      <column name="CBH_ID" not-null="true" />
+      <generator class="assigned" />
+    </id>
+    <property name="holiday_name" type="string">
+      <column name="CBH_HOLIDAY_NAME" length="64" />
+    </property>
+    <property name="holiday_from" type="timestamp">
+      <column name="CBH_HOLIDAY_FROM" />
+    </property>
+    <property name="holiday_to" type="timestamp">
+      <column name="CBH_HOLIDAY_TO" />
+    </property>
+  </class>
+</hibernate-mapping>

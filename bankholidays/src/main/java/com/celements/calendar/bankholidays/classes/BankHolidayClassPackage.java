@@ -3,12 +3,15 @@ package com.celements.calendar.bankholidays.classes;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.concurrent.Immutable;
+
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 
 import com.celements.model.classes.AbstractClassPackage;
 import com.celements.model.classes.ClassDefinition;
 
+@Immutable
 @Component(BankHolidayClassPackage.NAME)
 public class BankHolidayClassPackage extends AbstractClassPackage {
 

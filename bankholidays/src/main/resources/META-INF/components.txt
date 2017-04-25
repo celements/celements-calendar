@@ -1,1 +1,2 @@
 com.celements.calendar.bankholidays.classes.BankHolidayClass
+com.celements.calendar.bankholidays.classes.BankHolidayClassPackage

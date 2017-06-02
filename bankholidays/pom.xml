@@ -30,7 +30,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>celements-calendar-bankholidays</artifactId>
-  <version>1.1</version>
+  <version>1.2-SNAPSHOT</version>
   <description>Celements Calendar Bankholidays</description> 
   <dependencies>    
     <!-- Add here all your dependencies -->
@@ -51,6 +51,6 @@
     <connection>scm:git:git@github.com:celements/celements-calendar.git</connection>
     <developerConnection>scm:git:git@github.com:celements/celements-calendar.git</developerConnection>
     <url>https://github.com/celements/celements-calendar</url>
-    <tag>celements-calendar-bankholidays-1.1</tag>
+    <tag>celements-calendar-bankholidays-1.0</tag>
   </scm>
 </project>

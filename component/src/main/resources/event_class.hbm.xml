@@ -3,7 +3,7 @@
         "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
   <class entity-name="Classes.CalendarEventClass" table="cel_calendareventclass">
-  <id name="id" type="integer" unsaved-value="undefined">
+  <id name="id" type="long" unsaved-value="undefined">
     <column name="CEC_ID" not-null="true" />
     <generator class="assigned" />
   </id>

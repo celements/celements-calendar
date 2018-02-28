@@ -32,7 +32,7 @@
   <artifactId>calendar-web</artifactId>
   <packaging>war</packaging>
   <name>Calendar Web-Module</name>
-  <version>1.15-SNAPSHOT</version>
+  <version>3.0-SNAPSHOT</version>
   <description>	</description>
   <licenses>
     <license>
@@ -56,7 +56,7 @@
     <dependency>
       <groupId>com.celements</groupId>
       <artifactId>celements-calendar</artifactId>
-      <version>1.50</version>
+      <version>3.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>

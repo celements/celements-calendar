@@ -26,30 +26,36 @@
   <parent>
       <groupId>com.celements</groupId>
       <artifactId>celements</artifactId>
-      <version>2.17</version>
+      <version>3.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>celements-calendar</artifactId>
-  <version>1.52-SNAPSHOT</version>
+  <version>3.0-SNAPSHOT</version>
   <description>Celements Calendar</description> 
   <dependencies>    
     <!-- Add here all your dependencies -->
     <dependency>
       <groupId>com.celements</groupId>
+      <artifactId>celements-model</artifactId>
+      <version>3.0-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.celements</groupId>
       <artifactId>celements-core</artifactId>
-      <version>1.147</version>
+      <version>3.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.celements</groupId>
       <artifactId>celements-search</artifactId>
-      <version>2.14</version>
+      <version>3.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.celements</groupId>
       <artifactId>celements-subsystem-migration-manager</artifactId>
-      <version>1.3</version>
+      <version>3.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>  

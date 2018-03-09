@@ -1,5 +1,6 @@
 package com.celements.calendar;
 
+import static com.celements.common.test.CelementsTestUtils.*;
 import static org.junit.Assert.*;
 
 import org.junit.Before;
@@ -10,9 +11,9 @@ import com.celements.common.test.AbstractComponentTest;
 import com.xpn.xwiki.web.Utils;
 
 public class CalendarClassConfigTest extends AbstractComponentTest {
-  
+
   private ICalendarClassConfig calClassConf;
-  
+
   @Before
   public void setUp_CalendarClassConfigTest() throws Exception {
     calClassConf = Utils.getComponent(ICalendarClassConfig.class);

@@ -33,7 +33,6 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.python.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xwiki.context.Execution;
@@ -44,6 +43,7 @@ import com.celements.calendar.service.ICalendarService;
 import com.celements.common.collections.ListUtils;
 import com.celements.emptycheck.internal.IDefaultEmptyDocStrategyRole;
 import com.celements.web.service.IWebUtilsService;
+import com.google.common.base.Strings;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.api.Element;
@@ -133,7 +133,7 @@ public class Event implements IEvent {
   }
 
   private void initObjectMap(List<BaseObject> objList) {
-    eventObjMap = new HashMap<String, BaseObject>();
+    eventObjMap = new HashMap<>();
     if (objList != null) {
       for (BaseObject obj : objList) {
         if (obj != null) {
@@ -351,7 +351,7 @@ public class Event implements IEvent {
   }
 
   private List<String> getAdditionalPropertyNames() {
-    Set<String> detailFieldsSet = new HashSet<String>();
+    Set<String> detailFieldsSet = new HashSet<>();
     detailFieldsSet.addAll(splitIntoPropertyNames(getCalendar().getDetailviewFields()));
     List<String> additionalFields = ListUtils.subtract(Arrays.asList(detailFieldsSet.toArray(
         new String[0])), splitIntoPropertyNames(getCalendar().getOverviewFields()));
@@ -540,8 +540,8 @@ public class Event implements IEvent {
 
   @Override
   public List<List<String>> getEditableProperties(String lang) throws XWikiException {
-    Set<String> confIndep = new HashSet<String>();
-    Set<String> confDep = new HashSet<String>();
+    Set<String> confIndep = new HashSet<>();
+    Set<String> confDep = new HashSet<>();
     splitLanguageDependentFields(confIndep, confDep, splitIntoPropertyNames(
         getCalendar().getOverviewFields()));
     splitLanguageDependentFields(confIndep, confDep, splitIntoPropertyNames(
@@ -555,7 +555,7 @@ public class Event implements IEvent {
     LOGGER.debug("getEditableProperties: confDep - " + Arrays.deepToString(confDep.toArray()));
     List<String> lIndependantProps = getProps(allProps, confIndep);
     List<String> lDependantProps = getProps(allProps, confDep);
-    List<List<String>> editProp = new ArrayList<List<String>>();
+    List<List<String>> editProp = new ArrayList<>();
     editProp.add(lIndependantProps);
     editProp.add(lDependantProps);
     LOGGER.debug("getEditableProperties: return editProp - " + Arrays.deepToString(
@@ -564,7 +564,7 @@ public class Event implements IEvent {
   }
 
   private List<String> splitIntoPropertyNames(List<String> fieldList) {
-    List<String> propertyNames = new ArrayList<String>();
+    List<String> propertyNames = new ArrayList<>();
     for (String fieldName : fieldList) {
       if (fieldName.contains("-")) {
         for (String propName : fieldName.split("-")) {
@@ -579,7 +579,7 @@ public class Event implements IEvent {
 
   void splitLanguageDependentFields(Set<String> confIndep, Set<String> confDep,
       List<String> propertyNames) {
-    ArrayList<String> propNamesCleanList = new ArrayList<String>();
+    ArrayList<String> propNamesCleanList = new ArrayList<>();
     propNamesCleanList.addAll(propertyNames);
     propNamesCleanList.remove("detaillink");
     if (propNamesCleanList.contains("date") || propNamesCleanList.contains("time")) {
@@ -603,7 +603,7 @@ public class Event implements IEvent {
   }
 
   private List<String> getProps(Element[] allProps, Set<String> conf) {
-    List<String> props = new ArrayList<String>();
+    List<String> props = new ArrayList<>();
     for (Element allProp : allProps) {
       if ((allProp != null) && ((conf.size() == 0) || (conf.contains(allProp.getName())))) {
         LOGGER.debug("addProp: " + allProp.getName());
@@ -623,7 +623,7 @@ public class Event implements IEvent {
 
   @Override
   public List<String> getNonEmptyFields(List<String> fieldList) {
-    List<String> result = new ArrayList<String>();
+    List<String> result = new ArrayList<>();
     for (String fieldName : fieldList) {
       String fieldValue = internalDisplayField(getDetailConfigForField(fieldName), false);
       if ((fieldValue != null) && !getDefaultEmptyDocStrategy().isEmptyRTEString(fieldValue)) {

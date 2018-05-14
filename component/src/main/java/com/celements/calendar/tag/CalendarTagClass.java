@@ -10,8 +10,8 @@ import com.celements.model.classes.AbstractClassDefinition;
 import com.celements.model.classes.fields.ClassField;
 
 @Singleton
-@Component(CalendarTag.CLASS_DEF_HINT)
-public class CalendarTag extends AbstractClassDefinition implements CalendarClassDefinition {
+@Component(CalendarTagClass.CLASS_DEF_HINT)
+public class CalendarTagClass extends AbstractClassDefinition implements CalendarClassDefinition {
 
   private static final String DOC_NAME = "CalendarTagClass";
 

@@ -28,22 +28,21 @@ public class CalendarEngineHQL extends AbstractCalendarEngine {
 
   private static final String PROGON_ENGINE_HQL_TOTALTIME = "progonEngineHQLTotalTime";
   private static final DateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-  
+
   public static final String NAME = "hql";
 
   @Requirement
   private QueryManager queryManager;
 
   private XWikiContext getContext() {
-    return (XWikiContext) execution.getContext().getProperty(
-        XWikiContext.EXECUTIONCONTEXT_KEY);
+    return (XWikiContext) execution.getContext().getProperty(XWikiContext.EXECUTIONCONTEXT_KEY);
   }
 
   @Override
   public String getName() {
     return NAME;
   }
-  
+
   @Override
   public long getEngineLimit() {
     return 0L;
@@ -56,7 +55,7 @@ public class CalendarEngineHQL extends AbstractCalendarEngine {
     try {
       Query query = getQuery(cal, true);
       List<Object> eventCount = query.execute();
-      if((eventCount != null) && (eventCount.size() > 0)) {
+      if ((eventCount != null) && (eventCount.size() > 0)) {
         count = (Long) eventCount.get(0);
       }
     } catch (QueryException queryException) {
@@ -87,7 +86,7 @@ public class CalendarEngineHQL extends AbstractCalendarEngine {
   }
 
   private List<IEvent> convertToEventList(WikiReference wikiRef, List<String> eventDocs) {
-    List<IEvent> eventList = new ArrayList<IEvent>();
+    List<IEvent> eventList = new ArrayList<>();
     for (String docName : eventDocs) {
       eventList.add(new Event(webUtilsService.resolveDocumentReference(docName, wikiRef)));
     }
@@ -95,30 +94,30 @@ public class CalendarEngineHQL extends AbstractCalendarEngine {
   }
 
   private Query getQuery(ICalendar cal, boolean asCount) throws QueryException {
+    // TODO verify mode
     String evClassName = ICalendarClassConfig.CALENDAR_EVENT_CLASS;
     String timeComp = ">=";
     String sortOrder = "asc";
     String selectEmptyDates = "or ec.eventDate is null";
-    if(cal.isArchive()){
+    if (cal.isArchive()) {
       timeComp = "<";
       sortOrder = "desc";
       selectEmptyDates = "";
     }
     String hql = "select ";
-    if(asCount){
+    if (asCount) {
       hql += "count(obj.name) ";
     } else {
       hql += "obj.name ";
     }
     hql += "from BaseObject as obj, " + evClassName + " as ec ";
     hql += "where ec.id.id=obj.id and obj.className = '" + evClassName + "' and (";
-    if(toArchiveOnEndDate()) {
+    if (toArchiveOnEndDate()) {
       hql += "COALESCE(ec.eventDate_end, ec.eventDate)";
     } else {
       hql += "ec.eventDate";
     }
-    hql += " " + timeComp + " '" + SDF.format(cal.getStartDate()) + "' "
-        + selectEmptyDates + ") ";
+    hql += " " + timeComp + " '" + SDF.format(cal.getStartDate()) + "' " + selectEmptyDates + ") ";
     hql += "and " + getAllowedSpacesHQL(cal.getAllowedSpaces());
     hql += " order by ec.eventDate " + sortOrder + ", ec.eventDate_end " + sortOrder;
     hql += ", ec.l_title " + sortOrder;
@@ -130,7 +129,7 @@ public class CalendarEngineHQL extends AbstractCalendarEngine {
   }
 
   boolean toArchiveOnEndDate() {
-    return getContext().getWiki().getXWikiPreferenceAsInt("calendar_toArchiveOnEndDate", 
+    return getContext().getWiki().getXWikiPreferenceAsInt("calendar_toArchiveOnEndDate",
         "celements.calendar.toArchiveOnEndDate", 1, getContext()) == 1;
   }
 
@@ -174,8 +173,7 @@ public class CalendarEngineHQL extends AbstractCalendarEngine {
       }
     }
     if (ret == null) {
-      LOGGER.debug("getFirst/LastEvent: no Event for cal '" + cal + "', first '" + first 
-          + "'");
+      LOGGER.debug("getFirst/LastEvent: no Event for cal '" + cal + "', first '" + first + "'");
     }
     return ret;
   }

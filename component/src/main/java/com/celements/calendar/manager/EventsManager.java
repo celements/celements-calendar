@@ -25,7 +25,7 @@ import com.celements.calendar.engine.ICalendarEngineRole;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.service.ICalendarService;
-import com.celements.calendar.tag.CalendarTag;
+import com.celements.calendar.tag.CalendarTagClass;
 import com.celements.model.access.IModelAccessFacade;
 import com.celements.model.access.exception.DocumentNotExistsException;
 import com.celements.model.access.exception.DocumentSaveException;
@@ -55,7 +55,7 @@ public class EventsManager implements IEventManager {
   @Requirement
   private IModelAccessFacade modelAccess;
 
-  @Requirement(CalendarTag.CLASS_DEF_HINT)
+  @Requirement(CalendarTagClass.CLASS_DEF_HINT)
   private ClassDefinition calendarTagClassDef;
 
   @Requirement
@@ -95,7 +95,7 @@ public class EventsManager implements IEventManager {
   }
 
   private XWikiObjectEditor createTagObjectEditor(XWikiDocument eventDoc, ICalendar calendar) {
-    return XWikiObjectEditor.on(eventDoc).filter(calendarTagClassDef).filter(CalendarTag.FIELD_NAME,
+    return XWikiObjectEditor.on(eventDoc).filter(calendarTagClassDef).filter(CalendarTagClass.FIELD_NAME,
         calendar);
   }
 

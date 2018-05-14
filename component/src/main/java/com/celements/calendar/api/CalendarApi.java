@@ -74,15 +74,14 @@ public class CalendarApi extends Api {
   public boolean isArchive() {
     return calendar.isArchive();
   }
-  
+
   public SpaceReference getEventSpaceRef() {
     return calendar.getEventSpaceRef();
   }
 
   public List<EventApi> getAllEvents() {
     try {
-      return EventApi.createList(calendar.getAllEventsInternal(), calendar.getLanguage(), 
-          context);
+      return EventApi.createList(calendar.getAllEventsInternal(), calendar.getLanguage(), context);
     } catch (XWikiException xwe) {
       LOGGER.error("Error getting all events", xwe);
     }
@@ -91,8 +90,8 @@ public class CalendarApi extends Api {
 
   public List<EventApi> getEvents(int start, int nb) {
     try {
-      return EventApi.createList(calendar.getEventsInternal(start, nb), 
-          calendar.getLanguage(), context);
+      return EventApi.createList(calendar.getEventsInternal(start, nb), calendar.getLanguage(),
+          context);
     } catch (XWikiException xwe) {
       LOGGER.error("Error getting {} events starting at {}", nb, start, xwe);
     }
@@ -100,8 +99,7 @@ public class CalendarApi extends Api {
   }
 
   public EventSearchResultApi searchEvents(IEventSearchQuery query) {
-    return new EventSearchResultApi(calendar.searchEvents(query), calendar.getLanguage(),
-        context);
+    return new EventSearchResultApi(calendar.searchEvents(query), calendar.getLanguage(), context);
   }
 
   public long getNrOfEvents() {

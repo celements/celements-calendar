@@ -22,13 +22,11 @@ package com.celements.calendar.util;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xwiki.model.reference.DocumentReference;
 
-import com.celements.calendar.Calendar;
 import com.celements.calendar.ICalendar;
-import com.celements.calendar.service.CalendarService;
 import com.celements.calendar.service.ICalendarService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -36,21 +34,19 @@ import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.web.Utils;
 
-/**
- * @deprecated instead use {@link CalendarService}
- */
 @Deprecated
 public class CalendarUtils implements ICalendarUtils {
 
-  private static final Log LOGGER = LogFactory.getFactory(
-      ).getInstance(CalendarUtils.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CalendarUtils.class);
 
   private static ICalendarUtils utilsInstance;
 
   private ICalendarService calService;
 
-  private CalendarUtils() {}
+  private CalendarUtils() {
+  }
 
+  @Deprecated
   public static ICalendarUtils getInstance() {
     if (utilsInstance == null) {
       utilsInstance = new CalendarUtils();
@@ -58,26 +54,23 @@ public class CalendarUtils implements ICalendarUtils {
     return utilsInstance;
   }
 
-  /* (non-Javadoc)
-   * @see com.celements.calendar.util.ICalendarUtils#getCalendarPageByCalendarSpace(java.lang.String, com.xpn.xwiki.XWikiContext)
-   */
+  @Override
   @Deprecated
-  public XWikiDocument getCalendarPageByCalendarSpace(String calSpace,
-      XWikiContext context) throws XWikiException{
-    return context.getWiki().getDocument(getCalService().getCalendarDocRefByCalendarSpace(
-        calSpace), context);
+  public XWikiDocument getCalendarPageByCalendarSpace(String calSpace, XWikiContext context)
+      throws XWikiException {
+    return context.getWiki().getDocument(getCalService().getCalendarDocRefByCalendarSpace(calSpace),
+        context);
   }
 
-  /* (non-Javadoc)
-   * @see com.celements.calendar.util.ICalendarUtils#getSubscribingCalendars(java.lang.String, com.xpn.xwiki.XWikiContext)
-   */
-  public List<String> getSubscribingCalendars(String calSpace,
-      XWikiContext context) throws XWikiException {
+  @Override
+  @Deprecated
+  public List<String> getSubscribingCalendars(String calSpace, XWikiContext context)
+      throws XWikiException {
     List<String> subsCals = Collections.emptyList();
     XWikiDocument cal = getCalendarPageByCalendarSpace(calSpace, context);
     if (cal != null) {
       BaseObject obj = cal.getObject("Classes.CalendarConfigClass");
-      if((obj != null) && (obj.getIntValue("is_subscribable") == 1)) {
+      if ((obj != null) && (obj.getIntValue("is_subscribable") == 1)) {
         String hql = ", BaseObject as obj, ";
         hql += "DBStringListProperty as str join str.list subto ";
         hql += "where obj.name=doc.fullName ";
@@ -91,68 +84,52 @@ public class CalendarUtils implements ICalendarUtils {
     return subsCals;
   }
 
-  /* (non-Javadoc)
-   * @see com.celements.calendar.util.ICalendarUtils#getAllowedSpacesHQL(com.xpn.xwiki.doc.XWikiDocument, com.xpn.xwiki.XWikiContext)
-   */
+  @Override
   @Deprecated
-  public String getAllowedSpacesHQL(XWikiDocument calDoc, XWikiContext context
-      ) throws XWikiException {
+  public String getAllowedSpacesHQL(XWikiDocument calDoc, XWikiContext context)
+      throws XWikiException {
     return getCalService().getAllowedSpacesHQL(calDoc);
   }
 
-  /* (non-Javadoc)
-   * @see com.celements.calendar.util.ICalendarUtils#getCalendar(boolean, com.xpn.xwiki.XWikiContext)
-   */
+  @Deprecated
   public ICalendar getCalendar(boolean isArchive, XWikiContext context) {
     return getCalendarByCalDoc(context.getDoc(), isArchive, context);
   }
 
-  /* (non-Javadoc)
-   * @see com.celements.calendar.util.ICalendarUtils#getCalendar(java.lang.String, boolean, com.xpn.xwiki.XWikiContext)
-   */
-  public ICalendar getCalendar(String calDocFullName, boolean isArchive,
-      XWikiContext context) {
+  public ICalendar getCalendar(String calDocFullName, boolean isArchive, XWikiContext context) {
     try {
-      return getCalendarByCalDoc(context.getWiki().getDocument(
-          calDocFullName, context), isArchive, context);
+      return getCalendarByCalDoc(context.getWiki().getDocument(calDocFullName, context), isArchive,
+          context);
     } catch (XWikiException e) {
       LOGGER.error("connot load calender doc", e);
       return null;
     }
   }
 
-  /* (non-Javadoc)
-   * @see com.celements.calendar.util.ICalendarUtils#getCalendarByCalDoc(com.xpn.xwiki.doc.XWikiDocument, boolean, com.xpn.xwiki.XWikiContext)
-   */
-  public ICalendar getCalendarByCalDoc(XWikiDocument calendarDoc,
-      boolean isArchive, XWikiContext context) {
-    return new Calendar(calendarDoc, isArchive, context);
+  private ICalendar getCalendarByCalDoc(XWikiDocument calendarDoc, boolean isArchive,
+      XWikiContext context) {
+    return getCalService().getCalendarByCalRef(calendarDoc.getDocumentReference(), isArchive);
   }
 
-  /* (non-Javadoc)
-   * @see com.celements.calendar.util.ICalendarUtils#getEventSpaceForCalendar(com.xpn.xwiki.doc.XWikiDocument, com.xpn.xwiki.XWikiContext)
-   */
+  @Override
   @Deprecated
-  public String getEventSpaceForCalendar(XWikiDocument doc,
-      XWikiContext context) throws XWikiException {
+  public String getEventSpaceForCalendar(XWikiDocument doc, XWikiContext context)
+      throws XWikiException {
     return getCalService().getEventSpaceForCalendar(doc.getDocumentReference());
   }
 
-  /* (non-Javadoc)
-   * @see com.celements.calendar.util.ICalendarUtils#getEventSpaceForCalendar(java.lang.String, com.xpn.xwiki.XWikiContext)
-   */
+  @Override
   @Deprecated
-  public String getEventSpaceForCalendar(String fullName,
-      XWikiContext context) throws XWikiException {
-    return getEventSpaceForCalendar(context.getWiki().getDocument(fullName, context),
-        context);
+  public String getEventSpaceForCalendar(String fullName, XWikiContext context)
+      throws XWikiException {
+    return getEventSpaceForCalendar(context.getWiki().getDocument(fullName, context), context);
   }
 
+  @Override
   @Deprecated
-  public String getEventSpaceForCalendar(DocumentReference calDocRef,
-      XWikiContext context) throws XWikiException {
-    return getEventSpaceForCalendar(context.getWiki().getDocument(calDocRef, context),
-        context);
+  public String getEventSpaceForCalendar(DocumentReference calDocRef, XWikiContext context)
+      throws XWikiException {
+    return getEventSpaceForCalendar(context.getWiki().getDocument(calDocRef, context), context);
   }
 
   private ICalendarService getCalService() {

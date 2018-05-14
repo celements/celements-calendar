@@ -4,26 +4,55 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import org.xwiki.component.annotation.ComponentRole;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.model.reference.WikiReference;
 
+import com.celements.calendar.CalendarCreateException;
+import com.celements.calendar.DateUtil;
 import com.celements.calendar.ICalendar;
-import com.celements.model.access.exception.DocumentNotExistsException;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 
 @ComponentRole
 public interface ICalendarService {
 
+  @NotNull
+  ICalendar createCalendar(@NotNull DocumentReference calConfigDocRef)
+      throws CalendarCreateException;
+
+  @NotNull
+  ICalendar createCalendarArchive(@NotNull DocumentReference calConfigDocRef)
+      throws CalendarCreateException;
+
+  /**
+   * @deprecated instead use {@link #createCalendar(DocumentReference)}
+   */
+  @Deprecated
   public ICalendar getCalendar(DocumentReference calDocRef);
 
+  /**
+   * @deprecated instead use {@link #createCalendar(DocumentReference)} and
+   *             {@link ICalendar#setStartDate(Date)}
+   */
+  @Deprecated
   public ICalendar getCalendar(DocumentReference calDocRef, Date startDate);
 
+  /**
+   * @deprecated instead use {@link #createCalendarArchive(DocumentReference)}
+   */
+  @Deprecated
   public ICalendar getCalendarArchive(DocumentReference calDocRef);
 
+  /**
+   * @deprecated instead use {@link #createCalendarArchive(DocumentReference)} and
+   *             {@link ICalendar#setStartDate(Date)}
+   */
+  @Deprecated
   public ICalendar getCalendarArchive(DocumentReference calDocRef, Date startDate);
 
   /**
@@ -70,32 +99,30 @@ public interface ICalendarService {
       Collection<DocumentReference> excludes);
 
   /**
-   * @deprecated instead use {@link #getCalendarEventSpace}
+   * @deprecated instead use {@link #getCalendar(DocumentReference)} and
+   *             {@link ICalendar#getEventSpaceRef()}
    */
   @Deprecated
   public SpaceReference getEventSpaceRefForCalendar(DocumentReference calDocRef)
       throws XWikiException;
 
   /**
-   * @deprecated instead use {@link #getCalendarEventSpace}
+   * @deprecated instead use {@link #getCalendar(DocumentReference)} and
+   *             {@link ICalendar#getEventSpaceRef()}
    */
   @Deprecated
   public String getEventSpaceForCalendar(DocumentReference calDocRef) throws XWikiException;
 
-  public SpaceReference getCalendarEventSpace(DocumentReference calDocRef)
-      throws DocumentNotExistsException;
-
-  public List<SpaceReference> getAllowedCalendarSpaces(DocumentReference calDocRef)
-      throws DocumentNotExistsException;
-
   /**
-   * @deprecated instead use {@link #getAllowedCalendarSpaces}
+   * @deprecated instead use {@link #getCalendar(DocumentReference)} and
+   *             {@link ICalendar#getAllowedSpaceRefs()}
    */
   @Deprecated
   public List<String> getAllowedSpaces(DocumentReference calDocRef) throws XWikiException;
 
   /**
-   * @deprecated instead use {@link #getAllowedCalendarSpaces}
+   * @deprecated instead use {@link #getCalendar(DocumentReference)} and
+   *             {@link ICalendar#getAllowedSpaceRefs()}
    */
   @Deprecated
   public String getAllowedSpacesHQL(XWikiDocument calDoc) throws XWikiException;
@@ -136,10 +163,22 @@ public interface ICalendarService {
   public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace,
       EntityReference inRef);
 
+  /**
+   * @deprecated instead use {@link DateUtil#noTime(Date)}
+   */
+  @Deprecated
   public boolean isMidnightDate(Date date);
 
+  /**
+   * @deprecated instead use {@link DateUtil#noTime(Date)}
+   */
+  @Deprecated
   public Date getMidnightDate(Date date);
 
+  /**
+   * @deprecated instead use {@link DateUtil#endOfDay(Date)}
+   */
+  @Deprecated
   public Date getEndOfDayDate(Date date);
 
 }

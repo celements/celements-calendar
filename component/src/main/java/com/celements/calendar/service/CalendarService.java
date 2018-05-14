@@ -1,7 +1,6 @@
 package com.celements.calendar.service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -17,7 +16,6 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.context.Execution;
 import org.xwiki.model.EntityType;
-import org.xwiki.model.reference.ClassReference;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.SpaceReference;
@@ -27,20 +25,17 @@ import org.xwiki.query.QueryException;
 import org.xwiki.query.QueryManager;
 
 import com.celements.calendar.Calendar;
+import com.celements.calendar.CalendarCreateException;
+import com.celements.calendar.DateUtil;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.ICalendarClassConfig;
 import com.celements.model.access.IModelAccessFacade;
-import com.celements.model.access.exception.DocumentNotExistsException;
 import com.celements.model.context.ModelContext;
-import com.celements.model.object.xwiki.XWikiObjectFetcher;
 import com.celements.model.util.ModelUtils;
 import com.celements.query.IQueryExecutionServiceRole;
-import com.google.common.base.Optional;
-import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
-import com.xpn.xwiki.objects.BaseObject;
 
 @Component
 public class CalendarService implements ICalendarService {
@@ -52,11 +47,11 @@ public class CalendarService implements ICalendarService {
   static final String EXECUTIONCONTEXT_KEY_CAL_CACHE = "calCache";
   static final String EXECUTIONCONTEXT_KEY_CAL_SPACE_CACHE = "calSpaceCache";
 
-  private static final List<Integer> TIMESTAMP_FIELDS = Arrays.asList(
-      java.util.Calendar.HOUR_OF_DAY, java.util.Calendar.MINUTE, java.util.Calendar.SECOND);
-
   @Requirement
   private QueryManager queryManager;
+
+  @Requirement
+  private IQueryExecutionServiceRole queryExecutor;
 
   @Requirement
   private IModelAccessFacade modelAccess;
@@ -65,32 +60,50 @@ public class CalendarService implements ICalendarService {
   private ModelUtils modelUtils;
 
   @Requirement
-  private ICalendarClassConfig calClassConf;
-
-  private IQueryExecutionServiceRole queryExecutor;
-
-  @Requirement
   private ModelContext context;
 
   @Requirement
   private Execution execution;
 
   @Override
-  public ICalendar getCalendar(DocumentReference calDocRef) {
-    return new Calendar(calDocRef, false);
+  public ICalendar createCalendar(DocumentReference calDocRef) throws CalendarCreateException {
+    return new Calendar(calDocRef);
   }
 
   @Override
+  public ICalendar createCalendarArchive(DocumentReference calDocRef)
+      throws CalendarCreateException {
+    return new Calendar(calDocRef, true);
+  }
+
+  @Override
+  @Deprecated
+  public ICalendar getCalendar(DocumentReference calDocRef) {
+    try {
+      return createCalendar(calDocRef);
+    } catch (CalendarCreateException exc) {
+      throw new IllegalArgumentException(exc);
+    }
+  }
+
+  @Override
+  @Deprecated
   public ICalendar getCalendar(DocumentReference calDocRef, Date startDate) {
     return getCalendar(calDocRef).setStartDate(startDate);
   }
 
   @Override
+  @Deprecated
   public ICalendar getCalendarArchive(DocumentReference calDocRef) {
-    return new Calendar(calDocRef, true);
+    try {
+      return createCalendarArchive(calDocRef);
+    } catch (CalendarCreateException exc) {
+      throw new IllegalArgumentException(exc);
+    }
   }
 
   @Override
+  @Deprecated
   public ICalendar getCalendarArchive(DocumentReference calDocRef, Date startDate) {
     return getCalendarArchive(calDocRef).setStartDate(startDate);
   }
@@ -100,7 +113,7 @@ public class CalendarService implements ICalendarService {
   public ICalendar getCalendarByCalRef(DocumentReference calDocRef, boolean isArchive) {
     LOGGER.trace("getCalendarByCalRef: create Calendar reference for [" + calDocRef
         + "], isArchive [" + isArchive + "].");
-    return new Calendar(calDocRef, isArchive);
+    return isArchive ? getCalendarArchive(calDocRef) : getCalendar(calDocRef);
   }
 
   @Override
@@ -185,29 +198,10 @@ public class CalendarService implements ICalendarService {
   public SpaceReference getEventSpaceRefForCalendar(DocumentReference calDocRef)
       throws XWikiException {
     try {
-      return getCalendarEventSpace(calDocRef);
-    } catch (DocumentNotExistsException exc) {
+      return createCalendar(calDocRef).getEventSpaceRef();
+    } catch (CalendarCreateException exc) {
       throw new XWikiException(0, 0, "wrapper", exc);
     }
-  }
-
-  @Override
-  public SpaceReference getCalendarEventSpace(DocumentReference calDocRef)
-      throws DocumentNotExistsException {
-    Optional<BaseObject> calObj = XWikiObjectFetcher.on(modelAccess.getDocument(calDocRef)).filter(
-        getCalendarClassRef()).first();
-    String spaceName = "";
-    if (calObj.isPresent()) {
-      spaceName = Strings.nullToEmpty(calObj.get().getStringValue(
-          ICalendarClassConfig.PROPERTY_CALENDAR_SPACE)).trim();
-    }
-    if (spaceName.isEmpty()) {
-      spaceName = calDocRef.getName();
-    }
-    SpaceReference spaceRef = modelUtils.resolveRef(spaceName, SpaceReference.class,
-        calDocRef.getWikiReference());
-    LOGGER.debug("getEventSpaceRefForCalendar: got '" + spaceRef + "' for cal '" + calDocRef + "'");
-    return spaceRef;
   }
 
   @Override
@@ -215,40 +209,11 @@ public class CalendarService implements ICalendarService {
   public List<String> getAllowedSpaces(DocumentReference calDocRef) throws XWikiException {
     List<String> spaces = new ArrayList<>();
     try {
-      for (SpaceReference spaceRef : getAllowedCalendarSpaces(calDocRef)) {
+      for (SpaceReference spaceRef : createCalendar(calDocRef).getAllowedSpaceRefs()) {
         spaces.add(spaceRef.getName());
       }
-    } catch (DocumentNotExistsException dne) {
+    } catch (CalendarCreateException dne) {
       LOGGER.warn("getAllowedSpaces:", dne);
-    }
-    return spaces;
-  }
-
-  @Override
-  public List<SpaceReference> getAllowedCalendarSpaces(DocumentReference calDocRef)
-      throws DocumentNotExistsException {
-    List<SpaceReference> spaces = new ArrayList<>();
-    spaces.add(getCalendarEventSpace(calDocRef));
-    spaces.addAll(getSubscribedSpaces(calDocRef));
-    return spaces;
-  }
-
-  private List<SpaceReference> getSubscribedSpaces(DocumentReference calDocRef)
-      throws DocumentNotExistsException {
-    List<SpaceReference> spaces = new ArrayList<>();
-    Optional<BaseObject> calObj = XWikiObjectFetcher.on(modelAccess.getDocument(calDocRef)).filter(
-        getCalendarClassRef()).first();
-    if (calObj.isPresent()) {
-      for (Object subDocName : calObj.get().getListValue(
-          ICalendarClassConfig.PROPERTY_SUBSCRIBE_TO)) {
-        try {
-          DocumentReference subDocRef = modelUtils.resolveRef(subDocName.toString(),
-              DocumentReference.class, calDocRef.getWikiReference());
-          spaces.add(getCalendarEventSpace(subDocRef));
-        } catch (DocumentNotExistsException dne) {
-          LOGGER.warn("getSubscribedSpaces - invalid subscriber", dne);
-        }
-      }
     }
     return spaces;
   }
@@ -382,56 +347,24 @@ public class CalendarService implements ICalendarService {
   }
 
   @Override
+  @Deprecated
   public boolean isMidnightDate(Date date) {
-    boolean isMidnight = true;
     if (date != null) {
-      java.util.Calendar cal = java.util.Calendar.getInstance();
-      cal.setTime(date);
-      for (int field : TIMESTAMP_FIELDS) {
-        isMidnight &= (cal.get(field) == 0);
-      }
-    } else {
-      isMidnight = false;
+      return DateUtil.noTime(date).equals(date);
     }
-    return isMidnight;
+    return false;
   }
 
   @Override
+  @Deprecated
   public Date getMidnightDate(Date date) {
-    Date dateMidnight = null;
-    if (date != null) {
-      java.util.Calendar cal = java.util.Calendar.getInstance();
-      cal.setTime(date);
-      for (int field : TIMESTAMP_FIELDS) {
-        cal.set(field, 0);
-      }
-      dateMidnight = cal.getTime();
-    }
-    LOGGER.debug("date is: " + dateMidnight);
-    return dateMidnight;
+    return DateUtil.noTime(date);
   }
 
   @Override
+  @Deprecated
   public Date getEndOfDayDate(Date date) {
-    Date dateEndOfDay = null;
-    if (date != null) {
-      java.util.Calendar cal = java.util.Calendar.getInstance();
-      cal.setTime(date);
-      for (int field : TIMESTAMP_FIELDS) {
-        cal.set(field, cal.getMaximum(field));
-      }
-      dateEndOfDay = cal.getTime();
-    }
-    LOGGER.debug("date is: " + dateEndOfDay);
-    return dateEndOfDay;
-  }
-
-  private ClassReference getCalendarClassRef() {
-    return new ClassReference(calClassConf.getCalendarClassRef());
-  }
-
-  void injectQueryManager(QueryManager queryManager) {
-    this.queryManager = queryManager;
+    return DateUtil.endOfDay(date);
   }
 
 }

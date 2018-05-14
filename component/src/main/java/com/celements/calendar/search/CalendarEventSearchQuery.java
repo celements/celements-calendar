@@ -12,7 +12,7 @@ import org.xwiki.model.reference.SpaceReference;
 
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.ICalendarClassConfig;
-import com.celements.calendar.tag.CalendarTag;
+import com.celements.calendar.tag.CalendarTagClass;
 import com.celements.model.classes.ClassDefinition;
 import com.celements.search.lucene.LuceneUtils;
 import com.celements.search.lucene.query.LuceneQuery;
@@ -49,7 +49,7 @@ public class CalendarEventSearchQuery extends DefaultEventSearchQuery {
       if (isTaggingMode()) {
         query.add(getSearchService().createFieldRestriction(
             getCalendarTagClassDef().getClassReference().getDocRef(),
-            CalendarTag.FIELD_NAME.getName(), LuceneUtils.exactify(spaceRef)));
+            CalendarTagClass.FIELD_NAME.getName(), LuceneUtils.exactify(spaceRef)));
       } else {
         query.add(getSearchService().createSpaceRestriction(spaceRef));
       }
@@ -77,7 +77,7 @@ public class CalendarEventSearchQuery extends DefaultEventSearchQuery {
   }
 
   private ClassDefinition getCalendarTagClassDef() {
-    return Utils.getComponent(ClassDefinition.class, CalendarTag.CLASS_DEF_HINT);
+    return Utils.getComponent(ClassDefinition.class, CalendarTagClass.CLASS_DEF_HINT);
   }
 
   static List<String> getDefaultSortFields(List<String> sortFields, boolean inverted) {

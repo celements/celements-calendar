@@ -32,7 +32,12 @@
   <artifactId>celements-calendar</artifactId>
   <version>3.1-SNAPSHOT</version>
   <description>Celements Calendar</description> 
-  <dependencies>    
+  <dependencies>
+    <dependency>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+      <version>2.9.9</version>
+    </dependency>
     <!-- Add here all your dependencies -->
     <dependency>
       <groupId>com.celements</groupId>

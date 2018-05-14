@@ -30,13 +30,15 @@ import com.celements.calendar.api.EventApi;
 import com.celements.calendar.engine.ICalendarEngineRole;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearchQuery;
+import com.celements.model.access.exception.DocumentNotExistsException;
+import com.celements.model.access.exception.DocumentSaveException;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.doc.XWikiDocument;
 
 public interface ICalendar {
 
   public DocumentReference getDocumentReference();
-  
+
   public WikiReference getWikiRef();
 
   public XWikiDocument getCalDoc();
@@ -47,14 +49,14 @@ public interface ICalendar {
 
   /**
    * Sets date and time of Calendar
-   * 
+   *
    * @param newStartDate
    */
   public ICalendar setStartTimestamp(Date newStartDate);
 
   /**
    * Sets only date of Calendar (time to midnight)
-   * 
+   *
    * @param newStartDate
    */
   public ICalendar setStartDate(Date newStartDate);
@@ -62,16 +64,21 @@ public interface ICalendar {
   public String getLanguage();
 
   public ICalendar setLanguage(String language);
-  
+
   public SpaceReference getEventSpaceRef();
-  
+
+  /**
+   * @deprecated instead use {@link #getAllowedSpaceRefs()}
+   */
+  @Deprecated
   public List<String> getAllowedSpaces();
+
+  public List<SpaceReference> getAllowedSpaceRefs();
 
   /**
    * getAllEvents
-   * 
+   *
    * @return
-   * 
    * @deprecated instead use getAllEvents from CalendarApi or getAllEventsInternal
    *             getAllEvents returning EventsApi will be moved to CalendarApi class.
    */
@@ -82,9 +89,8 @@ public interface ICalendar {
 
   /**
    * getEvents
-   * 
+   *
    * @return
-   * 
    * @deprecated instead use getAllEvents from CalendarApi or getEventsInternal
    *             getEvents returning EventsApi will be moved to CalendarApi class.
    */
@@ -93,7 +99,7 @@ public interface ICalendar {
 
   /**
    * use internal only. Do not return IEvent objects to the velocity
-   * 
+   *
    * @param start
    * @param nb
    * @return
@@ -137,5 +143,11 @@ public interface ICalendar {
   public ICalendarEngineRole getEngine();
 
   public ICalendarEngineRole getEngineWithoutLimitCheck();
+
+  public boolean addEvent(DocumentReference eventDocRef) throws DocumentNotExistsException,
+      DocumentSaveException;
+
+  public boolean removeEvent(DocumentReference eventDocRef) throws DocumentNotExistsException,
+      DocumentSaveException;
 
 }

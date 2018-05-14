@@ -11,6 +11,7 @@ import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.ICalendar;
+import com.celements.model.access.exception.DocumentNotExistsException;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 
@@ -33,14 +34,14 @@ public interface ICalendarService {
 
   /**
    * gets all calendars in current database
-   * 
+   *
    * @return list of calendar config doc refs
    */
   public List<DocumentReference> getAllCalendars();
 
   /**
    * gets all calendars in given database
-   * 
+   *
    * @param wikiRef
    *          database
    * @return list of calendar config doc refs
@@ -49,7 +50,7 @@ public interface ICalendarService {
 
   /**
    * gets all calendars in current database without excludes
-   * 
+   *
    * @param excludes
    *          calendar config doc refs which to exclude
    * @return list of calendar config doc refs
@@ -58,31 +59,43 @@ public interface ICalendarService {
 
   /**
    * gets all calendars in given database without excludes
-   * 
+   *
    * @param wikiRef
    *          database
    * @param excludes
    *          calendar config doc refs which to exclude
    * @return list of calendar config doc refs
    */
-  public List<DocumentReference> getAllCalendars(WikiReference wikiRef, 
+  public List<DocumentReference> getAllCalendars(WikiReference wikiRef,
       Collection<DocumentReference> excludes);
 
-  public SpaceReference getEventSpaceRefForCalendar(DocumentReference calDocRef
-      ) throws XWikiException;
-
   /**
-   * @deprecated instead use {@link #getEventSpaceRefForCalendar}
+   * @deprecated instead use {@link #getCalendarEventSpace}
    */
   @Deprecated
-  public String getEventSpaceForCalendar(DocumentReference calDocRef
-      ) throws XWikiException;
+  public SpaceReference getEventSpaceRefForCalendar(DocumentReference calDocRef)
+      throws XWikiException;
 
+  /**
+   * @deprecated instead use {@link #getCalendarEventSpace}
+   */
+  @Deprecated
+  public String getEventSpaceForCalendar(DocumentReference calDocRef) throws XWikiException;
+
+  public SpaceReference getCalendarEventSpace(DocumentReference calDocRef)
+      throws DocumentNotExistsException;
+
+  public List<SpaceReference> getAllowedCalendarSpaces(DocumentReference calDocRef)
+      throws DocumentNotExistsException;
+
+  /**
+   * @deprecated instead use {@link #getAllowedCalendarSpaces}
+   */
+  @Deprecated
   public List<String> getAllowedSpaces(DocumentReference calDocRef) throws XWikiException;
 
   /**
-   * 
-   * @Deprecated use getAllowedSpaces(DocumentReference) instead
+   * @deprecated instead use {@link #getAllowedCalendarSpaces}
    */
   @Deprecated
   public String getAllowedSpacesHQL(XWikiDocument calDoc) throws XWikiException;
@@ -90,18 +103,15 @@ public interface ICalendarService {
   public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace);
 
   /**
-   * @deprecated instead use {@link #getCalendarDocRefByCalendarSpace(String, 
-   * EntityReference)}
+   * @deprecated instead use {@link #getCalendarDocRefByCalendarSpace(String,
+   *             EntityReference)}
    */
   @Deprecated
-  public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace,
-      String inSpace);
+  public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace, String inSpace);
 
-  public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace,
-      EntityReference inRef);
+  public DocumentReference getCalendarDocRefByCalendarSpace(String calSpace, EntityReference inRef);
 
   /**
-   * 
    * @param calSpace
    *          space name which to get calendars for
    * @return all calendar config docs with given space name
@@ -109,12 +119,11 @@ public interface ICalendarService {
   public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace);
 
   /**
-   * @deprecated instead use {@link #getCalendarDocRefsByCalendarSpace(String, 
-   * EntityReference)}
+   * @deprecated instead use {@link #getCalendarDocRefsByCalendarSpace(String,
+   *             EntityReference)}
    */
   @Deprecated
-  public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace,
-      String inSpace);
+  public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace, String inSpace);
 
   /**
    * @param calSpace
@@ -126,11 +135,11 @@ public interface ICalendarService {
    */
   public List<DocumentReference> getCalendarDocRefsByCalendarSpace(String calSpace,
       EntityReference inRef);
-  
+
   public boolean isMidnightDate(Date date);
 
   public Date getMidnightDate(Date date);
-  
+
   public Date getEndOfDayDate(Date date);
 
 }

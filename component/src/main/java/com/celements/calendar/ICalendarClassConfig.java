@@ -6,17 +6,20 @@ import org.xwiki.component.annotation.ComponentRole;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.WikiReference;
 
+import com.celements.calendar.classes.CalendarClassDefinition;
+
 @ComponentRole
 public interface ICalendarClassConfig {
 
   public static final Date DATE_LOW = new Date(-62135773200000L);
   public static final Date DATE_HIGH = new Date(253402297140000L);
 
-  public static final String CALENDAR_SPACE = "Classes";
+  @Deprecated
+  public static final String CALENDAR_SPACE = CalendarClassDefinition.SPACE_NAME;
 
   public static final String CALENDAR_CONFIG_CLASS_SPACE = CALENDAR_SPACE;
   public static final String CALENDAR_CONFIG_CLASS_DOC = "CalendarConfigClass";
-  public static final String CALENDAR_CONFIG_CLASS = CALENDAR_SPACE + "." 
+  public static final String CALENDAR_CONFIG_CLASS = CALENDAR_SPACE + "."
       + CALENDAR_CONFIG_CLASS_DOC;
 
   public static final String PROPERTY_IS_SUBSCRIBABLE = "is_subscribable";
@@ -29,8 +32,7 @@ public interface ICalendarClassConfig {
 
   public static final String CALENDAR_EVENT_CLASS_SPACE = CALENDAR_SPACE;
   public static final String CALENDAR_EVENT_CLASS_DOC = "CalendarEventClass";
-  public static final String CALENDAR_EVENT_CLASS = CALENDAR_SPACE + "."
-      + CALENDAR_EVENT_CLASS_DOC;
+  public static final String CALENDAR_EVENT_CLASS = CALENDAR_SPACE + "." + CALENDAR_EVENT_CLASS_DOC;
 
   public static final String PROPERTY_LANG = "lang";
   public static final String PROPERTY_TITLE = "l_title";
@@ -44,8 +46,7 @@ public interface ICalendarClassConfig {
 
   public static final String SUBSCRIPTION_CLASS_SPACE = CALENDAR_SPACE;
   public static final String SUBSCRIPTION_CLASS_DOC = "SubscriptionClass";
-  public static final String SUBSCRIPTION_CLASS = CALENDAR_SPACE + "."
-      + SUBSCRIPTION_CLASS_DOC;
+  public static final String SUBSCRIPTION_CLASS = CALENDAR_SPACE + "." + SUBSCRIPTION_CLASS_DOC;
 
   public static final String PROPERTY_SUBSCRIBER = "subscriber";
   public static final String PROPERTY_DO_SUBSCRIBE = "doSubscribe";

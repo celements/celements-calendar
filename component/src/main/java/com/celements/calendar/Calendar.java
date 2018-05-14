@@ -41,6 +41,9 @@ import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.service.ICalendarService;
+import com.celements.model.access.IModelAccessFacade;
+import com.celements.model.access.exception.DocumentNotExistsException;
+import com.celements.model.access.exception.DocumentSaveException;
 import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -53,12 +56,10 @@ public class Calendar implements ICalendar {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Calendar.class);
 
-  private static final String _OVERVIEW_DEFAULT_CONFIG =
-      "date,time,l_title,location";
-  private static final String _DETAILVIEW_DEFAULT_CONFIG =
-      "date,time,l_title,location,l_description";
-  private static final List<String> _NON_EVENT_PROPERTYS = Arrays.asList("lang", 
-      "isSubscribable", "eventDate", "eventDate_end");
+  private static final String _OVERVIEW_DEFAULT_CONFIG = "date,time,l_title,location";
+  private static final String _DETAILVIEW_DEFAULT_CONFIG = "date,time,l_title,location,l_description";
+  private static final List<String> _NON_EVENT_PROPERTYS = Arrays.asList("lang", "isSubscribable",
+      "eventDate", "eventDate_end");
 
   private DocumentReference calConfigDocRef;
   private Date startDate = new Date();
@@ -72,29 +73,24 @@ public class Calendar implements ICalendar {
   IWebUtilsService webUtilsService;
 
   /**
-   * 
    * @param calConfigDoc
    * @param isArchive
    * @param context
-   * 
    * @deprecated use Calendar(DocumentReference, boolean) instead
    */
   @Deprecated
-  public Calendar(XWikiDocument calConfigDoc, boolean isArchive, XWikiContext context){
+  public Calendar(XWikiDocument calConfigDoc, boolean isArchive, XWikiContext context) {
     this(calConfigDoc.getDocumentReference(), isArchive);
   }
 
   /**
-   * 
    * @param calConfigDocRef
    * @param isArchive
    * @param context
-   * 
    * @deprecated use Calendar(DocumentReference, boolean) instead
    */
   @Deprecated
-  public Calendar(DocumentReference calConfigDocRef, boolean isArchive,
-      XWikiContext context) {
+  public Calendar(DocumentReference calConfigDocRef, boolean isArchive, XWikiContext context) {
     this(calConfigDocRef, isArchive);
   }
 
@@ -132,7 +128,7 @@ public class Calendar implements ICalendar {
   }
 
   @Override
-  public boolean isArchive(){
+  public boolean isArchive() {
     return isArchive;
   }
 
@@ -176,31 +172,55 @@ public class Calendar implements ICalendar {
   }
 
   @Override
-  public SpaceReference getEventSpaceRef() {
+  public SpaceReference getEventSpaceRef() { // TODO check calls, they are likely to be faulty
     SpaceReference ret = null;
     try {
-      ret = getCalService().getEventSpaceRefForCalendar(getDocumentReference());
-    } catch (XWikiException exc) {
-      LOGGER.error("getEventSpaceRef: failed to get event space for '" 
-          + getDocumentReference() + "'", exc);
+      ret = getCalService().getCalendarEventSpace(getDocumentReference());
+    } catch (DocumentNotExistsException exc) {
+      LOGGER.error("getEventSpaceRef: failed to get event space for '" + getDocumentReference()
+          + "'", exc);
     }
     return ret;
   }
 
   @Override
+  @Deprecated
   public List<String> getAllowedSpaces() {
     try {
       return getCalService().getAllowedSpaces(getDocumentReference());
     } catch (XWikiException exp) {
-      LOGGER.error("Failed to get allowed spaces for '" + getDocumentReference() + "'", 
-          exp);
+      LOGGER.error("getAllowedSpaces: failed to get allowed spaces for '" + getDocumentReference()
+          + "'", exp);
     }
-    return new ArrayList<String>();
+    return new ArrayList<>();
+  }
+
+  @Override
+  public List<SpaceReference> getAllowedSpaceRefs() {
+    try {
+      return getCalService().getAllowedCalendarSpaces(getDocumentReference());
+    } catch (DocumentNotExistsException exp) {
+      LOGGER.error("getAllowedSpaceRefs: failed to get allowed spaces for '"
+          + getDocumentReference() + "'", exp);
+    }
+    return new ArrayList<>();
+  }
+
+  @Override
+  public boolean addEvent(DocumentReference eventDocRef) throws DocumentNotExistsException,
+      DocumentSaveException {
+    return eventMgr.addEvent(this, eventDocRef);
+  }
+
+  @Override
+  public boolean removeEvent(DocumentReference eventDocRef) throws DocumentNotExistsException,
+      DocumentSaveException {
+    return eventMgr.removeEvent(this, eventDocRef);
   }
 
   @Deprecated
   @Override
-  public List<EventApi> getAllEvents(){
+  public List<EventApi> getAllEvents() {
     return getEventMgr().getEvents(this, 0, 0);
   }
 
@@ -209,6 +229,7 @@ public class Calendar implements ICalendar {
     return getEventMgr().getAllEventsInternal(this);
   }
 
+  @Override
   @Deprecated
   public List<EventApi> getEvents(int start, int nb) {
     return getEventMgr().getEvents(this, start < 0 ? 0 : start, nb < 0 ? 0 : nb);
@@ -252,8 +273,7 @@ public class Calendar implements ICalendar {
   private String getOverviewConfig() {
     String overviewConfig = _OVERVIEW_DEFAULT_CONFIG;
     BaseObject calConfigObj = getConfigObject();
-    if ((calConfigObj != null)
-        && (getPropertyStringValueForOverviewConfig(calConfigObj) != null)
+    if ((calConfigObj != null) && (getPropertyStringValueForOverviewConfig(calConfigObj) != null)
         && (!"".equals(getPropertyStringValueForOverviewConfig(calConfigObj)))) {
       overviewConfig = getPropertyStringValueForOverviewConfig(calConfigObj);
     }
@@ -262,8 +282,7 @@ public class Calendar implements ICalendar {
   }
 
   private String getPropertyStringValueForOverviewConfig(BaseObject calConfigObj) {
-    return calConfigObj.getStringValue(
-        ICalendarClassConfig.PROPERTY_OVERVIEW_COLUMN_CONFIG);
+    return calConfigObj.getStringValue(ICalendarClassConfig.PROPERTY_OVERVIEW_COLUMN_CONFIG);
   }
 
   @Override
@@ -274,10 +293,11 @@ public class Calendar implements ICalendar {
   private String getDetailviewConfig() {
     String detailviewConfig = _DETAILVIEW_DEFAULT_CONFIG;
     BaseObject calConfigObj = getConfigObject();
-    if ((calConfigObj != null)
-        && (calConfigObj.getStringValue(ICalendarClassConfig.PROPERTY_EVENT_COLUMN_CONFIG) != null)
-        && (!"".equals(calConfigObj.getStringValue(ICalendarClassConfig.PROPERTY_EVENT_COLUMN_CONFIG)))) {
-      detailviewConfig = calConfigObj.getStringValue(ICalendarClassConfig.PROPERTY_EVENT_COLUMN_CONFIG);
+    if ((calConfigObj != null) && (calConfigObj.getStringValue(
+        ICalendarClassConfig.PROPERTY_EVENT_COLUMN_CONFIG) != null) && (!"".equals(
+            calConfigObj.getStringValue(ICalendarClassConfig.PROPERTY_EVENT_COLUMN_CONFIG)))) {
+      detailviewConfig = calConfigObj.getStringValue(
+          ICalendarClassConfig.PROPERTY_EVENT_COLUMN_CONFIG);
     }
     LOGGER.debug("detailview config: '" + detailviewConfig + "'");
     return detailviewConfig;
@@ -326,15 +346,15 @@ public class Calendar implements ICalendar {
   }
 
   private List<String> getEventPropertyNames_internal(XWikiContext context) {
-    List<String> propNames = new ArrayList<String>();
+    List<String> propNames = new ArrayList<>();
     try {
-      XWikiDocument doc = context.getWiki().getDocument(new DocumentReference(
-          context.getDatabase(), ICalendarClassConfig.CALENDAR_EVENT_CLASS_SPACE,
+      XWikiDocument doc = context.getWiki().getDocument(new DocumentReference(context.getDatabase(),
+          ICalendarClassConfig.CALENDAR_EVENT_CLASS_SPACE,
           ICalendarClassConfig.CALENDAR_EVENT_CLASS_DOC), context);
       BaseClass bclass = doc.getXClass();
       Object[] props = bclass.getPropertyNames();
-      for(int i = 0; i < props.length; i++) {
-        String propertyName = (String) props[i];
+      for (Object prop : props) {
+        String propertyName = (String) prop;
         if (!_NON_EVENT_PROPERTYS.contains(propertyName)) {
           propNames.add(propertyName);
         }
@@ -358,8 +378,7 @@ public class Calendar implements ICalendar {
   @Override
   public boolean isSubscribable() {
     BaseObject configObj = getConfigObject();
-    return (configObj.getIntValue(
-        ICalendarClassConfig.PROPERTY_IS_SUBSCRIBABLE) == 1);
+    return (configObj.getIntValue(ICalendarClassConfig.PROPERTY_IS_SUBSCRIBABLE) == 1);
   }
 
   @Override
@@ -375,7 +394,7 @@ public class Calendar implements ICalendar {
         }
         LOGGER.debug("getEngine: size {}, limit {}", size, limit);
       }
-      LOGGER.debug("getEngine: returning '{}' for  cal '{}'", engine.getName(), 
+      LOGGER.debug("getEngine: returning '{}' for  cal '{}'", engine.getName(),
           getDocumentReference());
     }
     return engine;
@@ -398,19 +417,18 @@ public class Calendar implements ICalendar {
   public boolean equals(Object obj) {
     if (obj instanceof Calendar) {
       Calendar other = (Calendar) obj;
-      return new EqualsBuilder().append(this.calConfigDocRef, other.calConfigDocRef
-          ).append(this.startDate, other.startDate).append(this.isArchive, other.isArchive
-          ).isEquals();
+      return new EqualsBuilder().append(this.calConfigDocRef, other.calConfigDocRef).append(
+          this.startDate, other.startDate).append(this.isArchive, other.isArchive).isEquals();
     }
     return false;
   }
 
   private XWikiContext getContext() {
     Execution execution = Utils.getComponent(Execution.class);
-    return (XWikiContext)execution.getContext().getProperty("xwikicontext");
+    return (XWikiContext) execution.getContext().getProperty("xwikicontext");
   }
 
-  private IEventManager getEventMgr() {
+  protected IEventManager getEventMgr() {
     if (eventMgr == null) {
       eventMgr = Utils.getComponent(IEventManager.class, "default");
     }
@@ -421,30 +439,34 @@ public class Calendar implements ICalendar {
     this.eventMgr = eventMgr;
   }
 
-  private ICalendarService getCalService() {
+  protected ICalendarService getCalService() {
     if (calService == null) {
       calService = Utils.getComponent(ICalendarService.class);
     }
     return calService;
   }
-  
+
   protected void injectCalService(ICalendarService calService) {
     this.calService = calService;
   }
 
-  private IWebUtilsService getWebUtilsService() {
+  protected IWebUtilsService getWebUtilsService() {
     if (webUtilsService == null) {
       webUtilsService = Utils.getComponent(IWebUtilsService.class);
     }
     return webUtilsService;
   }
 
+  protected IModelAccessFacade getModelAccess() {
+    return Utils.getComponent(IModelAccessFacade.class);
+  }
+
   @Override
   public String toString() {
-    return "Calendar [calConfigDocRef=" + getWebUtilsService().getRefDefaultSerializer(
-        ).serialize(calConfigDocRef) + ", startDate=" + startDate + ", isArchive=" 
-        + isArchive + ", language=" + getLanguage() + ", allowedSpaces=" 
-        + getAllowedSpaces() + ", engine=" + getEngine().getName() + "]";
+    return "Calendar [calConfigDocRef=" + getWebUtilsService().getRefDefaultSerializer().serialize(
+        calConfigDocRef) + ", startDate=" + startDate + ", isArchive=" + isArchive + ", language="
+        + getLanguage() + ", allowedSpaces=" + getAllowedSpaces() + ", engine="
+        + getEngine().getName() + "]";
   }
 
 }

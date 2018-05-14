@@ -14,4 +14,7 @@ com.celements.calendar.observation.listener.EventCreateListener
 com.celements.calendar.observation.listener.EventUpdateListener
 com.celements.calendar.observation.listener.EventDeleteListener
 com.celements.calendar.CalendarClassConfig
-com.celements.calendar.tag.CalendarTagClass
+com.celements.calendar.classes.CalendarConfigClass
+com.celements.calendar.classes.CalendarEventClass
+com.celements.calendar.classes.CalendarSubscriptionClass
+com.celements.calendar.classes.CalendarTagClass

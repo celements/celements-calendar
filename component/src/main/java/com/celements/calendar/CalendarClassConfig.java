@@ -8,6 +8,7 @@ import org.xwiki.model.reference.WikiReference;
 
 import com.celements.web.service.IWebUtilsService;
 
+@Deprecated
 @Component
 public class CalendarClassConfig implements ICalendarClassConfig {
 

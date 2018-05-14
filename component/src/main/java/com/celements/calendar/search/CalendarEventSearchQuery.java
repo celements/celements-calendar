@@ -12,7 +12,7 @@ import org.xwiki.model.reference.SpaceReference;
 
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.ICalendarClassConfig;
-import com.celements.calendar.tag.CalendarTagClass;
+import com.celements.calendar.classes.CalendarTagClass;
 import com.celements.model.classes.ClassDefinition;
 import com.celements.search.lucene.LuceneUtils;
 import com.celements.search.lucene.query.LuceneQuery;

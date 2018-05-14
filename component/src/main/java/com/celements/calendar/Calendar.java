@@ -19,7 +19,7 @@
  */
 package com.celements.calendar;
 
-import static com.celements.calendar.ICalendarClassConfig.*;
+import static com.celements.calendar.classes.CalendarConfigClass.*;
 import static com.celements.model.util.References.*;
 import static com.google.common.base.MoreObjects.*;
 
@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -35,12 +36,13 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xwiki.model.reference.ClassReference;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.api.EventApi;
+import com.celements.calendar.classes.CalendarConfigClass;
+import com.celements.calendar.classes.CalendarEventClass;
 import com.celements.calendar.engine.ICalendarEngineRole;
 import com.celements.calendar.manager.IEventManager;
 import com.celements.calendar.search.EventSearchResult;
@@ -48,12 +50,13 @@ import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.model.access.IModelAccessFacade;
 import com.celements.model.access.exception.DocumentNotExistsException;
 import com.celements.model.access.exception.DocumentSaveException;
+import com.celements.model.classes.ClassDefinition;
 import com.celements.model.context.ModelContext;
 import com.celements.model.object.xwiki.XWikiObjectEditor;
 import com.celements.model.object.xwiki.XWikiObjectFetcher;
 import com.celements.model.util.ModelUtils;
 import com.celements.web.service.IWebUtilsService;
-import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableSet;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
@@ -65,10 +68,12 @@ public class Calendar implements ICalendar {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Calendar.class);
 
-  private static final String _OVERVIEW_DEFAULT_CONFIG = "date,time,l_title,location";
-  private static final String _DETAILVIEW_DEFAULT_CONFIG = "date,time,l_title,location,l_description";
-  private static final List<String> _NON_EVENT_PROPERTYS = Arrays.asList("lang", "isSubscribable",
-      "eventDate", "eventDate_end");
+  private static final String OVERVIEW_DEFAULT_CONFIG = "date,time,l_title,location";
+  private static final String DETAILVIEW_DEFAULT_CONFIG = "date,time,l_title,location,l_description";
+  private static final Set<String> NON_EVENT_PROPERTYS = ImmutableSet.of(
+      CalendarEventClass.FIELD_LANG.getName(), CalendarEventClass.FIELD_IS_SUBSCRIBABLE.getName(),
+      CalendarEventClass.FIELD_EVENT_DATE.getName(),
+      CalendarEventClass.FIELD_EVENT_END_DATE.getName());
 
   private final XWikiDocument calDoc;
   private Date startDate;
@@ -163,15 +168,15 @@ public class Calendar implements ICalendar {
 
   @Override
   public SpaceReference getEventSpaceRef() { // TODO check calls, they are likely to be faulty
-    String spaceName = Strings.nullToEmpty(getConfigObject().getStringValue(
-        PROPERTY_CALENDAR_SPACE)).trim();
-    if (spaceName.isEmpty()) {
-      spaceName = getDocumentReference().getName();
-    }
-    SpaceReference spaceRef = getModelUtils().resolveRef(spaceName, SpaceReference.class,
-        getWikiRef());
+    SpaceReference spaceRef = getModelAccess().getFieldValue(getConfigObject(), FIELD_SPACE).or(
+        getDefaultSpaceRef());
     LOGGER.debug("getEventSpaceRef: got '{}' for cal '{}'", spaceRef, getDocumentReference());
     return spaceRef;
+  }
+
+  private SpaceReference getDefaultSpaceRef() {
+    return getModelUtils().resolveRef(getDocumentReference().getName(), SpaceReference.class,
+        getWikiRef());
   }
 
   @Override
@@ -194,7 +199,8 @@ public class Calendar implements ICalendar {
 
   private List<SpaceReference> getSubscribedSpaces() {
     List<SpaceReference> spaces = new ArrayList<>();
-    for (Object subDocName : getConfigObject().getListValue(PROPERTY_SUBSCRIBE_TO)) {
+    for (String subDocName : getModelAccess().getFieldValue(getConfigObject(),
+        FIELD_SUBSCRIBE_TO).get()) {
       try {
         ICalendar subsCal = new Calendar(getModelUtils().resolveRef(subDocName.toString(),
             DocumentReference.class, getWikiRef()), isArchive());
@@ -271,18 +277,10 @@ public class Calendar implements ICalendar {
   }
 
   private String getOverviewConfig() {
-    String overviewConfig = _OVERVIEW_DEFAULT_CONFIG;
-    BaseObject calConfigObj = getConfigObject();
-    if ((getPropertyStringValueForOverviewConfig(calConfigObj) != null) && (!"".equals(
-        getPropertyStringValueForOverviewConfig(calConfigObj)))) {
-      overviewConfig = getPropertyStringValueForOverviewConfig(calConfigObj);
-    }
-    LOGGER.debug("overview config: '" + overviewConfig + "'");
+    String overviewConfig = getModelAccess().getFieldValue(getConfigObject(),
+        FIELD_OVERVIEW_COLUMN_CONFIG).or(OVERVIEW_DEFAULT_CONFIG);
+    LOGGER.debug("getOverviewConfig: '{}'", overviewConfig);
     return overviewConfig;
-  }
-
-  private String getPropertyStringValueForOverviewConfig(BaseObject calConfigObj) {
-    return calConfigObj.getStringValue(PROPERTY_OVERVIEW_COLUMN_CONFIG);
   }
 
   @Override
@@ -291,13 +289,9 @@ public class Calendar implements ICalendar {
   }
 
   private String getDetailviewConfig() {
-    String detailviewConfig = _DETAILVIEW_DEFAULT_CONFIG;
-    BaseObject calConfigObj = getConfigObject();
-    if ((calConfigObj.getStringValue(PROPERTY_EVENT_COLUMN_CONFIG) != null) && (!"".equals(
-        calConfigObj.getStringValue(PROPERTY_EVENT_COLUMN_CONFIG)))) {
-      detailviewConfig = calConfigObj.getStringValue(PROPERTY_EVENT_COLUMN_CONFIG);
-    }
-    LOGGER.debug("detailview config: '" + detailviewConfig + "'");
+    String detailviewConfig = getModelAccess().getFieldValue(getConfigObject(),
+        FIELD_EVENT_COLUMN_CONFIG).or(DETAILVIEW_DEFAULT_CONFIG);
+    LOGGER.debug("getDetailviewConfig: '{}'", detailviewConfig);
     return detailviewConfig;
   }
 
@@ -340,10 +334,10 @@ public class Calendar implements ICalendar {
   private List<String> getEventPropertyNames_internal() {
     List<String> propNames = new ArrayList<>();
     try {
-      BaseClass bclass = getModelAccess().getDocument(getClassConfig().getCalendarEventClassRef(
-          getWikiRef())).getXClass();
+      BaseClass bclass = getModelAccess().getDocument(
+          getCalendarConfigClass().getClassReference().getDocRef(getWikiRef())).getXClass();
       for (String propertyName : bclass.getPropertyNames()) {
-        if (!_NON_EVENT_PROPERTYS.contains(propertyName)) {
+        if (!NON_EVENT_PROPERTYS.contains(propertyName)) {
           propNames.add(propertyName);
         }
       }
@@ -359,12 +353,12 @@ public class Calendar implements ICalendar {
 
   @Override
   public boolean hasDetailLink() {
-    return (getConfigObject().getIntValue("hasMoreLink") == 1);
+    return getModelAccess().getFieldValue(getConfigObject(), FIELD_HAS_MORE_LINK).or(false);
   }
 
   @Override
   public boolean isSubscribable() {
-    return (getConfigObject().getIntValue(PROPERTY_IS_SUBSCRIBABLE) == 1);
+    return getModelAccess().getFieldValue(getConfigObject(), FIELD_IS_SUBSCRIBABLE).or(false);
   }
 
   @Override
@@ -415,8 +409,7 @@ public class Calendar implements ICalendar {
   }
 
   private static XWikiObjectFetcher createObjectFetcher(XWikiDocument calDoc) {
-    return XWikiObjectEditor.on(calDoc).fetch().filter(new ClassReference(
-        getClassConfig().getCalendarClassRef()));
+    return XWikiObjectEditor.on(calDoc).fetch().filter(getCalendarConfigClass());
   }
 
   protected static ModelContext getContext() {
@@ -431,8 +424,8 @@ public class Calendar implements ICalendar {
     return Utils.getComponent(ModelUtils.class);
   }
 
-  protected static ICalendarClassConfig getClassConfig() {
-    return Utils.getComponent(ICalendarClassConfig.class);
+  protected static ClassDefinition getCalendarConfigClass() {
+    return Utils.getComponent(ClassDefinition.class, CalendarConfigClass.CLASS_DEF_HINT);
   }
 
   protected static IEventManager getEventManager() {

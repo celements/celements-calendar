@@ -1,4 +1,4 @@
-package com.celements.calendar.tag;
+package com.celements.calendar.classes.fields;
 
 import javax.validation.constraints.NotNull;
 

@@ -28,7 +28,7 @@ import com.celements.calendar.Calendar;
 import com.celements.calendar.CalendarCreateException;
 import com.celements.calendar.DateUtil;
 import com.celements.calendar.ICalendar;
-import com.celements.calendar.ICalendarClassConfig;
+import com.celements.calendar.classes.CalendarConfigClass;
 import com.celements.model.access.IModelAccessFacade;
 import com.celements.model.context.ModelContext;
 import com.celements.model.util.ModelUtils;
@@ -183,7 +183,7 @@ public class CalendarService implements ICalendarService {
   }
 
   String getAllCalendarsXWQL() {
-    return "from doc.object(" + ICalendarClassConfig.CALENDAR_CONFIG_CLASS
+    return "from doc.object(" + CalendarConfigClass.CLASS_NAME
         + ") as cal where doc.translation = 0";
   }
 

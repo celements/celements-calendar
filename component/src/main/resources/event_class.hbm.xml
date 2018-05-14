@@ -2,7 +2,8 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD//EN"
         "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-  <class entity-name="Classes.CalendarEventClass" table="cel_calendareventclass">
+
+<class entity-name="Classes.CalendarEventClass" table="cel_calendareventclass">
   <id name="id" type="long" unsaved-value="undefined">
     <column name="CEC_ID" not-null="true" />
     <generator class="assigned" />
@@ -35,4 +36,14 @@
     <column name="CEC_IS_SUBSCRIBABLE" />
   </property>
 </class>
+<class entity-name="Classes.CalendarTagClass" table="cel_calendartagclass">
+  <id name="id" type="long" unsaved-value="undefined">
+    <column name="CEC_ID" not-null="true" />
+    <generator class="assigned" />
+  </id>
+  <property name="name" type="string">
+    <column name="CTC_NAME" length="255" />
+  </property>
+</class>
+
 </hibernate-mapping>

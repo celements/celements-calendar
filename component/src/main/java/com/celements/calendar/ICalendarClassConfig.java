@@ -7,18 +7,19 @@ import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.classes.CalendarClassDefinition;
+import com.celements.calendar.classes.CalendarConfigClass;
 
+@Deprecated
 @ComponentRole
 public interface ICalendarClassConfig {
 
   public static final Date DATE_LOW = new Date(-62135773200000L);
   public static final Date DATE_HIGH = new Date(253402297140000L);
 
-  @Deprecated
   public static final String CALENDAR_SPACE = CalendarClassDefinition.SPACE_NAME;
 
   public static final String CALENDAR_CONFIG_CLASS_SPACE = CALENDAR_SPACE;
-  public static final String CALENDAR_CONFIG_CLASS_DOC = "CalendarConfigClass";
+  public static final String CALENDAR_CONFIG_CLASS_DOC = CalendarConfigClass.DOC_NAME;
   public static final String CALENDAR_CONFIG_CLASS = CALENDAR_SPACE + "."
       + CALENDAR_CONFIG_CLASS_DOC;
 

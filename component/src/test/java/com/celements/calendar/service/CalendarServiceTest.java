@@ -457,7 +457,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     DocumentReference calDocRef = new DocumentReference(context.getDatabase(), "Content", "Agenda");
     XWikiDocument calDoc = new XWikiDocument(calDocRef);
 
-    expect(xwiki.getDocument(same(calDocRef), same(context))).andReturn(calDoc);
+    expect(xwiki.getDocument(eq(calDocRef), same(context))).andReturn(calDoc);
 
     replayDefault();
     String spacesHQL = calService.getAllowedSpacesHQL(calDoc);
@@ -478,7 +478,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
     calDoc.setXObject(0, calConfObj);
     calConfObj.setStringValue("calendarspace", "myCalSpace");
 
-    expect(xwiki.getDocument(same(calDocRef), same(context))).andReturn(calDoc);
+    expect(xwiki.getDocument(eq(calDocRef), same(context))).andReturn(calDoc);
 
     replayDefault();
     String spacesHQL = calService.getAllowedSpacesHQL(calDoc);

@@ -12,6 +12,7 @@ import com.celements.calendar.ICalendarClassConfig;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.search.DateEventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
+import com.celements.calendar.search.IDateEventSearchQuery;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.search.IEventSearchRole;
 import com.celements.calendar.service.ICalendarService;
@@ -172,14 +173,14 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   @Deprecated
   @Override
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
-      NavigationDetails navDetails, int nb, DateEventSearchQuery query)
+      NavigationDetails navDetails, int nb, IDateEventSearchQuery query)
           throws LuceneSearchException {
     return getCalendarNavigation(calDocRef, navDetails, nb, query, false);
   }
 
   @Override
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
-      NavigationDetails navDetails, int nb, DateEventSearchQuery query, boolean isSendingEmptyPage)
+      NavigationDetails navDetails, int nb, IDateEventSearchQuery query, boolean isSendingEmptyPage)
           throws LuceneSearchException {
     int actualOffset = navDetails.getOffset();
     EventSearchResult calAllResult = getAllCalendar(calDocRef).searchEvents(query);

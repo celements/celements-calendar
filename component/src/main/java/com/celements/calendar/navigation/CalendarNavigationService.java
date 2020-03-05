@@ -16,6 +16,7 @@ import com.celements.calendar.navigation.factories.NavigationDetailException;
 import com.celements.calendar.navigation.factories.NavigationDetails;
 import com.celements.calendar.navigation.factories.NavigationDetailsFactory;
 import com.celements.calendar.search.DateEventSearchQuery;
+import com.celements.calendar.search.IDateEventSearchQuery;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.search.lucene.LuceneSearchException;
 
@@ -70,7 +71,7 @@ public class CalendarNavigationService implements ICalendarNavigationService {
    *  return page is needed or not
    */
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
-      NavigationDetails navDetails, int nb, DateEventSearchQuery query) 
+      NavigationDetails navDetails, int nb, IDateEventSearchQuery query) 
           throws LuceneSearchException {
     LOGGER.debug("called getCalendarNavigation");
     return getCalNavFactory().getCalendarNavigation(calDocRef, navDetails, nb, query, 
@@ -78,7 +79,7 @@ public class CalendarNavigationService implements ICalendarNavigationService {
   }
   
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
-      NavigationDetails navDetails, int nb, DateEventSearchQuery query,
+      NavigationDetails navDetails, int nb, IDateEventSearchQuery query,
       boolean isSendingEmptyPage) throws LuceneSearchException {
     LOGGER.debug("called getCalendarNavigation");
     return getCalNavFactory().getCalendarNavigation(calDocRef, navDetails, nb, query, 

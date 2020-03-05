@@ -8,23 +8,24 @@ import org.xwiki.model.reference.WikiReference;
 import com.celements.calendar.classes.CalendarClasses;
 import com.celements.search.lucene.query.LuceneQuery;
 
-public class DateEventSearchQuery extends DefaultEventSearchQuery {
+public class DateEventSearchQuery extends DefaultEventSearchQuery implements IDateEventSearchQuery {
 
   private final Date fromDate;
   private final Date toDate;
 
-  public DateEventSearchQuery(WikiReference wikiRef, Date fromDate, Date toDate, 
+  public DateEventSearchQuery(WikiReference wikiRef, Date fromDate, Date toDate,
       List<String> sortFields) {
     this(wikiRef, null, fromDate, toDate, sortFields);
   }
 
-  public DateEventSearchQuery(WikiReference wikiRef, LuceneQuery luceneQuery, 
+  public DateEventSearchQuery(WikiReference wikiRef, LuceneQuery luceneQuery,
       Date fromDate, Date toDate, List<String> sortFields) {
     super(wikiRef, luceneQuery, sortFields);
     this.fromDate = fromDate;
     this.toDate = toDate;
   }
-  
+
+  @Override
   public Date getFromDate() {
     if (fromDate != null) {
       return new Date(fromDate.getTime());
@@ -32,6 +33,7 @@ public class DateEventSearchQuery extends DefaultEventSearchQuery {
     return null;
   }
 
+  @Override
   public Date getToDate() {
     if (toDate != null) {
       return new Date(toDate.getTime());
@@ -43,14 +45,14 @@ public class DateEventSearchQuery extends DefaultEventSearchQuery {
   protected LuceneQuery getAsLuceneQueryInternal(LuceneQuery query) {
     query = super.getAsLuceneQueryInternal(query);
     query.add(getSearchService().createFromToDateRestriction(
-        CalendarClasses.CALENDAR_EVENT_CLASS + "." + CalendarClasses.PROPERTY_EVENT_DATE, 
+        CalendarClasses.CALENDAR_EVENT_CLASS + "." + CalendarClasses.PROPERTY_EVENT_DATE,
         fromDate, toDate, true));
     return query;
   }
 
   @Override
   public String toString() {
-    return "DateEventSearchQuery [" + super.toString() + ", fromDate=" + fromDate 
+    return "DateEventSearchQuery [" + super.toString() + ", fromDate=" + fromDate
         + ", toDate=" + toDate + "]";
   }
 

@@ -23,7 +23,7 @@ public class DateEventSearchQueryTest extends AbstractBridgedComponentTestCase {
     WikiReference wikiRef = new WikiReference("myDB");
     Date fromDate = SDF.parse("200001010000");
     Date toDate = SDF.parse("201405090125");
-    DateEventSearchQuery query = new DateEventSearchQuery(wikiRef, fromDate, toDate, null);
+    IDateEventSearchQuery query = new DateEventSearchQuery(wikiRef, fromDate, toDate, null);
 
     assertEquals(wikiRef, query.getWikiRef());
     assertEquals(0, query.getSortFields().size());
@@ -41,7 +41,7 @@ public class DateEventSearchQueryTest extends AbstractBridgedComponentTestCase {
     Date fromDate = SDF.parse("200001010000");
     Date toDate = SDF.parse("201405090125");
     List<String> sortFields = Arrays.asList("field1", "field2");
-    DateEventSearchQuery query = new DateEventSearchQuery(wikiRef, fromDate, toDate, 
+    IDateEventSearchQuery query = new DateEventSearchQuery(wikiRef, fromDate, toDate, 
         sortFields);
 
     assertEquals(wikiRef, query.getWikiRef());

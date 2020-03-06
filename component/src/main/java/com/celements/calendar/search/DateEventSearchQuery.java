@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.xwiki.model.reference.WikiReference;
 
-import com.celements.calendar.classes.CalendarClasses;
+import com.celements.calendar.ICalendarClassConfig;
 import com.celements.search.lucene.query.LuceneQuery;
 
 public class DateEventSearchQuery extends DefaultEventSearchQuery implements IDateEventSearchQuery {
@@ -18,8 +18,8 @@ public class DateEventSearchQuery extends DefaultEventSearchQuery implements IDa
     this(wikiRef, null, fromDate, toDate, sortFields);
   }
 
-  public DateEventSearchQuery(WikiReference wikiRef, LuceneQuery luceneQuery,
-      Date fromDate, Date toDate, List<String> sortFields) {
+  public DateEventSearchQuery(WikiReference wikiRef, LuceneQuery luceneQuery, Date fromDate,
+      Date toDate, List<String> sortFields) {
     super(wikiRef, luceneQuery, sortFields);
     this.fromDate = fromDate;
     this.toDate = toDate;
@@ -45,15 +45,15 @@ public class DateEventSearchQuery extends DefaultEventSearchQuery implements IDa
   protected LuceneQuery getAsLuceneQueryInternal(LuceneQuery query) {
     query = super.getAsLuceneQueryInternal(query);
     query.add(getSearchService().createFromToDateRestriction(
-        CalendarClasses.CALENDAR_EVENT_CLASS + "." + CalendarClasses.PROPERTY_EVENT_DATE,
+        ICalendarClassConfig.CALENDAR_EVENT_CLASS + "." + ICalendarClassConfig.PROPERTY_EVENT_DATE,
         fromDate, toDate, true));
     return query;
   }
 
   @Override
   public String toString() {
-    return "DateEventSearchQuery [" + super.toString() + ", fromDate=" + fromDate
-        + ", toDate=" + toDate + "]";
+    return "DateEventSearchQuery [" + super.toString() + ", fromDate=" + fromDate + ", toDate="
+        + toDate + "]";
   }
 
 }

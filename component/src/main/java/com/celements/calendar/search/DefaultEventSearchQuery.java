@@ -25,20 +25,19 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
   }
 
   public DefaultEventSearchQuery(IEventSearchQuery query, List<String> altSortFields) {
-    this(query.getWikiRef(), query.getAsLuceneQuery(), getSortFields(query, 
-        altSortFields));
+    this(query.getWikiRef(), query.getAsLuceneQuery(), getSortFields(query, altSortFields));
   }
 
   public DefaultEventSearchQuery(WikiReference wikiRef, List<String> sortFields) {
     this(wikiRef, null, sortFields);
   }
 
-  public DefaultEventSearchQuery(WikiReference wikiRef, LuceneQuery luceneQuery, 
+  public DefaultEventSearchQuery(WikiReference wikiRef, LuceneQuery luceneQuery,
       List<String> sortFields) {
     this.wikiRef = wikiRef;
     this.luceneQuery = luceneQuery;
     if (sortFields != null) {
-      this.sortFields = Collections.unmodifiableList(new ArrayList<String>(sortFields));
+      this.sortFields = Collections.unmodifiableList(new ArrayList<>(sortFields));
     } else {
       this.sortFields = Collections.emptyList();
     }
@@ -82,8 +81,7 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
   }
 
   protected final DocumentReference getCalEventClassRef() {
-    return Utils.getComponent(ICalendarClassConfig.class).getCalendarEventClassRef(
-        getWikiRef());
+    return Utils.getComponent(ICalendarClassConfig.class).getCalendarEventClassRef(getWikiRef());
   }
 
   protected final ILuceneSearchService getSearchService() {
@@ -95,17 +93,16 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
 
   @Override
   public String toString() {
-    return "DefaultEventSearchQuery [wikiRef=" + wikiRef + ", luceneQuery=" 
-        + luceneQuery + ", sortFields=" + sortFields + "]";
+    return "DefaultEventSearchQuery [wikiRef=" + wikiRef + ", luceneQuery=" + luceneQuery
+        + ", sortFields=" + sortFields + "]";
   }
 
   void injectQueryService(ILuceneSearchService searchService) {
     this.searchService = searchService;
   }
 
-  private static List<String> getSortFields(IEventSearchQuery query,
-      List<String> altSortFields) {
-    if (query.getSortFields() == null || query.getSortFields().isEmpty()) {
+  private static List<String> getSortFields(IEventSearchQuery query, List<String> altSortFields) {
+    if ((query.getSortFields() == null) || query.getSortFields().isEmpty()) {
       return altSortFields;
     } else {
       return query.getSortFields();

@@ -1,5 +1,6 @@
 package com.celements.calendar.search;
 
+import static com.celements.common.test.CelementsTestUtils.*;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
@@ -11,12 +12,12 @@ import org.junit.Test;
 import org.xwiki.configuration.ConfigurationSource;
 import org.xwiki.model.reference.WikiReference;
 
-import com.celements.common.test.AbstractBridgedComponentTestCase;
+import com.celements.common.test.AbstractComponentTest;
 import com.celements.search.lucene.LuceneSearchResult;
 import com.xpn.xwiki.web.Utils;
 
-public class EventSearchServiceTest extends AbstractBridgedComponentTestCase {
-  
+public class EventSearchServiceTest extends AbstractComponentTest {
+
   private EventSearchService eventSearchService;
   private ConfigurationSource configSourceMock;
 
@@ -29,41 +30,35 @@ public class EventSearchServiceTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testSkipChecks_false() {
-    expect(configSourceMock.getProperty(eq("calendar.search.skipChecks"), 
+    expect(configSourceMock.getProperty(eq("calendar.search.skipChecks"),
         same(Boolean.class))).andReturn(false);
-    
     replayDefault();
     boolean ret = eventSearchService.skipChecks();
     verifyDefault();
-    
     assertFalse(ret);
   }
-  
+
   @Test
   public void testSkipChecks_true() {
-    expect(configSourceMock.getProperty(eq("calendar.search.skipChecks"), 
+    expect(configSourceMock.getProperty(eq("calendar.search.skipChecks"),
         same(Boolean.class))).andReturn(true);
-    
     replayDefault();
     boolean ret = eventSearchService.skipChecks();
     verifyDefault();
-    
     assertTrue(ret);
   }
 
   @Test
   public void testGetSearchResult() throws Exception {
     List<String> sortFields = Arrays.asList("field1", "field2");
-    IEventSearchQuery query = new DefaultEventSearchQuery(new WikiReference("theDB"), 
+    IEventSearchQuery query = new DefaultEventSearchQuery(new WikiReference("theDB"),
         sortFields);
-    expect(configSourceMock.getProperty(eq("calendar.search.skipChecks"), 
+    expect(configSourceMock.getProperty(eq("calendar.search.skipChecks"),
         same(Boolean.class))).andReturn(false);
-
     replayDefault();
     EventSearchResult searchResult = eventSearchService.getSearchResult(query);
     LuceneSearchResult lSearchResult = searchResult.getSearchResult();
     verifyDefault();
-
     assertNotNull(searchResult);
     String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"theDB\") "
         + "AND object:(+\"Classes.CalendarEventClass\"))";
@@ -73,14 +68,12 @@ public class EventSearchServiceTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testGetSearchResult_null() throws Exception {
-    expect(configSourceMock.getProperty(eq("calendar.search.skipChecks"), 
+    expect(configSourceMock.getProperty(eq("calendar.search.skipChecks"),
         same(Boolean.class))).andReturn(true);
-    
     replayDefault();
     EventSearchResult searchResult = eventSearchService.getSearchResult(null);
     LuceneSearchResult lSearchResult = searchResult.getSearchResult();
     verifyDefault();
-
     assertNotNull(searchResult);
     String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"xwikidb\") "
         + "AND object:(+\"Classes.CalendarEventClass\"))";

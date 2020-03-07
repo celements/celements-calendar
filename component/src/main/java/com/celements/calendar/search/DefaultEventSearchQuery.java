@@ -1,6 +1,5 @@
 package com.celements.calendar.search;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -8,8 +7,10 @@ import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.ICalendarClassConfig;
+import com.celements.model.reference.RefBuilder;
 import com.celements.search.lucene.ILuceneSearchService;
 import com.celements.search.lucene.query.LuceneQuery;
+import com.google.common.collect.ImmutableList;
 import com.xpn.xwiki.web.Utils;
 
 public class DefaultEventSearchQuery implements IEventSearchQuery {
@@ -34,10 +35,10 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
 
   public DefaultEventSearchQuery(WikiReference wikiRef, LuceneQuery luceneQuery,
       List<String> sortFields) {
-    this.wikiRef = wikiRef;
+    this.wikiRef = RefBuilder.from(wikiRef).build(WikiReference.class);
     this.luceneQuery = luceneQuery;
     if (sortFields != null) {
-      this.sortFields = Collections.unmodifiableList(new ArrayList<>(sortFields));
+      this.sortFields = ImmutableList.copyOf(sortFields);
     } else {
       this.sortFields = Collections.emptyList();
     }
@@ -55,7 +56,7 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
 
   @Override
   public WikiReference getWikiRef() {
-    return wikiRef;
+    return RefBuilder.from(wikiRef).build(WikiReference.class);
   }
 
   @Override
@@ -70,7 +71,7 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
       query = getSearchService().createQuery();
     }
     if (wikiRef != null) {
-      query.setWiki(wikiRef);
+      query.setWiki(getWikiRef());
     }
     return getAsLuceneQueryInternal(query);
   }

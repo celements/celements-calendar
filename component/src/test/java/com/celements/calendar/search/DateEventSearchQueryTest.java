@@ -4,7 +4,6 @@ import static com.celements.common.test.CelementsTestUtils.*;
 import static org.junit.Assert.*;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -26,7 +25,25 @@ public class DateEventSearchQueryTest extends AbstractComponentTest {
   }
 
   @Test
-  public void testGetAsLuceneQuery() throws ParseException {
+  public void test_getWikiRef_protect_WikiReference() throws Exception {
+    String database = "myDB";
+    WikiReference wikiRef = new WikiReference(database);
+    Date fromDate = SDF.parse("200001010000");
+    Date toDate = SDF.parse("201405090125");
+    replayDefault();
+    IDateEventSearchQuery query = new DateEventSearchQuery(wikiRef, fromDate, toDate, null);
+    assertEquals("returned wikiRef must", database, query.getWikiRef().getName());
+    wikiRef.setName("testName");
+    assertEquals("getWikiRef must return given database wiki name", database,
+        query.getWikiRef().getName());
+    assertNotSame(wikiRef, query.getWikiRef());
+    assertNotSame("getWikiRef must preserve the internal wiki reference against"
+        + " external manipulation", query.getWikiRef(), query.getWikiRef());
+    verifyDefault();
+  }
+
+  @Test
+  public void test_getAsLuceneQuery() throws Exception {
     WikiReference wikiRef = new WikiReference("myDB");
     Date fromDate = SDF.parse("200001010000");
     Date toDate = SDF.parse("201405090125");
@@ -44,7 +61,7 @@ public class DateEventSearchQueryTest extends AbstractComponentTest {
   }
 
   @Test
-  public void testGetAsLuceneQuery_withSortField() throws ParseException {
+  public void test_getAsLuceneQuery_withSortField() throws Exception {
     WikiReference wikiRef = new WikiReference("myDB");
     Date fromDate = SDF.parse("200001010000");
     Date toDate = SDF.parse("201405090125");

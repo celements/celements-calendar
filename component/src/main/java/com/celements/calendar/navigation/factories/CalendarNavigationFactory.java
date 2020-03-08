@@ -10,7 +10,6 @@ import org.xwiki.model.reference.DocumentReference;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.ICalendarClassConfig;
 import com.celements.calendar.IEvent;
-import com.celements.calendar.search.DateEventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IDateEventSearchQuery;
 import com.celements.calendar.search.IEventSearchQuery;
@@ -68,7 +67,8 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
     CalendarNavigation calendarNavigation = new CalendarNavigation(counts[0], counts[1], counts[2],
         navDetails, startNavDetails, endNavDetails, getPrevNavDetails(cal, calArchive, navDetails,
-            nb), getNextNavDetails(cal, navDetails, nb));
+            nb),
+        getNextNavDetails(cal, navDetails, nb));
     if ((calendarNavigation.getCountAfter().getCount() <= 0) && (navDetails.getOffset() <= 0)
         && isSendingEmptyPage) {
       calendarNavigation = getEmptyCalendarNavigation(navDetails.getOffset());
@@ -167,21 +167,22 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
   /**
    * @deprecated instead use
-   *             {@link #getCalendarNavigation(DocumentReference, NavigationDetails, int, DateEventSearchQuery, boolean)
+   *             {@link #getCalendarNavigation(DocumentReference, NavigationDetails, int,
+   *             IDateEventSearchQuery, boolean)
    *             and specify if a empty return page is needed or not
    */
   @Deprecated
   @Override
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
       NavigationDetails navDetails, int nb, IDateEventSearchQuery query)
-          throws LuceneSearchException {
+      throws LuceneSearchException {
     return getCalendarNavigation(calDocRef, navDetails, nb, query, false);
   }
 
   @Override
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
       NavigationDetails navDetails, int nb, IDateEventSearchQuery query, boolean isSendingEmptyPage)
-          throws LuceneSearchException {
+      throws LuceneSearchException {
     int actualOffset = navDetails.getOffset();
     EventSearchResult calAllResult = getAllCalendar(calDocRef).searchEvents(query);
     EventSearchResult calResult = getCalService().getCalendar(calDocRef, navDetails.getStartDate())
@@ -227,9 +228,9 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   CalendarNavigation getEmptyCalendarNavigation(int actualOffset) {
     try {
       return new CalendarNavigation(
-          new UncertainCount(0, false), 
           new UncertainCount(0, false),
-          new UncertainCount(0, false), 
+          new UncertainCount(0, false),
+          new UncertainCount(0, false),
           NavigationDetails.create(ICalendarClassConfig.DATE_HIGH, actualOffset),
           NavigationDetails.create(ICalendarClassConfig.DATE_HIGH, actualOffset),
           NavigationDetails.create(ICalendarClassConfig.DATE_HIGH, actualOffset),
@@ -280,7 +281,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   private NavigationDetails getPrevNavDetails(DocumentReference calDocRef,
       NavigationDetails navDetails, int nb, IEventSearchQuery query,
       EventSearchResult calSearchResult, EventSearchResult calArchiveSearchResult)
-          throws LuceneSearchException {
+      throws LuceneSearchException {
     NavigationDetails prevNavDetails = null;
     int prevOffset = navDetails.getOffset() - nb;
     try {
@@ -317,7 +318,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
   private NavigationDetails getFirstNavDetails(DocumentReference calDocRef, int offset,
       IEventSearchQuery query, EventSearchResult searchResult) throws NavigationDetailException,
-          LuceneSearchException {
+      LuceneSearchException {
     LOGGER.debug("getFirstNavDetails with query for calDocRef [" + calDocRef + "] and offset ["
         + offset + "].");
     IEvent firstEvent = getFirstElement(searchResult.getEventList(offset, 1));
@@ -326,7 +327,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
   private NavigationDetails getLastNavDetails(DocumentReference calDocRef, int offset,
       IEventSearchQuery query, EventSearchResult searchResult) throws NavigationDetailException,
-          LuceneSearchException {
+      LuceneSearchException {
     LOGGER.debug("getLastNavDetails with query for calDocRef [" + calDocRef + "] and offset ["
         + offset + "].");
     IEvent lastEvent = getLastElement(searchResult.getEventList(0, Math.abs(offset)));

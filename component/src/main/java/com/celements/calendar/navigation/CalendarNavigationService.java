@@ -15,7 +15,6 @@ import com.celements.calendar.navigation.factories.INavigationDetailsFactory;
 import com.celements.calendar.navigation.factories.NavigationDetailException;
 import com.celements.calendar.navigation.factories.NavigationDetails;
 import com.celements.calendar.navigation.factories.NavigationDetailsFactory;
-import com.celements.calendar.search.DateEventSearchQuery;
 import com.celements.calendar.search.IDateEventSearchQuery;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.search.lucene.LuceneSearchException;
@@ -29,60 +28,69 @@ public class CalendarNavigationService implements ICalendarNavigationService {
   private static final Log LOGGER = LogFactory.getFactory().getInstance(
       CalendarNavigationService.class);
 
-  public NavigationDetails getNavigationDetails(Date startDate, int offset
-      ) throws NavigationDetailException {
+  @Override
+  public NavigationDetails getNavigationDetails(Date startDate, int offset)
+      throws NavigationDetailException {
     LOGGER.debug("called getNavigationDetails");
     return getNavDetailsFactory().getNavigationDetails(startDate, offset);
   }
 
+  @Override
   public NavigationDetails getNavigationDetails(DocumentReference calConfigDocRef,
       IEvent event) throws NavigationDetailException {
     LOGGER.debug("called getNavigationDetails");
     return getNavDetailsFactory().getNavigationDetails(calConfigDocRef, event);
   }
 
+  @Override
   public NavigationDetails getNavigationDetails(DocumentReference calConfigDocRef,
-      IEvent event, IEventSearchQuery query) throws NavigationDetailException, LuceneSearchException {
+      IEvent event, IEventSearchQuery query)
+      throws NavigationDetailException, LuceneSearchException {
     LOGGER.debug("called getNavigationDetails");
     return getNavDetailsFactory().getNavigationDetails(calConfigDocRef, event, query);
   }
 
   /**
    * @deprecated instead use {@link #getCalendarNavigation(DocumentReference,
-   *  NavigationDetails, int, boolean) and specify if a empty
-   *  return page is needed or not
+   *             NavigationDetails, int, boolean) and specify if a empty
+   *             return page is needed or not
    */
+  @Deprecated
+  @Override
   public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
       NavigationDetails navDetails, int nb) {
     LOGGER.debug("called getCalendarNavigation");
     return getCalendarNavigation(calConfigDocRef, navDetails, nb, false);
   }
-  
+
   public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
       NavigationDetails navDetails, int nb, boolean isSendingEmptyPage) {
     LOGGER.debug("called getCalendarNavigation");
-    return getCalNavFactory().getCalendarNavigation(calConfigDocRef, navDetails, nb, 
+    return getCalNavFactory().getCalendarNavigation(calConfigDocRef, navDetails, nb,
         isSendingEmptyPage);
   }
 
   /**
    * @deprecated instead use {@link #getCalendarNavigation(DocumentReference,
-   *  NavigationDetails, int, DateEventSearchQuery, boolean) and specify if a empty
-   *  return page is needed or not
+   *             NavigationDetails, int, IDateEventSearchQuery, boolean) and specify if a empty
+   *             return page is needed or not
    */
+  @Deprecated
+  @Override
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
-      NavigationDetails navDetails, int nb, IDateEventSearchQuery query) 
-          throws LuceneSearchException {
+      NavigationDetails navDetails, int nb, IDateEventSearchQuery query)
+      throws LuceneSearchException {
     LOGGER.debug("called getCalendarNavigation");
-    return getCalNavFactory().getCalendarNavigation(calDocRef, navDetails, nb, query, 
+    return getCalNavFactory().getCalendarNavigation(calDocRef, navDetails, nb, query,
         false);
   }
-  
+
+  @Override
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
       NavigationDetails navDetails, int nb, IDateEventSearchQuery query,
       boolean isSendingEmptyPage) throws LuceneSearchException {
     LOGGER.debug("called getCalendarNavigation");
-    return getCalNavFactory().getCalendarNavigation(calDocRef, navDetails, nb, query, 
+    return getCalNavFactory().getCalendarNavigation(calDocRef, navDetails, nb, query,
         isSendingEmptyPage);
   }
 

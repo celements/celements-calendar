@@ -1,5 +1,6 @@
 package com.celements.calendar.search;
 
+import static com.celements.common.test.CelementsTestUtils.*;
 import static org.junit.Assert.*;
 
 import java.text.DateFormat;
@@ -12,10 +13,10 @@ import java.util.List;
 import org.junit.Test;
 import org.xwiki.model.reference.WikiReference;
 
-import com.celements.common.test.AbstractBridgedComponentTestCase;
+import com.celements.common.test.AbstractComponentTest;
 
-public class SearchTermEventSearchQueryTest extends AbstractBridgedComponentTestCase {
-  
+public class SearchTermEventSearchQueryTest extends AbstractComponentTest {
+
   private static final DateFormat SDF = new SimpleDateFormat("yyyyMMddHHmm");
 
   @Test
@@ -25,9 +26,9 @@ public class SearchTermEventSearchQueryTest extends AbstractBridgedComponentTest
     Date fromDate = SDF.parse("200001010000");
     Date toDate = SDF.parse("201405090125");
     boolean fuzzy = false;
-    SearchTermEventSearchQuery query = new SearchTermEventSearchQuery(wikiRef, fromDate, 
+    SearchTermEventSearchQuery query = new SearchTermEventSearchQuery(wikiRef, fromDate,
         toDate, searchTerm, fuzzy, null);
-
+    replayDefault();
     assertEquals(wikiRef, query.getWikiRef());
     assertEquals(0, query.getSortFields().size());
     assertEquals(fromDate, query.getFromDate());
@@ -40,6 +41,7 @@ public class SearchTermEventSearchQueryTest extends AbstractBridgedComponentTest
         + "AND (Classes.CalendarEventClass.l_title:(+some* +search* +term*) "
         + "OR Classes.CalendarEventClass.l_description:(+some* +search* +term*)))";
     assertEquals(compareQueryString, query.getAsLuceneQuery().getQueryString());
+    verifyDefault();
   }
 
   @Test
@@ -49,9 +51,9 @@ public class SearchTermEventSearchQueryTest extends AbstractBridgedComponentTest
     Date fromDate = SDF.parse("200001010000");
     Date toDate = SDF.parse("201405090125");
     boolean fuzzy = true;
-    SearchTermEventSearchQuery query = new SearchTermEventSearchQuery(wikiRef, fromDate, 
+    SearchTermEventSearchQuery query = new SearchTermEventSearchQuery(wikiRef, fromDate,
         toDate, searchTerm, fuzzy, null);
-
+    replayDefault();
     assertEquals(wikiRef, query.getWikiRef());
     assertEquals(0, query.getSortFields().size());
     assertEquals(fromDate, query.getFromDate());
@@ -66,6 +68,7 @@ public class SearchTermEventSearchQueryTest extends AbstractBridgedComponentTest
         + "OR Classes.CalendarEventClass.l_description:((some* OR some~) "
         + "AND (search* OR search~) AND (term* OR term~))))";
     assertEquals(compareQueryString, query.getAsLuceneQuery().getQueryString());
+    verifyDefault();
   }
 
   @Test
@@ -76,9 +79,9 @@ public class SearchTermEventSearchQueryTest extends AbstractBridgedComponentTest
     Date toDate = SDF.parse("201405090125");
     boolean fuzzy = false;
     List<String> sortFields = Arrays.asList("field1", "field2");
-    SearchTermEventSearchQuery query = new SearchTermEventSearchQuery(wikiRef, fromDate, 
+    SearchTermEventSearchQuery query = new SearchTermEventSearchQuery(wikiRef, fromDate,
         toDate, searchTerm, fuzzy, sortFields);
-
+    replayDefault();
     assertEquals(wikiRef, query.getWikiRef());
     assertEquals(sortFields, query.getSortFields());
     assertEquals(fromDate, query.getFromDate());
@@ -91,6 +94,7 @@ public class SearchTermEventSearchQueryTest extends AbstractBridgedComponentTest
         + "AND (Classes.CalendarEventClass.l_title:(+some* +search* +term*) "
         + "OR Classes.CalendarEventClass.l_description:(+some* +search* +term*)))";
     assertEquals(compareQueryString, query.getAsLuceneQuery().getQueryString());
+    verifyDefault();
   }
 
 }

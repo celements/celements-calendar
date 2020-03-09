@@ -1,6 +1,5 @@
 package com.celements.calendar.search;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -8,8 +7,10 @@ import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.ICalendarClassConfig;
+import com.celements.model.reference.RefBuilder;
 import com.celements.search.lucene.ILuceneSearchService;
 import com.celements.search.lucene.query.LuceneQuery;
+import com.google.common.collect.ImmutableList;
 import com.xpn.xwiki.web.Utils;
 
 public class DefaultEventSearchQuery implements IEventSearchQuery {
@@ -25,20 +26,19 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
   }
 
   public DefaultEventSearchQuery(IEventSearchQuery query, List<String> altSortFields) {
-    this(query.getWikiRef(), query.getAsLuceneQuery(), getSortFields(query, 
-        altSortFields));
+    this(query.getWikiRef(), query.getAsLuceneQuery(), getSortFields(query, altSortFields));
   }
 
   public DefaultEventSearchQuery(WikiReference wikiRef, List<String> sortFields) {
     this(wikiRef, null, sortFields);
   }
 
-  public DefaultEventSearchQuery(WikiReference wikiRef, LuceneQuery luceneQuery, 
+  public DefaultEventSearchQuery(WikiReference wikiRef, LuceneQuery luceneQuery,
       List<String> sortFields) {
-    this.wikiRef = wikiRef;
+    this.wikiRef = RefBuilder.from(wikiRef).build(WikiReference.class);
     this.luceneQuery = luceneQuery;
     if (sortFields != null) {
-      this.sortFields = Collections.unmodifiableList(new ArrayList<String>(sortFields));
+      this.sortFields = ImmutableList.copyOf(sortFields);
     } else {
       this.sortFields = Collections.emptyList();
     }
@@ -56,7 +56,7 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
 
   @Override
   public WikiReference getWikiRef() {
-    return wikiRef;
+    return RefBuilder.from(wikiRef).build(WikiReference.class);
   }
 
   @Override
@@ -71,7 +71,7 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
       query = getSearchService().createQuery();
     }
     if (wikiRef != null) {
-      query.setWiki(wikiRef);
+      query.setWiki(getWikiRef());
     }
     return getAsLuceneQueryInternal(query);
   }
@@ -82,8 +82,7 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
   }
 
   protected final DocumentReference getCalEventClassRef() {
-    return Utils.getComponent(ICalendarClassConfig.class).getCalendarEventClassRef(
-        getWikiRef());
+    return Utils.getComponent(ICalendarClassConfig.class).getCalendarEventClassRef(getWikiRef());
   }
 
   protected final ILuceneSearchService getSearchService() {
@@ -95,17 +94,16 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
 
   @Override
   public String toString() {
-    return "DefaultEventSearchQuery [wikiRef=" + wikiRef + ", luceneQuery=" 
-        + luceneQuery + ", sortFields=" + sortFields + "]";
+    return "DefaultEventSearchQuery [wikiRef=" + wikiRef + ", luceneQuery=" + luceneQuery
+        + ", sortFields=" + sortFields + "]";
   }
 
   void injectQueryService(ILuceneSearchService searchService) {
     this.searchService = searchService;
   }
 
-  private static List<String> getSortFields(IEventSearchQuery query,
-      List<String> altSortFields) {
-    if (query.getSortFields() == null || query.getSortFields().isEmpty()) {
+  private static List<String> getSortFields(IEventSearchQuery query, List<String> altSortFields) {
+    if ((query.getSortFields() == null) || query.getSortFields().isEmpty()) {
       return altSortFields;
     } else {
       return query.getSortFields();

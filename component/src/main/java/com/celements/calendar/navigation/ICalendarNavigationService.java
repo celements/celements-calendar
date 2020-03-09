@@ -9,7 +9,7 @@ import com.celements.calendar.IEvent;
 import com.celements.calendar.navigation.factories.CalendarNavigation;
 import com.celements.calendar.navigation.factories.NavigationDetailException;
 import com.celements.calendar.navigation.factories.NavigationDetails;
-import com.celements.calendar.search.DateEventSearchQuery;
+import com.celements.calendar.search.IDateEventSearchQuery;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.search.lucene.LuceneSearchException;
 
@@ -30,11 +30,11 @@ public interface ICalendarNavigationService {
       NavigationDetails navDetails, int nb);
 
   public CalendarNavigation getCalendarNavigation(DocumentReference calConfigDocRef,
-      NavigationDetails navDetails, int nb, DateEventSearchQuery query
+      NavigationDetails navDetails, int nb, IDateEventSearchQuery query
       ) throws LuceneSearchException;
   
   public CalendarNavigation getCalendarNavigation(DocumentReference calDocRef,
-      NavigationDetails navDetails, int nb, DateEventSearchQuery query,
+      NavigationDetails navDetails, int nb, IDateEventSearchQuery query,
       boolean isSendingEmptyPage) throws LuceneSearchException;
 
 }

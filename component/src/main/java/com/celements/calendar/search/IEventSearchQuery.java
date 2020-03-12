@@ -14,9 +14,11 @@ public interface IEventSearchQuery {
    */
   @Deprecated
   public String getDatabase();
-  
+
   public WikiReference getWikiRef();
-  
+
+  public void setSortFields(List<String> sortFields);
+
   public List<String> getSortFields();
 
   public LuceneQuery getAsLuceneQuery();

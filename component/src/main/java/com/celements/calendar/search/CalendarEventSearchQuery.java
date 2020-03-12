@@ -56,7 +56,7 @@ public class CalendarEventSearchQuery extends DefaultEventSearchQuery implements
     this.startDate = cal.getStartDate();
     this.isArchive = cal.isArchive();
     this.allowedSpaces = cal.getAllowedSpaces();
-    setSortField(getDefaultSortFields(getSortFields(), cal.isArchive()));
+    setSortFields(getDefaultSortFields(getSortFields(), cal.isArchive()));
   }
 
   @Override

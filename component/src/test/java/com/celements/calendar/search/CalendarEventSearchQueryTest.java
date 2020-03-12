@@ -36,6 +36,19 @@ public class CalendarEventSearchQueryTest extends AbstractComponentTest {
   }
 
   @Test
+  public void test_newCalendarEventSearchQuery_wikiRef() throws Exception {
+    List<String> sortFields = Arrays.asList("field1", "field2");
+
+    replayDefault();
+    IEventSearchQuery queryBuilder = new CalendarEventSearchQuery(wikiRef);
+    queryBuilder.setSortFields(sortFields);
+    verifyDefault();
+
+    assertEquals(wikiRef, queryBuilder.getWikiRef());
+    assertEquals(sortFields, queryBuilder.getSortFields());
+  }
+
+  @Test
   public void test_newCalendarEventSearchQuery() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
@@ -99,6 +112,50 @@ public class CalendarEventSearchQueryTest extends AbstractComponentTest {
 
     assertEquals(wikiRef, query.getWikiRef());
     assertDefaultSortFields(query.getSortFields(), isArchive);
+  }
+
+  @Test
+  public void test_addCalendarRestrictions() throws Exception {
+    Date startDate = SDF.parse("201405090125");
+    boolean isArchive = false;
+    List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
+    expectForCalMock(startDate, isArchive, spaces);
+
+    replayDefault();
+    ICalendarSearchQueryBuilder queryBuilder = new CalendarEventSearchQuery(wikiRef);
+    queryBuilder.addCalendarRestrictions(calMock);
+
+    assertEquals(wikiRef, queryBuilder.getWikiRef());
+    String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"theDB\") "
+        + "AND object:(+\"Classes.CalendarEventClass\") "
+        + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
+        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]))";
+    assertEquals(expQueryString, queryBuilder.getAsLuceneQuery().getQueryString());
+    assertDefaultSortFields(queryBuilder.getSortFields(), isArchive);
+    verifyDefault();
+  }
+
+  @Test
+  public void test_addCalendarRestrictions_sortFields() throws Exception {
+    Date startDate = SDF.parse("201405090125");
+    boolean isArchive = false;
+    List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
+    expectForCalMock(startDate, isArchive, spaces);
+    List<String> sortFields = Arrays.asList("field1", "field2");
+
+    replayDefault();
+    IEventSearchQuery fromQuery = new DefaultEventSearchQuery(wikiRef, null, sortFields);
+    ICalendarSearchQueryBuilder queryBuilder = new CalendarEventSearchQuery(fromQuery);
+    queryBuilder.addCalendarRestrictions(calMock);
+
+    assertEquals(wikiRef, queryBuilder.getWikiRef());
+    assertEquals(sortFields, queryBuilder.getSortFields());
+    String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"theDB\") "
+        + "AND object:(+\"Classes.CalendarEventClass\") "
+        + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
+        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]))";
+    assertEquals(expQueryString, queryBuilder.getAsLuceneQuery().getQueryString());
+    verifyDefault();
   }
 
   @Test

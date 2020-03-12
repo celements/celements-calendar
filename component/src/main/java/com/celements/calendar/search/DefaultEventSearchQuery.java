@@ -19,7 +19,7 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
 
   private final WikiReference wikiRef;
   private final LuceneQuery luceneQuery;
-  private final List<String> sortFields;
+  private List<String> sortFields;
 
   public DefaultEventSearchQuery(WikiReference wikiRef) {
     this(wikiRef, null, null);
@@ -37,6 +37,10 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
       List<String> sortFields) {
     this.wikiRef = RefBuilder.from(wikiRef).build(WikiReference.class);
     this.luceneQuery = luceneQuery;
+    setSortField(sortFields);
+  }
+
+  protected void setSortField(List<String> sortFields) {
     if (sortFields != null) {
       this.sortFields = ImmutableList.copyOf(sortFields);
     } else {

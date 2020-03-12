@@ -107,14 +107,14 @@ public class CalendarEngineLucene extends AbstractCalendarEngine {
     return ret;
   }
 
-  public EventSearchResult searchEvents(ICalendar cal, IEventSearchQuery query) {
+  public EventSearchResult searchEvents(ICalendar cal, IEventSearchQuery queryBuilder) {
     ICalendarSearchQueryBuilder calSearchQuery;
-    if (query == null) {
+    if (queryBuilder == null) {
       calSearchQuery = new CalendarEventSearchQuery(cal.getDocumentReference().getWikiReference());
       // } else if (query instanceof ICalendarEventSearchQuery) {
       // calSearchQuery = (ICalendarEventSearchQuery) query;
     } else {
-      calSearchQuery = new CalendarEventSearchQuery(query);
+      calSearchQuery = new CalendarEventSearchQuery(queryBuilder);
     }
     calSearchQuery.addCalendarRestrictions(cal);
     EventSearchResult searchResult = eventSearchService.getSearchResult(calSearchQuery);

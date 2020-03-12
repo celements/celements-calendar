@@ -52,7 +52,7 @@ public class CalendarEventSearchQueryTest extends AbstractComponentTest {
   }
 
   @Test
-  public void testNewCalendarEventSearchQuery_defaultSortFields() throws Exception {
+  public void test_newCalendarEventSearchQuery_defaultSortFields() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
@@ -68,7 +68,7 @@ public class CalendarEventSearchQueryTest extends AbstractComponentTest {
   }
 
   @Test
-  public void testNewCalendarEventSearchQuery_fromQuery() throws Exception {
+  public void test_newCalendarEventSearchQuery_fromQuery() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
@@ -85,7 +85,7 @@ public class CalendarEventSearchQueryTest extends AbstractComponentTest {
   }
 
   @Test
-  public void testNewCalendarEventSearchQuery_fromQuery_defaultSortFields() throws Exception {
+  public void test_newCalendarEventSearchQuery_fromQuery_defaultSortFields() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
@@ -102,7 +102,7 @@ public class CalendarEventSearchQueryTest extends AbstractComponentTest {
   }
 
   @Test
-  public void testGetAsLuceneQuery() throws Exception {
+  public void test_getAsLuceneQuery() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
@@ -123,7 +123,7 @@ public class CalendarEventSearchQueryTest extends AbstractComponentTest {
   }
 
   @Test
-  public void testGetAsLuceneQuery_isArchive() throws Exception {
+  public void test_getAsLuceneQuery_isArchive() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = true;
     List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
@@ -144,7 +144,7 @@ public class CalendarEventSearchQueryTest extends AbstractComponentTest {
   }
 
   @Test
-  public void testGetAsLuceneQuery_sortFields() throws Exception {
+  public void test_getAsLuceneQuery_sortFields() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
@@ -165,7 +165,7 @@ public class CalendarEventSearchQueryTest extends AbstractComponentTest {
   }
 
   @Test
-  public void testGetAsLuceneQuery_noSpaces() throws Exception {
+  public void test_getAsLuceneQuery_noSpaces() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     List<String> spaces = Collections.emptyList();
@@ -185,20 +185,20 @@ public class CalendarEventSearchQueryTest extends AbstractComponentTest {
   }
 
   @Test
-  public void testGetSortFields() {
+  public void test_getSortFields() {
     List<String> inSortFields = Arrays.asList("field1", "field2");
     assertEquals(inSortFields, CalendarEventSearchQuery.getDefaultSortFields(inSortFields, false));
   }
 
   @Test
-  public void testGetSortFields_default() {
+  public void test_getSortFields_default() {
     boolean inverted = false;
     List<String> sortFields = CalendarEventSearchQuery.getDefaultSortFields(null, inverted);
     assertDefaultSortFields(sortFields, inverted);
   }
 
   @Test
-  public void testGetSortFields_default_inverted() {
+  public void test_getSortFields_default_inverted() {
     boolean inverted = true;
     List<String> inSortFields = Collections.emptyList();
     List<String> sortFields = CalendarEventSearchQuery.getDefaultSortFields(inSortFields, inverted);

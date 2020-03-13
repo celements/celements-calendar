@@ -22,6 +22,7 @@ import com.celements.calendar.IEvent;
 import com.celements.calendar.search.CalendarEventSearchQuery;
 import com.celements.calendar.search.DefaultEventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
+import com.celements.calendar.search.ICalendarSearchQueryBuilder;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.search.IEventSearchRole;
 import com.celements.common.test.AbstractComponentTest;
@@ -330,6 +331,31 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
         + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     assertEquals(sortFields, query.getSortFields());
+  }
+
+  @Test
+  public void test_searchEvent_CalendarSearchQueryBuilder() throws Exception {
+    WikiReference wikiRef = new WikiReference("myDB");
+
+    // expectForCalMock(startDate, isArchive, spaces);
+    Capture<IEventSearchQuery> queryCapture = newCapture();
+    expect(eventSearchMock.getSearchResult(capture(queryCapture))).andReturn(
+        eventSearchResultMock).once();
+
+    final ICalendarSearchQueryBuilder queryBuilder = createMockAndAddToDefault(
+        ICalendarSearchQueryBuilder.class);
+    expect(queryBuilder.getWikiRef()).andReturn(wikiRef).anyTimes();
+    queryBuilder.addCalendarRestrictions(same(calMock));
+    expectLastCall().once();
+
+    replayDefault();
+    EventSearchResult ret = engine.searchEvents(calMock, queryBuilder);
+    verifyDefault();
+
+    assertSame(eventSearchResultMock, ret);
+    IEventSearchQuery query = queryCapture.getValue();
+    assertSame("If the queryBuilder parameter implements ICalendarSearchQueryBuilder it must not"
+        + " be wrapped with an CalendarEventSearchQuery.", queryBuilder, query);
   }
 
   private void expectForCalMock(Date startDate, boolean isArchive, List<String> spaces) {

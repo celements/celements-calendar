@@ -111,8 +111,8 @@ public class CalendarEngineLucene extends AbstractCalendarEngine {
     ICalendarSearchQueryBuilder calSearchQuery;
     if (queryBuilder == null) {
       calSearchQuery = new CalendarEventSearchQuery(cal.getDocumentReference().getWikiReference());
-      // } else if (query instanceof ICalendarEventSearchQuery) {
-      // calSearchQuery = (ICalendarEventSearchQuery) query;
+    } else if (queryBuilder instanceof ICalendarSearchQueryBuilder) {
+      calSearchQuery = (ICalendarSearchQueryBuilder) queryBuilder;
     } else {
       calSearchQuery = new CalendarEventSearchQuery(queryBuilder);
     }

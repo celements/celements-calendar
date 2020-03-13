@@ -1,9 +1,17 @@
 package com.celements.calendar.search;
 
+import javax.validation.constraints.NotNull;
+
 import com.celements.calendar.ICalendar;
 
 public interface ICalendarSearchQueryBuilder extends IEventSearchQuery {
 
-  void addCalendarRestrictions(ICalendar cal);
+  /**
+   * must extend the query with restrictions limiting the search to the calendar given. This
+   * includes startDate, isArchive and allowedSpaces.
+   *
+   * @param cal
+   */
+  void addCalendarRestrictions(@NotNull ICalendar cal);
 
 }

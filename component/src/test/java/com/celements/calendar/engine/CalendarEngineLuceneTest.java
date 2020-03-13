@@ -55,12 +55,12 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
   }
 
   @Test
-  public void testGetName() {
+  public void test_getName() {
     assertEquals("lucene", engine.getName());
   }
 
   @Test
-  public void testGetEngineLimit() {
+  public void test_getEngineLimit() {
     int limit = 5;
     boolean skipChecks = true;
     expect(eventSearchMock.skipChecks()).andReturn(skipChecks).once();
@@ -71,7 +71,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
   }
 
   @Test
-  public void testGetEvents() throws Exception {
+  public void test_getEvents() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     List<String> spaces = Arrays.asList("myCalSpace");
@@ -102,7 +102,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
   }
 
   @Test
-  public void testCountEventsInternal() throws Exception {
+  public void test_countEventsInternal() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     List<String> spaces = Arrays.asList("myCalSpace");
@@ -130,7 +130,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
   }
 
   @Test
-  public void testGetFirstEventDate() throws Exception {
+  public void test_getFirstEventDate() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     List<String> spaces = Arrays.asList("myCalSpace");
@@ -159,7 +159,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
   }
 
   @Test
-  public void testGetFirstEventDate_isArchive() throws Exception {
+  public void test_getFirstEventDate_isArchive() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = true;
     List<String> spaces = Arrays.asList("myCalSpace");
@@ -189,7 +189,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
   }
 
   @Test
-  public void testGetLastEventDate() throws Exception {
+  public void test_getLastEventDate() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     List<String> spaces = Arrays.asList("myCalSpace");
@@ -219,7 +219,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
   }
 
   @Test
-  public void testGetLastEventDate_isArchive() throws Exception {
+  public void test_getLastEventDate_isArchive() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = true;
     List<String> spaces = Arrays.asList("myCalSpace");
@@ -248,7 +248,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
   }
 
   @Test
-  public void testSearchEvent_isNotArchive() throws Exception {
+  public void test_searchEvent_isNotArchive() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
@@ -276,7 +276,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
   }
 
   @Test
-  public void testSearchEvent_isArchive() throws Exception {
+  public void test_searchEvent_isArchive() throws Exception {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = true;
     List<String> spaces = Arrays.asList("myCalSpace1", "myCalSpace2");
@@ -304,7 +304,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
   }
 
   @Test
-  public void testSearchEvent_withQuery() throws Exception {
+  public void test_searchEvent_withQuery() throws Exception {
     WikiReference wikiRef = new WikiReference("myDB");
     List<String> sortFields = Arrays.asList("field");
     Date startDate = SDF.parse("201405090125");

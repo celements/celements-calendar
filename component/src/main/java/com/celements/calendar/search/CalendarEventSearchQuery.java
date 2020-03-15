@@ -52,11 +52,13 @@ public class CalendarEventSearchQuery extends DefaultEventSearchQuery implements
   }
 
   @Override
-  public void addCalendarRestrictions(ICalendar cal) {
+  public ICalendarSearchQueryBuilder addCalendarRestrictions(ICalendar cal) {
+    checkNotNull(cal);
     this.startDate = cal.getStartDate();
     this.isArchive = cal.isArchive();
     this.allowedSpaces = cal.getAllowedSpaces();
     setSortFields(getDefaultSortFields(getSortFields(), cal.isArchive()));
+    return this;
   }
 
   @Override
@@ -73,7 +75,8 @@ public class CalendarEventSearchQuery extends DefaultEventSearchQuery implements
     if (!isArchive) {
       query.add(getSearchService().createFromDateRestriction(
           ICalendarClassConfig.CALENDAR_EVENT_CLASS + "."
-              + ICalendarClassConfig.PROPERTY_EVENT_DATE, startDate, true));
+              + ICalendarClassConfig.PROPERTY_EVENT_DATE,
+          startDate, true));
     } else {
       query.add(getSearchService().createToDateRestriction(ICalendarClassConfig.CALENDAR_EVENT_CLASS
           + "." + ICalendarClassConfig.PROPERTY_EVENT_DATE, startDate, false));
@@ -105,7 +108,8 @@ public class CalendarEventSearchQuery extends DefaultEventSearchQuery implements
       LOGGER.info("getDefaultSortFields: got empty sortFields, using default");
       String pref = (inverted ? "-" : "") + ICalendarClassConfig.CALENDAR_EVENT_CLASS + ".";
       return Arrays.asList(pref + ICalendarClassConfig.PROPERTY_EVENT_DATE, pref
-          + ICalendarClassConfig.PROPERTY_EVENT_DATE_END, pref
+          + ICalendarClassConfig.PROPERTY_EVENT_DATE_END,
+          pref
               + ICalendarClassConfig.PROPERTY_TITLE);
     } else {
       return sortFields;

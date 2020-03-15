@@ -12,6 +12,7 @@ public interface ICalendarSearchQueryBuilder extends IEventSearchQuery {
    *
    * @param cal
    */
-  void addCalendarRestrictions(@NotNull ICalendar cal);
+  @NotNull
+  ICalendarSearchQueryBuilder addCalendarRestrictions(@NotNull ICalendar cal);
 
 }

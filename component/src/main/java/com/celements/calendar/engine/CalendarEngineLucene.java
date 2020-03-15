@@ -101,7 +101,7 @@ public class CalendarEngineLucene extends AbstractCalendarEngine {
     if (events.size() > 0) {
       ret = events.get(0);
     } else {
-      LOGGER.debug("getFirst/LastEvent: no Event for cal '" + cal + "', first '" + first + "'");
+      LOGGER.debug("getFirst/LastEvent: no Event for cal [{}], first [{}]", cal, first);
     }
     return ret;
   }

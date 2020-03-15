@@ -24,7 +24,7 @@ public class CalendarEventSearchQuery extends DefaultEventSearchQuery implements
   private static final Logger LOGGER = LoggerFactory.getLogger(CalendarEventSearchQuery.class);
 
   private Date startDate;
-  private Boolean isArchive;
+  private Boolean isArchive = null;
   private List<String> allowedSpaces;
 
   public CalendarEventSearchQuery(WikiReference wikiRef) {
@@ -68,8 +68,8 @@ public class CalendarEventSearchQuery extends DefaultEventSearchQuery implements
   }
 
   private LuceneQuery addCalendarRestrictions(LuceneQuery query) {
-    checkNotNull("Calendar must be initialized before calling addCalendarRestrictions",
-        this.isArchive);
+    checkState(this.isArchive != null,
+        "Calendar must be initialized before calling addCalendarRestrictions");
     query.add(getSearchService().createRestrictionGroup(Type.OR, Arrays.asList("space"),
         getAllowedSpaces()));
     if (!isArchive) {

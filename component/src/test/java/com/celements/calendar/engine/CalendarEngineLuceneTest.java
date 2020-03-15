@@ -345,8 +345,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
     final ICalendarSearchQueryBuilder queryBuilder = createMockAndAddToDefault(
         ICalendarSearchQueryBuilder.class);
     expect(queryBuilder.getWikiRef()).andReturn(wikiRef).anyTimes();
-    queryBuilder.addCalendarRestrictions(same(calMock));
-    expectLastCall().once();
+    expect(queryBuilder.addCalendarRestrictions(same(calMock))).andReturn(queryBuilder);
 
     replayDefault();
     EventSearchResult ret = engine.searchEvents(calMock, queryBuilder);

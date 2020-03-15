@@ -22,6 +22,8 @@ package com.celements.calendar;
 import java.util.Date;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.model.reference.WikiReference;
@@ -36,7 +38,7 @@ import com.xpn.xwiki.doc.XWikiDocument;
 public interface ICalendar {
 
   public DocumentReference getDocumentReference();
-  
+
   public WikiReference getWikiRef();
 
   public XWikiDocument getCalDoc();
@@ -47,14 +49,14 @@ public interface ICalendar {
 
   /**
    * Sets date and time of Calendar
-   * 
+   *
    * @param newStartDate
    */
   public ICalendar setStartTimestamp(Date newStartDate);
 
   /**
    * Sets only date of Calendar (time to midnight)
-   * 
+   *
    * @param newStartDate
    */
   public ICalendar setStartDate(Date newStartDate);
@@ -62,16 +64,15 @@ public interface ICalendar {
   public String getLanguage();
 
   public ICalendar setLanguage(String language);
-  
+
   public SpaceReference getEventSpaceRef();
-  
-  public List<String> getAllowedSpaces();
+
+  public @NotNull List<String> getAllowedSpaces();
 
   /**
    * getAllEvents
-   * 
+   *
    * @return
-   * 
    * @deprecated instead use getAllEvents from CalendarApi or getAllEventsInternal
    *             getAllEvents returning EventsApi will be moved to CalendarApi class.
    */
@@ -82,9 +83,8 @@ public interface ICalendar {
 
   /**
    * getEvents
-   * 
+   *
    * @return
-   * 
    * @deprecated instead use getAllEvents from CalendarApi or getEventsInternal
    *             getEvents returning EventsApi will be moved to CalendarApi class.
    */
@@ -93,7 +93,7 @@ public interface ICalendar {
 
   /**
    * use internal only. Do not return IEvent objects to the velocity
-   * 
+   *
    * @param start
    * @param nb
    * @return

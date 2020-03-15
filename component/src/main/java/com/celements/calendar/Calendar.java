@@ -21,6 +21,7 @@ package com.celements.calendar;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -42,6 +43,7 @@ import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.service.ICalendarService;
 import com.celements.web.service.IWebUtilsService;
+import com.google.common.collect.ImmutableList;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -53,11 +55,9 @@ public class Calendar implements ICalendar {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Calendar.class);
 
-  private static final String _OVERVIEW_DEFAULT_CONFIG =
-      "date,time,l_title,location";
-  private static final String _DETAILVIEW_DEFAULT_CONFIG =
-      "date,time,l_title,location,l_description";
-  private static final List<String> _NON_EVENT_PROPERTYS = Arrays.asList("lang", 
+  private static final String _OVERVIEW_DEFAULT_CONFIG = "date,time,l_title,location";
+  private static final String _DETAILVIEW_DEFAULT_CONFIG = "date,time,l_title,location,l_description";
+  private static final List<String> _NON_EVENT_PROPERTYS = Arrays.asList("lang",
       "isSubscribable", "eventDate", "eventDate_end");
 
   private DocumentReference calConfigDocRef;
@@ -72,24 +72,20 @@ public class Calendar implements ICalendar {
   IWebUtilsService webUtilsService;
 
   /**
-   * 
    * @param calConfigDoc
    * @param isArchive
    * @param context
-   * 
    * @deprecated use Calendar(DocumentReference, boolean) instead
    */
   @Deprecated
-  public Calendar(XWikiDocument calConfigDoc, boolean isArchive, XWikiContext context){
+  public Calendar(XWikiDocument calConfigDoc, boolean isArchive, XWikiContext context) {
     this(calConfigDoc.getDocumentReference(), isArchive);
   }
 
   /**
-   * 
    * @param calConfigDocRef
    * @param isArchive
    * @param context
-   * 
    * @deprecated use Calendar(DocumentReference, boolean) instead
    */
   @Deprecated
@@ -132,7 +128,7 @@ public class Calendar implements ICalendar {
   }
 
   @Override
-  public boolean isArchive(){
+  public boolean isArchive() {
     return isArchive;
   }
 
@@ -181,7 +177,7 @@ public class Calendar implements ICalendar {
     try {
       ret = getCalService().getEventSpaceRefForCalendar(getDocumentReference());
     } catch (XWikiException exc) {
-      LOGGER.error("getEventSpaceRef: failed to get event space for '" 
+      LOGGER.error("getEventSpaceRef: failed to get event space for '"
           + getDocumentReference() + "'", exc);
     }
     return ret;
@@ -190,17 +186,17 @@ public class Calendar implements ICalendar {
   @Override
   public List<String> getAllowedSpaces() {
     try {
-      return getCalService().getAllowedSpaces(getDocumentReference());
+      return ImmutableList.copyOf(getCalService().getAllowedSpaces(getDocumentReference()));
     } catch (XWikiException exp) {
-      LOGGER.error("Failed to get allowed spaces for '" + getDocumentReference() + "'", 
+      LOGGER.error("Failed to get allowed spaces for '" + getDocumentReference() + "'",
           exp);
     }
-    return new ArrayList<String>();
+    return Collections.emptyList();
   }
 
   @Deprecated
   @Override
-  public List<EventApi> getAllEvents(){
+  public List<EventApi> getAllEvents() {
     return getEventMgr().getEvents(this, 0, 0);
   }
 
@@ -209,6 +205,7 @@ public class Calendar implements ICalendar {
     return getEventMgr().getAllEventsInternal(this);
   }
 
+  @Override
   @Deprecated
   public List<EventApi> getEvents(int start, int nb) {
     return getEventMgr().getEvents(this, start < 0 ? 0 : start, nb < 0 ? 0 : nb);
@@ -276,8 +273,10 @@ public class Calendar implements ICalendar {
     BaseObject calConfigObj = getConfigObject();
     if ((calConfigObj != null)
         && (calConfigObj.getStringValue(ICalendarClassConfig.PROPERTY_EVENT_COLUMN_CONFIG) != null)
-        && (!"".equals(calConfigObj.getStringValue(ICalendarClassConfig.PROPERTY_EVENT_COLUMN_CONFIG)))) {
-      detailviewConfig = calConfigObj.getStringValue(ICalendarClassConfig.PROPERTY_EVENT_COLUMN_CONFIG);
+        && (!"".equals(
+            calConfigObj.getStringValue(ICalendarClassConfig.PROPERTY_EVENT_COLUMN_CONFIG)))) {
+      detailviewConfig = calConfigObj
+          .getStringValue(ICalendarClassConfig.PROPERTY_EVENT_COLUMN_CONFIG);
     }
     LOGGER.debug("detailview config: '" + detailviewConfig + "'");
     return detailviewConfig;
@@ -333,8 +332,8 @@ public class Calendar implements ICalendar {
           ICalendarClassConfig.CALENDAR_EVENT_CLASS_DOC), context);
       BaseClass bclass = doc.getXClass();
       Object[] props = bclass.getPropertyNames();
-      for(int i = 0; i < props.length; i++) {
-        String propertyName = (String) props[i];
+      for (Object prop : props) {
+        String propertyName = (String) prop;
         if (!_NON_EVENT_PROPERTYS.contains(propertyName)) {
           propNames.add(propertyName);
         }
@@ -375,7 +374,7 @@ public class Calendar implements ICalendar {
         }
         LOGGER.debug("getEngine: size {}, limit {}", size, limit);
       }
-      LOGGER.debug("getEngine: returning '{}' for  cal '{}'", engine.getName(), 
+      LOGGER.debug("getEngine: returning '{}' for  cal '{}'", engine.getName(),
           getDocumentReference());
     }
     return engine;
@@ -398,16 +397,16 @@ public class Calendar implements ICalendar {
   public boolean equals(Object obj) {
     if (obj instanceof Calendar) {
       Calendar other = (Calendar) obj;
-      return new EqualsBuilder().append(this.calConfigDocRef, other.calConfigDocRef
-          ).append(this.startDate, other.startDate).append(this.isArchive, other.isArchive
-          ).isEquals();
+      return new EqualsBuilder().append(this.calConfigDocRef, other.calConfigDocRef)
+          .append(this.startDate, other.startDate).append(this.isArchive, other.isArchive)
+          .isEquals();
     }
     return false;
   }
 
   private XWikiContext getContext() {
     Execution execution = Utils.getComponent(Execution.class);
-    return (XWikiContext)execution.getContext().getProperty("xwikicontext");
+    return (XWikiContext) execution.getContext().getProperty("xwikicontext");
   }
 
   private IEventManager getEventMgr() {
@@ -427,7 +426,7 @@ public class Calendar implements ICalendar {
     }
     return calService;
   }
-  
+
   protected void injectCalService(ICalendarService calService) {
     this.calService = calService;
   }
@@ -441,9 +440,10 @@ public class Calendar implements ICalendar {
 
   @Override
   public String toString() {
-    return "Calendar [calConfigDocRef=" + getWebUtilsService().getRefDefaultSerializer(
-        ).serialize(calConfigDocRef) + ", startDate=" + startDate + ", isArchive=" 
-        + isArchive + ", language=" + getLanguage() + ", allowedSpaces=" 
+    return "Calendar [calConfigDocRef="
+        + getWebUtilsService().getRefDefaultSerializer().serialize(calConfigDocRef) + ", startDate="
+        + startDate + ", isArchive="
+        + isArchive + ", language=" + getLanguage() + ", allowedSpaces="
         + getAllowedSpaces() + ", engine=" + getEngine().getName() + "]";
   }
 

@@ -4,10 +4,12 @@ import static com.google.common.base.Preconditions.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +25,9 @@ public class CalendarEventSearchQuery extends DefaultEventSearchQuery implements
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CalendarEventSearchQuery.class);
 
-  private Date startDate;
-  private Boolean isArchive = null;
-  private List<String> allowedSpaces;
+  private Date startDate = null;
+  private boolean isArchive = false;
+  private List<String> allowedSpaces = Collections.emptyList();
 
   public CalendarEventSearchQuery(WikiReference wikiRef) {
     super(wikiRef);
@@ -68,7 +70,7 @@ public class CalendarEventSearchQuery extends DefaultEventSearchQuery implements
   }
 
   private LuceneQuery addCalendarRestrictions(LuceneQuery query) {
-    checkState(this.isArchive != null,
+    checkState(this.startDate != null,
         "Calendar must be initialized before calling addCalendarRestrictions");
     query.add(getSearchService().createRestrictionGroup(Type.OR, Arrays.asList("space"),
         getAllowedSpaces()));
@@ -84,9 +86,9 @@ public class CalendarEventSearchQuery extends DefaultEventSearchQuery implements
     return query;
   }
 
-  private List<String> getAllowedSpaces() {
+  private @NotNull List<String> getAllowedSpaces() {
     List<String> ret = new ArrayList<>();
-    if ((allowedSpaces != null) && (allowedSpaces.size() > 0)) {
+    if (!allowedSpaces.isEmpty()) {
       for (String space : allowedSpaces) {
         ret.add("\"" + space + "\"");
       }

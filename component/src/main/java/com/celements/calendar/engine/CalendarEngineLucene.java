@@ -96,7 +96,6 @@ public class CalendarEngineLucene extends AbstractCalendarEngine {
     int offset = 0;
     if ((first && cal.isArchive()) || (!first && !cal.isArchive())) {
       offset = (int) (countEvents(cal) - 1);
-      ;
     }
     List<IEvent> events = getEvents(cal, offset, 1);
     if (events.size() > 0) {

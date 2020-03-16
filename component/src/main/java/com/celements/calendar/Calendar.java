@@ -57,7 +57,7 @@ public class Calendar implements ICalendar {
 
   private static final String _OVERVIEW_DEFAULT_CONFIG = "date,time,l_title,location";
   private static final String _DETAILVIEW_DEFAULT_CONFIG = "date,time,l_title,location,l_description";
-  private static final List<String> _NON_EVENT_PROPERTYS = Arrays.asList("lang",
+  private static final List<String> _NON_EVENT_PROPERTYS = ImmutableList.of("lang",
       "isSubscribable", "eventDate", "eventDate_end");
 
   private DocumentReference calConfigDocRef;

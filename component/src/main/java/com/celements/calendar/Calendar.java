@@ -188,7 +188,7 @@ public class Calendar implements ICalendar {
     try {
       return ImmutableList.copyOf(getCalService().getAllowedSpaces(getDocumentReference()));
     } catch (XWikiException exp) {
-      LOGGER.error("Failed to get allowed spaces for '" + getDocumentReference() + "'",
+      LOGGER.error("Failed to get allowed spaces for [{}]", getDocumentReference(),
           exp);
     }
     return Collections.emptyList();

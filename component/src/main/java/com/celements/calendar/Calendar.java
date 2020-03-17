@@ -191,7 +191,7 @@ public class Calendar implements ICalendar {
       LOGGER.error("Failed to get allowed spaces for [{}]", getDocumentReference(),
           exp);
     }
-    return Collections.emptyList();
+    return ImmutableList.of();
   }
 
   @Deprecated

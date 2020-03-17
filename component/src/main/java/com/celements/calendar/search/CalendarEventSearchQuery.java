@@ -110,8 +110,7 @@ public class CalendarEventSearchQuery extends DefaultEventSearchQuery implements
       LOGGER.info("getDefaultSortFields: got empty sortFields, using default");
       String pref = (inverted ? "-" : "") + ICalendarClassConfig.CALENDAR_EVENT_CLASS + ".";
       return Arrays.asList(pref + ICalendarClassConfig.PROPERTY_EVENT_DATE, pref
-          + ICalendarClassConfig.PROPERTY_EVENT_DATE_END,
-          pref
+          + ICalendarClassConfig.PROPERTY_EVENT_DATE_END, pref
               + ICalendarClassConfig.PROPERTY_TITLE);
     } else {
       return sortFields;

@@ -337,7 +337,6 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
   public void test_searchEvent_CalendarSearchQueryBuilder() throws Exception {
     WikiReference wikiRef = new WikiReference("myDB");
 
-    // expectForCalMock(startDate, isArchive, spaces);
     Capture<IEventSearchQuery> queryCapture = newCapture();
     expect(eventSearchMock.getSearchResult(capture(queryCapture))).andReturn(
         eventSearchResultMock).once();

@@ -12,8 +12,9 @@ import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
 import com.celements.calendar.search.CalendarEventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
-import com.celements.calendar.search.IEventSearchRole;
+import com.celements.calendar.search.ICalendarSearchQueryBuilder;
 import com.celements.calendar.search.IEventSearchQuery;
+import com.celements.calendar.search.IEventSearchRole;
 import com.celements.search.lucene.ILuceneSearchService;
 import com.celements.search.lucene.LuceneSearchException;
 
@@ -22,8 +23,7 @@ public class CalendarEngineLucene extends AbstractCalendarEngine {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CalendarEngineLucene.class);
 
-  private static final String PROGON_ENGINE_LUCENE_TOTALTIME = 
-      "progonEngineLuceneTotalTime";
+  private static final String PROGON_ENGINE_LUCENE_TOTALTIME = "progonEngineLuceneTotalTime";
 
   public static final String NAME = "lucene";
 
@@ -37,7 +37,7 @@ public class CalendarEngineLucene extends AbstractCalendarEngine {
   public String getName() {
     return NAME;
   }
-  
+
   @Override
   public long getEngineLimit() {
     return searchService.getResultLimit(eventSearchService.skipChecks());
@@ -95,30 +95,32 @@ public class CalendarEngineLucene extends AbstractCalendarEngine {
     IEvent ret = null;
     int offset = 0;
     if ((first && cal.isArchive()) || (!first && !cal.isArchive())) {
-      offset = (int) (countEvents(cal) - 1); ;
+      offset = (int) (countEvents(cal) - 1);
     }
     List<IEvent> events = getEvents(cal, offset, 1);
     if (events.size() > 0) {
       ret = events.get(0);
     } else {
-      LOGGER.debug("getFirst/LastEvent: no Event for cal '" + cal + "', first '" + first 
-          + "'");
+      LOGGER.debug("getFirst/LastEvent: no Event for cal [{}], first [{}]", cal, first);
     }
     return ret;
   }
 
-  public EventSearchResult searchEvents(ICalendar cal, IEventSearchQuery query) {
-    CalendarEventSearchQuery calSearchQuery;
-    if (query == null) {
-      calSearchQuery = new CalendarEventSearchQuery(cal, Collections.<String>emptyList());
+  public EventSearchResult searchEvents(ICalendar cal, IEventSearchQuery queryBuilder) {
+    ICalendarSearchQueryBuilder calSearchQuery;
+    if (queryBuilder == null) {
+      calSearchQuery = new CalendarEventSearchQuery(cal.getDocumentReference().getWikiReference());
+    } else if (queryBuilder instanceof ICalendarSearchQueryBuilder) {
+      calSearchQuery = (ICalendarSearchQueryBuilder) queryBuilder;
     } else {
-      calSearchQuery = new CalendarEventSearchQuery(cal, query);
+      calSearchQuery = new CalendarEventSearchQuery(queryBuilder);
     }
+    calSearchQuery.addCalendarRestrictions(cal);
     EventSearchResult searchResult = eventSearchService.getSearchResult(calSearchQuery);
     LOGGER.debug("searchEvents: " + searchResult);
     return searchResult;
   }
-  
+
   private void addToTotalTime(long startTime, String methodName) {
     long time = System.currentTimeMillis() - startTime;
     Long totalTime = 0L;

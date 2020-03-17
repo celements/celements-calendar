@@ -1,5 +1,7 @@
 package com.celements.calendar.search;
 
+import static com.google.common.base.Preconditions.*;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -19,7 +21,7 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
 
   private final WikiReference wikiRef;
   private final LuceneQuery luceneQuery;
-  private final List<String> sortFields;
+  private List<String> sortFields = Collections.emptyList();
 
   public DefaultEventSearchQuery(WikiReference wikiRef) {
     this(wikiRef, null, null);
@@ -38,10 +40,15 @@ public class DefaultEventSearchQuery implements IEventSearchQuery {
     this.wikiRef = RefBuilder.from(wikiRef).build(WikiReference.class);
     this.luceneQuery = luceneQuery;
     if (sortFields != null) {
-      this.sortFields = ImmutableList.copyOf(sortFields);
-    } else {
-      this.sortFields = Collections.emptyList();
+      setSortFields(sortFields);
     }
+  }
+
+  @Override
+  public IEventSearchQuery setSortFields(List<String> sortFields) {
+    checkNotNull(sortFields);
+    this.sortFields = ImmutableList.copyOf(sortFields);
+    return this;
   }
 
   @Deprecated

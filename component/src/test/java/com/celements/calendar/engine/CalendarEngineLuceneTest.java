@@ -343,8 +343,10 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
 
     final ICalendarSearchQueryBuilder queryBuilder = createMockAndAddToDefault(
         ICalendarSearchQueryBuilder.class);
+    final ICalendarSearchQueryBuilder queryBuilder2 = createMockAndAddToDefault(
+        ICalendarSearchQueryBuilder.class);
     expect(queryBuilder.getWikiRef()).andReturn(wikiRef).anyTimes();
-    expect(queryBuilder.addCalendarRestrictions(same(calMock))).andReturn(queryBuilder);
+    expect(queryBuilder.addCalendarRestrictions(same(calMock))).andReturn(queryBuilder2);
 
     replayDefault();
     EventSearchResult ret = engine.searchEvents(calMock, queryBuilder);
@@ -352,8 +354,11 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
 
     assertSame(eventSearchResultMock, ret);
     IEventSearchQuery query = queryCapture.getValue();
-    assertSame("If the queryBuilder parameter implements ICalendarSearchQueryBuilder it must not"
-        + " be wrapped with an CalendarEventSearchQuery.", queryBuilder, query);
+    assertFalse("If the queryBuilder parameter implements ICalendarSearchQueryBuilder it must not"
+        + " be wrapped with an CalendarEventSearchQuery.",
+        query.getClass().equals(CalendarEventSearchQuery.class));
+    assertSame("getSearchResults must be called with the object returned from"
+        + " addCalendarRestrictions", queryBuilder2, query);
   }
 
   private void expectForCalMock(Date startDate, boolean isArchive, List<String> spaces) {

@@ -115,7 +115,7 @@ public class CalendarEngineLucene extends AbstractCalendarEngine {
     } else {
       calSearchQuery = new CalendarEventSearchQuery(queryBuilder);
     }
-    calSearchQuery.addCalendarRestrictions(cal);
+    calSearchQuery = calSearchQuery.addCalendarRestrictions(cal);
     EventSearchResult searchResult = eventSearchService.getSearchResult(calSearchQuery);
     LOGGER.debug("searchEvents: {}", searchResult);
     return searchResult;

@@ -30,7 +30,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>celements-calendar</artifactId>
-  <version>5.1-SNAPSHOT</version>
+  <version>5.0.1</version>
   <description>Celements Calendar</description> 
   <dependencies>    
     <!-- Add here all your dependencies -->
@@ -63,6 +63,6 @@
     <connection>scm:git:git@github.com:celements/celements-calendar.git</connection>
     <developerConnection>scm:git:git@github.com:celements/celements-calendar.git</developerConnection>
     <url>https://github.com/celements/celements-calendar</url>
-    <tag>celements-calendar-1.41</tag>
+    <tag>celements-calendar-5.0.1</tag>
   </scm>
 </project>

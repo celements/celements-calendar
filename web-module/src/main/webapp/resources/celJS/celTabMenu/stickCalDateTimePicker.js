@@ -8,6 +8,7 @@ jQuery("input").each(
       var replaceId = value.id.replace(".", "\\.");
       jQuery("#" + value.id.replace(".", "\\.")).datetimepicker( {
         lang : Validation.messages.get("admin-language"),
+        scrollInput: false,
         dayOfWeekStart : 1,
         format : 'd.m.Y H:i'
       });

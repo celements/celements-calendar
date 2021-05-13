@@ -32,7 +32,7 @@
   <artifactId>calendar-web</artifactId>
   <packaging>war</packaging>
   <name>Calendar Web-Module</name>
-  <version>5.1</version>
+  <version>5.2-SNAPSHOT</version>
   <description>	</description>
   <licenses>
     <license>
@@ -45,7 +45,7 @@
     <connection>scm:git:git://github.com/celements/celements-calendar</connection>
     <developerConnection>scm:git:git@github.com:celements/celements-calendar.git</developerConnection>
     <url>https://github.com/celements/celements-calendar</url>
-    <tag>calendar-web-5.1</tag>
+    <tag>HEAD</tag>
   </scm>
   <properties>
     <platform.core.version>2.33</platform.core.version>

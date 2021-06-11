@@ -3,8 +3,8 @@ package com.celements.calendar.navigation.factories;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.ICalendar;
@@ -21,7 +21,7 @@ import com.xpn.xwiki.web.Utils;
 
 public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
-  private static final Log LOGGER = LogFactory.getFactory().getInstance(
+  private static final Logger LOGGER = LoggerFactory.getLogger(
       CalendarNavigationFactory.class);
 
   private ICalendarService calService;

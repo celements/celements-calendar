@@ -23,8 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.celements.calendar.classes.CalendarClasses;
 import com.xpn.xwiki.XWiki;
@@ -92,7 +92,7 @@ public class CelementsCalendarPlugin extends XWikiDefaultPlugin {
   @Deprecated
   public static final String PROPERTY_EVENT_IS_SUBSCRIBABLE = CalendarClasses.PROPERTY_EVENT_IS_SUBSCRIBABLE;
 
-  private static final Log mLogger = LogFactory.getFactory().getInstance(CelementsCalendarPlugin.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CelementsCalendarPlugin.class);
 
   public CelementsCalendarPlugin(String name, String className, XWikiContext context) {
     super(name, className, context);
@@ -199,11 +199,11 @@ public class CelementsCalendarPlugin extends XWikiDefaultPlugin {
       //      String paramClass = inputNameParts[0];
       //      String objNumber = inputNameParts[1];
       String propName = inputNameParts[2];
-      mLogger.debug("Save '" + value + "' to '" + propName + "'"
+      LOGGER.debug("Save '" + value + "' to '" + propName + "'"
           + " with lang=" + lang);
       for (BaseObject obj : objs) {
         if(needsUpdate(inputName, lang, obj)){
-          mLogger.debug(lang + "-Save '" + value + "' to '" + propName + "'");
+          LOGGER.debug(lang + "-Save '" + value + "' to '" + propName + "'");
           obj.set(propName, value, context);
         }
       }

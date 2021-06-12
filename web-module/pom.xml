@@ -22,11 +22,13 @@
  *
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <groupId>com.celements</groupId>
     <artifactId>celementsweb</artifactId>
-    <version>5.1</version>
+    <version>5.2-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>calendar-web</artifactId>
@@ -45,7 +47,6 @@
     <connection>scm:git:git://github.com/celements/celements-calendar</connection>
     <developerConnection>scm:git:git@github.com:celements/celements-calendar.git</developerConnection>
     <url>https://github.com/celements/celements-calendar</url>
-    <tag>HEAD</tag>
   </scm>
   <properties>
     <platform.core.version>2.33</platform.core.version>
@@ -56,7 +57,7 @@
     <dependency>
       <groupId>com.celements</groupId>
       <artifactId>celements-calendar</artifactId>
-      <version>5.0.1</version>
+      <version>5.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>

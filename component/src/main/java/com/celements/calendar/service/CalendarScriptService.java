@@ -33,7 +33,7 @@ import com.xpn.xwiki.XWikiException;
 @Component("celcalendar")
 public class CalendarScriptService implements ScriptService {
 
-  private static Logger LOGGER = LoggerFactory.getLogger(CalendarScriptService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CalendarScriptService.class);
 
   @Requirement
   private IEventManager eventManager;

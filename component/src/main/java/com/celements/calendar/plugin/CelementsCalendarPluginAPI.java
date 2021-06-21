@@ -21,8 +21,8 @@ package com.celements.calendar.plugin;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.Event;
@@ -43,7 +43,7 @@ import com.xpn.xwiki.doc.XWikiDocument;
 @Deprecated
 public class CelementsCalendarPluginAPI extends Api {
 
-  private static final Log mLogger = LogFactory.getFactory().getInstance(
+  private static final Logger LOGGER = LoggerFactory.getLogger(
       CelementsCalendarPluginAPI.class);
 
   private CelementsCalendarPlugin calPlugin;
@@ -115,7 +115,7 @@ public class CelementsCalendarPluginAPI extends Api {
    */
   @Deprecated
   public String getEventSpaceForCalendar(String fullName) throws XWikiException{
-    mLogger.warn("Deprecated method getEventSpaceForCalendar used: "
+    LOGGER.warn("Deprecated method getEventSpaceForCalendar used: "
         + context.getDoc().getFullName() + " for calendar [" + fullName + "].");
     return CalendarUtils.getInstance().getEventSpaceForCalendar(fullName, context);
   }

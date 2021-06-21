@@ -44,7 +44,7 @@ public class CalendarService implements ICalendarService {
   @Requirement("celements.CalendarClasses")
   private IClassCollectionRole calClasses;
 
-  private static Logger LOGGER = LoggerFactory.getLogger(CalendarService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CalendarService.class);
 
   public static final String CALENDAR_SERVICE_START_DATE =
       "com.celements.calendar.service.CalendarService.startDate";

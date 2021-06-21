@@ -1,7 +1,7 @@
 package com.celements.calendar.classes;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.Requirement;
 import org.xwiki.model.reference.DocumentReference;
@@ -63,11 +63,9 @@ public class CalendarClasses extends AbstractClassCollection {
   @Deprecated
   public static final String PROPERTY_EVENT_DATE_END = "eventDate_end";
   @Deprecated
-  public static final String PROPERTY_EVENT_DATE_VALIDATION = 
-      "cel_calendar_validation_event_date";
+  public static final String PROPERTY_EVENT_DATE_VALIDATION = "cel_calendar_validation_event_date";
   @Deprecated
-  public static final String PROPERTY_EVENT_DATE_END_VALIDATION = 
-      "cel_calendar_validation_event_end_date";
+  public static final String PROPERTY_EVENT_DATE_END_VALIDATION = "cel_calendar_validation_event_end_date";
   @Deprecated
   public static final String PROPERTY_EVENT_DATE_FORMAT = "dd.MM.yyyy HH:mm";
   @Deprecated
@@ -85,18 +83,13 @@ public class CalendarClasses extends AbstractClassCollection {
   @Deprecated
   public static final String PROPERTY_DO_SUBSCRIBE = "doSubscribe";
 
-  private static Log LOGGER = LogFactory.getFactory().getInstance(CalendarClasses.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CalendarClasses.class);
 
   @Requirement
   private ICalendarClassConfig classConf;
 
   @Requirement
   private IWebUtilsService webUtilsService;
-
-  @Override
-  protected Log getLogger() {
-    return LOGGER;
-  }
 
   @Override
   protected void initClasses() throws XWikiException {
@@ -187,15 +180,15 @@ public class CalendarClasses extends AbstractClassCollection {
     needsUpdate |= bclass.addTextAreaField(PROPERTY_LOCATION_RTE, PROPERTY_LOCATION_RTE,
         80, 15);
     needsUpdate |= addDateField(bclass, PROPERTY_EVENT_DATE, PROPERTY_EVENT_DATE,
-        PROPERTY_EVENT_DATE_FORMAT, 20, 0, getRegexDate(false, true), 
+        PROPERTY_EVENT_DATE_FORMAT, 20, 0, getRegexDate(false, true),
         PROPERTY_EVENT_DATE_VALIDATION);
     needsUpdate |= addDateField(bclass, PROPERTY_EVENT_DATE_END, PROPERTY_EVENT_DATE_END,
-        PROPERTY_EVENT_DATE_FORMAT, 20, 0, getRegexDate(true, true), 
+        PROPERTY_EVENT_DATE_FORMAT, 20, 0, getRegexDate(true, true),
         PROPERTY_EVENT_DATE_END_VALIDATION);
     needsUpdate |= bclass.addBooleanField(PROPERTY_EVENT_IS_SUBSCRIBABLE,
         PROPERTY_EVENT_IS_SUBSCRIBABLE, "yesno");
 
-    if(!"internal".equals(bclass.getCustomMapping())){
+    if (!"internal".equals(bclass.getCustomMapping())) {
       needsUpdate = true;
       bclass.setCustomMapping("internal");
     }
@@ -229,7 +222,7 @@ public class CalendarClasses extends AbstractClassCollection {
     BaseClass bclass = doc.getXClass();
     bclass.setDocumentReference(classRef);
     needsUpdate |= bclass.addTextField(PROPERTY_SUBSCRIBER, PROPERTY_SUBSCRIBER, 30);
-    needsUpdate |= bclass.addBooleanField(PROPERTY_DO_SUBSCRIBE, PROPERTY_DO_SUBSCRIBE, 
+    needsUpdate |= bclass.addBooleanField(PROPERTY_DO_SUBSCRIBE, PROPERTY_DO_SUBSCRIBE,
         "yesno");
 
     setContentAndSaveClassDocument(doc, needsUpdate);
@@ -243,7 +236,7 @@ public class CalendarClasses extends AbstractClassCollection {
   public DocumentReference getSubscriptionClassRef(String wikiName) {
     return classConf.getSubscriptionClassRef(new WikiReference(wikiName));
   }
-  
+
   public String getRegexDate(boolean allowEmpty, boolean withTime) {
     String regex = "(0[1-9]|[12][0-9]|3[01])\\.(0[1-9]|1[012])\\.([0-9]{4})";
     if (withTime) {

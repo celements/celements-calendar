@@ -33,7 +33,7 @@ public class DateEventSearchQueryTest extends AbstractComponentTest {
     replayDefault();
     IDateEventSearchQuery query = new DateEventSearchQuery(wikiRef, fromDate, toDate, null);
     assertEquals("returned wikiRef must", database, query.getWikiRef().getName());
-    wikiRef.setName("testName");
+    wikiRef = new WikiReference("testName");
     assertEquals("getWikiRef must return given database wiki name", database,
         query.getWikiRef().getName());
     assertNotSame(wikiRef, query.getWikiRef());

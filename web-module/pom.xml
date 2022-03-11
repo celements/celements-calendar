@@ -26,7 +26,7 @@
   <parent>
     <groupId>com.celements</groupId>
     <artifactId>celementsweb</artifactId>
-    <version>5.6-SNAPSHOT</version>
+    <version>5.6</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>calendar-web</artifactId>
@@ -56,7 +56,7 @@
     <dependency>
       <groupId>com.celements</groupId>
       <artifactId>celements-calendar</artifactId>
-      <version>5.1</version>
+      <version>5.2</version>
     </dependency>
   </dependencies>
   <build>

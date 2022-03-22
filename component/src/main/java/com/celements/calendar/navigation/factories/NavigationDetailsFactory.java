@@ -21,13 +21,15 @@ public class NavigationDetailsFactory implements INavigationDetailsFactory {
 
   private ICalendarService calService;
 
-  public NavigationDetails getNavigationDetails(Date startDate, int offset
-      ) throws NavigationDetailException {
+  @Override
+  public NavigationDetails getNavigationDetails(Date startDate, int offset)
+      throws NavigationDetailException {
     return NavigationDetails.create(startDate, offset);
   }
 
-  public NavigationDetails getNavigationDetails(DocumentReference calDocRef, IEvent event
-      ) throws NavigationDetailException {
+  @Override
+  public NavigationDetails getNavigationDetails(DocumentReference calDocRef, IEvent event)
+      throws NavigationDetailException {
     try {
       return getNavigationDetails(calDocRef, event, null);
     } catch (LuceneSearchException lse) {
@@ -37,7 +39,8 @@ public class NavigationDetailsFactory implements INavigationDetailsFactory {
     return null;
   }
 
-  public NavigationDetails getNavigationDetails(DocumentReference calDocRef, IEvent event, 
+  @Override
+  public NavigationDetails getNavigationDetails(DocumentReference calDocRef, IEvent event,
       IEventSearchQuery query) throws NavigationDetailException, LuceneSearchException {
     NavigationDetails navDetail = null;
     LOGGER.debug("getNavigationDetails: for cal '{}', event '{}'", calDocRef, event);
@@ -50,7 +53,7 @@ public class NavigationDetailsFactory implements INavigationDetailsFactory {
       List<IEvent> events;
       boolean hasMore, notFound;
       do {
-        if (query == null) {          
+        if (query == null) {
           events = cal.getEventsInternal(start, nb);
         } else {
           events = cal.searchEvents(query).getEventList(start, nb);
@@ -76,7 +79,7 @@ public class NavigationDetailsFactory implements INavigationDetailsFactory {
       LOGGER.debug("getNavigationDetails: found '{}'", navDetail);
       return navDetail;
     } else {
-      throw new NavigationDetailException("Unable to create NavigationDetails for cal '" 
+      throw new NavigationDetailException("Unable to create NavigationDetails for cal '"
           + calDocRef + "', event '" + event + "'");
     }
   }
@@ -87,7 +90,7 @@ public class NavigationDetailsFactory implements INavigationDetailsFactory {
     }
     return calService;
   }
-  
+
   void injectCalService(ICalendarService calService) {
     this.calService = calService;
   }

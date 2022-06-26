@@ -57,11 +57,11 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
       endNavDetails = getEndNavDetails(calDocRef, nb);
       getBenchService().bench("getCalendarNavigation after getEndNavDetails");
       if (isInvalidNavDetails(navDetails, cal)) {
-        LOGGER.debug("isInvalidNavDetails true for '" + navDetails + "'");
+        LOGGER.debug("isInvalidNavDetails true for '{}'", navDetails);
         navDetails = endNavDetails;
         cal = getCalService().getCalendar(calDocRef, navDetails.getStartDate());
       } else {
-        LOGGER.debug("isInvalidNavDetails false for '" + navDetails + "'");
+        LOGGER.debug("isInvalidNavDetails false for '{}'", navDetails);
       }
     } catch (NavigationDetailException exc) {
       LOGGER.warn("getCalendarNavigation encountered NavDetailException for calDocRef [" + calDocRef
@@ -93,12 +93,18 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
       throws NavigationDetailException {
     LOGGER.debug("getStartNavDetails for calDocRef [" + calDocRef + "]");
     IEvent firstEvent = getAllCalendar(calDocRef).getFirstEvent();
+    getBenchService().bench("getStartNavDetails after allCalendar.getFirstEvent");
     if (firstEvent != null) {
       Date startDate = firstEvent.getEventDate();
       if (startDate == null) {
         startDate = ICalendarClassConfig.DATE_LOW;
       }
-      return getNavDetailsFactory().getNavigationDetails(startDate, 0);
+      getBenchService()
+          .bench("getStartNavDetails before getNavDetailsFactory.getNavigationDetails");
+      NavigationDetails navigationDetails = getNavDetailsFactory().getNavigationDetails(startDate,
+          0);
+      getBenchService().bench("getStartNavDetails after getNavDetailsFactory.getNavigationDetails");
+      return navigationDetails;
     } else {
       throw new NavigationDetailException("empty calendar '" + calDocRef + "'");
     }

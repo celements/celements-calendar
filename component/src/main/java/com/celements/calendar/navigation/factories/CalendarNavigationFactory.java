@@ -15,6 +15,7 @@ import com.celements.calendar.search.IDateEventSearchQuery;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.search.IEventSearchRole;
 import com.celements.calendar.service.ICalendarService;
+import com.celements.performance.BenchmarkRole;
 import com.celements.search.lucene.ILuceneSearchService;
 import com.celements.search.lucene.LuceneSearchException;
 import com.xpn.xwiki.web.Utils;
@@ -28,6 +29,8 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
   private IEventSearchRole eventSearchService;
   private INavigationDetailsFactory navDetailsFactory;
   private ILuceneSearchService searchService;
+
+  private BenchmarkRole benchService;
 
   /**
    * @deprecated instead use
@@ -48,8 +51,11 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
     NavigationDetails startNavDetails = null;
     NavigationDetails endNavDetails = null;
     try {
+      getBenchService().bench("getCalendarNavigation after getCalendar");
       startNavDetails = getStartNavDetails(calDocRef);
+      getBenchService().bench("getCalendarNavigation after getStartNavDetails");
       endNavDetails = getEndNavDetails(calDocRef, nb);
+      getBenchService().bench("getCalendarNavigation after getEndNavDetails");
       if (isInvalidNavDetails(navDetails, cal)) {
         LOGGER.debug("isInvalidNavDetails true for '" + navDetails + "'");
         navDetails = endNavDetails;
@@ -388,6 +394,13 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
   private ICalendar getAllCalendarReversed(DocumentReference calDocRef) {
     return getCalService().getCalendarArchive(calDocRef, ICalendarClassConfig.DATE_HIGH);
+  }
+
+  BenchmarkRole getBenchService() {
+    if (benchService == null) {
+      benchService = Utils.getComponent(BenchmarkRole.class);
+    }
+    return benchService;
   }
 
   ICalendarService getCalService() {

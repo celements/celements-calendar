@@ -1,9 +1,7 @@
 package com.celements.calendar.service;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +25,8 @@ import com.celements.calendar.search.DefaultEventSearchQuery;
 import com.celements.calendar.search.IDateEventSearchQuery;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.search.SearchTermEventSearchQuery;
+import com.celements.performance.BenchmarkRole;
 import com.celements.search.lucene.query.LuceneQuery;
-import com.celements.web.service.CelementsWebScriptService;
 import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -50,11 +48,11 @@ public class CalendarScriptService implements ScriptService {
   @Requirement
   private IWebUtilsService webUtilsService;
 
-  @Requirement("celementsweb")
-  private ScriptService celementsWebScriptService;
-
   @Requirement
   private Execution execution;
+
+  @Requirement
+  private BenchmarkRole benchSrv;
 
   private XWikiContext getContext() {
     return (XWikiContext) execution.getContext().getProperty(
@@ -114,9 +112,9 @@ public class CalendarScriptService implements ScriptService {
     if (hasViewRights(calConfigDocRef)) {
       try {
         NavigationDetails navigationDetails = calNavService.getNavigationDetails(eventDate, offset);
-        bench("getCalendarNavigation after getNavigationDetails");
+        benchSrv.bench("getCalendarNavigation after getNavigationDetails");
         calNav = calNavService.getCalendarNavigation(calConfigDocRef, navigationDetails, nb);
-        bench("getCalendarNavigation after getCalendarNavigation");
+        benchSrv.bench("getCalendarNavigation after getCalendarNavigation");
       } catch (Exception exc) {
         LOGGER.error("Exception getting calNav for cal '{}', eventDate '{}', "
             + "offset '{}', nb '{}'", calConfigDocRef, eventDate, offset, nb, exc);
@@ -240,34 +238,4 @@ public class CalendarScriptService implements ScriptService {
     return ICalendarClassConfig.DATE_LOW;
   }
 
-  private long getBenchLastTime() {
-    return (long) ((CelementsWebScriptService) celementsWebScriptService)
-        .getGlobalContextValue("bench_lastTime");
-  }
-
-  private long getBenchStartTime() {
-    return (long) ((CelementsWebScriptService) celementsWebScriptService)
-        .getGlobalContextValue("bench_startTime");
-  }
-
-  private void appendBenchString(String benchString) {
-    @SuppressWarnings("unchecked")
-    ArrayList<String> outStrings = Optional
-        .ofNullable((ArrayList<String>) ((CelementsWebScriptService) celementsWebScriptService)
-            .getGlobalContextValue("bench_outString"))
-        .orElse(new ArrayList<>());
-    outStrings.add(benchString);
-    ((CelementsWebScriptService) celementsWebScriptService).setGlobalContextValue("bench_outString",
-        outStrings);
-  }
-
-  private void bench(String label) {
-    long currTime = new Date().getTime();
-    long benchLastTime = getBenchLastTime();
-    long benchStartTime = getBenchStartTime();
-    double totalTime = (currTime - benchStartTime) / 1000.0;
-    double time = (currTime - benchLastTime) / 1000.0;
-    appendBenchString("bench '" + label + "' &mdash; in " + time + "s &mdash; total " + totalTime
-        + "s");
-  }
 }

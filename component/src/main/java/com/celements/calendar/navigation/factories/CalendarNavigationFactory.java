@@ -91,16 +91,16 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
 
   NavigationDetails getStartNavDetails(DocumentReference calDocRef)
       throws NavigationDetailException {
-    LOGGER.debug("getStartNavDetails for calDocRef [" + calDocRef + "]");
-    IEvent firstEvent = getAllCalendar(calDocRef).getFirstEvent();
-    getBenchService().bench("getStartNavDetails after allCalendar.getFirstEvent");
+    LOGGER.debug("getStartNavDetails for calDocRef [{}]", calDocRef);
+    ICalendar allCalendar = getAllCalendar(calDocRef);
+    getBenchService().bench("getStartNavDetails after allCalendar");
+    IEvent firstEvent = allCalendar.getFirstEvent();
+    getBenchService().bench("getStartNavDetails after getFirstEvent");
     if (firstEvent != null) {
       Date startDate = firstEvent.getEventDate();
       if (startDate == null) {
         startDate = ICalendarClassConfig.DATE_LOW;
       }
-      getBenchService()
-          .bench("getStartNavDetails before getNavDetailsFactory.getNavigationDetails");
       NavigationDetails navigationDetails = getNavDetailsFactory().getNavigationDetails(startDate,
           0);
       getBenchService().bench("getStartNavDetails after getNavDetailsFactory.getNavigationDetails");

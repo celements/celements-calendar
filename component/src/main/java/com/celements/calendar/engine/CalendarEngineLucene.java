@@ -100,10 +100,14 @@ public class CalendarEngineLucene extends AbstractCalendarEngine {
   private IEvent getBorderEvent(ICalendar cal, boolean first) throws LuceneSearchException {
     IEvent ret = null;
     int offset = 0;
+    benchSrv.bench("getBorderEvent before isArchive");
     if ((first && cal.isArchive()) || (!first && !cal.isArchive())) {
+      benchSrv.bench("getBorderEvent before countEvents");
       offset = (int) (countEvents(cal) - 1);
     }
+    benchSrv.bench("getBorderEvent before getEvents");
     List<IEvent> events = getEvents(cal, offset, 1);
+    benchSrv.bench("getBorderEvent after getEvents");
     if (events.size() > 0) {
       ret = events.get(0);
     } else {

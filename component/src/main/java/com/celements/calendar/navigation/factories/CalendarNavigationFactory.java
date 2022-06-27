@@ -402,7 +402,7 @@ public class CalendarNavigationFactory implements ICalendarNavigationFactory {
     return getCalService().getCalendarArchive(calDocRef, ICalendarClassConfig.DATE_HIGH);
   }
 
-  BenchmarkRole getBenchService() {
+  private BenchmarkRole getBenchService() {
     if (benchService == null) {
       benchService = Utils.getComponent(BenchmarkRole.class);
     }

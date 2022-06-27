@@ -15,6 +15,7 @@ import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.ICalendarSearchQueryBuilder;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.search.IEventSearchRole;
+import com.celements.performance.BenchmarkRole;
 import com.celements.search.lucene.ILuceneSearchService;
 import com.celements.search.lucene.LuceneSearchException;
 
@@ -32,6 +33,9 @@ public class CalendarEngineLucene extends AbstractCalendarEngine {
 
   @Requirement
   private ILuceneSearchService searchService;
+
+  @Requirement
+  private BenchmarkRole benchSrv;
 
   @Override
   public String getName() {
@@ -73,7 +77,9 @@ public class CalendarEngineLucene extends AbstractCalendarEngine {
   public IEvent getFirstEvent(ICalendar cal) {
     IEvent event = null;
     try {
+      benchSrv.bench("getFirstEvent before getBorderEvent");
       event = getBorderEvent(cal, true);
+      benchSrv.bench("getFirstEvent after getBorderEvent");
     } catch (LuceneSearchException lse) {
       LOGGER.error("Unable to search for cal '" + cal + "'", lse);
     }

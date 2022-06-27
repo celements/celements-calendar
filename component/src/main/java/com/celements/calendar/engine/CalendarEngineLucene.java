@@ -52,7 +52,10 @@ public class CalendarEngineLucene extends AbstractCalendarEngine {
     long startTime = System.currentTimeMillis();
     List<IEvent> eventList = Collections.emptyList();
     try {
-      eventList = searchEvents(cal, null).getEventList(offset, limit);
+      EventSearchResult searchEvents = searchEvents(cal, null);
+      benchSrv.bench("getEvents after searchEvents");
+      eventList = searchEvents.getEventList(offset, limit);
+      benchSrv.bench("getEvents after getEventList");
     } catch (LuceneSearchException lse) {
       LOGGER.error("Unable to search for cal '" + cal + "'", lse);
     }

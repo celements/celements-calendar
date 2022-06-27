@@ -68,7 +68,9 @@ public class EventSearchResult {
    */
   public List<IEvent> getEventList(int offset, int limit) throws LuceneSearchException {
     List<IEvent> eventList = new ArrayList<IEvent>();
-    for (EntityReference ref : getSearchResult().getResults(offset, limit)) {
+    List<EntityReference> results = getSearchResult().getResults(offset, limit);
+    getBenchService().bench("getEventList after getResults size: " + results.size());
+    for (EntityReference ref : results) {
       if (ref instanceof DocumentReference) {
         eventList.add(new Event((DocumentReference) ref));
       } else {
@@ -76,6 +78,7 @@ public class EventSearchResult {
             + "for search '{}'", ref, this);
       }
     }
+    getBenchService().bench("getEventList after transform to Event objects");
     return eventList;
   }
 

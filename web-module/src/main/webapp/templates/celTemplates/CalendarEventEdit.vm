@@ -25,7 +25,7 @@ $celementsweb.addExtJSfileOnce(':celJS/jquery-datetimepicker/jquery.datetimepick
       #set($dispProp = '')
       #set($dispProp = $doc.display("$!prop", 'edit', $sobj))
       #set($dispProp = ${dispProp.replaceAll('\{/?pre\}','')})
-      #set($contentIsEmpty = $contentIsEmpty && $xwiki.celementsweb.isEmptyRTEString("$dispProp")))
+      #set($contentIsEmpty = $contentIsEmpty && $services.rteconfig.isEmptyRTEString("$dispProp")))
     #end
     #if($contentIsEmpty)
       #set($!devnull = $!eventTransList.add($sobj.getProperty('lang').getValue()))

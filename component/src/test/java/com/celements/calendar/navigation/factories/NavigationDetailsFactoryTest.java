@@ -18,10 +18,10 @@ import com.celements.calendar.search.DefaultEventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.service.ICalendarService;
-import com.celements.common.test.AbstractBridgedComponentTestCase;
+import com.celements.common.test.AbstractComponentTest;
 import com.celements.search.lucene.LuceneSearchException;
 
-public class NavigationDetailsFactoryTest extends AbstractBridgedComponentTestCase {
+public class NavigationDetailsFactoryTest extends AbstractComponentTest {
 
   private NavigationDetailsFactory navDetailsFactory;
   private ICalendarService calServiceMock;
@@ -34,12 +34,12 @@ public class NavigationDetailsFactoryTest extends AbstractBridgedComponentTestCa
   @Before
   public void setUp_NavigationDetailsFactoryTest() throws Exception {
     navDetailsFactory = new NavigationDetailsFactory();
-    calServiceMock = createMockAndAddToDefault(ICalendarService.class);
+    calServiceMock = createDefaultMock(ICalendarService.class);
     navDetailsFactory.injectCalService(calServiceMock);
-    calMock = createMockAndAddToDefault(ICalendar.class);
+    calMock = createDefaultMock(ICalendar.class);
     calDocRef = new DocumentReference("myWiki", "mySpace", "myCalDoc");
     expect(calMock.getDocumentReference()).andReturn(calDocRef).anyTimes();
-    eventMock = createMockAndAddToDefault(IEvent.class);
+    eventMock = createDefaultMock(IEvent.class);
     evDocRef = new DocumentReference("myWiki", "evSpace", "ev1");
     expect(eventMock.getDocumentReference()).andReturn(evDocRef).anyTimes();
   }
@@ -57,10 +57,9 @@ public class NavigationDetailsFactoryTest extends AbstractBridgedComponentTestCa
   public void testGetNavigationDetails() throws Exception {
     Date eventDate = new Date();
     List<IEvent> eventList = Arrays.asList(eventMock);
-    
+
     expect(eventMock.getEventDate()).andReturn(eventDate).once();
-    expect(calServiceMock.getCalendar(eq(calDocRef), eq(eventDate))).andReturn(calMock
-        ).once();
+    expect(calServiceMock.getCalendar(eq(calDocRef), eq(eventDate))).andReturn(calMock).once();
     expect(calMock.getStartDate()).andReturn(eventDate).once();
     expect(calMock.getEventsInternal(eq(0), eq(10))).andReturn(eventList).once();
 
@@ -75,14 +74,13 @@ public class NavigationDetailsFactoryTest extends AbstractBridgedComponentTestCa
   @Test
   public void testGetNavigationDetails_multiple() throws Exception {
     Date eventDate = new Date();
-    List<IEvent> eventList = Arrays.asList(createMockAndAddToDefault(IEvent.class), 
-        createMockAndAddToDefault(IEvent.class), 
-        eventMock, 
-        createMockAndAddToDefault(IEvent.class));
-    
+    List<IEvent> eventList = Arrays.asList(createDefaultMock(IEvent.class),
+        createDefaultMock(IEvent.class),
+        eventMock,
+        createDefaultMock(IEvent.class));
+
     expect(eventMock.getEventDate()).andReturn(eventDate).once();
-    expect(calServiceMock.getCalendar(eq(calDocRef), eq(eventDate))).andReturn(calMock
-        ).once();
+    expect(calServiceMock.getCalendar(eq(calDocRef), eq(eventDate))).andReturn(calMock).once();
     expect(calMock.getStartDate()).andReturn(eventDate).once();
     expect(calMock.getEventsInternal(eq(0), eq(10))).andReturn(eventList).once();
 
@@ -99,11 +97,10 @@ public class NavigationDetailsFactoryTest extends AbstractBridgedComponentTestCa
     Date eventDate = new Date();
     List<IEvent> eventList = Arrays.asList(eventMock);
     IEventSearchQuery query = new DefaultEventSearchQuery(new WikiReference("myWiki"));
-    EventSearchResult searchResultMock = createMockAndAddToDefault(EventSearchResult.class);
+    EventSearchResult searchResultMock = createDefaultMock(EventSearchResult.class);
 
     expect(eventMock.getEventDate()).andReturn(eventDate).once();
-    expect(calServiceMock.getCalendar(eq(calDocRef), eq(eventDate))).andReturn(calMock
-        ).once();
+    expect(calServiceMock.getCalendar(eq(calDocRef), eq(eventDate))).andReturn(calMock).once();
     expect(calMock.getStartDate()).andReturn(eventDate).once();
     expect(calMock.searchEvents(same(query))).andReturn(searchResultMock).once();
     expect(searchResultMock.getEventList(eq(0), eq(10))).andReturn(eventList).once();
@@ -122,12 +119,11 @@ public class NavigationDetailsFactoryTest extends AbstractBridgedComponentTestCa
   public void testGetNavigationDetails_query_LSE() throws Exception {
     Date eventDate = new Date();
     IEventSearchQuery query = new DefaultEventSearchQuery(new WikiReference("myWiki"));
-    EventSearchResult searchResultMock = createMockAndAddToDefault(EventSearchResult.class);
-    Throwable cause = createMockAndAddToDefault(LuceneSearchException.class);
+    EventSearchResult searchResultMock = createDefaultMock(EventSearchResult.class);
+    Throwable cause = createDefaultMock(LuceneSearchException.class);
 
     expect(eventMock.getEventDate()).andReturn(eventDate).once();
-    expect(calServiceMock.getCalendar(eq(calDocRef), eq(eventDate))).andReturn(calMock
-        ).once();
+    expect(calServiceMock.getCalendar(eq(calDocRef), eq(eventDate))).andReturn(calMock).once();
     expect(calMock.searchEvents(same(query))).andReturn(searchResultMock).once();
     expect(searchResultMock.getEventList(eq(0), eq(10))).andThrow(cause).once();
 
@@ -158,12 +154,11 @@ public class NavigationDetailsFactoryTest extends AbstractBridgedComponentTestCa
   @Test
   public void testGetNavigationDetails_NDE_notFound() throws Exception {
     Date eventDate = new Date();
-    List<IEvent> eventList = Arrays.asList(createMockAndAddToDefault(IEvent.class), 
-        createMockAndAddToDefault(IEvent.class));
-    
+    List<IEvent> eventList = Arrays.asList(createDefaultMock(IEvent.class),
+        createDefaultMock(IEvent.class));
+
     expect(eventMock.getEventDate()).andReturn(eventDate).once();
-    expect(calServiceMock.getCalendar(eq(calDocRef), eq(eventDate))).andReturn(calMock
-        ).once();
+    expect(calServiceMock.getCalendar(eq(calDocRef), eq(eventDate))).andReturn(calMock).once();
     expect(calMock.getEventsInternal(eq(0), eq(10))).andReturn(eventList).once();
 
     replayDefault();

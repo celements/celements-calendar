@@ -16,10 +16,10 @@ import com.celements.calendar.navigation.factories.ICalendarNavigationFactory;
 import com.celements.calendar.navigation.factories.INavigationDetailsFactory;
 import com.celements.calendar.search.DefaultEventSearchQuery;
 import com.celements.calendar.search.IEventSearchQuery;
-import com.celements.common.test.AbstractBridgedComponentTestCase;
+import com.celements.common.test.AbstractComponentTest;
 import com.xpn.xwiki.web.Utils;
 
-public class CalendarNavigationServiceTest extends AbstractBridgedComponentTestCase {
+public class CalendarNavigationServiceTest extends AbstractComponentTest {
 
   private CalendarNavigationService calNavService;
   private INavigationDetailsFactory navDetailsFactoryMock;

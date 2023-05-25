@@ -14,14 +14,14 @@ import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.search.EventSearchResult;
-import com.celements.calendar.search.IEventSearchRole;
 import com.celements.calendar.search.IEventSearchQuery;
-import com.celements.common.test.AbstractBridgedComponentTestCase;
+import com.celements.calendar.search.IEventSearchRole;
+import com.celements.common.test.AbstractComponentTest;
 import com.celements.search.lucene.ILuceneSearchService;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.web.Utils;
 
-public class AbstractCalendarEngineTest extends AbstractBridgedComponentTestCase {
+public class AbstractCalendarEngineTest extends AbstractComponentTest {
 
   private CalendarEngineLucene engine;
   private IEventSearchRole eventSearchMock;
@@ -33,14 +33,14 @@ public class AbstractCalendarEngineTest extends AbstractBridgedComponentTestCase
   @Before
   public void setUp_AbstractCalendarEngineTest() {
     engine = (CalendarEngineLucene) Utils.getComponent(ICalendarEngineRole.class, "lucene");
-    eventSearchMock = createMockAndAddToDefault(IEventSearchRole.class);
+    eventSearchMock = createDefaultMock(IEventSearchRole.class);
     engine.injectEventSearchService(eventSearchMock);
-    searchServiceMock = createMockAndAddToDefault(ILuceneSearchService.class);
+    searchServiceMock = createDefaultMock(ILuceneSearchService.class);
     engine.injectSearchService(searchServiceMock);
-    eventSearchResultMock = createMockAndAddToDefault(EventSearchResult.class);
+    eventSearchResultMock = createDefaultMock(EventSearchResult.class);
     expect(eventSearchMock.getSearchResult(anyObject(IEventSearchQuery.class))).andReturn(
         eventSearchResultMock).anyTimes();
-    calMock = createMockAndAddToDefault(ICalendar.class);
+    calMock = createDefaultMock(ICalendar.class);
     database = "xwikidb";
     DocumentReference docRef = new DocumentReference(database, "someSpace", "someCal");
     expect(calMock.getDocumentReference()).andReturn(docRef).anyTimes();
@@ -60,10 +60,9 @@ public class AbstractCalendarEngineTest extends AbstractBridgedComponentTestCase
     long ret = engine.countEvents(calMock);
     String key = engine.getCalCountCacheKey(calMock);
     verifyDefault();
- 
+
     assertEquals(count, ret);
-    assertEquals((long) count, Utils.getComponent(Execution.class).getContext(
-        ).getProperty(key));
+    assertEquals((long) count, Utils.getComponent(Execution.class).getContext().getProperty(key));
   }
 
   @Test
@@ -79,7 +78,7 @@ public class AbstractCalendarEngineTest extends AbstractBridgedComponentTestCase
     long ret = engine.countEvents(calMock);
     String key = engine.getCalCountCacheKey(calMock);
     verifyDefault();
- 
+
     assertEquals(count, ret);
     assertNull(Utils.getComponent(Execution.class).getContext().getProperty(key));
   }
@@ -100,19 +99,19 @@ public class AbstractCalendarEngineTest extends AbstractBridgedComponentTestCase
 
     assertEquals(count, ret);
   }
-  
+
   @Test
   public void testGetCalCountCacheKey() {
     Date startDate = new Date();
     boolean isArchive = false;
-    
+
     expectForCalMock(startDate, isArchive);
 
     replayDefault();
     String ret = engine.getCalCountCacheKey(calMock);
     int hashCode = calMock.hashCode();
     verifyDefault();
-    
+
     String expectedKey = "CalendarEngine.countEvents|lucene|" + hashCode;
     assertEquals(expectedKey, ret);
   }

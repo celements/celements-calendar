@@ -1,6 +1,5 @@
 package com.celements.calendar.search;
 
-import static com.celements.common.test.CelementsTestUtils.*;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
@@ -27,7 +26,7 @@ public class EventSearchResultTest extends AbstractComponentTest {
 
   @Before
   public void setUp_EventSearchResultTest() throws Exception {
-    searchServiceMock = createMockAndAddToDefault(ILuceneSearchService.class);
+    searchServiceMock = createDefaultMock(ILuceneSearchService.class);
   }
 
   @Test
@@ -35,7 +34,7 @@ public class EventSearchResultTest extends AbstractComponentTest {
     LuceneQuery query = new LuceneQuery(Arrays.asList(LucenePlugin.DOCTYPE_WIKIPAGE));
     List<String> sortFields = Arrays.asList("field1", "field2");
     List<String> languages = null;
-    LuceneSearchResult resultMock = createMockAndAddToDefault(LuceneSearchResult.class);
+    LuceneSearchResult resultMock = createDefaultMock(LuceneSearchResult.class);
     EventSearchResult result = getEventSearchResult(query, sortFields, false);
     expect(searchServiceMock.search(same(query), eq(sortFields), eq(languages)))
         .andReturn(resultMock).once();
@@ -50,7 +49,7 @@ public class EventSearchResultTest extends AbstractComponentTest {
     LuceneQuery query = new LuceneQuery(Arrays.asList(LucenePlugin.DOCTYPE_WIKIPAGE));
     List<String> sortFields = Arrays.asList("field1", "field2");
     List<String> languages = null;
-    LuceneSearchResult resultMock = createMockAndAddToDefault(LuceneSearchResult.class);
+    LuceneSearchResult resultMock = createDefaultMock(LuceneSearchResult.class);
     EventSearchResult result = getEventSearchResult(query, sortFields, true);
     expect(searchServiceMock.searchWithoutChecks(same(query), eq(sortFields),
         eq(languages))).andReturn(resultMock).once();
@@ -67,7 +66,7 @@ public class EventSearchResultTest extends AbstractComponentTest {
     List<String> languages = null;
     int offset = 5;
     int limit = 10;
-    LuceneSearchResult resultMock = createMockAndAddToDefault(LuceneSearchResult.class);
+    LuceneSearchResult resultMock = createDefaultMock(LuceneSearchResult.class);
     DocumentReference docRef1 = new DocumentReference("xwikidb", "TestSpace", "Event1");
     DocumentReference docRef2 = new DocumentReference("xwikidb", "TestSpace", "Event2");
     AttachmentReference attRef = new AttachmentReference("fileName", docRef1);
@@ -92,8 +91,8 @@ public class EventSearchResultTest extends AbstractComponentTest {
     List<String> languages = null;
     int offset = 5;
     int limit = 10;
-    Throwable cause = createMockAndAddToDefault(LuceneSearchException.class);
-    LuceneSearchResult resultMock = createMockAndAddToDefault(LuceneSearchResult.class);
+    Throwable cause = createDefaultMock(LuceneSearchException.class);
+    LuceneSearchResult resultMock = createDefaultMock(LuceneSearchResult.class);
     EventSearchResult result = getEventSearchResult(query, sortFields, false);
     expect(searchServiceMock.search(same(query), eq(sortFields), eq(languages)))
         .andReturn(resultMock).once();
@@ -113,7 +112,7 @@ public class EventSearchResultTest extends AbstractComponentTest {
     LuceneQuery query = new LuceneQuery(Arrays.asList(LucenePlugin.DOCTYPE_WIKIPAGE));
     List<String> sortFields = Arrays.asList("field1", "field2");
     List<String> languages = null;
-    LuceneSearchResult resultMock = createMockAndAddToDefault(LuceneSearchResult.class);
+    LuceneSearchResult resultMock = createDefaultMock(LuceneSearchResult.class);
     EventSearchResult result = getEventSearchResult(query, sortFields, false);
     expect(searchServiceMock.search(same(query), eq(sortFields), eq(languages)))
         .andReturn(resultMock).once();
@@ -129,8 +128,8 @@ public class EventSearchResultTest extends AbstractComponentTest {
     LuceneQuery query = new LuceneQuery(Arrays.asList(LucenePlugin.DOCTYPE_WIKIPAGE));
     List<String> sortFields = Arrays.asList("field1", "field2");
     List<String> languages = null;
-    LuceneSearchResult resultMock = createMockAndAddToDefault(LuceneSearchResult.class);
-    Throwable cause = createMockAndAddToDefault(LuceneSearchException.class);
+    LuceneSearchResult resultMock = createDefaultMock(LuceneSearchResult.class);
+    Throwable cause = createDefaultMock(LuceneSearchException.class);
 
     EventSearchResult result = getEventSearchResult(query, sortFields, false);
     expect(searchServiceMock.search(same(query), eq(sortFields), eq(languages)))

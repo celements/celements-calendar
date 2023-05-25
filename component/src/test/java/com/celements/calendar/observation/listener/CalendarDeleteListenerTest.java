@@ -12,10 +12,10 @@ import org.xwiki.observation.event.Event;
 import com.celements.calendar.classes.CalendarClasses;
 import com.celements.calendar.observation.event.CalendarDeletedEvent;
 import com.celements.calendar.observation.event.CalendarDeletingEvent;
-import com.celements.common.test.AbstractBridgedComponentTestCase;
+import com.celements.common.test.AbstractComponentTest;
 import com.xpn.xwiki.web.Utils;
 
-public class CalendarDeleteListenerTest extends AbstractBridgedComponentTestCase {
+public class CalendarDeleteListenerTest extends AbstractComponentTest {
 
   private CalendarDeleteListener listener;
 

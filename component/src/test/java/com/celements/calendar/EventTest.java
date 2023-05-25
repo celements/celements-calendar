@@ -19,6 +19,7 @@
  */
 package com.celements.calendar;
 
+import static com.celements.common.test.CelementsTestUtils.*;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
@@ -37,7 +38,7 @@ import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.service.ICalendarService;
-import com.celements.common.test.AbstractBridgedComponentTestCase;
+import com.celements.common.test.AbstractComponentTest;
 import com.celements.common.test.TestMessageTool;
 import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWiki;
@@ -48,7 +49,7 @@ import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.web.Utils;
 import com.xpn.xwiki.web.XWikiRequest;
 
-public class EventTest extends AbstractBridgedComponentTestCase {
+public class EventTest extends AbstractComponentTest {
 
   private Event event;
   private XWikiContext context;
@@ -61,9 +62,9 @@ public class EventTest extends AbstractBridgedComponentTestCase {
   public void setUp_EventTest() throws Exception {
     context = getContext();
     xwiki = getWikiMock();
-    testMsgTool = (TestMessageTool)context.getMessageTool();
+    testMsgTool = (TestMessageTool) context.getMessageTool();
     testMsgTool.injectMessage("cel_cal_datetime_delim", " - ");
-    List<BaseObject> objList = new ArrayList<BaseObject>();
+    List<BaseObject> objList = new ArrayList<>();
     BaseObject eventObj = new BaseObject();
     eventDocRef = new DocumentReference(context.getDatabase(), "Test", "Event1");
     eventObj.setDocumentReference(eventDocRef);
@@ -72,7 +73,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     event = new Event(objList);
     event.injectDocumentReference(eventDocRef);
     event.injectDefaultLanguage("de");
-    calendar = createMockAndAddToDefault(ICalendar.class);
+    calendar = createDefaultMock(ICalendar.class);
     event.injectCalendar(calendar);
   }
 
@@ -85,12 +86,11 @@ public class EventTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testGetObj_NPE() throws Exception {
-    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(), 
+    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(),
         "MySpace", "MyCal");
     XWikiDocument eventDoc = new XWikiDocument(myEventDocRef);
-    expect(xwiki.getDocument(eq(myEventDocRef), same(context))).andReturn(eventDoc
-        ).atLeastOnce();
-    XWikiRequest request = createMockAndAddToDefault(XWikiRequest.class);
+    expect(xwiki.getDocument(eq(myEventDocRef), same(context))).andReturn(eventDoc).atLeastOnce();
+    XWikiRequest request = createDefaultMock(XWikiRequest.class);
     context.setRequest(request);
     expect(request.get(eq("template"))).andReturn("").anyTimes();
     replayDefault();
@@ -102,7 +102,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testGetObj_langPrio() throws Exception {
-    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(), 
+    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(),
         "MySpace", "MyCal");
     Event myEvent = new Event(myEventDocRef);
     XWikiDocument eventDoc = new XWikiDocument(myEventDocRef);
@@ -113,9 +113,8 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     BaseObject objNonEn = new BaseObject();
     objNonEn.setXClassReference(myEvent.getCalendarEventClassRef());
     eventDoc.addXObject(objNonEn);
-    expect(xwiki.getDocument(eq(myEventDocRef), same(context))).andReturn(eventDoc
-        ).atLeastOnce();
-    XWikiRequest request = createMockAndAddToDefault(XWikiRequest.class);
+    expect(xwiki.getDocument(eq(myEventDocRef), same(context))).andReturn(eventDoc).atLeastOnce();
+    XWikiRequest request = createDefaultMock(XWikiRequest.class);
     context.setRequest(request);
     expect(request.get(eq("template"))).andReturn("").anyTimes();
     replayDefault();
@@ -126,7 +125,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testGetObj_noRequest() throws Exception {
-    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(), 
+    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(),
         "MySpace", "MyCal");
     XWikiDocument eventDoc = new XWikiDocument(myEventDocRef);
     expect(xwiki.getDocument(eq(myEventDocRef), same(context))).andReturn(eventDoc).once();
@@ -139,22 +138,20 @@ public class EventTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testGetObj_withRequestTemplate() throws Exception {
-    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(), 
+    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(),
         "MySpace", "MyCal");
-    Event myEvent = new Event(myEventDocRef);   
+    Event myEvent = new Event(myEventDocRef);
     XWikiDocument eventDoc = new XWikiDocument(myEventDocRef);
     expect(xwiki.getDocument(eq(myEventDocRef), same(context))).andReturn(eventDoc).once();
-    DocumentReference tmplDocRef = new DocumentReference(context.getDatabase(), 
+    DocumentReference tmplDocRef = new DocumentReference(context.getDatabase(),
         "MySpace", "MyTemplate");
-    getContext().setRequest(createMockAndAddToDefault(XWikiRequest.class));
+    getContext().setRequest(createDefaultMock(XWikiRequest.class));
     expect(getContext().getRequest().get(eq("template"))).andReturn(Utils.getComponent(
-        IWebUtilsService.class).serializeRef(tmplDocRef)).once();    
-    expect(getWikiMock().exists(eq(tmplDocRef), same(getContext()))).andReturn(true
-        ).once();
-    expect(getWikiMock().exists(eq(myEventDocRef), same(getContext()))).andReturn(false
-        ).once();
-    
-    replayDefault(); 
+        IWebUtilsService.class).serializeRef(tmplDocRef)).once();
+    expect(getWikiMock().exists(eq(tmplDocRef), same(getContext()))).andReturn(true).once();
+    expect(getWikiMock().exists(eq(myEventDocRef), same(getContext()))).andReturn(false).once();
+
+    replayDefault();
     myEvent.injectDefaultLanguage("de");
     BaseObject obj = myEvent.getObj("de");
     assertNotNull(obj);
@@ -164,22 +161,20 @@ public class EventTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testGetObj_withRequestTemplate_docExists() throws Exception {
-    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(), 
+    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(),
         "MySpace", "MyCal");
-    Event myEvent = new Event(myEventDocRef);   
+    Event myEvent = new Event(myEventDocRef);
     XWikiDocument eventDoc = new XWikiDocument(myEventDocRef);
     expect(xwiki.getDocument(eq(myEventDocRef), same(context))).andReturn(eventDoc).once();
-    DocumentReference tmplDocRef = new DocumentReference(context.getDatabase(), 
+    DocumentReference tmplDocRef = new DocumentReference(context.getDatabase(),
         "MySpace", "MyTemplate");
-    getContext().setRequest(createMockAndAddToDefault(XWikiRequest.class));
+    getContext().setRequest(createDefaultMock(XWikiRequest.class));
     expect(getContext().getRequest().get(eq("template"))).andReturn(Utils.getComponent(
-        IWebUtilsService.class).serializeRef(tmplDocRef)).once();    
-    expect(getWikiMock().exists(eq(tmplDocRef), same(getContext()))).andReturn(true
-        ).once();
-    expect(getWikiMock().exists(eq(myEventDocRef), same(getContext()))).andReturn(true
-        ).once();
-    
-    replayDefault(); 
+        IWebUtilsService.class).serializeRef(tmplDocRef)).once();
+    expect(getWikiMock().exists(eq(tmplDocRef), same(getContext()))).andReturn(true).once();
+    expect(getWikiMock().exists(eq(myEventDocRef), same(getContext()))).andReturn(true).once();
+
+    replayDefault();
     myEvent.injectDefaultLanguage("de");
     assertNull(myEvent.getObj("de"));
     verifyDefault();
@@ -187,20 +182,19 @@ public class EventTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testGetObj_withRequestTemplate_notExists() throws Exception {
-    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(), 
+    DocumentReference myEventDocRef = new DocumentReference(context.getDatabase(),
         "MySpace", "MyCal");
-    Event myEvent = new Event(myEventDocRef);   
+    Event myEvent = new Event(myEventDocRef);
     XWikiDocument eventDoc = new XWikiDocument(myEventDocRef);
     expect(xwiki.getDocument(eq(myEventDocRef), same(context))).andReturn(eventDoc).once();
-    DocumentReference tmplDocRef = new DocumentReference(context.getDatabase(), 
+    DocumentReference tmplDocRef = new DocumentReference(context.getDatabase(),
         "MySpace", "MyTemplate");
-    getContext().setRequest(createMockAndAddToDefault(XWikiRequest.class));
+    getContext().setRequest(createDefaultMock(XWikiRequest.class));
     expect(getContext().getRequest().get(eq("template"))).andReturn(Utils.getComponent(
-        IWebUtilsService.class).serializeRef(tmplDocRef)).once();    
-    expect(getWikiMock().exists(eq(tmplDocRef), same(getContext()))).andReturn(false
-        ).once();
-    
-    replayDefault(); 
+        IWebUtilsService.class).serializeRef(tmplDocRef)).once();
+    expect(getWikiMock().exists(eq(tmplDocRef), same(getContext()))).andReturn(false).once();
+
+    replayDefault();
     myEvent.injectDefaultLanguage("de");
     assertNull(myEvent.getObj("de"));
     verifyDefault();
@@ -272,9 +266,9 @@ public class EventTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testSplitLanguageDependentFields_empty() {
-    List<String> propertyNames = new ArrayList<String>();
-    Set<String> confDep = new HashSet<String>();
-    Set<String> confIndep = new HashSet<String>();
+    List<String> propertyNames = new ArrayList<>();
+    Set<String> confDep = new HashSet<>();
+    Set<String> confIndep = new HashSet<>();
     event.splitLanguageDependentFields(confIndep, confDep, propertyNames);
     assertTrue("Expecting empty indepList.", confIndep.isEmpty());
     assertTrue("Expecting empty depList.", confDep.isEmpty());
@@ -282,10 +276,10 @@ public class EventTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testSplitLanguageDependentFields_detaillink() {
-    List<String> propertyNames = new ArrayList<String>();
+    List<String> propertyNames = new ArrayList<>();
     propertyNames.add("detaillink");
-    Set<String> confDep = new HashSet<String>();
-    Set<String> confIndep = new HashSet<String>();
+    Set<String> confDep = new HashSet<>();
+    Set<String> confIndep = new HashSet<>();
     event.splitLanguageDependentFields(confIndep, confDep, propertyNames);
     assertTrue("Expecting empty indepList.", confIndep.isEmpty());
     assertTrue("Expecting empty depList.", confDep.isEmpty());
@@ -293,10 +287,10 @@ public class EventTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testSplitLanguageDependentFields_date() {
-    List<String> propertyNames = new ArrayList<String>();
+    List<String> propertyNames = new ArrayList<>();
     propertyNames.add("date");
-    Set<String> confDep = new HashSet<String>();
-    Set<String> confIndep = new HashSet<String>();
+    Set<String> confDep = new HashSet<>();
+    Set<String> confIndep = new HashSet<>();
     event.splitLanguageDependentFields(confIndep, confDep, propertyNames);
     assertTrue("Expecting empty depList.", confDep.isEmpty());
     assertTrue("Expecting indepList containing eventDate.",
@@ -307,10 +301,10 @@ public class EventTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testSplitLanguageDependentFields_time() {
-    List<String> propertyNames = new ArrayList<String>();
+    List<String> propertyNames = new ArrayList<>();
     propertyNames.add("time");
-    Set<String> confDep = new HashSet<String>();
-    Set<String> confIndep = new HashSet<String>();
+    Set<String> confDep = new HashSet<>();
+    Set<String> confIndep = new HashSet<>();
     event.splitLanguageDependentFields(confIndep, confDep, propertyNames);
     assertTrue("Expecting empty depList.", confDep.isEmpty());
     assertTrue("Expecting indepList containing eventDate.",
@@ -321,10 +315,10 @@ public class EventTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testSplitLanguageDependentFields_date_end() {
-    List<String> propertyNames = new ArrayList<String>();
+    List<String> propertyNames = new ArrayList<>();
     propertyNames.add("date_end");
-    Set<String> confDep = new HashSet<String>();
-    Set<String> confIndep = new HashSet<String>();
+    Set<String> confDep = new HashSet<>();
+    Set<String> confIndep = new HashSet<>();
     event.splitLanguageDependentFields(confIndep, confDep, propertyNames);
     assertTrue("Expecting empty depList.", confDep.isEmpty());
     assertTrue("Expecting indepList containing eventDate_end.",
@@ -335,10 +329,10 @@ public class EventTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testSplitLanguageDependentFields_time_end() {
-    List<String> propertyNames = new ArrayList<String>();
+    List<String> propertyNames = new ArrayList<>();
     propertyNames.add("time_end");
-    Set<String> confDep = new HashSet<String>();
-    Set<String> confIndep = new HashSet<String>();
+    Set<String> confDep = new HashSet<>();
+    Set<String> confIndep = new HashSet<>();
     event.splitLanguageDependentFields(confIndep, confDep, propertyNames);
     assertTrue("Expecting empty depList.", confDep.isEmpty());
     assertTrue("Expecting indepList containing eventDate_end.",
@@ -349,7 +343,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testDisplayField_two_Dates_sameDay() throws ParseException {
-    XWikiRequest request = createMockAndAddToDefault(XWikiRequest.class);
+    XWikiRequest request = createDefaultMock(XWikiRequest.class);
     context.setRequest(request);
     expect(request.get(eq("template"))).andReturn("").anyTimes();
     replayDefault();
@@ -366,7 +360,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testDisplayField_two_Dates_differentDays() throws ParseException {
-    XWikiRequest request = createMockAndAddToDefault(XWikiRequest.class);
+    XWikiRequest request = createDefaultMock(XWikiRequest.class);
     context.setRequest(request);
     expect(request.get(eq("template"))).andReturn("").anyTimes();
     replayDefault();
@@ -384,7 +378,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testDisplayField_startDate_only() throws ParseException {
-    XWikiRequest request = createMockAndAddToDefault(XWikiRequest.class);
+    XWikiRequest request = createDefaultMock(XWikiRequest.class);
     context.setRequest(request);
     expect(request.get(eq("template"))).andReturn("").anyTimes();
     replayDefault();
@@ -400,9 +394,8 @@ public class EventTest extends AbstractBridgedComponentTestCase {
   }
 
   @Test
-  public void testInternalDisplayField_two_Dates_differentDays (
-      ) throws ParseException {
-    XWikiRequest request = createMockAndAddToDefault(XWikiRequest.class);
+  public void testInternalDisplayField_two_Dates_differentDays() throws ParseException {
+    XWikiRequest request = createDefaultMock(XWikiRequest.class);
     context.setRequest(request);
     expect(request.get(eq("template"))).andReturn("").anyTimes();
     replayDefault();
@@ -418,13 +411,13 @@ public class EventTest extends AbstractBridgedComponentTestCase {
   }
 
   @Test
-  public void testGetNonEmptyFields_CombinedFields () throws ParseException {
+  public void testGetNonEmptyFields_CombinedFields() throws ParseException {
     event.injectDefaultLanguage("de");
     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-    List<String> fieldList = new ArrayList<String>();
+    List<String> fieldList = new ArrayList<>();
     fieldList.add("date-date_end");
     expect(calendar.getDetailviewFields()).andStubReturn(fieldList);
-    XWikiRequest request = createMockAndAddToDefault(XWikiRequest.class);
+    XWikiRequest request = createDefaultMock(XWikiRequest.class);
     context.setRequest(request);
     expect(request.get(eq("template"))).andReturn("").anyTimes();
     replayDefault();
@@ -438,16 +431,15 @@ public class EventTest extends AbstractBridgedComponentTestCase {
   }
 
   @Test
-  public void testGetNonEmptyFields_optionalDateTime (
-      ) throws ParseException {
+  public void testGetNonEmptyFields_optionalDateTime() throws ParseException {
     event.injectEventDoc(new XWikiDocument(eventDocRef));
     event.injectDefaultLanguage("de");
     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-    List<String> fieldList = new ArrayList<String>();
+    List<String> fieldList = new ArrayList<>();
     fieldList.add("time.-time_end.");
     fieldList.add("date_end.");
     expect(calendar.getDetailviewFields()).andStubReturn(fieldList);
-    XWikiRequest request = createMockAndAddToDefault(XWikiRequest.class);
+    XWikiRequest request = createDefaultMock(XWikiRequest.class);
     context.setRequest(request);
     expect(request.get(eq("template"))).andReturn("").anyTimes();
     replayDefault();
@@ -461,22 +453,21 @@ public class EventTest extends AbstractBridgedComponentTestCase {
   }
 
   @Test
-  public void testNeedsMoreLink_multiple_used_fields (
-      ) throws ParseException {
+  public void testNeedsMoreLink_multiple_used_fields() throws ParseException {
     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-    List<String> fieldList = new ArrayList<String>();
+    List<String> fieldList = new ArrayList<>();
     fieldList.add("date");
     fieldList.add("date_end");
     fieldList.add("date");
     fieldList.add("l_title");
-    List<String> overviewFieldList = new ArrayList<String>();
+    List<String> overviewFieldList = new ArrayList<>();
     overviewFieldList.add("date");
     overviewFieldList.add("date_end");
     overviewFieldList.add("l_title");
     overviewFieldList.add("detaillink");
     expect(calendar.getDetailviewFields()).andStubReturn(fieldList);
     expect(calendar.getOverviewFields()).andStubReturn(overviewFieldList);
-    XWikiRequest request = createMockAndAddToDefault(XWikiRequest.class);
+    XWikiRequest request = createDefaultMock(XWikiRequest.class);
     context.setRequest(request);
     expect(request.get(eq("template"))).andReturn("").anyTimes();
     replayDefault();
@@ -492,21 +483,20 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     assertFalse("needsMoreLink must correctly handle multiple occurences.",
         needsMoreLink);
   }
-  
+
   @Test
-  public void testNeedsMoreLink_combinedFields (
-      ) throws ParseException {
+  public void testNeedsMoreLink_combinedFields() throws ParseException {
     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-    List<String> fieldList = new ArrayList<String>();
+    List<String> fieldList = new ArrayList<>();
     fieldList.add("date-date_end");
     fieldList.add("time-time_end");
     fieldList.add("contact_rte-l_title");
     expect(calendar.getDetailviewFields()).andStubReturn(fieldList);
     List<String> emptylist = Collections.emptyList();
     expect(calendar.getOverviewFields()).andStubReturn(emptylist);
-    //All additional fields in detailview are combined fields. If not correct
-    //handled all fields will be emtpy and needsMoreLink returns wrongly false.
-    XWikiRequest request = createMockAndAddToDefault(XWikiRequest.class);
+    // All additional fields in detailview are combined fields. If not correct
+    // handled all fields will be emtpy and needsMoreLink returns wrongly false.
+    XWikiRequest request = createDefaultMock(XWikiRequest.class);
     context.setRequest(request);
     expect(request.get(eq("template"))).andReturn("").anyTimes();
     replayDefault();
@@ -521,24 +511,24 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     verifyDefault();
     assertTrue("needsMoreLink must support compbined fields.", needsMoreLink);
   }
-  
+
   @Test
-  public void testNeedsMoreLink_identical_detailAndOvervFields_with_combinedFields (
-      ) throws ParseException {
+  public void testNeedsMoreLink_identical_detailAndOvervFields_with_combinedFields()
+      throws ParseException {
     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-    List<String> fieldList = new ArrayList<String>();
+    List<String> fieldList = new ArrayList<>();
     fieldList.add("date-date_end");
     fieldList.add("time-time_end");
     fieldList.add("l_title_l_description");
     fieldList.add("location_rte");
-    List<String> overviewFieldList = new ArrayList<String>();
+    List<String> overviewFieldList = new ArrayList<>();
     overviewFieldList.add("date-date_end-location_rte");
     overviewFieldList.add("time-time_end");
     overviewFieldList.add("l_title-l_description");
     overviewFieldList.add("detaillink");
     expect(calendar.getDetailviewFields()).andStubReturn(fieldList);
     expect(calendar.getOverviewFields()).andStubReturn(overviewFieldList);
-    XWikiRequest request = createMockAndAddToDefault(XWikiRequest.class);
+    XWikiRequest request = createDefaultMock(XWikiRequest.class);
     context.setRequest(request);
     expect(request.get(eq("template"))).andReturn("").anyTimes();
     replayDefault();
@@ -553,23 +543,22 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     assertFalse("needsMoreLink must look at displayed property names.",
         needsMoreLink);
   }
-  
+
   @Test
-  public void testNeedsMoreLink_identical_optinalTimeEnd_in_detail (
-      ) throws ParseException {
+  public void testNeedsMoreLink_identical_optinalTimeEnd_in_detail() throws ParseException {
     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-    List<String> fieldList = new ArrayList<String>();
+    List<String> fieldList = new ArrayList<>();
     fieldList.add("date-date_end");
     fieldList.add("time-time_end.");
     fieldList.add("l_title_l_description");
     fieldList.add("location_rte");
-    List<String> overviewFieldList = new ArrayList<String>();
+    List<String> overviewFieldList = new ArrayList<>();
     overviewFieldList.add("date-time-date_end-location_rte");
     overviewFieldList.add("l_title-l_description");
     overviewFieldList.add("detaillink");
     expect(calendar.getDetailviewFields()).andStubReturn(fieldList);
     expect(calendar.getOverviewFields()).andStubReturn(overviewFieldList);
-    XWikiRequest request = createMockAndAddToDefault(XWikiRequest.class);
+    XWikiRequest request = createDefaultMock(XWikiRequest.class);
     context.setRequest(request);
     expect(request.get(eq("template"))).andReturn("").anyTimes();
     replayDefault();
@@ -584,23 +573,23 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     assertFalse("needsMoreLink must handle empty optional time_end field.",
         needsMoreLink);
   }
-  
+
   @Test
   public void testGetDisplayPart_Empty_time_And_timeEnd() throws ParseException {
     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-    List<String> fieldList = new ArrayList<String>();
+    List<String> fieldList = new ArrayList<>();
     fieldList.add("date-date_end");
     fieldList.add("time-time_end");
     fieldList.add("l_title_l_description");
     fieldList.add("location_rte");
-    List<String> overviewFieldList = new ArrayList<String>();
+    List<String> overviewFieldList = new ArrayList<>();
     overviewFieldList.add("date-date_end-location_rte");
     overviewFieldList.add("time-time_end");
     overviewFieldList.add("l_title-l_description");
     overviewFieldList.add("detaillink");
     expect(calendar.getDetailviewFields()).andStubReturn(fieldList);
     expect(calendar.getOverviewFields()).andStubReturn(overviewFieldList);
-    XWikiRequest request = createMockAndAddToDefault(XWikiRequest.class);
+    XWikiRequest request = createDefaultMock(XWikiRequest.class);
     context.setRequest(request);
     expect(request.get(eq("template"))).andReturn("").anyTimes();
     replayDefault();
@@ -622,19 +611,19 @@ public class EventTest extends AbstractBridgedComponentTestCase {
   @Test
   public void testInternalDisplayField_optional_time() throws ParseException {
     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-    List<String> fieldList = new ArrayList<String>();
+    List<String> fieldList = new ArrayList<>();
     fieldList.add("date-date_end");
     fieldList.add("time-time_end");
     fieldList.add("l_title_l_description");
     fieldList.add("location_rte");
-    List<String> overviewFieldList = new ArrayList<String>();
+    List<String> overviewFieldList = new ArrayList<>();
     overviewFieldList.add("date-date_end-location_rte");
     overviewFieldList.add("time-time_end");
     overviewFieldList.add("l_title-l_description");
     overviewFieldList.add("detaillink");
     expect(calendar.getDetailviewFields()).andStubReturn(fieldList);
     expect(calendar.getOverviewFields()).andStubReturn(overviewFieldList);
-    XWikiRequest request = createMockAndAddToDefault(XWikiRequest.class);
+    XWikiRequest request = createDefaultMock(XWikiRequest.class);
     context.setRequest(request);
     expect(request.get(eq("template"))).andReturn("").anyTimes();
     replayDefault();
@@ -654,7 +643,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
 
   @Test
   public void testGetDetailConfigForField() {
-    List<String> fieldList = new ArrayList<String>();
+    List<String> fieldList = new ArrayList<>();
     fieldList.add("date-date_end");
     fieldList.add("time.-time_end.");
     fieldList.add("l_title_l_description");
@@ -665,7 +654,7 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     assertEquals("time.", event.getDetailConfigForField("time"));
     verifyDefault();
   }
-  
+
   @Test
   public void testIsOptionalField() {
     assertTrue(event.isIncludingFieldAsOptional("time_end", "time.-time_end."));
@@ -698,46 +687,46 @@ public class EventTest extends AbstractBridgedComponentTestCase {
     assertEquals(0, Arrays.asList(theEvent).indexOf(new Event(eventDoc2Ref)));
     verifyDefault();
   }
-  
+
   @Test
-  public void testGetCalendar_set() throws Exception { 
+  public void testGetCalendar_set() throws Exception {
     replayDefault();
     ICalendar ret = event.getCalendar();
     verifyDefault();
-    
+
     assertSame(calendar, ret);
   }
-  
+
   @Test
   public void testGetCalendar() throws Exception {
     event.injectCalendar(null);
-    ICalendarService calServiceMock = createMockAndAddToDefault(ICalendarService.class);
+    ICalendarService calServiceMock = createDefaultMock(ICalendarService.class);
     event.injectCalService(calServiceMock);
     DocumentReference calDocRef = new DocumentReference("xwikidb", "someSpace", "calDoc");
     expect(calServiceMock.getCalendarDocRefByCalendarSpace("Test", new WikiReference(
         "xwikidb"))).andReturn(calDocRef).once();
     ICalendar cal = new Calendar(calDocRef, false);
     expect(calServiceMock.getCalendar(eq(calDocRef))).andReturn(cal).once();
- 
+
     replayDefault();
     ICalendar ret = event.getCalendar();
     verifyDefault();
-    
+
     assertSame(cal, ret);
   }
-  
+
   @Test
   public void testGetCalendar_noCal() throws Exception {
     event.injectCalendar(null);
-    ICalendarService calServiceMock = createMockAndAddToDefault(ICalendarService.class);
+    ICalendarService calServiceMock = createDefaultMock(ICalendarService.class);
     event.injectCalService(calServiceMock);
     expect(calServiceMock.getCalendarDocRefByCalendarSpace("Test", new WikiReference(
         "xwikidb"))).andReturn(null).once();
- 
+
     replayDefault();
     ICalendar ret = event.getCalendar();
     verifyDefault();
-    
+
     assertNull(ret);
   }
 

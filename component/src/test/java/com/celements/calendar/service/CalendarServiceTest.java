@@ -1,5 +1,6 @@
 package com.celements.calendar.service;
 
+import static com.celements.common.test.CelementsTestUtils.*;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
@@ -26,7 +27,7 @@ import org.xwiki.query.QueryExecutor;
 import org.xwiki.query.QueryManager;
 import org.xwiki.query.internal.DefaultQuery;
 
-import com.celements.common.test.AbstractBridgedComponentTestCase;
+import com.celements.common.test.AbstractComponentTest;
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -34,7 +35,7 @@ import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.web.Utils;
 
-public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
+public class CalendarServiceTest extends AbstractComponentTest {
 
   private static final DateFormat SDF = new SimpleDateFormat("yyyyMMddHHmmss");
 
@@ -49,10 +50,10 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
   public void setUp_CalendarServiceTest() throws Exception {
     context = getContext();
     calService = (CalendarService) Utils.getComponent(ICalendarService.class);
-    xwiki = createMockAndAddToDefault(XWiki.class);
+    xwiki = createDefaultMock(XWiki.class);
     context.setWiki(xwiki);
-    queryManagerMock = createMockAndAddToDefault(QueryManager.class);
-    queryExecutorMock = createMockAndAddToDefault(QueryExecutor.class);
+    queryManagerMock = createDefaultMock(QueryManager.class);
+    queryExecutorMock = createDefaultMock(QueryExecutor.class);
     calService.injectQueryManager(queryManagerMock);
     setCalCache(null);
   }
@@ -110,7 +111,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
   public void testGetAllCalendarsInternal_noCache() throws Exception {
     WikiReference wikiRef = new WikiReference("db");
     Query query = new DefaultQuery("theStatement", Query.XWQL, queryExecutorMock);
-    List<Object> fullNames = Arrays.asList(new Object[] { "space.calDoc1", "space.calDoc2" });
+    List<Object> fullNames = Arrays.asList("space.calDoc1", "space.calDoc2");
 
     expect(queryManagerMock.createQuery(eq(calService.getAllCalendarsXWQL()), eq(
         Query.XWQL))).andReturn(query).once();
@@ -166,7 +167,7 @@ public class CalendarServiceTest extends AbstractBridgedComponentTestCase {
   public void testExecuteAllCalendarsQuery() throws QueryException {
     WikiReference wikiRef = new WikiReference("db");
     Query query = new DefaultQuery("theStatement", Query.XWQL, queryExecutorMock);
-    List<Object> fullNames = Arrays.asList(new Object[] { "space.calDoc1", "space.calDoc2" });
+    List<Object> fullNames = Arrays.asList("space.calDoc1", "space.calDoc2");
 
     expect(queryManagerMock.createQuery(eq(calService.getAllCalendarsXWQL()), eq(
         Query.XWQL))).andReturn(query).once();

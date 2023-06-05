@@ -19,7 +19,6 @@
  */
 package com.celements.calendar;
 
-import static com.celements.common.test.CelementsTestUtils.*;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
@@ -27,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.junit.Before;
@@ -66,7 +66,7 @@ public class CalendarTest extends AbstractComponentTest {
   @Before
   public void setUp_CalendarTest() throws Exception {
     eventList = new ArrayList<>();
-    context = getContext();
+    context = getXContext();
     xwiki = createDefaultMock(XWiki.class);
     context.setWiki(xwiki);
     calDocRef = new DocumentReference("myWiki", "MyCalSpace", "MyCalDoc");
@@ -248,11 +248,11 @@ public class CalendarTest extends AbstractComponentTest {
 
   @Test
   public void testGetStartDate_newDate() {
-    java.util.Calendar gregCal = java.util.Calendar.getInstance();
+    java.util.Calendar gregCal = new GregorianCalendar();
     gregCal.add(java.util.Calendar.SECOND, -5);
     Date startDateBefore = gregCal.getTime();
     ICalendar cal = new Calendar(calDocRef, isArchiv);
-    gregCal = java.util.Calendar.getInstance();
+    gregCal = new GregorianCalendar();
     gregCal.add(java.util.Calendar.SECOND, 5);
     Date startDateAfter = gregCal.getTime();
     assertTrue(startDateBefore.before(cal.getStartDate()));
@@ -346,8 +346,8 @@ public class CalendarTest extends AbstractComponentTest {
 
   @Test
   public void testGetEngine_HQL() throws Exception {
-    expect(getContext().getWiki().getXWikiPreference(eq("calendar_engine"),
-        eq("calendar.engine"), eq("default"), same(getContext()))).andReturn("default").once();
+    expect(context.getWiki().getXWikiPreference(eq("calendar_engine"),
+        eq("calendar.engine"), eq("default"), same(context))).andReturn("default").once();
     replayDefault();
     ICalendarEngineRole ret = cal.getEngine();
     verifyDefault();
@@ -357,8 +357,8 @@ public class CalendarTest extends AbstractComponentTest {
   @Test
   public void testGetEngine_Lucene() throws Exception {
     String hint = CalendarEngineLucene.NAME;
-    expect(getContext().getWiki().getXWikiPreference(eq("calendar_engine"),
-        eq("calendar.engine"), eq("default"), same(getContext()))).andReturn(hint).once();
+    expect(context.getWiki().getXWikiPreference(eq("calendar_engine"),
+        eq("calendar.engine"), eq("default"), same(context))).andReturn(hint).once();
 
     ICalendarEngineRole engineMock = registerComponentMock(ICalendarEngineRole.class, hint);
     expect(engineMock.getName()).andReturn(hint).anyTimes();
@@ -374,8 +374,8 @@ public class CalendarTest extends AbstractComponentTest {
   @Test
   public void testGetEngine_Lucene_overLimit() throws Exception {
     String hint = CalendarEngineLucene.NAME;
-    expect(getContext().getWiki().getXWikiPreference(eq("calendar_engine"),
-        eq("calendar.engine"), eq("default"), same(getContext()))).andReturn(hint).once();
+    expect(context.getWiki().getXWikiPreference(eq("calendar_engine"),
+        eq("calendar.engine"), eq("default"), same(context))).andReturn(hint).once();
 
     ICalendarEngineRole engineMock = registerComponentMock(ICalendarEngineRole.class, hint);
     expect(engineMock.getName()).andReturn(hint).anyTimes();

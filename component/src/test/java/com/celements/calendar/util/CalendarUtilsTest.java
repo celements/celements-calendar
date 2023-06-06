@@ -19,15 +19,14 @@
  */
 package com.celements.calendar.util;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.celements.common.test.AbstractBridgedComponentTestCase;
+import com.celements.common.test.AbstractComponentTest;
 
-public class CalendarUtilsTest extends AbstractBridgedComponentTestCase {
+public class CalendarUtilsTest extends AbstractComponentTest {
 
   private ICalendarUtils calUtils;
 

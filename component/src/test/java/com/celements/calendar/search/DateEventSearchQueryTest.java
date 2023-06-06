@@ -1,6 +1,7 @@
 package com.celements.calendar.search;
 
 import static com.celements.common.test.CelementsTestUtils.*;
+import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
 import java.text.DateFormat;
@@ -14,6 +15,7 @@ import org.junit.Test;
 import org.xwiki.model.reference.WikiReference;
 
 import com.celements.common.test.AbstractComponentTest;
+import com.xpn.xwiki.plugin.lucene.LucenePlugin;
 
 public class DateEventSearchQueryTest extends AbstractComponentTest {
 
@@ -21,12 +23,15 @@ public class DateEventSearchQueryTest extends AbstractComponentTest {
 
   @Before
   public void setup_DateEventSearchQueryTest() {
-
+    LucenePlugin lucenePlugin = createDefaultMock(LucenePlugin.class);
+    expect(getWikiMock().getPlugin(eq("lucene"), same(getContext())))
+        .andReturn(lucenePlugin).anyTimes();
+    expect(lucenePlugin.getAnalyzer()).andReturn(null).anyTimes();
   }
 
   @Test
   public void test_getWikiRef_protect_WikiReference() throws Exception {
-    String database = "myDB";
+    String database = "mydb";
     WikiReference wikiRef = new WikiReference(database);
     Date fromDate = SDF.parse("200001010000");
     Date toDate = SDF.parse("201405090125");
@@ -44,7 +49,7 @@ public class DateEventSearchQueryTest extends AbstractComponentTest {
 
   @Test
   public void test_getAsLuceneQuery() throws Exception {
-    WikiReference wikiRef = new WikiReference("myDB");
+    WikiReference wikiRef = new WikiReference("mydb");
     Date fromDate = SDF.parse("200001010000");
     Date toDate = SDF.parse("201405090125");
     IDateEventSearchQuery query = new DateEventSearchQuery(wikiRef, fromDate, toDate, null);
@@ -53,7 +58,7 @@ public class DateEventSearchQueryTest extends AbstractComponentTest {
     assertEquals(0, query.getSortFields().size());
     assertEquals(fromDate, query.getFromDate());
     assertEquals(toDate, query.getToDate());
-    String compareQueryString = "(type:(+\"wikipage\") AND wiki:(+\"myDB\") "
+    String compareQueryString = "(type:(+\"wikipage\") AND wiki:(+\"mydb\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND Classes.CalendarEventClass.eventDate:([200001010000 TO 201405090125]))";
     assertEquals(compareQueryString, query.getAsLuceneQuery().getQueryString());
@@ -62,7 +67,7 @@ public class DateEventSearchQueryTest extends AbstractComponentTest {
 
   @Test
   public void test_getAsLuceneQuery_withSortField() throws Exception {
-    WikiReference wikiRef = new WikiReference("myDB");
+    WikiReference wikiRef = new WikiReference("mydb");
     Date fromDate = SDF.parse("200001010000");
     Date toDate = SDF.parse("201405090125");
     List<String> sortFields = Arrays.asList("field1", "field2");
@@ -73,7 +78,7 @@ public class DateEventSearchQueryTest extends AbstractComponentTest {
     assertEquals(sortFields, query.getSortFields());
     assertEquals(fromDate, query.getFromDate());
     assertEquals(toDate, query.getToDate());
-    String compareQueryString = "(type:(+\"wikipage\") AND wiki:(+\"myDB\") "
+    String compareQueryString = "(type:(+\"wikipage\") AND wiki:(+\"mydb\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND Classes.CalendarEventClass.eventDate:([200001010000 TO 201405090125]))";
     assertEquals(compareQueryString, query.getAsLuceneQuery().getQueryString());

@@ -27,6 +27,7 @@ import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.search.IEventSearchRole;
 import com.celements.common.test.AbstractComponentTest;
 import com.celements.search.lucene.ILuceneSearchService;
+import com.xpn.xwiki.plugin.lucene.LucenePlugin;
 import com.xpn.xwiki.web.Utils;
 
 public class CalendarEngineLuceneTest extends AbstractComponentTest {
@@ -43,16 +44,20 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
   @Before
   public void setUp_CalendarEngineLuceneTest() {
     engine = (CalendarEngineLucene) Utils.getComponent(ICalendarEngineRole.class, "lucene");
-    eventSearchMock = createMockAndAddToDefault(IEventSearchRole.class);
+    eventSearchMock = createDefaultMock(IEventSearchRole.class);
     engine.injectEventSearchService(eventSearchMock);
-    searchServiceMock = createMockAndAddToDefault(ILuceneSearchService.class);
+    searchServiceMock = createDefaultMock(ILuceneSearchService.class);
     engine.injectSearchService(searchServiceMock);
-    eventSearchResultMock = createMockAndAddToDefault(EventSearchResult.class);
-    calMock = createMockAndAddToDefault(ICalendar.class);
+    eventSearchResultMock = createDefaultMock(EventSearchResult.class);
+    calMock = createDefaultMock(ICalendar.class);
     database = "xwikidb";
     DocumentReference docRef = new DocumentReference(database, "someSpace", "someCal");
     expect(calMock.getDocumentReference()).andReturn(docRef).anyTimes();
     expect(calMock.getWikiRef()).andReturn(new WikiReference(database)).anyTimes();
+    LucenePlugin lucenePlugin = createDefaultMock(LucenePlugin.class);
+    expect(getWikiMock().getPlugin(eq("lucene"), same(getContext())))
+        .andReturn(lucenePlugin).anyTimes();
+    expect(lucenePlugin.getAnalyzer()).andReturn(null).anyTimes();
   }
 
   @Test
@@ -95,7 +100,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
     assertTrue(query instanceof CalendarEventSearchQuery);
     String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"xwikidb\") "
         + "AND object:(+\"Classes.CalendarEventClass\") " + "AND space:(+\"myCalSpace\") "
-        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]))";
+        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO zzzzzzzzzzzz]))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     List<String> sortFields = Arrays.asList("Classes.CalendarEventClass.eventDate",
         "Classes.CalendarEventClass.eventDate_end", "Classes.CalendarEventClass.l_title");
@@ -123,7 +128,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
     assertTrue(query instanceof CalendarEventSearchQuery);
     String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"xwikidb\") "
         + "AND object:(+\"Classes.CalendarEventClass\") " + "AND space:(+\"myCalSpace\") "
-        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]))";
+        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO zzzzzzzzzzzz]))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     List<String> sortFields = Arrays.asList("Classes.CalendarEventClass.eventDate",
         "Classes.CalendarEventClass.eventDate_end", "Classes.CalendarEventClass.l_title");
@@ -135,7 +140,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     List<String> spaces = Arrays.asList("myCalSpace");
-    List<IEvent> eventList = Arrays.asList(createMockAndAddToDefault(IEvent.class));
+    List<IEvent> eventList = Arrays.asList(createDefaultMock(IEvent.class));
 
     expectForCalMock(startDate, isArchive, spaces);
     Capture<IEventSearchQuery> queryCapture = newCapture();
@@ -152,7 +157,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
     assertTrue(query instanceof CalendarEventSearchQuery);
     String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"xwikidb\") "
         + "AND object:(+\"Classes.CalendarEventClass\") " + "AND space:(+\"myCalSpace\") "
-        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]))";
+        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO zzzzzzzzzzzz]))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     List<String> sortFields = Arrays.asList("Classes.CalendarEventClass.eventDate",
         "Classes.CalendarEventClass.eventDate_end", "Classes.CalendarEventClass.l_title");
@@ -164,7 +169,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = true;
     List<String> spaces = Arrays.asList("myCalSpace");
-    List<IEvent> eventList = Arrays.asList(createMockAndAddToDefault(IEvent.class));
+    List<IEvent> eventList = Arrays.asList(createDefaultMock(IEvent.class));
 
     expectForCalMock(startDate, isArchive, spaces);
     Capture<IEventSearchQuery> queryCapture = newCapture();
@@ -182,7 +187,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
     assertTrue(query instanceof CalendarEventSearchQuery);
     String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"xwikidb\") "
         + "AND object:(+\"Classes.CalendarEventClass\") " + "AND space:(+\"myCalSpace\") "
-        + "AND Classes.CalendarEventClass.eventDate:({000101010000 TO 201405090125}))";
+        + "AND Classes.CalendarEventClass.eventDate:([0 TO 201405090125}))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     List<String> sortFields = Arrays.asList("-Classes.CalendarEventClass.eventDate",
         "-Classes.CalendarEventClass.eventDate_end", "-Classes.CalendarEventClass.l_title");
@@ -194,7 +199,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
     List<String> spaces = Arrays.asList("myCalSpace");
-    List<IEvent> eventList = Arrays.asList(createMockAndAddToDefault(IEvent.class));
+    List<IEvent> eventList = Arrays.asList(createDefaultMock(IEvent.class));
 
     expectForCalMock(startDate, isArchive, spaces);
     Capture<IEventSearchQuery> queryCapture = newCapture();
@@ -212,7 +217,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
     assertTrue(query instanceof CalendarEventSearchQuery);
     String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"xwikidb\") "
         + "AND object:(+\"Classes.CalendarEventClass\") " + "AND space:(+\"myCalSpace\") "
-        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]))";
+        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO zzzzzzzzzzzz]))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     List<String> sortFields = Arrays.asList("Classes.CalendarEventClass.eventDate",
         "Classes.CalendarEventClass.eventDate_end", "Classes.CalendarEventClass.l_title");
@@ -224,7 +229,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = true;
     List<String> spaces = Arrays.asList("myCalSpace");
-    List<IEvent> eventList = Arrays.asList(createMockAndAddToDefault(IEvent.class));
+    List<IEvent> eventList = Arrays.asList(createDefaultMock(IEvent.class));
 
     expectForCalMock(startDate, isArchive, spaces);
     Capture<IEventSearchQuery> queryCapture = newCapture();
@@ -241,7 +246,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
     assertTrue(query instanceof CalendarEventSearchQuery);
     String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"xwikidb\") "
         + "AND object:(+\"Classes.CalendarEventClass\") " + "AND space:(+\"myCalSpace\") "
-        + "AND Classes.CalendarEventClass.eventDate:({000101010000 TO 201405090125}))";
+        + "AND Classes.CalendarEventClass.eventDate:([0 TO 201405090125}))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     List<String> sortFields = Arrays.asList("-Classes.CalendarEventClass.eventDate",
         "-Classes.CalendarEventClass.eventDate_end", "-Classes.CalendarEventClass.l_title");
@@ -269,7 +274,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
     String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"xwikidb\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
-        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]))";
+        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO zzzzzzzzzzzz]))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     List<String> sortFields = Arrays.asList("Classes.CalendarEventClass.eventDate",
         "Classes.CalendarEventClass.eventDate_end", "Classes.CalendarEventClass.l_title");
@@ -297,7 +302,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
     String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"xwikidb\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
-        + "AND Classes.CalendarEventClass.eventDate:({000101010000 TO 201405090125}))";
+        + "AND Classes.CalendarEventClass.eventDate:([0 TO 201405090125}))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     List<String> sortFields = Arrays.asList("-Classes.CalendarEventClass.eventDate",
         "-Classes.CalendarEventClass.eventDate_end", "-Classes.CalendarEventClass.l_title");
@@ -306,7 +311,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
 
   @Test
   public void test_searchEvent_withQuery() throws Exception {
-    WikiReference wikiRef = new WikiReference("myDB");
+    WikiReference wikiRef = new WikiReference("mydb");
     List<String> sortFields = Arrays.asList("field");
     Date startDate = SDF.parse("201405090125");
     boolean isArchive = false;
@@ -325,25 +330,25 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
     assertSame(eventSearchResultMock, ret);
     IEventSearchQuery query = queryCapture.getValue();
     assertTrue(query instanceof CalendarEventSearchQuery);
-    String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"myDB\") "
+    String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"mydb\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
-        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]))";
+        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO zzzzzzzzzzzz]))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     assertEquals(sortFields, query.getSortFields());
   }
 
   @Test
   public void test_searchEvent_CalendarSearchQueryBuilder() throws Exception {
-    WikiReference wikiRef = new WikiReference("myDB");
+    WikiReference wikiRef = new WikiReference("mydb");
 
     Capture<IEventSearchQuery> queryCapture = newCapture();
     expect(eventSearchMock.getSearchResult(capture(queryCapture))).andReturn(
         eventSearchResultMock).once();
 
-    final ICalendarSearchQueryBuilder queryBuilder = createMockAndAddToDefault(
+    final ICalendarSearchQueryBuilder queryBuilder = createDefaultMock(
         ICalendarSearchQueryBuilder.class);
-    final ICalendarSearchQueryBuilder queryBuilder2 = createMockAndAddToDefault(
+    final ICalendarSearchQueryBuilder queryBuilder2 = createDefaultMock(
         ICalendarSearchQueryBuilder.class);
     expect(queryBuilder.getWikiRef()).andReturn(wikiRef).anyTimes();
     expect(queryBuilder.addCalendarRestrictions(same(calMock))).andReturn(queryBuilder2);

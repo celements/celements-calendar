@@ -1,5 +1,6 @@
 package com.celements.calendar.manager;
 
+import static com.celements.common.test.CelementsTestUtils.*;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
@@ -21,19 +22,19 @@ import com.celements.calendar.search.DefaultEventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.service.ICalendarService;
-import com.celements.common.test.AbstractBridgedComponentTestCase;
+import com.celements.common.test.AbstractComponentTest;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.web.Utils;
 
-public class EventsManagerTest extends AbstractBridgedComponentTestCase {
+public class EventsManagerTest extends AbstractComponentTest {
 
   private XWikiContext context;
   private EventsManager eventsMgr;
   private ICalendarService calServiceMock;
   private ICalendarEngineRole engineMock;
   private ICalendar calMock;
-  
+
   private DocumentReference calDocRef;
   private SpaceReference evSpaceRef;
 
@@ -41,12 +42,12 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
   public void setUp_EventsManagerTest() {
     context = getContext();
     eventsMgr = (EventsManager) Utils.getComponent(IEventManager.class);
-    calServiceMock = createMockAndAddToDefault(ICalendarService.class);
+    calServiceMock = createDefaultMock(ICalendarService.class);
     eventsMgr.injectCalService(calServiceMock);
-    engineMock = createMockAndAddToDefault(CalendarEngineLucene.class);
-    calMock = createMockAndAddToDefault(Calendar.class);
+    engineMock = createDefaultMock(CalendarEngineLucene.class);
+    calMock = createDefaultMock(Calendar.class);
     calDocRef = new DocumentReference(context.getDatabase(), "mySpace", "myCalDoc");
-    evSpaceRef = new SpaceReference("evSpace", new WikiReference(context.getDatabase())); 
+    evSpaceRef = new SpaceReference("evSpace", new WikiReference(context.getDatabase()));
     expect(calMock.getDocumentReference()).andReturn(calDocRef).anyTimes();
     expect(calMock.getEngine()).andReturn(engineMock).anyTimes();
   }
@@ -56,16 +57,16 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
     int offset = 2;
     int limit = 5;
     DocumentReference eventDocRef1 = new DocumentReference("myEvent1", evSpaceRef);
-    IEvent event1 = createMockAndAddToDefault(IEvent.class);
+    IEvent event1 = createDefaultMock(IEvent.class);
     expect(event1.getDocumentReference()).andReturn(eventDocRef1).once();
     DocumentReference eventDocRef2 = new DocumentReference("myEvent2", evSpaceRef);
-    IEvent event2 = createMockAndAddToDefault(IEvent.class);
+    IEvent event2 = createDefaultMock(IEvent.class);
     expect(event2.getDocumentReference()).andReturn(eventDocRef2).once();
 
     expect(engineMock.getEvents(same(calMock), eq(offset), eq(limit))).andReturn(
         Arrays.asList(event1, event2)).once();
-    expect(calServiceMock.getEventSpaceRefForCalendar(eq(calDocRef))
-        ).andReturn(evSpaceRef).times(2);
+    expect(calServiceMock.getEventSpaceRefForCalendar(eq(calDocRef))).andReturn(evSpaceRef)
+        .times(2);
 
     replayDefault();
     List<IEvent> events = eventsMgr.getEventsInternal(calMock, offset, limit);
@@ -121,11 +122,11 @@ public class EventsManagerTest extends AbstractBridgedComponentTestCase {
   public void testSearchEvents_dirtyLuceneWorkaraound() throws Exception {
     expect(calMock.getEngineWithoutLimitCheck()).andReturn(engineMock).once();
     IEventSearchQuery query = new DefaultEventSearchQuery(new WikiReference("myWiki"));
-    EventSearchResult mockEventSearchResults = createMockAndAddToDefault(
+    EventSearchResult mockEventSearchResults = createDefaultMock(
         EventSearchResult.class);
-    expect(((CalendarEngineLucene) engineMock).searchEvents(same(calMock), same(query))
-        ).andReturn(mockEventSearchResults).once();
-    //!! IMPORTANT getSize MUST be called imadiatelly
+    expect(((CalendarEngineLucene) engineMock).searchEvents(same(calMock), same(query)))
+        .andReturn(mockEventSearchResults).once();
+    // !! IMPORTANT getSize MUST be called imadiatelly
     expect(mockEventSearchResults.getSize()).andReturn(10).once();
     replayDefault();
     assertSame(mockEventSearchResults, eventsMgr.searchEvents(calMock, query));

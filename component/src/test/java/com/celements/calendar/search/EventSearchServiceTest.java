@@ -14,6 +14,7 @@ import org.xwiki.model.reference.WikiReference;
 
 import com.celements.common.test.AbstractComponentTest;
 import com.celements.search.lucene.LuceneSearchResult;
+import com.xpn.xwiki.plugin.lucene.LucenePlugin;
 import com.xpn.xwiki.web.Utils;
 
 public class EventSearchServiceTest extends AbstractComponentTest {
@@ -24,8 +25,12 @@ public class EventSearchServiceTest extends AbstractComponentTest {
   @Before
   public void setUp_EventSearchServiceTest() throws Exception {
     eventSearchService = (EventSearchService) Utils.getComponent(IEventSearchRole.class);
-    configSourceMock = createMockAndAddToDefault(ConfigurationSource.class);
+    configSourceMock = createDefaultMock(ConfigurationSource.class);
     eventSearchService.injectConfigSource(configSourceMock);
+    LucenePlugin lucenePlugin = createDefaultMock(LucenePlugin.class);
+    expect(getWikiMock().getPlugin(eq("lucene"), same(getContext())))
+        .andReturn(lucenePlugin).anyTimes();
+    expect(lucenePlugin.getAnalyzer()).andReturn(null).anyTimes();
   }
 
   @Test
@@ -51,7 +56,7 @@ public class EventSearchServiceTest extends AbstractComponentTest {
   @Test
   public void testGetSearchResult() throws Exception {
     List<String> sortFields = Arrays.asList("field1", "field2");
-    IEventSearchQuery query = new DefaultEventSearchQuery(new WikiReference("theDB"),
+    IEventSearchQuery query = new DefaultEventSearchQuery(new WikiReference("thedb"),
         sortFields);
     expect(configSourceMock.getProperty(eq("calendar.search.skipChecks"),
         same(Boolean.class))).andReturn(false);
@@ -60,7 +65,7 @@ public class EventSearchServiceTest extends AbstractComponentTest {
     LuceneSearchResult lSearchResult = searchResult.getSearchResult();
     verifyDefault();
     assertNotNull(searchResult);
-    String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"theDB\") "
+    String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"thedb\") "
         + "AND object:(+\"Classes.CalendarEventClass\"))";
     assertEquals(expQueryString, lSearchResult.getQueryString());
     assertEquals(sortFields, lSearchResult.getSortFields());

@@ -18,6 +18,7 @@ import org.xwiki.model.reference.WikiReference;
 
 import com.celements.calendar.ICalendar;
 import com.celements.common.test.AbstractComponentTest;
+import com.xpn.xwiki.plugin.lucene.LucenePlugin;
 
 public class CalendarEventSearchQueryTest extends AbstractComponentTest {
 
@@ -28,11 +29,15 @@ public class CalendarEventSearchQueryTest extends AbstractComponentTest {
 
   @Before
   public void setUp_CalendarEventSearchQueryTest() {
-    calMock = createMockAndAddToDefault(ICalendar.class);
-    wikiRef = new WikiReference("theDB");
+    calMock = createDefaultMock(ICalendar.class);
+    wikiRef = new WikiReference("thedb");
     DocumentReference docRef = new DocumentReference(wikiRef.getName(), "someSpace", "someCal");
     expect(calMock.getDocumentReference()).andReturn(docRef).anyTimes();
     expect(calMock.getWikiRef()).andReturn(wikiRef).anyTimes();
+    LucenePlugin lucenePlugin = createDefaultMock(LucenePlugin.class);
+    expect(getWikiMock().getPlugin(eq("lucene"), same(getContext())))
+        .andReturn(lucenePlugin).anyTimes();
+    expect(lucenePlugin.getAnalyzer()).andReturn(null).anyTimes();
   }
 
   @Test
@@ -126,10 +131,10 @@ public class CalendarEventSearchQueryTest extends AbstractComponentTest {
     queryBuilder.addCalendarRestrictions(calMock);
 
     assertEquals(wikiRef, queryBuilder.getWikiRef());
-    String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"theDB\") "
+    String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"thedb\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
-        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]))";
+        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO zzzzzzzzzzzz]))";
     assertEquals(expQueryString, queryBuilder.getAsLuceneQuery().getQueryString());
     assertDefaultSortFields(queryBuilder.getSortFields(), isArchive);
     verifyDefault();
@@ -150,10 +155,10 @@ public class CalendarEventSearchQueryTest extends AbstractComponentTest {
 
     assertEquals(wikiRef, queryBuilder.getWikiRef());
     assertEquals(sortFields, queryBuilder.getSortFields());
-    String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"theDB\") "
+    String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"thedb\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
-        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]))";
+        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO zzzzzzzzzzzz]))";
     assertEquals(expQueryString, queryBuilder.getAsLuceneQuery().getQueryString());
     verifyDefault();
   }
@@ -171,10 +176,10 @@ public class CalendarEventSearchQueryTest extends AbstractComponentTest {
     verifyDefault();
 
     assertEquals(wikiRef, query.getWikiRef());
-    String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"theDB\") "
+    String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"thedb\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
-        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]))";
+        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO zzzzzzzzzzzz]))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     assertDefaultSortFields(query.getSortFields(), isArchive);
   }
@@ -192,10 +197,10 @@ public class CalendarEventSearchQueryTest extends AbstractComponentTest {
     verifyDefault();
 
     assertEquals(wikiRef, query.getWikiRef());
-    String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"theDB\") "
+    String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"thedb\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
-        + "AND Classes.CalendarEventClass.eventDate:({000101010000 TO 201405090125}))";
+        + "AND Classes.CalendarEventClass.eventDate:([0 TO 201405090125}))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     assertDefaultSortFields(query.getSortFields(), isArchive);
   }
@@ -213,10 +218,10 @@ public class CalendarEventSearchQueryTest extends AbstractComponentTest {
     verifyDefault();
 
     assertEquals(wikiRef, query.getWikiRef());
-    String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"theDB\") "
+    String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"thedb\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
-        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]))";
+        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO zzzzzzzzzzzz]))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     assertEquals(sortFields, query.getSortFields());
   }
@@ -234,9 +239,9 @@ public class CalendarEventSearchQueryTest extends AbstractComponentTest {
     verifyDefault();
 
     assertEquals(wikiRef, query.getWikiRef());
-    String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"theDB\") "
+    String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"thedb\") "
         + "AND object:(+\"Classes.CalendarEventClass\") " + "AND space:(+\".\") "
-        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO 999912312359]))";
+        + "AND Classes.CalendarEventClass.eventDate:([201405090125 TO zzzzzzzzzzzz]))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     assertDefaultSortFields(query.getSortFields(), isArchive);
   }

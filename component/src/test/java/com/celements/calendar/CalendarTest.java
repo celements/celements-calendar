@@ -31,7 +31,6 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xwiki.component.descriptor.DefaultComponentDescriptor;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.model.reference.WikiReference;
@@ -45,7 +44,7 @@ import com.celements.calendar.search.DefaultEventSearchQuery;
 import com.celements.calendar.search.EventSearchResult;
 import com.celements.calendar.search.IEventSearchQuery;
 import com.celements.calendar.service.ICalendarService;
-import com.celements.common.test.AbstractBridgedComponentTestCase;
+import com.celements.common.test.AbstractComponentTest;
 import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
@@ -53,7 +52,7 @@ import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.web.Utils;
 
-public class CalendarTest extends AbstractBridgedComponentTestCase{
+public class CalendarTest extends AbstractComponentTest {
 
   private boolean isArchiv = false;
   private Calendar cal;
@@ -66,13 +65,13 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
 
   @Before
   public void setUp_CalendarTest() throws Exception {
-    eventList = new ArrayList<EventApi>();
-    context = getContext();
-    xwiki = createMockAndAddToDefault(XWiki.class);
+    eventList = new ArrayList<>();
+    context = getXContext();
+    xwiki = createDefaultMock(XWiki.class);
     context.setWiki(xwiki);
     calDocRef = new DocumentReference("myWiki", "MyCalSpace", "MyCalDoc");
-    eventMgrMock = createMockAndAddToDefault(IEventManager.class);
-    calServiceMock = createMockAndAddToDefault(ICalendarService.class);
+    eventMgrMock = createDefaultMock(IEventManager.class);
+    calServiceMock = createDefaultMock(ICalendarService.class);
     cal = getInjectedCal(calDocRef, isArchiv);
   }
 
@@ -108,17 +107,17 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
 
   @Test
   public void testGetAllEvents() throws XWikiException {
-    ArrayList<EventApi> eventList = new ArrayList<EventApi>();
-    IEvent event = createMockAndAddToDefault(IEvent.class);
+    ArrayList<EventApi> eventList = new ArrayList<>();
+    IEvent event = createDefaultMock(IEvent.class);
     event.setLanguage(eq("de"));
     expectLastCall().once();
-    IEvent event2 = createMockAndAddToDefault(IEvent.class);
+    IEvent event2 = createDefaultMock(IEvent.class);
     event2.setLanguage(eq("de"));
     expectLastCall().once();
-    IEvent event3 = createMockAndAddToDefault(IEvent.class);
+    IEvent event3 = createDefaultMock(IEvent.class);
     event3.setLanguage(eq("de"));
     expectLastCall().once();
-    IEvent event4 = createMockAndAddToDefault(IEvent.class);
+    IEvent event4 = createDefaultMock(IEvent.class);
     event4.setLanguage(eq("de"));
     expectLastCall().once();
     DocumentReference cal2DocRef = new DocumentReference(context.getDatabase(),
@@ -137,8 +136,8 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
 
   @Test
   public void testGetEvents_overEnd() throws XWikiException {
-    ArrayList<EventApi> eventList = new ArrayList<EventApi>();
-    IEvent event = createMockAndAddToDefault(IEvent.class);
+    ArrayList<EventApi> eventList = new ArrayList<>();
+    IEvent event = createDefaultMock(IEvent.class);
     event.setLanguage(eq("de"));
     expectLastCall().once();
     DocumentReference cal2DocRef = new DocumentReference(context.getDatabase(),
@@ -156,8 +155,8 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
 
   @Test
   public void testGetEvents_illegalStartValue() throws XWikiException {
-    ArrayList<EventApi> eventList = new ArrayList<EventApi>();
-    IEvent event = createMockAndAddToDefault(IEvent.class);
+    ArrayList<EventApi> eventList = new ArrayList<>();
+    IEvent event = createDefaultMock(IEvent.class);
     event.setLanguage(eq("de"));
     expectLastCall().once();
     DocumentReference cal2DocRef = new DocumentReference(context.getDatabase(),
@@ -175,8 +174,8 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
 
   @Test
   public void testGetEvents_minusOneStart() throws XWikiException {
-    ArrayList<EventApi> eventList = new ArrayList<EventApi>();
-    IEvent event = createMockAndAddToDefault(IEvent.class);
+    ArrayList<EventApi> eventList = new ArrayList<>();
+    IEvent event = createDefaultMock(IEvent.class);
     event.setLanguage(eq("de"));
     expectLastCall().once();
     DocumentReference cal2DocRef = new DocumentReference(context.getDatabase(),
@@ -191,18 +190,18 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     verifyDefault(event);
     assertEquals("Expecting to get the full eventlist", eventList, events);
   }
-  
+
   @Test
   public void testSearchEvents() {
     IEventSearchQuery query = new DefaultEventSearchQuery(new WikiReference("myWiki"));
-    EventSearchResult result = createMockAndAddToDefault(EventSearchResult.class);
-    
+    EventSearchResult result = createDefaultMock(EventSearchResult.class);
+
     expect(eventMgrMock.searchEvents(same(cal), same(query))).andReturn(result).once();
-    
+
     replayDefault();
     EventSearchResult ret = cal.searchEvents(query);
     verifyDefault();
-    
+
     assertSame(result, ret);
   }
 
@@ -249,11 +248,11 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
 
   @Test
   public void testGetStartDate_newDate() {
-    java.util.Calendar gregCal = GregorianCalendar.getInstance();
+    java.util.Calendar gregCal = new GregorianCalendar();
     gregCal.add(java.util.Calendar.SECOND, -5);
     Date startDateBefore = gregCal.getTime();
     ICalendar cal = new Calendar(calDocRef, isArchiv);
-    gregCal = GregorianCalendar.getInstance();
+    gregCal = new GregorianCalendar();
     gregCal.add(java.util.Calendar.SECOND, 5);
     Date startDateAfter = gregCal.getTime();
     assertTrue(startDateBefore.before(cal.getStartDate()));
@@ -290,45 +289,44 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     assertNotNull(cal.getStartDate());
     assertSame(startDate, cal.getStartDate());
   }
-  
+
   @Test
   public void testGetLanguage() throws Exception {
     String lang = "de";
     cal.setLanguage(lang);
-    
+
     replayDefault();
     String ret = cal.getLanguage();
     verifyDefault();
-    
+
     assertEquals(lang, ret);
   }
-  
+
   @Test
   public void testGetLanguage_default() throws Exception {
     String lang = "de";
     SpaceReference spaceRef = new SpaceReference("evSpace", new WikiReference("db"));
     expect(calServiceMock.getEventSpaceRefForCalendar(eq(calDocRef))).andReturn(
         spaceRef).once();
-    cal.webUtilsService = createMockAndAddToDefault(IWebUtilsService.class);
+    cal.webUtilsService = createDefaultMock(IWebUtilsService.class);
     expect(cal.webUtilsService.getDefaultLanguage(eq(spaceRef))).andReturn(lang).once();
-    
+
     replayDefault();
     String ret = cal.getLanguage();
     verifyDefault();
-    
+
     assertEquals(lang, ret);
   }
-  
+
   @Test
   public void testGetEventSpaceRef() throws Exception {
     SpaceReference spaceRef = new SpaceReference("evSpace", new WikiReference("db"));
-    expect(calServiceMock.getEventSpaceRefForCalendar(eq(calDocRef))).andReturn(spaceRef
-        ).once();
-    
+    expect(calServiceMock.getEventSpaceRefForCalendar(eq(calDocRef))).andReturn(spaceRef).once();
+
     replayDefault();
     SpaceReference ret = cal.getEventSpaceRef();
     verifyDefault();
-    
+
     assertSame(spaceRef, ret);
   }
 
@@ -337,7 +335,7 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
     String eventSpace1 = "calEventSpace1";
     String eventSpace2 = "calEventSpace2";
     expect(calServiceMock.getAllowedSpaces(eq(calDocRef))).andReturn(Arrays.asList(
-        new String[] {eventSpace1, eventSpace2}));
+        eventSpace1, eventSpace2));
     replayDefault();
     List<String> allowedSpaces = cal.getAllowedSpaces();
     assertEquals(2, allowedSpaces.size());
@@ -348,59 +346,48 @@ public class CalendarTest extends AbstractBridgedComponentTestCase{
 
   @Test
   public void testGetEngine_HQL() throws Exception {
-    expect(getContext().getWiki().getXWikiPreference(eq("calendar_engine"), 
-        eq("calendar.engine"), eq("default"), same(getContext()))).andReturn("default"
-        ).once();
+    expect(context.getWiki().getXWikiPreference(eq("calendar_engine"),
+        eq("calendar.engine"), eq("default"), same(context))).andReturn("default").once();
     replayDefault();
     ICalendarEngineRole ret = cal.getEngine();
     verifyDefault();
     assertTrue(ret instanceof CalendarEngineHQL);
   }
-  
+
   @Test
   public void testGetEngine_Lucene() throws Exception {
     String hint = CalendarEngineLucene.NAME;
-    expect(getContext().getWiki().getXWikiPreference(eq("calendar_engine"), 
-        eq("calendar.engine"), eq("default"), same(getContext()))).andReturn(hint).once();
-    
-    ICalendarEngineRole engineMock = createMockAndAddToDefault(ICalendarEngineRole.class);
-    DefaultComponentDescriptor<ICalendarEngineRole> descriptor = 
-        new DefaultComponentDescriptor<ICalendarEngineRole>();
-    descriptor.setRole(ICalendarEngineRole.class);
-    descriptor.setRoleHint(hint);
-    Utils.getComponentManager().registerComponent(descriptor, engineMock);
+    expect(context.getWiki().getXWikiPreference(eq("calendar_engine"),
+        eq("calendar.engine"), eq("default"), same(context))).andReturn(hint).once();
+
+    ICalendarEngineRole engineMock = registerComponentMock(ICalendarEngineRole.class, hint);
     expect(engineMock.getName()).andReturn(hint).anyTimes();
     expect(engineMock.getEngineLimit()).andReturn(10L).once();
     expect(engineMock.countEvents(same(cal))).andReturn(5L).once();
-    
+
     replayDefault();
     ICalendarEngineRole ret = cal.getEngine();
     verifyDefault();
     assertSame(engineMock, ret);
   }
-  
+
   @Test
   public void testGetEngine_Lucene_overLimit() throws Exception {
     String hint = CalendarEngineLucene.NAME;
-    expect(getContext().getWiki().getXWikiPreference(eq("calendar_engine"), 
-        eq("calendar.engine"), eq("default"), same(getContext()))).andReturn(hint).once();
-    
-    ICalendarEngineRole engineMock = createMockAndAddToDefault(ICalendarEngineRole.class);
-    DefaultComponentDescriptor<ICalendarEngineRole> descriptor = 
-        new DefaultComponentDescriptor<ICalendarEngineRole>();
-    descriptor.setRole(ICalendarEngineRole.class);
-    descriptor.setRoleHint(hint);
-    Utils.getComponentManager().registerComponent(descriptor, engineMock);
+    expect(context.getWiki().getXWikiPreference(eq("calendar_engine"),
+        eq("calendar.engine"), eq("default"), same(context))).andReturn(hint).once();
+
+    ICalendarEngineRole engineMock = registerComponentMock(ICalendarEngineRole.class, hint);
     expect(engineMock.getName()).andReturn(hint).anyTimes();
     expect(engineMock.getEngineLimit()).andReturn(10L).once();
     expect(engineMock.countEvents(same(cal))).andReturn(11L).once();
-    
+
     replayDefault();
     ICalendarEngineRole ret = cal.getEngine();
     verifyDefault();
     assertTrue(ret instanceof CalendarEngineHQL);
   }
-  
+
   private Calendar getInjectedCal(DocumentReference docRef, boolean isArchive) {
     Calendar cal = new Calendar(calDocRef, isArchiv);
     cal.injectEventManager(eventMgrMock);

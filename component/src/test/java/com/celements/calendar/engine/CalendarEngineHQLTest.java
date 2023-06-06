@@ -1,5 +1,6 @@
 package com.celements.calendar.engine;
 
+import static com.celements.common.test.CelementsTestUtils.*;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
@@ -19,12 +20,12 @@ import org.xwiki.query.QueryManager;
 import com.celements.calendar.Event;
 import com.celements.calendar.ICalendar;
 import com.celements.calendar.IEvent;
-import com.celements.common.test.AbstractBridgedComponentTestCase;
+import com.celements.common.test.AbstractComponentTest;
 import com.celements.web.service.IWebUtilsService;
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.web.Utils;
 
-public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
+public class CalendarEngineHQLTest extends AbstractComponentTest {
 
   private CalendarEngineHQL engine;
   private QueryManager queryManagerMock;
@@ -35,15 +36,15 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
   @Before
   public void setUp_CalendarEngineHQLTest() {
     engine = (CalendarEngineHQL) Utils.getComponent(ICalendarEngineRole.class);
-    queryManagerMock = createMockAndAddToDefault(QueryManager.class);
+    queryManagerMock = createDefaultMock(QueryManager.class);
     engine.injectQueryManager(queryManagerMock);
-    xwiki = createMockAndAddToDefault(XWiki.class);
+    xwiki = createDefaultMock(XWiki.class);
     getContext().setWiki(xwiki);
-    expect(xwiki.getXWikiPreferenceAsInt(eq("calendar_toArchiveOnEndDate"), 
-        eq("celements.calendar.toArchiveOnEndDate"), eq(1), same(getContext()))
-        ).andReturn(0).anyTimes();
-    calMock = createMockAndAddToDefault(ICalendar.class);
-    database = "theDB";
+    expect(xwiki.getXWikiPreferenceAsInt(eq("calendar_toArchiveOnEndDate"),
+        eq("celements.calendar.toArchiveOnEndDate"), eq(1), same(getContext()))).andReturn(0)
+            .anyTimes();
+    calMock = createDefaultMock(ICalendar.class);
+    database = "thedb";
     DocumentReference docRef = new DocumentReference(database, "someSpace", "someCal");
     expect(calMock.getDocumentReference()).andReturn(docRef).anyTimes();
     expect(calMock.getWikiRef()).andReturn(new WikiReference(database)).anyTimes();
@@ -65,10 +66,10 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     Date startDate = new Date(0);
     boolean isArchive = false;
     long count = 5L;
-    Query queryMock = createMockAndAddToDefault(Query.class);
+    Query queryMock = createDefaultMock(Query.class);
 
-    expect(queryManagerMock.createQuery(eq(getHQL(true, isArchive)), eq("hql"))
-        ).andReturn(queryMock).once();
+    expect(queryManagerMock.createQuery(eq(getHQL(true, isArchive)), eq("hql")))
+        .andReturn(queryMock).once();
     expect(queryMock.setWiki(database)).andReturn(queryMock).once();
     expect(queryMock.execute()).andReturn(Arrays.<Object>asList(count)).once();
     expectForCalMock(startDate, isArchive, spaces);
@@ -87,14 +88,14 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     boolean isArchive = true;
     DocumentReference evDocRef1 = new DocumentReference(database, "space", "ev1");
     DocumentReference evDocRef2 = new DocumentReference(database, "space", "ev2");
-    List<Object> eventList = new ArrayList<Object>();
+    List<Object> eventList = new ArrayList<>();
     eventList.add(getWebUtilsService().getRefLocalSerializer().serialize(evDocRef1));
     eventList.add(getWebUtilsService().getRefLocalSerializer().serialize(evDocRef2));
 
-    Query queryMock = createMockAndAddToDefault(Query.class);
+    Query queryMock = createDefaultMock(Query.class);
 
-    expect(queryManagerMock.createQuery(eq(getHQL(false, isArchive)), eq("hql"))
-        ).andReturn(queryMock).once();
+    expect(queryManagerMock.createQuery(eq(getHQL(false, isArchive)), eq("hql")))
+        .andReturn(queryMock).once();
     expect(queryMock.setWiki(database)).andReturn(queryMock).once();
     expect(queryMock.execute()).andReturn(eventList).once();
     expectForCalMock(startDate, isArchive, spaces);
@@ -117,14 +118,14 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     int limit = 20;
     DocumentReference evDocRef1 = new DocumentReference(database, "space", "ev1");
     DocumentReference evDocRef2 = new DocumentReference(database, "space", "ev2");
-    List<Object> eventList = new ArrayList<Object>();
+    List<Object> eventList = new ArrayList<>();
     eventList.add(getWebUtilsService().getRefLocalSerializer().serialize(evDocRef1));
     eventList.add(getWebUtilsService().getRefLocalSerializer().serialize(evDocRef2));
 
-    Query queryMock = createMockAndAddToDefault(Query.class);
+    Query queryMock = createDefaultMock(Query.class);
 
-    expect(queryManagerMock.createQuery(eq(getHQL(false, isArchive)), eq("hql"))
-        ).andReturn(queryMock).once();
+    expect(queryManagerMock.createQuery(eq(getHQL(false, isArchive)), eq("hql")))
+        .andReturn(queryMock).once();
     expect(queryMock.setWiki(database)).andReturn(queryMock).once();
     expect(queryMock.setOffset(offset)).andReturn(queryMock).once();
     expect(queryMock.setLimit(limit)).andReturn(queryMock).once();
@@ -146,13 +147,13 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     Date startDate = new Date(0);
     boolean isArchive = false;
     DocumentReference evDocRef = new DocumentReference(database, "space", "ev");
-    List<Object> eventList = new ArrayList<Object>();
+    List<Object> eventList = new ArrayList<>();
     eventList.add(getWebUtilsService().getRefLocalSerializer().serialize(evDocRef));
 
-    Query queryMock = createMockAndAddToDefault(Query.class);
+    Query queryMock = createDefaultMock(Query.class);
 
-    expect(queryManagerMock.createQuery(eq(getHQL(false, isArchive)), eq("hql"))
-        ).andReturn(queryMock).once();
+    expect(queryManagerMock.createQuery(eq(getHQL(false, isArchive)), eq("hql")))
+        .andReturn(queryMock).once();
     expect(queryMock.setWiki(database)).andReturn(queryMock).once();
     expect(queryMock.setLimit(1)).andReturn(queryMock).once();
     expect(queryMock.execute()).andReturn(eventList).once();
@@ -171,22 +172,22 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     Date startDate = new Date(0);
     boolean isArchive = true;
     long count = 5L;
-    List<Object> countList = new ArrayList<Object>();
+    List<Object> countList = new ArrayList<>();
     countList.add(count);
     DocumentReference evDocRef = new DocumentReference(database, "space", "ev");
-    List<Object> eventList = new ArrayList<Object>();
+    List<Object> eventList = new ArrayList<>();
     eventList.add(getWebUtilsService().getRefLocalSerializer().serialize(evDocRef));
 
-    Query queryMock1 = createMockAndAddToDefault(Query.class);
-    Query queryMock2 = createMockAndAddToDefault(Query.class);
+    Query queryMock1 = createDefaultMock(Query.class);
+    Query queryMock2 = createDefaultMock(Query.class);
 
-    expect(queryManagerMock.createQuery(eq(getHQL(true, isArchive)), eq("hql"))
-        ).andReturn(queryMock1).once();
+    expect(queryManagerMock.createQuery(eq(getHQL(true, isArchive)), eq("hql")))
+        .andReturn(queryMock1).once();
     expect(queryMock1.setWiki(database)).andReturn(queryMock1).once();
     expect(queryMock1.execute()).andReturn(countList).once();
 
-    expect(queryManagerMock.createQuery(eq(getHQL(false, isArchive)), eq("hql"))
-        ).andReturn(queryMock2).once();
+    expect(queryManagerMock.createQuery(eq(getHQL(false, isArchive)), eq("hql")))
+        .andReturn(queryMock2).once();
     expect(queryMock2.setWiki(database)).andReturn(queryMock2).once();
     expect(queryMock2.setOffset(eq((int) count - 1))).andReturn(queryMock2).once();
     expect(queryMock2.setLimit(eq(1))).andReturn(queryMock2).once();
@@ -206,22 +207,22 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     Date startDate = new Date(0);
     boolean isArchive = false;
     long count = 5L;
-    List<Object> countList = new ArrayList<Object>();
+    List<Object> countList = new ArrayList<>();
     countList.add(count);
     DocumentReference evDocRef = new DocumentReference(database, "space", "ev");
-    List<Object> eventList = new ArrayList<Object>();
+    List<Object> eventList = new ArrayList<>();
     eventList.add(getWebUtilsService().getRefLocalSerializer().serialize(evDocRef));
 
-    Query queryMock1 = createMockAndAddToDefault(Query.class);
-    Query queryMock2 = createMockAndAddToDefault(Query.class);
+    Query queryMock1 = createDefaultMock(Query.class);
+    Query queryMock2 = createDefaultMock(Query.class);
 
-    expect(queryManagerMock.createQuery(eq(getHQL(true, isArchive)), eq("hql"))
-        ).andReturn(queryMock1).once();
+    expect(queryManagerMock.createQuery(eq(getHQL(true, isArchive)), eq("hql")))
+        .andReturn(queryMock1).once();
     expect(queryMock1.setWiki(database)).andReturn(queryMock1).once();
     expect(queryMock1.execute()).andReturn(countList).once();
 
-    expect(queryManagerMock.createQuery(eq(getHQL(false, isArchive)), eq("hql"))
-        ).andReturn(queryMock2).once();
+    expect(queryManagerMock.createQuery(eq(getHQL(false, isArchive)), eq("hql")))
+        .andReturn(queryMock2).once();
     expect(queryMock2.setWiki(database)).andReturn(queryMock2).once();
     expect(queryMock2.setOffset(eq((int) count - 1))).andReturn(queryMock2).once();
     expect(queryMock2.setLimit(eq(1))).andReturn(queryMock2).once();
@@ -241,12 +242,12 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     Date startDate = new Date(0);
     boolean isArchive = true;
     DocumentReference evDocRef = new DocumentReference(database, "space", "ev");
-    List<Object> evList = new ArrayList<Object>();
+    List<Object> evList = new ArrayList<>();
     evList.add(getWebUtilsService().getRefLocalSerializer().serialize(evDocRef));
 
-    Query queryMock = createMockAndAddToDefault(Query.class);
-    expect(queryManagerMock.createQuery(eq(getHQL(false, isArchive)), eq("hql"))
-        ).andReturn(queryMock).once();
+    Query queryMock = createDefaultMock(Query.class);
+    expect(queryManagerMock.createQuery(eq(getHQL(false, isArchive)), eq("hql")))
+        .andReturn(queryMock).once();
     expect(queryMock.setWiki(database)).andReturn(queryMock).once();
     expect(queryMock.setLimit(1)).andReturn(queryMock).once();
     expect(queryMock.execute()).andReturn(evList).once();
@@ -271,10 +272,10 @@ public class CalendarEngineHQLTest extends AbstractBridgedComponentTestCase {
     String order = isArchive ? "desc" : "asc";
     String selectEmptyDates = isArchive ? "" : "or ec.eventDate is null";
     return "select " + select + " from BaseObject as obj, Classes.CalendarEventClass as "
-    +	"ec where ec.id.id=obj.id and obj.className = 'Classes.CalendarEventClass' and "
-    + "(ec.eventDate " + comp + " '1970-01-01 01:00:00' " + selectEmptyDates 
-    + ") and (obj.name like 'myCalSpace.%') order by ec.eventDate " + order 
-    + ", ec.eventDate_end " + order + ", ec.l_title " + order;
+        + "ec where ec.id.id=obj.id and obj.className = 'Classes.CalendarEventClass' and "
+        + "(ec.eventDate " + comp + " '1970-01-01 01:00:00' " + selectEmptyDates
+        + ") and (obj.name like 'myCalSpace.%') order by ec.eventDate " + order
+        + ", ec.eventDate_end " + order + ", ec.l_title " + order;
   }
 
   private IWebUtilsService getWebUtilsService() {

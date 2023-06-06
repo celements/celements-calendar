@@ -1,18 +1,15 @@
 package com.celements.calendar.migrator;
 
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.same;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static com.celements.common.test.CelementsTestUtils.*;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.xwiki.model.reference.DocumentReference;
 
 import com.celements.calendar.classes.CalendarClasses;
-import com.celements.common.test.AbstractBridgedComponentTestCase;
+import com.celements.common.test.AbstractComponentTest;
 import com.celements.migrations.celSubSystem.ICelementsMigrator;
 import com.celements.migrator.ChangeCalendarDateFormatMigrator;
 import com.xpn.xwiki.XWiki;
@@ -22,13 +19,13 @@ import com.xpn.xwiki.objects.classes.BaseClass;
 import com.xpn.xwiki.objects.classes.DateClass;
 import com.xpn.xwiki.web.Utils;
 
-public class ChangeCalendarDateFormatMigratorTest 
-extends AbstractBridgedComponentTestCase {
+public class ChangeCalendarDateFormatMigratorTest extends AbstractComponentTest {
+
   private XWikiContext context;
   private XWiki xwiki;
-  
+
   private ChangeCalendarDateFormatMigrator migrator;
-  
+
   @Before
   public void setUp_DocumentMetaDataMigratorTest() {
     context = getContext();
@@ -37,15 +34,15 @@ extends AbstractBridgedComponentTestCase {
     migrator = (ChangeCalendarDateFormatMigrator) Utils.getComponent(
         ICelementsMigrator.class, "ChangeCalendarDateFormatMigrator");
   }
-  
+
   @Test
   public void testGetName() {
     assertEquals("ChangeCalendarDateFormatMigrator", migrator.getName());
   }
-  
+
   @Test
   public void testMigrate() throws Exception {
-    XWikiDocument docMock = createMockAndAddToDefault(XWikiDocument.class);
+    XWikiDocument docMock = createDefaultMock(XWikiDocument.class);
     DocumentReference docRef = new DocumentReference(context.getDatabase(),
         "Classes", "CalendarEventClass");
     expect(xwiki.getDocument(eq(docRef), same(context))).andReturn(docMock).once();
@@ -58,10 +55,10 @@ extends AbstractBridgedComponentTestCase {
     replayDefault();
     migrator.migrate(null, context);
     verifyDefault();
-    assertTrue(((DateClass) bClass.get(CalendarClasses.PROPERTY_EVENT_DATE)
-        ).getValidationRegExp().length() > 0);
-    assertTrue(((DateClass) bClass.get(CalendarClasses.PROPERTY_EVENT_DATE_END)
-        ).getValidationRegExp().length() > 0);
+    assertTrue(((DateClass) bClass.get(CalendarClasses.PROPERTY_EVENT_DATE)).getValidationRegExp()
+        .length() > 0);
+    assertTrue(((DateClass) bClass.get(CalendarClasses.PROPERTY_EVENT_DATE_END))
+        .getValidationRegExp().length() > 0);
     assertEquals("cel_calendar_validation_event_date", ((DateClass) bClass.get(
         CalendarClasses.PROPERTY_EVENT_DATE)).getValidationMessage());
     assertEquals("cel_calendar_validation_event_end_date", ((DateClass) bClass.get(
@@ -71,5 +68,5 @@ extends AbstractBridgedComponentTestCase {
     assertEquals("dd.MM.yyyy HH:mm", ((DateClass) bClass.get(
         CalendarClasses.PROPERTY_EVENT_DATE_END)).getDateFormat());
   }
-  
+
 }

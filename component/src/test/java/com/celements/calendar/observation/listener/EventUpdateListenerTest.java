@@ -16,10 +16,10 @@ import com.celements.calendar.observation.event.EventDeletedEvent;
 import com.celements.calendar.observation.event.EventDeletingEvent;
 import com.celements.calendar.observation.event.EventUpdatedEvent;
 import com.celements.calendar.observation.event.EventUpdatingEvent;
-import com.celements.common.test.AbstractBridgedComponentTestCase;
+import com.celements.common.test.AbstractComponentTest;
 import com.xpn.xwiki.web.Utils;
 
-public class EventUpdateListenerTest extends AbstractBridgedComponentTestCase {
+public class EventUpdateListenerTest extends AbstractComponentTest {
 
   private EventUpdateListener listener;
 

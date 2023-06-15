@@ -200,7 +200,7 @@ public class CalendarEventSearchQueryTest extends AbstractComponentTest {
     String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"thedb\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
-        + "AND Classes.CalendarEventClass.eventDate:([0 TO 201405090125}))";
+        + "AND Classes.CalendarEventClass.eventDate:({0 TO 201405090125}))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     assertDefaultSortFields(query.getSortFields(), isArchive);
   }

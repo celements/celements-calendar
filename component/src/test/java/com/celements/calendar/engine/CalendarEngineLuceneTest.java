@@ -187,7 +187,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
     assertTrue(query instanceof CalendarEventSearchQuery);
     String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"xwikidb\") "
         + "AND object:(+\"Classes.CalendarEventClass\") " + "AND space:(+\"myCalSpace\") "
-        + "AND Classes.CalendarEventClass.eventDate:([0 TO 201405090125}))";
+        + "AND Classes.CalendarEventClass.eventDate:({0 TO 201405090125}))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     List<String> sortFields = Arrays.asList("-Classes.CalendarEventClass.eventDate",
         "-Classes.CalendarEventClass.eventDate_end", "-Classes.CalendarEventClass.l_title");
@@ -246,7 +246,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
     assertTrue(query instanceof CalendarEventSearchQuery);
     String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"xwikidb\") "
         + "AND object:(+\"Classes.CalendarEventClass\") " + "AND space:(+\"myCalSpace\") "
-        + "AND Classes.CalendarEventClass.eventDate:([0 TO 201405090125}))";
+        + "AND Classes.CalendarEventClass.eventDate:({0 TO 201405090125}))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     List<String> sortFields = Arrays.asList("-Classes.CalendarEventClass.eventDate",
         "-Classes.CalendarEventClass.eventDate_end", "-Classes.CalendarEventClass.l_title");
@@ -302,7 +302,7 @@ public class CalendarEngineLuceneTest extends AbstractComponentTest {
     String expQueryString = "(type:(+\"wikipage\") AND wiki:(+\"xwikidb\") "
         + "AND object:(+\"Classes.CalendarEventClass\") "
         + "AND (space:(+\"myCalSpace1\") OR space:(+\"myCalSpace2\")) "
-        + "AND Classes.CalendarEventClass.eventDate:([0 TO 201405090125}))";
+        + "AND Classes.CalendarEventClass.eventDate:({0 TO 201405090125}))";
     assertEquals(expQueryString, query.getAsLuceneQuery().getQueryString());
     List<String> sortFields = Arrays.asList("-Classes.CalendarEventClass.eventDate",
         "-Classes.CalendarEventClass.eventDate_end", "-Classes.CalendarEventClass.l_title");

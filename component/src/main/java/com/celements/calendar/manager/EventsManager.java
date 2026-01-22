@@ -53,19 +53,22 @@ public class EventsManager implements IEventManager {
     return (XWikiContext) execution.getContext().getProperty("xwikicontext");
   }
 
+  @Override
   @Deprecated
   public List<EventApi> getEvents(ICalendar cal, int start, int nb) {
-    List<EventApi> eventApiList = new ArrayList<EventApi>();
+    List<EventApi> eventApiList = new ArrayList<>();
     for (IEvent event : getEventsInternal(cal, start, nb)) {
       eventApiList.add(new EventApi(event, cal.getLanguage(), getContext()));
     }
     return eventApiList;
   }
 
+  @Override
   public List<IEvent> getAllEventsInternal(ICalendar cal) {
-    return getEventsInternal(cal, 0, 0);
+    return getEventsInternal(cal, 0, -1);
   }
 
+  @Override
   public List<IEvent> getEventsInternal(ICalendar cal, int start, int nb) {
     List<IEvent> eventList = Collections.emptyList();
     try {
@@ -74,7 +77,7 @@ public class EventsManager implements IEventManager {
     } catch (XWikiException exc) {
       LOGGER.error("Error while getting events for '{}'", cal, exc);
     }
-    LOGGER.debug("getEventsInternal: {} events found for cal '{}', start '{}' and nb '{}'", 
+    LOGGER.debug("getEventsInternal: {} events found for cal '{}', start '{}' and nb '{}'",
         eventList.size(), cal, start, nb);
     return eventList;
   }
@@ -93,17 +96,17 @@ public class EventsManager implements IEventManager {
     return eventList;
   }
 
-  private boolean checkEventSubscription(DocumentReference calDocRef, IEvent event
-      ) throws XWikiException {
+  private boolean checkEventSubscription(DocumentReference calDocRef, IEvent event)
+      throws XWikiException {
     return isHomeCalendar(calDocRef, event.getDocumentReference())
         || isEventSubscribed(calDocRef, event);
   }
 
-  boolean isHomeCalendar(DocumentReference calDocRef, DocumentReference eventDocRef
-      ) throws XWikiException {
+  boolean isHomeCalendar(DocumentReference calDocRef, DocumentReference eventDocRef)
+      throws XWikiException {
     SpaceReference eventSpaceRef = calService.getEventSpaceRefForCalendar(calDocRef);
     boolean isHomeCal = eventDocRef.getLastSpaceReference().equals(eventSpaceRef);
-    LOGGER.trace("isHomeCalendar: for '{}' check on cal '{}' with space '{}' returning {}", 
+    LOGGER.trace("isHomeCalendar: for '{}' check on cal '{}' with space '{}' returning {}",
         eventDocRef, calDocRef, eventSpaceRef, isHomeCal);
     return isHomeCal;
   }
@@ -133,20 +136,21 @@ public class EventsManager implements IEventManager {
         wikiRef), "subscriber", webUtilsService.serializeRef(calDocRef), false);
     if (subscriptObj == null) {
       // for backwards compatibility
-      subscriptObj = eventDoc.getXObject(calClassConf.getSubscriptionClassRef(wikiRef), 
+      subscriptObj = eventDoc.getXObject(calClassConf.getSubscriptionClassRef(wikiRef),
           "subscriber", webUtilsService.serializeRef(calDocRef, true), false);
     }
     return subscriptObj;
   }
 
+  @Override
   public EventSearchResult searchEvents(ICalendar cal, IEventSearchQuery query) {
     EventSearchResult eventsResult = getLuceneEngine(cal).searchEvents(cal, query);
     try {
-      //XXX calling getSize() imediatelly is a dirty Workaround!!!
-      //XXX accessing results directly prevents lucene inconsistancies
-      //XXX if multiple results are created (e.g. in Navigation).
+      // XXX calling getSize() imediatelly is a dirty Workaround!!!
+      // XXX accessing results directly prevents lucene inconsistancies
+      // XXX if multiple results are created (e.g. in Navigation).
       int size = eventsResult.getSize();
-      LOGGER.debug("searchEvents: {} events found for cal '{}' and query '{}'", size, 
+      LOGGER.debug("searchEvents: {} events found for cal '{}' and query '{}'", size,
           cal, query);
     } catch (LuceneSearchException lse) {
       LOGGER.error("Unable to search for cal '{}'", cal, lse);
@@ -165,37 +169,41 @@ public class EventsManager implements IEventManager {
   }
 
   /**
-   * 
+   *
    * @param calDoc
    * @param isArchive
    * @return
-   * 
+   *
    * @deprecated instead use countEvents(DocumentReference, boolean)
    */
+  @Override
   @Deprecated
   public long countEvents(XWikiDocument calDoc, boolean isArchive) {
     return countEvents(calDoc, isArchive, new Date());
   }
 
   /**
-   * 
+   *
    * @param calDoc
    * @param isArchive
    * @param startDate
    * @return
-   * 
+   *
    * @deprecated instead use countEvents(DocumentReference, boolean, Date)
    */
+  @Override
   @Deprecated
   public long countEvents(XWikiDocument calDoc, boolean isArchive, Date startDate) {
     return countEvents(calDoc.getDocumentReference(), isArchive, startDate);
   }
 
+  @Override
   @Deprecated
   public long countEvents(DocumentReference calDocRef, boolean isArchive) {
     return countEvents(calDocRef, isArchive, new Date());
   }
 
+  @Override
   @Deprecated
   public long countEvents(DocumentReference calDocRef, boolean isArchive, Date startDate) {
     ICalendar cal = calService.getCalendarByCalRef(calDocRef, isArchive);
@@ -203,18 +211,22 @@ public class EventsManager implements IEventManager {
     return countEvents(cal);
   }
 
+  @Override
   public long countEvents(ICalendar cal) {
     return cal.getEngine().countEvents(cal);
   }
 
+  @Override
   public IEvent getEvent(DocumentReference eventDocRef) {
     return new Event(eventDocRef);
   }
 
+  @Override
   public IEvent getFirstEvent(ICalendar cal) {
     return cal.getEngine().getFirstEvent(cal);
   }
 
+  @Override
   public IEvent getLastEvent(ICalendar cal) {
     return cal.getEngine().getLastEvent(cal);
   }

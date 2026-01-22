@@ -19,13 +19,13 @@ import com.xpn.xwiki.web.Utils;
 public class EventSearchResult {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(EventSearchResult.class);
-  
+
   private ILuceneSearchService searchService;
-  
+
   private final LuceneQuery query;
   private final List<String> sortFields;
   private final boolean skipChecks;
-  
+
   private LuceneSearchResult searchResult;
 
   EventSearchResult(LuceneQuery query, List<String> sortFields, boolean skipChecks) {
@@ -46,23 +46,25 @@ public class EventSearchResult {
   }
 
   /**
-   * 
+   *
    * @return all events
-   * @throws LuceneSearchException 
+   * @throws LuceneSearchException
    */
   public List<IEvent> getEventList() throws LuceneSearchException {
-    return getEventList(0, 0);
+    return getEventList(0, -1);
   }
 
   /**
-   * 
-   * @param offset from 0 to (size - 1)
-   * @param limit all remaining events are returned for values < 0 or >= (size - 1)
+   *
+   * @param offset
+   *          from 0 to (size - 1)
+   * @param limit
+   *          all remaining events are returned for values < 0 or >= (size - 1)
    * @return selected events
-   * @throws LuceneSearchException 
+   * @throws LuceneSearchException
    */
   public List<IEvent> getEventList(int offset, int limit) throws LuceneSearchException {
-    List<IEvent> eventList = new ArrayList<IEvent>();
+    List<IEvent> eventList = new ArrayList<>();
     for (EntityReference ref : getSearchResult().getResults(offset, limit)) {
       if (ref instanceof DocumentReference) {
         eventList.add(new Event((DocumentReference) ref));
@@ -80,8 +82,8 @@ public class EventSearchResult {
 
   @Override
   public String toString() {
-    return "EventSearchResult [searchResult=" + getSearchResult() + ", skipChecks=" 
-        + skipChecks+ "]";
+    return "EventSearchResult [searchResult=" + getSearchResult() + ", skipChecks="
+        + skipChecks + "]";
   }
 
   private ILuceneSearchService getSearchService() {

@@ -196,7 +196,7 @@ public class Calendar implements ICalendar {
   @Deprecated
   @Override
   public List<EventApi> getAllEvents() {
-    return getEventMgr().getEvents(this, 0, 0);
+    return getEventMgr().getEvents(this, 0, -1);
   }
 
   @Override
@@ -324,7 +324,7 @@ public class Calendar implements ICalendar {
   }
 
   private List<String> getEventPropertyNames_internal(XWikiContext context) {
-    List<String> propNames = new ArrayList<String>();
+    List<String> propNames = new ArrayList<>();
     try {
       XWikiDocument doc = context.getWiki().getDocument(new DocumentReference(
           context.getDatabase(), ICalendarClassConfig.CALENDAR_EVENT_CLASS_SPACE,

@@ -97,7 +97,7 @@ public class CalendarTest extends AbstractComponentTest {
   @Test
   public void testGetAllEvents_informationHidingSecurity() throws XWikiException {
     List<EventApi> list = Collections.emptyList();
-    expect(eventMgrMock.getEvents(same(cal), eq(0), eq(0))).andReturn(list).once();
+    expect(eventMgrMock.getEvents(same(cal), eq(0), eq(-1))).andReturn(list).once();
     replayDefault();
     List<EventApi> events = cal.getAllEvents();
     verifyDefault();
@@ -123,7 +123,7 @@ public class CalendarTest extends AbstractComponentTest {
     DocumentReference cal2DocRef = new DocumentReference(context.getDatabase(),
         "MyCalDoc2Space", "MyCal2Doc");
     Calendar cal2 = getInjectedCal(cal2DocRef, isArchiv);
-    expect(eventMgrMock.getEvents(same(cal2), eq(0), eq(0))).andReturn(eventList);
+    expect(eventMgrMock.getEvents(same(cal2), eq(0), eq(-1))).andReturn(eventList);
     replayDefault();
     eventList.add(new EventApi(event, context));
     eventList.add(new EventApi(event2, context));

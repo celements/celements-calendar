@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>calendar-web</artifactId>
-  <version>7.1-SNAPSHOT</version>
+  <version>7.1-RC1</version>
   <packaging>war</packaging>
   <name>Calendar Web-Module</name>
   <description>	</description>
@@ -31,6 +31,6 @@
     <connection>scm:git:git://github.com/celements/celements-calendar</connection>
     <developerConnection>scm:git:git@github.com:celements/celements-calendar.git</developerConnection>
     <url>https://github.com/celements/celements-calendar/web-module</url>
-    <tag>HEAD</tag>
+    <tag>calendar-web-7.1-RC1</tag>
   </scm>
 </project>

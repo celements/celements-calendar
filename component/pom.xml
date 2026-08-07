@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>celements-calendar</artifactId>
-  <version>7.1-SNAPSHOT</version>
+  <version>7.1</version>
   <description>Celements Calendar</description>
   <dependencies>
     <dependency>
@@ -155,6 +155,6 @@
     <connection>scm:git:git@github.com:celements/celements-calendar.git</connection>
     <developerConnection>scm:git:git@github.com:celements/celements-calendar.git</developerConnection>
     <url>https://github.com/celements/celements-calendar/component</url>
-    <tag>HEAD</tag>
+    <tag>celements-calendar-7.1</tag>
   </scm>
 </project>

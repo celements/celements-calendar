@@ -3,11 +3,11 @@
   <parent>
     <groupId>com.celements</groupId>
     <artifactId>celements-parent</artifactId>
-    <version>7.2-SNAPSHOT</version>
+    <version>7.3-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>calendar-web</artifactId>
-  <version>7.2-SNAPSHOT</version>
+  <version>7.3-SNAPSHOT</version>
   <packaging>war</packaging>
   <name>Calendar Web-Module</name>
   <description>	</description>
